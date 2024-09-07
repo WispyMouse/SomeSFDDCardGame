@@ -1,7 +1,9 @@
 namespace SFDDCards
 {
+    using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.IO;
     using UnityEngine;
 
     public class CentralGameStateController : MonoBehaviour
@@ -28,6 +30,8 @@ namespace SFDDCards
         public Room CurrentRoom { get; private set; } = null;
         public Deck CurrentDeck { get; private set; } = null;
         public Player CurrentPlayer { get; private set; } = null;
+
+        RunConfiguration CurrentRunConfiguration { get; set; } = null;
 
         [SerializeReference]
         private GameObject PlayerRepresentationPF;
@@ -65,9 +69,13 @@ namespace SFDDCards
 
         public CardUX CurrentSelectedCard { get; private set; } = null;
 
+        private void Awake()
+        {
+        }
+
         void Start()
         {
-            this.SetupAndStartNewGame();
+            this.StartCoroutine(this.BootupSequence());
         }
 
         private void Update()
@@ -119,7 +127,7 @@ namespace SFDDCards
             this.AddToLog("Proceeding to next room");
 
             this.SetGameCampaignNavigationState(GameplayCampaignState.EnteringRoom);
-            this.SpawnEnemy();
+            this.SpawnEnemiesFromRoom();
             this.CurrentDeck.ShuffleEntireDeck();
             this.CurrentDeck.DealCards(5);
             this.RepresentPlayerHand();
@@ -133,17 +141,9 @@ namespace SFDDCards
         {
             this.CurrentDeck = new Deck();
 
-            const int NumberOfCardsInStarterDeck = 20;
-
-            for (int ii = 0; ii < NumberOfCardsInStarterDeck; ii++)
+            foreach (string startingCard in this.CurrentRunConfiguration.StartingDeck)
             {
-                this.CurrentDeck.AddCardToDeck(
-                    new Card()
-                    {
-                        Name = "Simple Attack",
-                        EffectText = "Deals 1 damage to any enemy"
-                    }
-                    );
+                this.CurrentDeck.AddCardToDeck(CardDatabase.GetModel(startingCard).Clone());
             }
         }
 
@@ -185,12 +185,7 @@ namespace SFDDCards
 
             if (newState == GameplayCampaignState.EnteringRoom)
             {
-                this.CurrentRoom = new Room();
-
-                for (int ii = this.EnemyRepresntationTransform.childCount - 1; ii >= 0; ii++)
-                {
-                    Destroy(this.EnemyRepresntationTransform.GetChild(ii).gameObject);
-                }
+                this.CurrentRoom = new Room(EncounterDatabase.GetRandomEncounter());
             }
 
             if (newState == GameplayCampaignState.InCombat)
@@ -210,32 +205,29 @@ namespace SFDDCards
             }
         }
 
-        /// <summary>
-        /// Adds an enemy to the current room, and spawns them in visually.
-        /// </summary>
-        void SpawnEnemy()
+        void SpawnEnemiesFromRoom()
         {
+            for (int ii = this.EnemyRepresntationTransform.childCount - 1; ii >= 0; ii++)
+            {
+                Destroy(this.EnemyRepresntationTransform.GetChild(ii).gameObject);
+            }
+
             if (this.CurrentRoom == null)
             {
                 Debug.LogException(new System.NullReferenceException($"The current room is null, and cannot have enemies added to it."));
                 return;
             }
 
-            Enemy currentEnemy = new Enemy()
+            foreach (Enemy curEnemy in this.CurrentRoom.Enemies)
             {
-                Name = "Some Shmuck",
-                MaximumHealth = 3,
-                CurrentHealth = 3
-            };
+                Vector3 objectOffset = new Vector3(3f, 0, 0) * this.EnemyRepresntationTransform.childCount;
+                EnemyUX newEnemy = Instantiate(this.EnemyRepresentationPF, this.EnemyRepresntationTransform);
+                newEnemy.transform.localPosition = objectOffset;
+                newEnemy.SetFromEnemy(curEnemy, SelectEnemy);
+                this.spawnedEnemiesLookup.Add(curEnemy, newEnemy);
 
-            this.CurrentRoom.AddEnemy(currentEnemy);
-            Vector3 objectOffset = new Vector3(50f, 0, 0) * this.EnemyRepresntationTransform.childCount;
-            EnemyUX newEnemy = Instantiate(this.EnemyRepresentationPF, this.EnemyRepresntationTransform);
-            newEnemy.transform.localPosition = objectOffset;
-            newEnemy.SetFromEnemy(currentEnemy, SelectEnemy);
-            this.spawnedEnemiesLookup.Add(currentEnemy, newEnemy);
-
-            this.AddToLog($"Enemy {newEnemy} spawned");
+                this.AddToLog($"Enemy {newEnemy.RepresentedEnemy.Name} spawned");
+            }
         }
 
         /// <summary>
@@ -248,15 +240,15 @@ namespace SFDDCards
                 return;
             }
 
-            this.AddToLog($"Played card {toPlay.Name} on {toPlayOn.Name}");
+            this.AddToLog($"Played card {toPlay.Name} on {toPlayOn.BaseModel.Name}");
 
-            int newEnemyHealth = Mathf.Max(0, toPlayOn.CurrentHealth - 1);
-            this.AddToLog($"Dealing 1 damage to {toPlayOn.Name}. {toPlayOn.CurrentHealth} => {newEnemyHealth}");
-            toPlayOn.CurrentHealth = newEnemyHealth;
+            GamestateDelta delta = ScriptTokenEvaluator.CalculateDifferenceFromTokenEvaluation(this, this.CurrentPlayer, toPlay, toPlayOn);
+            this.AddToLog(delta.DescribeDelta());
+            delta.ApplyDelta(this, AddToLog);
 
             if (toPlayOn.ShouldBecomeDefeated)
             {
-                this.AddToLog($"{toPlayOn.Name} has been defeated!");
+                this.AddToLog($"{toPlayOn.BaseModel.Name} has been defeated!");
                 this.RemoveEnemy(toPlayOn);
             }
             else
@@ -341,6 +333,8 @@ namespace SFDDCards
             {
                 this.Log.text = this.Log.text.Substring(this.Log.text.Length - maximumLogSize, maximumLogSize);
             }
+
+            Debug.Log(text);
         }
 
         void RemoveEnemy(Enemy toRemove)
@@ -361,10 +355,13 @@ namespace SFDDCards
 
             foreach (Enemy curEnemy in this.spawnedEnemiesLookup.Keys)
             {
-                int newPlayerHealth = Mathf.Max(0, this.CurrentPlayer.CurrentHealth - 1);
-                this.AddToLog($"{curEnemy.Name} deals damage to the player. {this.CurrentPlayer.CurrentHealth} => {newPlayerHealth}");
-                this.CurrentPlayer.CurrentHealth = newPlayerHealth;
-                this.LifeValue.text = $"{this.CurrentPlayer.CurrentHealth} / {this.CurrentPlayer.MaxHealth}";
+                int randomAttackIndex = UnityEngine.Random.Range(0, curEnemy.BaseModel.Attacks.Count);
+                EnemyAttack randomAttack = curEnemy.BaseModel.Attacks[randomAttackIndex];
+                GamestateDelta delta = ScriptTokenEvaluator.CalculateDifferenceFromTokenEvaluation(this, curEnemy, randomAttack, this.CurrentPlayer);
+
+                this.AddToLog(delta.DescribeDelta());
+
+                delta.ApplyDelta(this, AddToLog);
             }
 
             if (this.CurrentPlayer.CurrentHealth <= 0)
@@ -374,12 +371,105 @@ namespace SFDDCards
                 return;
             }
 
+            this.LifeValue.text = this.CurrentPlayer.CurrentHealth.ToString();
             this.CurrentDeck.DiscardHand();
             this.CurrentDeck.DealCards(5);
 
             this.CurrentTurnStatus = TurnStatus.PlayerTurn;
 
             this.RepresentPlayerHand();
+        }
+
+        IEnumerator BootupSequence()
+        {
+            yield return LoadConfiguration();
+            yield return LoadCards();
+            yield return LoadEnemyScripts();
+            this.SetupAndStartNewGame();
+        }
+
+        IEnumerator LoadConfiguration()
+        {
+            string configImportPath = Application.streamingAssetsPath;
+            string fileText = File.ReadAllText(configImportPath + "/runconfiguration.runconfiguration");
+            CurrentRunConfiguration = Newtonsoft.Json.JsonConvert.DeserializeObject<RunConfiguration>(fileText);
+            yield return null;
+        }
+
+        IEnumerator LoadCards()
+        {
+            string cardImportPath = Application.streamingAssetsPath + "/cardImport";
+            string[] cardImportScriptNames = Directory.GetFiles(cardImportPath, "*.cardimport");
+
+            this.AddToLog($"Searched {cardImportPath}; Found {cardImportScriptNames.Length} scripts");
+
+            foreach (string cardImportScriptName in cardImportScriptNames)
+            {
+                this.AddToLog($"Loading and parsing {cardImportScriptName}...");
+
+                try
+                {
+                    string fileText = File.ReadAllText(cardImportScriptName);
+                    CardImport importedCard = Newtonsoft.Json.JsonConvert.DeserializeObject<CardImport>(fileText);
+                    CardDatabase.AddCardToDatabase(importedCard);
+                }
+                catch (Exception e)
+                {
+                    this.AddToLog($"Failed to parse! Debug log has exception details.");
+                    Debug.LogException(e);
+                }
+            }
+
+            yield return null;
+        }
+
+        IEnumerator LoadEnemyScripts()
+        {
+            string enemyImportPath = Application.streamingAssetsPath + "/enemyImport";
+            string[] enemyImportScriptNames = Directory.GetFiles(enemyImportPath, "*.enemyimport");
+
+            this.AddToLog($"Searched {enemyImportPath}; Found {enemyImportScriptNames.Length} scripts");
+
+            foreach (string enemyImportScriptName in enemyImportScriptNames)
+            {
+                this.AddToLog($"Loading and parsing {enemyImportScriptName}...");
+
+                try
+                {
+                    string fileText = File.ReadAllText(enemyImportScriptName);
+                    EnemyImport importedEnemy = Newtonsoft.Json.JsonConvert.DeserializeObject<EnemyImport>(fileText);
+                    EnemyDatabase.AddEnemyToDatabase(importedEnemy);
+                }
+                catch (Exception e)
+                {
+                    this.AddToLog($"Failed to parse! Debug log has exception details.");
+                    Debug.LogException(e);
+                }
+            }
+
+            string encounterImportPath = Application.streamingAssetsPath + "/encounterImport";
+            string[] encounterImportNames = Directory.GetFiles(encounterImportPath, "*.encounterImport");
+
+            this.AddToLog($"Searched {encounterImportPath}; Found {encounterImportNames.Length} scripts");
+
+            foreach (string encounterImportScriptNames in encounterImportNames)
+            {
+                this.AddToLog($"Loading and parsing {encounterImportScriptNames}...");
+
+                try
+                {
+                    string fileText = File.ReadAllText(encounterImportScriptNames);
+                    EncounterImport importedEncounter = Newtonsoft.Json.JsonConvert.DeserializeObject<EncounterImport>(fileText);
+                    EncounterDatabase.AddEncounter(importedEncounter);
+                }
+                catch (Exception e)
+                {
+                    this.AddToLog($"Failed to parse! Debug log has exception details.");
+                    Debug.LogException(e);
+                }
+            }
+
+            yield return new WaitForEndOfFrame();
         }
     }
 }

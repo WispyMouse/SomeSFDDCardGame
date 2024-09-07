@@ -26,13 +26,13 @@ namespace SFDDCards
         {
             this.RepresentedEnemy = toSet;
             this.enemySelectedEvent = inEnemySelectedEvent;
-            this.Name.text = toSet.Name;
+            this.Name.text = toSet.BaseModel.Name;
             this.UpdateUX();
         }
 
         public void UpdateUX()
         {
-            this.Health.text = $"{this.RepresentedEnemy.CurrentHealth} / {this.RepresentedEnemy.MaximumHealth}";
+            this.Health.text = $"{this.RepresentedEnemy.CurrentHealth} / {this.RepresentedEnemy.BaseModel.MaximumHealth}";
         }
     }
 }
