@@ -1,0 +1,9 @@
+{
+	"Id": "testencounter_twoenemy",
+	"Name": "Test Encounter With Two Enemies",
+	"EnemyIds":
+	[
+		"basictestenemy",
+		"basictestenemy"
+	]
+}

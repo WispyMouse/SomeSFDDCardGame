@@ -1,0 +1,5 @@
+{
+	"Id": "onedamagespell",
+	"Name": "One Damage Spell",
+	"EffectScript": "[DAMAGE: 1]"
+}
