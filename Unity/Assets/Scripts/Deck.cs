@@ -85,6 +85,16 @@ namespace SFDDCards
             this.CardsCurrentlyInDiscard.Clear();
             this.CardsCurrentlyInDeck = this.CardsCurrentlyInDeck.ShuffleList();
         }
+
+        public void DiscardHand()
+        {
+            foreach (Card curCard in this.CardsCurrentlyInHand)
+            {
+                this.CardsCurrentlyInDiscard.Add(curCard);
+            }
+
+            this.CardsCurrentlyInHand.Clear();
+        }
     }
 
     public static class ListOfCardExtentions
