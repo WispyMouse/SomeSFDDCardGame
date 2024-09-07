@@ -15,9 +15,19 @@ namespace SFDDCards
             EnteringRoom = 4
         }
 
+        public enum TurnStatus
+        {
+            NotInCombat = 0,
+            PlayerTurn = 1,
+            EnemyTurn = 2
+        }
+
         public GameplayCampaignState CurrentGameplayCampaignState { get; private set; } = GameplayCampaignState.NotStarted;
+        public TurnStatus CurrentTurnStatus { get; private set; } = TurnStatus.NotInCombat;
+
         public Room CurrentRoom { get; private set; } = null;
         public Deck CurrentDeck { get; private set; } = null;
+        public Player CurrentPlayer { get; private set; } = null;
 
         [SerializeReference]
         private GameObject PlayerRepresentationPF;
@@ -36,15 +46,40 @@ namespace SFDDCards
         private GameObject GoNextRoomButton;
         [SerializeReference]
         private GameObject ResetGameButton;
+        [SerializeReference]
+        private GameObject EndTurnButton;
+
+        [SerializeReference]
+        private GameObject DeckStatPanel;
+        [SerializeReference]
+        private TMPro.TMP_Text CardsInDeckValue;
+        [SerializeReference]
+        private TMPro.TMP_Text CardsInDiscardValue;
+        [SerializeReference]
+        private TMPro.TMP_Text LifeValue;
 
         [SerializeReference]
         private TMPro.TMP_Text Log;
 
-        public Card CurrentSelectedCard { get; private set; } = null;
+        private Dictionary<Enemy, EnemyUX> spawnedEnemiesLookup { get; set; } = new Dictionary<Enemy, EnemyUX>();
+
+        public CardUX CurrentSelectedCard { get; private set; } = null;
 
         void Start()
         {
             this.SetupAndStartNewGame();
+        }
+
+        private void Update()
+        {
+            if (Input.GetMouseButtonDown(2))
+            {
+                if (this.CurrentSelectedCard != null)
+                {
+                    this.CurrentSelectedCard.DisableSelectionGlow();
+                    this.CurrentSelectedCard = null;
+                }
+            }
         }
 
         /// <summary>
@@ -102,7 +137,13 @@ namespace SFDDCards
 
             for (int ii = 0; ii < NumberOfCardsInStarterDeck; ii++)
             {
-                this.CurrentDeck.AddCardToDeck(new Card());
+                this.CurrentDeck.AddCardToDeck(
+                    new Card()
+                    {
+                        Name = "Simple Attack",
+                        EffectText = "Deals 1 damage to any enemy"
+                    }
+                    );
             }
         }
 
@@ -112,6 +153,14 @@ namespace SFDDCards
         void PlacePlayerCharacter()
         {
             GameObject playerObject = Instantiate(this.PlayerRepresentationPF, this.PlayerRepresentationTransform);
+
+            this.CurrentPlayer = new Player()
+            {
+                MaxHealth = 50,
+                CurrentHealth = 50
+            };
+
+            this.LifeValue.text = $"{this.CurrentPlayer.CurrentHealth} / {this.CurrentPlayer.MaxHealth}";
         }
 
         /// <summary>
@@ -125,7 +174,9 @@ namespace SFDDCards
             // If the room is cleared, prepare to go to the next one by allowing for the button to be active.
             if (newState == GameplayCampaignState.ClearedRoom)
             {
+                this.CurrentTurnStatus = TurnStatus.NotInCombat;
                 this.GoNextRoomButton.SetActive(true);
+                this.AddToLog($"Room is clear! Press Next Room to proceed to next encounter.");
             }
             else
             {
@@ -141,6 +192,22 @@ namespace SFDDCards
                     Destroy(this.EnemyRepresntationTransform.GetChild(ii).gameObject);
                 }
             }
+
+            if (newState == GameplayCampaignState.InCombat)
+            {
+                this.AddToLog($"Combat start! Left click a card to select it, then left click an enemy to play it on them. Right click to deselect the currently selected card.");
+                this.CurrentTurnStatus = TurnStatus.PlayerTurn;
+                this.EndTurnButton.SetActive(true);
+            }
+            else
+            {
+                this.EndTurnButton.SetActive(false);
+            }
+
+            if (newState == GameplayCampaignState.Defeat)
+            {
+
+            }
         }
 
         /// <summary>
@@ -154,14 +221,21 @@ namespace SFDDCards
                 return;
             }
 
-            Enemy currentEnemy = new Enemy();
+            Enemy currentEnemy = new Enemy()
+            {
+                Name = "Some Shmuck",
+                MaximumHealth = 3,
+                CurrentHealth = 3
+            };
+
             this.CurrentRoom.AddEnemy(currentEnemy);
             Vector3 objectOffset = new Vector3(50f, 0, 0) * this.EnemyRepresntationTransform.childCount;
             EnemyUX newEnemy = Instantiate(this.EnemyRepresentationPF, this.EnemyRepresntationTransform);
             newEnemy.transform.localPosition = objectOffset;
             newEnemy.SetFromEnemy(currentEnemy, SelectEnemy);
+            this.spawnedEnemiesLookup.Add(currentEnemy, newEnemy);
 
-            AddToLog($"Enemy {newEnemy} spawned");
+            this.AddToLog($"Enemy {newEnemy} spawned");
         }
 
         /// <summary>
@@ -169,9 +243,34 @@ namespace SFDDCards
         /// </summary>
         public void PlayCard(Card toPlay, Enemy toPlayOn)
         {
-            AddToLog($"Played card {toPlay} on {toPlayOn}");
+            if (this.CurrentTurnStatus != TurnStatus.PlayerTurn)
+            {
+                return;
+            }
+
+            this.AddToLog($"Played card {toPlay.Name} on {toPlayOn.Name}");
+
+            int newEnemyHealth = Mathf.Max(0, toPlayOn.CurrentHealth - 1);
+            this.AddToLog($"Dealing 1 damage to {toPlayOn.Name}. {toPlayOn.CurrentHealth} => {newEnemyHealth}");
+            toPlayOn.CurrentHealth = newEnemyHealth;
+
+            if (toPlayOn.ShouldBecomeDefeated)
+            {
+                this.AddToLog($"{toPlayOn.Name} has been defeated!");
+                this.RemoveEnemy(toPlayOn);
+            }
+            else
+            {
+                this.spawnedEnemiesLookup[toPlayOn].UpdateUX();
+            }
+
             this.CurrentDeck.CardsCurrentlyInHand.Remove(toPlay);
             this.RepresentPlayerHand();
+
+            if (this.spawnedEnemiesLookup.Count == 0)
+            {
+                this.SetGameCampaignNavigationState(GameplayCampaignState.ClearedRoom);
+            }
         }
 
         /// <summary>
@@ -179,23 +278,42 @@ namespace SFDDCards
         /// </summary>
         void RepresentPlayerHand()
         {
+            const float CardFanDistance = 2f;
+
             for (int ii = this.PlayerHandTransform.childCount - 1; ii >= 0; ii--)
             {
                 Destroy(this.PlayerHandTransform.GetChild(ii).gameObject);
             }
 
+            float leftStartingPoint = -CardFanDistance * (this.CurrentDeck.CardsCurrentlyInHand.Count - 1) / 2f;
+
             for (int ii = 0; ii < this.CurrentDeck.CardsCurrentlyInHand.Count; ii++)
             {
-                Vector3 objectOffset = new Vector3(.5f, 0, 0) * ii;
+                Vector3 objectOffset = new Vector3(leftStartingPoint, 0, 0) + new Vector3(CardFanDistance, 0, 0) * ii;
                 CardUX newCard = Instantiate(this.CardRepresentationPF, this.PlayerHandTransform);
                 newCard.transform.localPosition = objectOffset;
                 newCard.SetFromCard(this.CurrentDeck.CardsCurrentlyInHand[ii], SelectCurrentCard);
             }
+
+            this.CardsInDeckValue.text = this.CurrentDeck.CardsCurrentlyInDeck.Count.ToString();
+            this.CardsInDiscardValue.text = this.CurrentDeck.CardsCurrentlyInDiscard.Count.ToString();
         }
 
-        public void SelectCurrentCard(Card toSelect)
+        public void SelectCurrentCard(CardUX toSelect)
         {
+            if (this.CurrentTurnStatus != TurnStatus.PlayerTurn)
+            {
+                return;
+            }
+
+            if (this.CurrentSelectedCard != null)
+            {
+                this.CurrentSelectedCard.DisableSelectionGlow();
+            }
+
             this.CurrentSelectedCard = toSelect;
+            this.CurrentSelectedCard.EnableSelectionGlow();
+            AddToLog($"Selected card {toSelect.RepresentedCard.Name}");
         }
 
         public void SelectEnemy(Enemy toSelect)
@@ -205,7 +323,12 @@ namespace SFDDCards
                 return;
             }
 
-            this.PlayCard(this.CurrentSelectedCard, toSelect);
+            if (this.CurrentTurnStatus != TurnStatus.PlayerTurn)
+            {
+                return;
+            }
+
+            this.PlayCard(this.CurrentSelectedCard.RepresentedCard, toSelect);
             this.CurrentSelectedCard = null;
         }
 
@@ -218,6 +341,45 @@ namespace SFDDCards
             {
                 this.Log.text = this.Log.text.Substring(this.Log.text.Length - maximumLogSize, maximumLogSize);
             }
+        }
+
+        void RemoveEnemy(Enemy toRemove)
+        {
+            EnemyUX representation = this.spawnedEnemiesLookup[toRemove];
+            Destroy(representation.gameObject);
+            this.spawnedEnemiesLookup.Remove(toRemove);
+        }
+
+        public void EndTurn()
+        {
+            if (this.CurrentTurnStatus != TurnStatus.PlayerTurn)
+            {
+                return;
+            }
+
+            this.CurrentTurnStatus = TurnStatus.EnemyTurn;
+
+            foreach (Enemy curEnemy in this.spawnedEnemiesLookup.Keys)
+            {
+                int newPlayerHealth = Mathf.Max(0, this.CurrentPlayer.CurrentHealth - 1);
+                this.AddToLog($"{curEnemy.Name} deals damage to the player. {this.CurrentPlayer.CurrentHealth} => {newPlayerHealth}");
+                this.CurrentPlayer.CurrentHealth = newPlayerHealth;
+                this.LifeValue.text = $"{this.CurrentPlayer.CurrentHealth} / {this.CurrentPlayer.MaxHealth}";
+            }
+
+            if (this.CurrentPlayer.CurrentHealth <= 0)
+            {
+                this.AddToLog($"The player has run out of health! This run is over.");
+                this.SetGameCampaignNavigationState(GameplayCampaignState.Defeat);
+                return;
+            }
+
+            this.CurrentDeck.DiscardHand();
+            this.CurrentDeck.DealCards(5);
+
+            this.CurrentTurnStatus = TurnStatus.PlayerTurn;
+
+            this.RepresentPlayerHand();
         }
     }
 }

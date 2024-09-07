@@ -10,17 +10,44 @@ namespace SFDDCards
     {
         public Card RepresentedCard { get; private set; } = null;
 
-        Action<Card> cardSelectedAction { get; set; } = null;
+        Action<CardUX> cardSelectedAction { get; set; } = null;
 
-        public void OnMouseDown()
+        [SerializeReference]
+        private TMPro.TMP_Text NameText;
+
+        [SerializeReference]
+        private TMPro.TMP_Text EffectText;
+
+        [SerializeReference]
+        private GameObject SelectedGlow;
+
+        public void Awake()
         {
-            this.cardSelectedAction.Invoke(this.RepresentedCard);
+            this.DisableSelectionGlow();
         }
 
-        public void SetFromCard(Card toSet, Action<Card> inCardSelectedAction)
+        public void Clicked()
+        {
+            this.cardSelectedAction.Invoke(this);
+        }
+
+        public void SetFromCard(Card toSet, Action<CardUX> inCardSelectedAction)
         {
             this.RepresentedCard = toSet;
             this.cardSelectedAction = inCardSelectedAction;
+
+            this.NameText.text = toSet.Name;
+            this.EffectText.text = toSet.EffectText;
+        }
+
+        public void EnableSelectionGlow()
+        {
+            this.SelectedGlow.SetActive(true);
+        }
+
+        public void DisableSelectionGlow()
+        {
+            this.SelectedGlow.SetActive(false);
         }
     }
 }

@@ -5,5 +5,7 @@ namespace SFDDCards
     using UnityEngine;
     public class Card
     {
+        public string Name;
+        public string EffectText;
     }
 }

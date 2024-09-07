@@ -5,5 +5,16 @@ namespace SFDDCards
     using UnityEngine;
     public class Enemy
     {
+        public string Name;
+        public int MaximumHealth;
+        public int CurrentHealth;
+
+        public bool ShouldBecomeDefeated
+        {
+            get
+            {
+                return this.CurrentHealth <= 0;
+            }
+        }
     }
 }

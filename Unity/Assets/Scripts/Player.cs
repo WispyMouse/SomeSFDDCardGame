@@ -5,5 +5,7 @@ namespace SFDDCards
     using UnityEngine;
     public class Player
     {
+        public int MaxHealth;
+        public int CurrentHealth;
     }
 }
