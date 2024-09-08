@@ -1,0 +1,5 @@
+{
+	"Id": "healself",
+	"Name": "Small Heal",
+	"EffectScript": "[GAINELEMENT: 1 BIO][SETTARGETSELF][HEAL: 4]"
+}

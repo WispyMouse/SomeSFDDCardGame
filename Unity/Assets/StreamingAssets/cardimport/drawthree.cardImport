@@ -1,0 +1,5 @@
+{
+	"Id": "drawthreecyber",
+	"Name": "Cyber Draw",
+	"EffectScript": "[DRAINSELEMENT: 3 CYBER][DRAW: 3]"
+}

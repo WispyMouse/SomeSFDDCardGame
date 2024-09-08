@@ -9,6 +9,15 @@ namespace SFDDCards.ScriptingTokens
         public static List<IScriptingToken> AllTokenPrototypes = new List<IScriptingToken>()
         {
             new DamageScriptingToken(),
+            new DrawScriptingToken(),
+            new HealScriptingToken(),
+            new LaunchScriptingToken(),
+            new SetIntensityScriptingToken(),
+            new SetTargetFoeScriptingToken(),
+            new SetTargetSelfScriptingToken(),
+            new GainElementScriptingToken(),
+            new RequiresAtLeastElementScriptingToken(),
+            new DrainsElementScriptingToken()
         };
 
         public static bool TryGetScriptingTokenMatch(string input, out IScriptingToken match)
@@ -29,7 +38,7 @@ namespace SFDDCards.ScriptingTokens
         {
             List<IScriptingToken> tokens = new List<IScriptingToken>();
 
-            MatchCollection tagMatches = Regex.Matches(input, @"(\[.*?\])+");
+            MatchCollection tagMatches = Regex.Matches(input, @"(\[.*?\])");
             foreach (Match curTagMatch in tagMatches)
             {
                 if (!TryGetScriptingTokenMatch(curTagMatch.Value, out IScriptingToken token))

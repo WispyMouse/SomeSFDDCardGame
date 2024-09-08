@@ -3,19 +3,15 @@ namespace SFDDCards
     using System.Collections;
     using System.Collections.Generic;
     using UnityEngine;
-    public class Player : ICombatantTarget
+    public class Player : Combatant
     {
-        public int MaxHealth;
-        public int CurrentHealth { get; set; }
+        public override string Name => "Player";
+        public override int MaxHealth { get; }
 
-        public string Name => "Player";
-
-        public void ApplyDelta(DeltaEntry deltaEntry)
+        public Player(int maxHealth)
         {
-            if (deltaEntry.IntensityKindType == TokenEvaluatorBuilder.IntensityKind.Damage)
-            {
-                this.CurrentHealth = Mathf.Max(this.CurrentHealth - deltaEntry.Intensity, 0);
-            }
+            this.MaxHealth = maxHealth;
+            this.CurrentHealth = maxHealth;
         }
     }
 }

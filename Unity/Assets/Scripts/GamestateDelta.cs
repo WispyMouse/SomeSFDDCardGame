@@ -15,11 +15,24 @@ namespace SFDDCards
         {
             foreach (DeltaEntry entry in DeltaEntries)
             {
+                if (entry.IntensityKindType == TokenEvaluatorBuilder.IntensityKind.NumberOfCards)
+                {
+                    if (entry.NumberOfCardsRelationType == TokenEvaluatorBuilder.NumberOfCardsRelation.Draw)
+                    {
+                        gameStateController.CurrentDeck.DealCards(entry.Intensity);
+                    }
+                }
+
+                foreach (ElementResourceChange change in entry.ElementResourceChanges)
+                {
+                    gameStateController.ApplyElementResourceChange(change);
+                }
+                
                 entry.Target.ApplyDelta(entry);
             }
         }
 
-        public void ApplyDelta(GamestateDelta delta)
+        public void AppendDelta(GamestateDelta delta)
         {
             this.DeltaEntries.AddRange(delta.DeltaEntries);
         }
@@ -30,7 +43,12 @@ namespace SFDDCards
 
             foreach (DeltaEntry entry in DeltaEntries)
             {
-                stringLog.AppendLine(entry.DescribeDelta());
+                string description = entry.DescribeDelta();
+
+                if (!string.IsNullOrEmpty(description))
+                {
+                    stringLog.AppendLine(description);
+                }
             }
 
             return stringLog.ToString();
@@ -42,7 +60,12 @@ namespace SFDDCards
 
             foreach (DeltaEntry entry in DeltaEntries)
             {
-                stringLog.AppendLine(entry.DescribeAsEffect());
+                string description = entry.DescribeAsEffect();
+
+                if (!string.IsNullOrEmpty(description))
+                {
+                    stringLog.AppendLine(description);
+                }
             }
 
             return stringLog.ToString();

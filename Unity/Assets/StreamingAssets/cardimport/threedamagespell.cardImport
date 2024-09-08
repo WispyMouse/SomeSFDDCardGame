@@ -1,5 +1,5 @@
 {
 	"Id": "threedamagespell",
 	"Name": "Three Damage Spell",
-	"EffectScript": "[DAMAGE: 3]"
+	"EffectScript": "[GAINELEMENT: 1 VOID][DAMAGE: 1][LAUNCH][REQUIRESATLEASTELEMENT: 3 VOID][DAMAGE: 2]"
 }

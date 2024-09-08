@@ -3,10 +3,11 @@ namespace SFDDCards
     using System.Collections;
     using System.Collections.Generic;
     using UnityEngine;
-    public class Enemy : ICombatantTarget
+    public class Enemy : Combatant
     {
         public EnemyModel BaseModel { get; private set; }
-        public int CurrentHealth { get; set; }
+        public override string Name => this.BaseModel.Name;
+        public override int MaxHealth => this.BaseModel.MaximumHealth;
 
         public bool ShouldBecomeDefeated
         {
@@ -16,20 +17,10 @@ namespace SFDDCards
             }
         }
 
-        public string Name => this.BaseModel.Name;
-
         public Enemy(EnemyModel baseModel)
         {
             this.BaseModel = baseModel;
             this.CurrentHealth = baseModel.MaximumHealth;
-        }
-
-        public void ApplyDelta(DeltaEntry deltaEntry)
-        {
-            if (deltaEntry.IntensityKindType == TokenEvaluatorBuilder.IntensityKind.Damage)
-            {
-                this.CurrentHealth = Mathf.Max(this.CurrentHealth - deltaEntry.Intensity, 0);
-            }
         }
     }
 }
