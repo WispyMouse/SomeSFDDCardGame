@@ -6,7 +6,7 @@ namespace SFDDCards.ScriptingTokens
     {
         public void ApplyToken(TokenEvaluatorBuilder tokenBuilder)
         {
-            tokenBuilder.Target = null;
+            tokenBuilder.Target = new FoeTarget();
         }
 
         public bool GetTokenIfMatch(string tokenString, out IScriptingToken match)
@@ -22,6 +22,11 @@ namespace SFDDCards.ScriptingTokens
             match = typedMatch;
 
             return true;
+        }
+
+        public bool IsHarmfulToTarget(ICombatantTarget user, ICombatantTarget target)
+        {
+            return false;
         }
     }
 }

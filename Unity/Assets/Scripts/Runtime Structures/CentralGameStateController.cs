@@ -1,0 +1,413 @@
+namespace SFDDCards
+{
+    using System;
+    using System.Collections;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Text;
+    using UnityEngine;
+
+    public class CentralGameStateController : MonoBehaviour
+    {
+        public enum GameplayCampaignState
+        {
+            NotStarted = 0,
+            ClearedRoom = 1,
+            InCombat = 2,
+            Defeat = 3,
+            EnteringRoom = 4
+        }
+
+        public enum TurnStatus
+        {
+            NotInCombat = 0,
+            PlayerTurn = 1,
+            EnemyTurn = 2
+        }
+
+        public GameplayCampaignState CurrentGameplayCampaignState { get; private set; } = GameplayCampaignState.NotStarted;
+        public TurnStatus CurrentTurnStatus { get; private set; } = TurnStatus.NotInCombat;
+
+        public Room CurrentRoom { get; private set; } = null;
+        public Deck CurrentDeck { get; private set; } = null;
+        public Player CurrentPlayer { get; private set; } = null;
+        public Dictionary<string, int> ElementResourceCounts { get; private set; } = null;
+
+        [SerializeReference]
+        public GameplayUXController UXController;
+
+        RunConfiguration CurrentRunConfiguration { get; set; } = null;
+
+        private void Awake()
+        {
+        }
+
+        void Start()
+        {
+            this.StartCoroutine(this.BootupSequence());
+        }
+
+        /// <summary>
+        /// Starts up a new game and begins it.
+        /// This will disable all other Controllers, reset all state based information, and generally clean the slate.
+        /// Then the game will transition in to a new, playable state.
+        /// </summary>
+        public void SetupAndStartNewGame()
+        {
+            this.UXController.AddToLog("Resetting game to new state");
+
+            this.ElementResourceCounts = new Dictionary<string, int>();
+            this.AssignStartingDeck();
+            
+            this.CurrentPlayer = new Player(50);
+            this.UXController.PlacePlayerCharacter();
+
+            this.SetGameCampaignNavigationState(GameplayCampaignState.ClearedRoom);
+        }
+
+        /// <summary>
+        /// Leaves the current room, and loads in the next one, ready for gameplay.
+        /// </summary>
+        public void ProceedToNextRoom()
+        {
+            this.UXController.AddToLog("Proceeding to next room");
+
+            this.SetGameCampaignNavigationState(GameplayCampaignState.EnteringRoom);
+            this.ElementResourceCounts.Clear();
+            this.SpawnEnemiesFromRoom();
+            this.AssignEnemyIntents();
+            this.CurrentDeck.ShuffleEntireDeck();
+            this.CurrentDeck.DealCards(5);
+            this.SetGameCampaignNavigationState(GameplayCampaignState.InCombat);
+        }
+
+        /// <summary>
+        /// Creates the data structures for a deck, fills it with the starter cards, and sets that as the player's deck.
+        /// </summary>
+        void AssignStartingDeck()
+        {
+            this.CurrentDeck = new Deck();
+
+            foreach (string startingCard in this.CurrentRunConfiguration.StartingDeck)
+            {
+                this.CurrentDeck.AddCardToDeck(CardDatabase.GetModel(startingCard).Clone());
+            }
+        }
+
+        /// <summary>
+        /// Sets up the current navigation state, and then reflects that on the UX.
+        /// </summary>
+        /// <param name="newState">The incoming state to configure for.</param>
+        void SetGameCampaignNavigationState(GameplayCampaignState newState)
+        {
+            this.CurrentGameplayCampaignState = newState;
+
+            // If the room is cleared, prepare to go to the next one by allowing for the button to be active.
+            if (newState == GameplayCampaignState.ClearedRoom)
+            {
+                this.CurrentTurnStatus = TurnStatus.NotInCombat;
+                this.UXController.AddToLog($"Room is clear! Press Next Room to proceed to next encounter.");
+            }
+
+            if (newState == GameplayCampaignState.EnteringRoom)
+            {
+                this.CurrentRoom = new Room(EncounterDatabase.GetRandomEncounter());
+            }
+
+            if (newState == GameplayCampaignState.InCombat)
+            {
+                this.UXController.AddToLog($"Combat start! Left click a card to select it, then left click an enemy to play it on them. Right click to deselect the currently selected card.");
+                this.CurrentTurnStatus = TurnStatus.PlayerTurn;
+            }
+
+            this.UXController.GameCampaignNavigationStateChanged(newState, this.CurrentTurnStatus);
+        }
+
+        void SpawnEnemiesFromRoom()
+        {
+            if (this.CurrentRoom == null)
+            {
+                Debug.LogException(new System.NullReferenceException($"The current room is null, and cannot have enemies added to it."));
+                return;
+            }
+
+            foreach (Enemy curEnemy in this.CurrentRoom.Enemies)
+            {
+                this.UXController.AddEnemy(curEnemy);
+                this.UXController.AddToLog($"Enemy {curEnemy.Name} spawned");
+            }
+        }
+
+        /// <summary>
+        /// Plays a specified card on the specified target.
+        /// </summary>
+        public void PlayCard(Card toPlay, ICombatantTarget toPlayOn)
+        {
+            if (this.UXController.PlayerIsCurrentlyAnimating)
+            {
+                this.UXController.AddToLog($"Player is currently animating, please wait until finished. (Being able to play faster will be fixed soon!)");
+                return;
+            }
+
+            if (this.CurrentTurnStatus != TurnStatus.PlayerTurn)
+            {
+                this.UXController.CancelAllSelections();
+                return;
+            }
+
+            // Does the player meet the requirements of at least one of the effects?
+            bool anyPassingRequirements = false;
+            List<TokenEvaluatorBuilder> builders = ScriptTokenEvaluator.CalculateEvaluatorBuildersFromTokenEvaluation(this.CurrentPlayer, toPlay, toPlayOn);
+            foreach (TokenEvaluatorBuilder builder in builders)
+            {
+                if (builder.MeetsElementRequirements(this))
+                {
+                    anyPassingRequirements = true;
+                    break;
+                }
+            }
+
+            if (!anyPassingRequirements)
+            {
+                this.UXController.AddToLog($"Unable to play card {toPlay.Name}. No requirements for any of the card's effects have been met.");
+                this.UXController.CancelAllSelections();
+                return;
+            }
+
+            this.UXController.AddToLog($"Playing card {toPlay.Name} on {toPlayOn.Name}");
+            this.UXController.CancelAllSelections();
+            this.CurrentDeck.CardsCurrentlyInHand.Remove(toPlay);
+
+            this.UXController.AnimateCardPlay(
+                toPlay,
+                toPlayOn,
+                () =>
+                {
+                    GamestateDelta delta = ScriptTokenEvaluator.CalculateDifferenceFromTokenEvaluation(this, this.CurrentPlayer, toPlay, toPlayOn);
+                    this.UXController.AddToLog(delta.DescribeDelta());
+                    delta.ApplyDelta(this, this.UXController.AddToLog);
+                    this.CheckAllStateEffectsAndKnockouts();
+                },
+                () =>
+                {
+                }
+                );
+        }
+
+        void CheckAllStateEffectsAndKnockouts()
+        {
+            List<Enemy> enemies = new List<Enemy>(this.CurrentRoom.Enemies);
+            foreach (Enemy curEnemy in enemies)
+            {
+                if (curEnemy.ShouldBecomeDefeated)
+                {
+                    this.UXController.AddToLog($"{curEnemy.Name} has been defeated!");
+                    this.RemoveEnemy(curEnemy);
+                }
+            }
+
+            if (this.CurrentPlayer.CurrentHealth <= 0)
+            {
+                this.UXController.AddToLog($"The player has run out of health! This run is over.");
+                this.SetGameCampaignNavigationState(GameplayCampaignState.Defeat);
+                return;
+            }
+            if (this.CurrentRoom.Enemies.Count == 0)
+            {
+                this.UXController.AddToLog($"There are no more enemies!");
+                this.SetGameCampaignNavigationState(GameplayCampaignState.ClearedRoom);
+                return;
+            }
+
+            this.UXController.UpdateUX();
+        }
+
+        void RemoveEnemy(Enemy toRemove)
+        {
+            this.UXController.RemoveEnemy(toRemove);
+            this.CurrentRoom.Enemies.Remove(toRemove);
+        }
+
+        public void EndTurn()
+        {
+            if (this.CurrentTurnStatus != TurnStatus.PlayerTurn)
+            {
+                return;
+            }
+
+            this.CurrentTurnStatus = TurnStatus.EnemyTurn;
+            this.UXController.GameCampaignNavigationStateChanged(this.CurrentGameplayCampaignState, this.CurrentTurnStatus);
+
+            this.UXController.AnimateEnemyTurns(ContinueAfterEndTurnAnimationsFinished);
+        }
+
+        void ContinueAfterEndTurnAnimationsFinished()
+        {
+            this.CheckAllStateEffectsAndKnockouts();
+            this.AssignEnemyIntents();
+            this.CurrentDeck.DiscardHand();
+            this.CurrentDeck.DealCards(5);
+
+            this.CurrentTurnStatus = TurnStatus.PlayerTurn;
+            this.UXController.GameCampaignNavigationStateChanged(this.CurrentGameplayCampaignState, this.CurrentTurnStatus);
+        }
+
+        public void EnemyActsOnIntent(Enemy toAct)
+        {
+            GamestateDelta delta = ScriptTokenEvaluator.CalculateDifferenceFromTokenEvaluation(this, toAct, toAct.Intent, this.CurrentPlayer);
+            this.UXController.AddToLog(delta.DescribeDelta());
+            delta.ApplyDelta(this, this.UXController.AddToLog);
+        }
+
+        IEnumerator BootupSequence()
+        {
+            yield return LoadConfiguration();
+            yield return LoadCards();
+            yield return LoadEnemyScripts();
+            this.SetupAndStartNewGame();
+        }
+
+        IEnumerator LoadConfiguration()
+        {
+            string configImportPath = Application.streamingAssetsPath;
+            string fileText = File.ReadAllText(configImportPath + "/runconfiguration.runconfiguration");
+            CurrentRunConfiguration = Newtonsoft.Json.JsonConvert.DeserializeObject<RunConfiguration>(fileText);
+            yield return null;
+        }
+
+        IEnumerator LoadCards()
+        {
+            string cardImportPath = Application.streamingAssetsPath + "/cardImport";
+            string[] cardImportScriptNames = Directory.GetFiles(cardImportPath, "*.cardimport");
+
+            this.UXController.AddToLog($"Searched {cardImportPath}; Found {cardImportScriptNames.Length} scripts");
+
+            foreach (string cardImportScriptName in cardImportScriptNames)
+            {
+                this.UXController.AddToLog($"Loading and parsing {cardImportScriptName}...");
+
+                try
+                {
+                    string fileText = File.ReadAllText(cardImportScriptName);
+                    CardImport importedCard = Newtonsoft.Json.JsonConvert.DeserializeObject<CardImport>(fileText);
+                    CardDatabase.AddCardToDatabase(importedCard);
+                }
+                catch (Exception e)
+                {
+                    this.UXController.AddToLog($"Failed to parse! Debug log has exception details.");
+                    Debug.LogException(e);
+                }
+            }
+
+            yield return null;
+        }
+
+        IEnumerator LoadEnemyScripts()
+        {
+            string enemyImportPath = Application.streamingAssetsPath + "/enemyImport";
+            string[] enemyImportScriptNames = Directory.GetFiles(enemyImportPath, "*.enemyimport");
+
+            this.UXController.AddToLog($"Searched {enemyImportPath}; Found {enemyImportScriptNames.Length} scripts");
+
+            foreach (string enemyImportScriptName in enemyImportScriptNames)
+            {
+                this.UXController.AddToLog($"Loading and parsing {enemyImportScriptName}...");
+
+                try
+                {
+                    string fileText = File.ReadAllText(enemyImportScriptName);
+                    EnemyImport importedEnemy = Newtonsoft.Json.JsonConvert.DeserializeObject<EnemyImport>(fileText);
+                    EnemyDatabase.AddEnemyToDatabase(importedEnemy);
+                }
+                catch (Exception e)
+                {
+                    this.UXController.AddToLog($"Failed to parse! Debug log has exception details.");
+                    Debug.LogException(e);
+                }
+            }
+
+            string encounterImportPath = Application.streamingAssetsPath + "/encounterImport";
+            string[] encounterImportNames = Directory.GetFiles(encounterImportPath, "*.encounterImport");
+
+            this.UXController.AddToLog($"Searched {encounterImportPath}; Found {encounterImportNames.Length} scripts");
+
+            foreach (string encounterImportScriptNames in encounterImportNames)
+            {
+                this.UXController.AddToLog($"Loading and parsing {encounterImportScriptNames}...");
+
+                try
+                {
+                    string fileText = File.ReadAllText(encounterImportScriptNames);
+                    EncounterImport importedEncounter = Newtonsoft.Json.JsonConvert.DeserializeObject<EncounterImport>(fileText);
+                    EncounterDatabase.AddEncounter(importedEncounter);
+                }
+                catch (Exception e)
+                {
+                    this.UXController.AddToLog($"Failed to parse! Debug log has exception details.");
+                    Debug.LogException(e);
+                }
+            }
+
+            yield return new WaitForEndOfFrame();
+        }
+
+        public void PlayerModelClicked()
+        {
+            this.UXController.SelectTarget(this.CurrentPlayer);
+        }
+
+        public void ApplyElementResourceChange(ElementResourceChange toChange)
+        {
+            if (this.ElementResourceCounts.TryGetValue(toChange.Element, out int currentAmount))
+            {
+                int newAmount = Mathf.Max(0, currentAmount + toChange.GainOrLoss);
+
+                if (newAmount > 0)
+                {
+                    this.ElementResourceCounts[toChange.Element] = newAmount;
+                }
+                else
+                {
+                    this.ElementResourceCounts.Remove(toChange.Element);
+                }
+            }
+            else
+            {
+                if (toChange.GainOrLoss > 0)
+                {
+                    this.ElementResourceCounts.Add(toChange.Element, toChange.GainOrLoss);
+                }
+            }
+
+            this.UXController.UpdateUX();
+        }
+
+        void AssignEnemyIntents()
+        {
+            foreach (Enemy curEnemy in this.CurrentRoom.Enemies)
+            {
+                int randomAttackIndex = UnityEngine.Random.Range(0, curEnemy.BaseModel.Attacks.Count);
+                EnemyAttack randomAttack = curEnemy.BaseModel.Attacks[randomAttackIndex];
+                curEnemy.Intent = randomAttack;
+
+                List<ICombatantTarget> consideredTargets = new List<ICombatantTarget>()
+                {
+                    curEnemy,
+                    this.CurrentPlayer
+                };
+
+                List<ICombatantTarget> filteredTargets = ScriptTokenEvaluator.GetTargetsThatCanBeTargeted(curEnemy, curEnemy.Intent, consideredTargets);
+                if (filteredTargets.Count == 0)
+                {
+                    randomAttack.PrecalculatedTarget = null;
+                }
+                else
+                {
+                    randomAttack.PrecalculatedTarget = filteredTargets[0];
+                }
+            }
+
+            this.UXController.UpdateUX();
+        }
+    }
+}

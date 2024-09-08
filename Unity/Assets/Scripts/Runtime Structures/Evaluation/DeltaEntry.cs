@@ -16,6 +16,13 @@ namespace SFDDCards
         public List<ElementResourceChange> ElementResourceChanges = new List<ElementResourceChange>();
 
         /// <summary>
+        /// An indicator of who the original target of the ability is.
+        /// If an ability has a 'FoeTarget' as its original target, then it's a targetable card.
+        /// If an ability has a 'FoeTarget' after something that isn't a FoeTarget, it becomes random.
+        /// </summary>
+        public ICombatantTarget TopOfEffectTarget;
+
+        /// <summary>
         /// Assuming that the delta is being applied, this describes
         /// the actual effect on the targets of the ability.
         /// </summary>
@@ -127,30 +134,41 @@ namespace SFDDCards
 
         public string DescribeTarget()
         {
+            if (User == Target)
+            {
+                return "Self";
+            }
+
             if (Target is FoeTarget)
             {
-                if (User is AbstractPlayerUser)
+                if (User is Enemy)
                 {
-                    return "Random Foe";
+                    return "Player";
                 }
-                else if (User is Player)
+                else if (Target == TopOfEffectTarget)
                 {
-                    return "Random Foe";
+                    return "Targeted Foe";
                 }
                 else
                 {
-                    return "Player";
+                    if (User is AbstractPlayerUser)
+                    {
+                        return "Random Foe";
+                    }
+                    else if (User is Player)
+                    {
+                        return "Random Foe";
+                    }
+                    else
+                    {
+                        return "Player";
+                    }
                 }
             }
 
             if (User == null && Target == null)
             {
                 return "Any Target";
-            }
-
-            if (User == Target)
-            {
-                return "Self";
             }
 
             if (Target == null)

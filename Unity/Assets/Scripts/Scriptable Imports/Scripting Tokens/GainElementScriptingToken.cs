@@ -28,5 +28,10 @@ namespace SFDDCards.ScriptingTokens
 
             return true;
         }
+
+        public bool IsHarmfulToTarget(ICombatantTarget user, ICombatantTarget target)
+        {
+            return false;
+        }
     }
 }

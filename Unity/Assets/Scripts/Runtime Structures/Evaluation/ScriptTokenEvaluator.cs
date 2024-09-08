@@ -40,6 +40,8 @@ namespace SFDDCards
                 builder.Target = new FoeTarget();
             }
 
+            builder.TopOfEffectTarget = builder.Target;
+
             Dictionary<string, int> previousRequirements = new Dictionary<string, int>();
 
             int finalIndex = evaluatedAttack.AttackTokens.Count - 1;
@@ -67,6 +69,7 @@ namespace SFDDCards
                     builder = new TokenEvaluatorBuilder();
                     builder.User = actor;
                     builder.Target = previousTarget;
+                    builder.TopOfEffectTarget = builder.Target;
                 }
             }
 
@@ -145,6 +148,77 @@ namespace SFDDCards
             }
 
             return effectText.ToString();
+        }
+
+        public static string DescribeEnemyAttackIntent(Enemy user, EnemyAttack attack)
+        {
+            List<TokenEvaluatorBuilder> builders = CalculateEvaluatorBuildersFromTokenEvaluation(user, attack);
+            StringBuilder effectText = new StringBuilder();
+
+            foreach (TokenEvaluatorBuilder builder in builders)
+            {
+                GamestateDelta delta = builder.GetEffectiveDelta();
+
+                string deltaText = delta.DescribeAsEffect();
+
+                if (!string.IsNullOrEmpty(deltaText))
+                {
+                    effectText.AppendLine(deltaText);
+                }
+            }
+
+            return effectText.ToString();
+        }
+
+        public static List<ICombatantTarget> GetTargetsThatCanBeTargeted(ICombatantTarget user, IAttackTokenHolder effect, List<ICombatantTarget> consideredTargets)
+        {
+            // Hunt until we find the first targeting token
+            // If none is found, make assumptions based on the qualities of the ability
+            // If no targets are found, that's still acceptable
+            List<ICombatantTarget> validTargets = new List<ICombatantTarget>();
+
+            foreach (ICombatantTarget currentConsideredTarget in consideredTargets)
+            {
+                if (CanEffectTarget(user, effect, currentConsideredTarget))
+                {
+                    validTargets.Add(currentConsideredTarget);
+                }
+            }
+
+            return validTargets;
+        }
+
+        public static bool CanEffectTarget(ICombatantTarget user, IAttackTokenHolder effect, ICombatantTarget target)
+        {
+            // First pass through looking for all explicit targeting tokens
+            for (int ii = 0; ii < effect.AttackTokens.Count; ii++)
+            {
+                IScriptingToken currentToken = effect.AttackTokens[ii];
+
+                if (currentToken is SetTargetSelfScriptingToken)
+                {
+                    return user == target;
+                }
+                else if (currentToken is SetTargetFoeScriptingToken)
+                {
+                    return user.IsFoeOf(target);
+                }
+            }
+
+            // If no explicit tokens have been defend,
+            // then go through each ability until we hit something with a target implied
+            for (int ii = 0; ii < effect.AttackTokens.Count; ii++)
+            {
+                IScriptingToken currentToken = effect.AttackTokens[ii];
+
+                if (currentToken.IsHarmfulToTarget(user, target) && user.IsFoeOf(target))
+                {
+                    return true;
+                }
+            }
+
+            // If there's still no hits, then no this can't effect target
+            return false;
         }
     }
 }
