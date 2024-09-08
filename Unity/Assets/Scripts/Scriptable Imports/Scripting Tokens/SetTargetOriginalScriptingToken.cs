@@ -2,27 +2,23 @@ using System.Text.RegularExpressions;
 
 namespace SFDDCards.ScriptingTokens
 {
-    public class DamageScriptingToken : IScriptingToken
+    public class SetTargetOriginalScriptingToken : IScriptingToken
     {
-        public int Damage { get; private set; }
-
         public void ApplyToken(TokenEvaluatorBuilder tokenBuilder)
         {
-            tokenBuilder.IntensityKindType = TokenEvaluatorBuilder.IntensityKind.Damage;
-            tokenBuilder.Intensity = Damage;
+            tokenBuilder.Target = tokenBuilder.TopOfEffectTarget;
         }
 
         public bool GetTokenIfMatch(string tokenString, out IScriptingToken match)
         {
-            Match regexMatch = Regex.Match(tokenString, @"^\[DAMAGE: (\d+)\]$");
+            Match regexMatch = Regex.Match(tokenString, @"^\[SETTARGETORIGINAL\]$");
             if (!regexMatch.Success)
             {
                 match = null;
                 return false;
             }
 
-            DamageScriptingToken typedMatch = new DamageScriptingToken();
-            typedMatch.Damage = int.Parse(regexMatch.Groups[1].Value);
+            SetTargetOriginalScriptingToken typedMatch = new SetTargetOriginalScriptingToken();
             match = typedMatch;
 
             return true;
@@ -30,7 +26,7 @@ namespace SFDDCards.ScriptingTokens
 
         public bool IsHarmfulToTarget(ICombatantTarget user, ICombatantTarget target)
         {
-            return true;
+            return false;
         }
     }
 }

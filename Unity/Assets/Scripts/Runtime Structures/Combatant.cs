@@ -8,6 +8,7 @@ namespace SFDDCards
         public abstract string Name { get; }
         public abstract int MaxHealth { get; }
         public int CurrentHealth { get; set; }
+        public Transform UXPositionalTransform { get; set; }
 
         public void ApplyDelta(DeltaEntry deltaEntry)
         {
@@ -22,6 +23,19 @@ namespace SFDDCards
                 this.CurrentHealth = Mathf.Min(this.MaxHealth, this.CurrentHealth + deltaEntry.Intensity);
                 return;
             }
+        }
+
+        public bool IsFoeOf(ICombatantTarget otherTarget)
+        {
+            if (this is Enemy)
+            {
+                return otherTarget is Player;
+            }
+            else if (this is Player)
+            {
+                return otherTarget is Enemy;
+            }
+            return false;
         }
     }
 }

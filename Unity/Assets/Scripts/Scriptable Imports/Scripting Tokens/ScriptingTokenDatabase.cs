@@ -8,16 +8,24 @@ namespace SFDDCards.ScriptingTokens
     {
         public static List<IScriptingToken> AllTokenPrototypes = new List<IScriptingToken>()
         {
+            // Effect Tokens
             new DamageScriptingToken(),
             new DrawScriptingToken(),
             new HealScriptingToken(),
+
+            // Meta Token
             new LaunchScriptingToken(),
             new SetIntensityScriptingToken(),
+
+            // Targeting Token
             new SetTargetFoeScriptingToken(),
             new SetTargetSelfScriptingToken(),
+            new SetTargetOriginalScriptingToken(),
+
+            // Element Token
             new GainElementScriptingToken(),
             new RequiresAtLeastElementScriptingToken(),
-            new DrainsElementScriptingToken()
+            new DrainsElementScriptingToken(),
         };
 
         public static bool TryGetScriptingTokenMatch(string input, out IScriptingToken match)

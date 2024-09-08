@@ -13,6 +13,18 @@ Foe
 
 # Scripting Tokens:
 
+[SETTARGETSELF]
+- The user of the ability will be set as the target.
+- You can separate abilities that affect an opponent and yourself with [LAUNCH]
+
+[SETTARGETFOE]
+- If this is the first targeting token found, it uses the target of the effect selected when playing the card.
+- Otherwise, it picks a random Foe.
+
+[SETTARGETORIGINAL]
+- Sets the target to the originally targeted opponent.
+- You could use this to have a "[SETTARGETFOE][DAMAGE: 1][LAUNCH][SETTARGETSELF][HEAL: 1][LAUNCH][REQUIRESATLEASTELEMENT: 1 CYBER][SETTARGETORIGINAL][DAMAGE: 3]" to have the attack deal additional damage to the original target.
+
 [SETINTENSITY: 3]
 - Sets Intensity to 3. Does not change IntensityType.
 

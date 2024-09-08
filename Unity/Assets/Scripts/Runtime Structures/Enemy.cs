@@ -9,6 +9,8 @@ namespace SFDDCards
         public override string Name => this.BaseModel.Name;
         public override int MaxHealth => this.BaseModel.MaximumHealth;
 
+        public EnemyAttack Intent;
+
         public bool ShouldBecomeDefeated
         {
             get

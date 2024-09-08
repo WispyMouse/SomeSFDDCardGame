@@ -10,5 +10,6 @@ namespace SFDDCards
     public class EnemyAttack : IAttackTokenHolder
     {
         public List<IScriptingToken> AttackTokens { get; set; }
+        public ICombatantTarget PrecalculatedTarget { get; set; }
     }
 }

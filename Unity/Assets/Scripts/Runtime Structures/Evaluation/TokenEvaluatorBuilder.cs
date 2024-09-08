@@ -30,6 +30,7 @@ namespace SFDDCards
 
         public ICombatantTarget Target;
         public ICombatantTarget User;
+        public ICombatantTarget TopOfEffectTarget;
 
         public int Intensity;
         public IntensityKind IntensityKindType;
@@ -50,6 +51,7 @@ namespace SFDDCards
                 IntensityKindType = this.IntensityKindType,
                 NumberOfCardsRelationType = this.NumberOfCardsRelationType,
                 ElementResourceChanges = this.ElementResourceChanges,
+                TopOfEffectTarget = this.TopOfEffectTarget
             }) ;
 
             return delta;

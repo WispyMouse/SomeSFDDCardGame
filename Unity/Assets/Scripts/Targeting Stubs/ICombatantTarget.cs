@@ -10,5 +10,8 @@ namespace SFDDCards
     {
         string Name { get; }
         void ApplyDelta(DeltaEntry deltaEntry);
+        Transform UXPositionalTransform { get; }
+
+        bool IsFoeOf(ICombatantTarget otherTarget);
     }
 }
