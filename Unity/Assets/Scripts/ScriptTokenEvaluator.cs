@@ -14,21 +14,34 @@ namespace SFDDCards
         {
             GamestateDelta resultingDelta = new GamestateDelta();
 
-            List<TokenEvaluatorBuilder> builders = CalculateEvaluatorBuildersFromTokenEvaluation(actor, evaluatedAttack);
+            List<TokenEvaluatorBuilder> builders = CalculateEvaluatorBuildersFromTokenEvaluation(actor, evaluatedAttack, target: target);
             foreach (TokenEvaluatorBuilder builder in builders)
             {
-                builder.Target = target;
                 ApplyMissingDefaultInformation(builder, actor, gameStateController);
-                resultingDelta.ApplyDelta(builder.GetEffectiveDelta());
+
+                if (builder.MeetsElementRequirements(gameStateController))
+                {
+                    resultingDelta.AppendDelta(builder.GetEffectiveDelta());
+                }
             }
 
             return resultingDelta;
         }
 
-        public static List<TokenEvaluatorBuilder> CalculateEvaluatorBuildersFromTokenEvaluation(ICombatantTarget actor, IAttackTokenHolder evaluatedAttack)
+        public static List<TokenEvaluatorBuilder> CalculateEvaluatorBuildersFromTokenEvaluation(ICombatantTarget actor, IAttackTokenHolder evaluatedAttack, ICombatantTarget target = null)
         {
             List<TokenEvaluatorBuilder> builders = new List<TokenEvaluatorBuilder>();
             TokenEvaluatorBuilder builder = new TokenEvaluatorBuilder();
+            builder.User = actor;
+            builder.Target = target;
+
+            if (builder.Target == null)
+            {
+                builder.Target = new FoeTarget();
+            }
+
+            Dictionary<string, int> previousRequirements = new Dictionary<string, int>();
+
             int finalIndex = evaluatedAttack.AttackTokens.Count - 1;
             for (int scriptIndex = 0; scriptIndex < evaluatedAttack.AttackTokens.Count; scriptIndex++)
             {
@@ -38,8 +51,22 @@ namespace SFDDCards
 
                 if (scriptIndex == finalIndex || builder.ShouldLaunch)
                 {
+                    // If the next ability set has no requirements tokens,
+                    // re-use the previous set.
+                    // This will allow for an easier set up of "if you meet this element criteria, play the rest of the card"
+                    if (builder.ElementRequirements.Count == 0 && previousRequirements.Count != 0)
+                    {
+                        builder.ElementRequirements = new Dictionary<string, int>(previousRequirements);
+                    }
                     builders.Add(builder);
+
+                    previousRequirements = builder.ElementRequirements;
+
+                    ICombatantTarget previousTarget = builder.Target;
+
                     builder = new TokenEvaluatorBuilder();
+                    builder.User = actor;
+                    builder.Target = previousTarget;
                 }
             }
 
@@ -52,25 +79,69 @@ namespace SFDDCards
             {
                 builder.User = actor;
             }
+            else if (builder.User is AbstractPlayerUser)
+            {
+                builder.User = gameStateController.CurrentPlayer;
+            }
 
-            if (builder.Target == null)
+            if (builder.Target == null || builder.Target is FoeTarget)
             {
                 if (builder.IntensityKindType == TokenEvaluatorBuilder.IntensityKind.Damage)
                 {
-                    builder.Target = gameStateController.CurrentPlayer;
+                    if (actor is Player)
+                    {
+                        if (gameStateController.CurrentRoom.Enemies.Count > 0)
+                        {
+                            int randomIndex = UnityEngine.Random.Range(0, gameStateController.CurrentRoom.Enemies.Count);
+                            builder.Target = gameStateController.CurrentRoom.Enemies[randomIndex];
+                        }
+                    }
+                    else
+                    {
+                        builder.Target = gameStateController.CurrentPlayer;
+                    }
+                }
+                else
+                {
+                    builder.Target = actor;
                 }
             }
         }
 
         public static string DescribeCardText(Card importingCard)
         {
-            List<TokenEvaluatorBuilder> builders = CalculateEvaluatorBuildersFromTokenEvaluation(null, importingCard);
+            List<TokenEvaluatorBuilder> builders = CalculateEvaluatorBuildersFromTokenEvaluation(new AbstractPlayerUser(), importingCard);
             StringBuilder effectText = new StringBuilder();
+
+            // When parsing a card, if three abilities sequentially have the same elemental requirements,
+            // don't display the redundant requirements, if the requirements are empty.
+            string previousRequirements = string.Empty;
 
             foreach (TokenEvaluatorBuilder builder in builders)
             {
+                string currentRequirements = builder.DescribeElementRequirements();
+
+                if (string.IsNullOrEmpty(currentRequirements) && !string.IsNullOrEmpty(previousRequirements))
+                {
+                    // If there are no requirements, but the previous builder had requirements, notate that
+                    // Don't do that if this is the first thing, or the previous requirements were also empty
+                    effectText.AppendLine("(no requirements):");
+                }
+                else if (!string.IsNullOrEmpty(currentRequirements) && previousRequirements != currentRequirements)
+                {
+                    effectText.AppendLine(currentRequirements);
+                }
+
+                previousRequirements = currentRequirements;
+
                 GamestateDelta delta = builder.GetEffectiveDelta();
-                effectText.AppendLine(delta.DescribeAsEffect());
+
+                string deltaText = delta.DescribeAsEffect();
+
+                if (!string.IsNullOrEmpty(deltaText))
+                {
+                    effectText.AppendLine(deltaText);
+                }
             }
 
             return effectText.ToString();

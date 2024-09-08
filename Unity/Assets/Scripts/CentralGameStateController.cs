@@ -4,6 +4,7 @@ namespace SFDDCards
     using System.Collections;
     using System.Collections.Generic;
     using System.IO;
+    using System.Text;
     using UnityEngine;
 
     public class CentralGameStateController : MonoBehaviour
@@ -30,11 +31,12 @@ namespace SFDDCards
         public Room CurrentRoom { get; private set; } = null;
         public Deck CurrentDeck { get; private set; } = null;
         public Player CurrentPlayer { get; private set; } = null;
+        public Dictionary<string, int> ElementResourceCounts { get; private set; } = null;
 
         RunConfiguration CurrentRunConfiguration { get; set; } = null;
 
         [SerializeReference]
-        private GameObject PlayerRepresentationPF;
+        private PlayerUX PlayerRepresentationPF;
         [SerializeReference]
         private EnemyUX EnemyRepresentationPF;
         [SerializeReference]
@@ -61,6 +63,8 @@ namespace SFDDCards
         private TMPro.TMP_Text CardsInDiscardValue;
         [SerializeReference]
         private TMPro.TMP_Text LifeValue;
+        [SerializeReference]
+        private TMPro.TMP_Text ElementsValue;
 
         [SerializeReference]
         private TMPro.TMP_Text Log;
@@ -114,9 +118,12 @@ namespace SFDDCards
                 Destroy(this.EnemyRepresntationTransform.GetChild(ii).gameObject);
             }
 
+            this.ElementResourceCounts = new Dictionary<string, int>();
             this.AssignStartingDeck();
             this.PlacePlayerCharacter();
             this.SetGameCampaignNavigationState(GameplayCampaignState.ClearedRoom);
+
+            this.SetElementValueLabel();
         }
 
         /// <summary>
@@ -127,6 +134,7 @@ namespace SFDDCards
             this.AddToLog("Proceeding to next room");
 
             this.SetGameCampaignNavigationState(GameplayCampaignState.EnteringRoom);
+            this.ElementResourceCounts.Clear();
             this.SpawnEnemiesFromRoom();
             this.CurrentDeck.ShuffleEntireDeck();
             this.CurrentDeck.DealCards(5);
@@ -152,13 +160,10 @@ namespace SFDDCards
         /// </summary>
         void PlacePlayerCharacter()
         {
-            GameObject playerObject = Instantiate(this.PlayerRepresentationPF, this.PlayerRepresentationTransform);
+            PlayerUX playerObject = Instantiate(this.PlayerRepresentationPF, this.PlayerRepresentationTransform);
 
-            this.CurrentPlayer = new Player()
-            {
-                MaxHealth = 50,
-                CurrentHealth = 50
-            };
+            playerObject.SetFromPlayer(this.CurrentPlayer, PlayerModelClicked);
+            this.CurrentPlayer = new Player(50);
 
             this.LifeValue.text = $"{this.CurrentPlayer.CurrentHealth} / {this.CurrentPlayer.MaxHealth}";
         }
@@ -223,7 +228,7 @@ namespace SFDDCards
                 Vector3 objectOffset = new Vector3(3f, 0, 0) * this.EnemyRepresntationTransform.childCount;
                 EnemyUX newEnemy = Instantiate(this.EnemyRepresentationPF, this.EnemyRepresntationTransform);
                 newEnemy.transform.localPosition = objectOffset;
-                newEnemy.SetFromEnemy(curEnemy, SelectEnemy);
+                newEnemy.SetFromEnemy(curEnemy, SelectTarget);
                 this.spawnedEnemiesLookup.Add(curEnemy, newEnemy);
 
                 this.AddToLog($"Enemy {newEnemy.RepresentedEnemy.Name} spawned");
@@ -233,35 +238,81 @@ namespace SFDDCards
         /// <summary>
         /// Plays a specified card on the specified target.
         /// </summary>
-        public void PlayCard(Card toPlay, Enemy toPlayOn)
+        public void PlayCard(Card toPlay, ICombatantTarget toPlayOn)
         {
             if (this.CurrentTurnStatus != TurnStatus.PlayerTurn)
             {
                 return;
             }
 
-            this.AddToLog($"Played card {toPlay.Name} on {toPlayOn.BaseModel.Name}");
+            // Does the player meet the requirements of at least one of the effects?
+            bool anyPassingRequirements = false;
+            List<TokenEvaluatorBuilder> builders = ScriptTokenEvaluator.CalculateEvaluatorBuildersFromTokenEvaluation(this.CurrentPlayer, toPlay, toPlayOn);
+            foreach (TokenEvaluatorBuilder builder in builders)
+            {
+                if (builder.MeetsElementRequirements(this))
+                {
+                    anyPassingRequirements = true;
+                    break;
+                }
+            }
+
+            if (!anyPassingRequirements)
+            {
+                this.AddToLog($"Unalbe to play card {toPlay.Name}. No requirements for any of the card's effects have been met.");
+                this.CurrentSelectedCard?.DisableSelectionGlow();
+                this.CurrentSelectedCard = null;
+                return;
+            }
+
+            this.AddToLog($"Played card {toPlay.Name} on {toPlayOn.Name}");
 
             GamestateDelta delta = ScriptTokenEvaluator.CalculateDifferenceFromTokenEvaluation(this, this.CurrentPlayer, toPlay, toPlayOn);
             this.AddToLog(delta.DescribeDelta());
             delta.ApplyDelta(this, AddToLog);
 
-            if (toPlayOn.ShouldBecomeDefeated)
-            {
-                this.AddToLog($"{toPlayOn.BaseModel.Name} has been defeated!");
-                this.RemoveEnemy(toPlayOn);
-            }
-            else
-            {
-                this.spawnedEnemiesLookup[toPlayOn].UpdateUX();
-            }
-
+            this.CheckAllStateEffectsAndKnockouts();
             this.CurrentDeck.CardsCurrentlyInHand.Remove(toPlay);
             this.RepresentPlayerHand();
 
             if (this.spawnedEnemiesLookup.Count == 0)
             {
                 this.SetGameCampaignNavigationState(GameplayCampaignState.ClearedRoom);
+            }
+        }
+
+        void CheckAllStateEffectsAndKnockouts()
+        {
+            this.SetElementValueLabel();
+
+            List<Enemy> enemies = new List<Enemy>(this.CurrentRoom.Enemies);
+            foreach (Enemy curEnemy in enemies)
+            {
+                if (curEnemy.ShouldBecomeDefeated)
+                {
+                    this.AddToLog($"{curEnemy.Name} has been defeated!");
+                    this.RemoveEnemy(curEnemy);
+                }
+                else
+                {
+                    this.spawnedEnemiesLookup[curEnemy].UpdateUX();
+                }
+            }
+
+            this.LifeValue.text = this.CurrentPlayer.CurrentHealth.ToString();
+            this.RepresentPlayerHand();
+
+            if (this.CurrentPlayer.CurrentHealth <= 0)
+            {
+                this.AddToLog($"The player has run out of health! This run is over.");
+                this.SetGameCampaignNavigationState(GameplayCampaignState.Defeat);
+                return;
+            }
+            if (this.CurrentRoom.Enemies.Count == 0)
+            {
+                this.AddToLog($"There are no more enemies!");
+                this.SetGameCampaignNavigationState(GameplayCampaignState.ClearedRoom);
+                return;
             }
         }
 
@@ -308,7 +359,7 @@ namespace SFDDCards
             AddToLog($"Selected card {toSelect.RepresentedCard.Name}");
         }
 
-        public void SelectEnemy(Enemy toSelect)
+        public void SelectTarget(ICombatantTarget toSelect)
         {
             if (this.CurrentSelectedCard == null)
             {
@@ -326,6 +377,11 @@ namespace SFDDCards
 
         public void AddToLog(string text)
         {
+            if (string.IsNullOrEmpty(text))
+            {
+                return;
+            }
+
             this.Log.text += "\n" + text;
 
             const int maximumLogSize = 10000;
@@ -342,6 +398,7 @@ namespace SFDDCards
             EnemyUX representation = this.spawnedEnemiesLookup[toRemove];
             Destroy(representation.gameObject);
             this.spawnedEnemiesLookup.Remove(toRemove);
+            this.CurrentRoom.Enemies.Remove(toRemove);
         }
 
         public void EndTurn()
@@ -364,14 +421,7 @@ namespace SFDDCards
                 delta.ApplyDelta(this, AddToLog);
             }
 
-            if (this.CurrentPlayer.CurrentHealth <= 0)
-            {
-                this.AddToLog($"The player has run out of health! This run is over.");
-                this.SetGameCampaignNavigationState(GameplayCampaignState.Defeat);
-                return;
-            }
-
-            this.LifeValue.text = this.CurrentPlayer.CurrentHealth.ToString();
+            this.CheckAllStateEffectsAndKnockouts();
             this.CurrentDeck.DiscardHand();
             this.CurrentDeck.DealCards(5);
 
@@ -470,6 +520,56 @@ namespace SFDDCards
             }
 
             yield return new WaitForEndOfFrame();
+        }
+
+        public void PlayerModelClicked()
+        {
+            this.SelectTarget(this.CurrentPlayer);
+        }
+
+        public void ApplyElementResourceChange(ElementResourceChange toChange)
+        {
+            if (this.ElementResourceCounts.TryGetValue(toChange.Element, out int currentAmount))
+            {
+                int newAmount = Mathf.Max(0, currentAmount + toChange.GainOrLoss);
+
+                if (newAmount > 0)
+                {
+                    this.ElementResourceCounts[toChange.Element] = newAmount;
+                }
+                else
+                {
+                    this.ElementResourceCounts.Remove(toChange.Element);
+                }
+            }
+            else
+            {
+                if (toChange.GainOrLoss > 0)
+                {
+                    this.ElementResourceCounts.Add(toChange.Element, toChange.GainOrLoss);
+                }
+            }
+
+            this.SetElementValueLabel();
+        }
+
+        private void SetElementValueLabel()
+        {
+            if (this.ElementResourceCounts.Count == 0)
+            {
+                this.ElementsValue.text = "None";
+                return;
+            }
+
+            string startingSeparator = "";
+            StringBuilder compositeElements = new StringBuilder();
+            foreach (string element in this.ElementResourceCounts.Keys)
+            {
+                compositeElements.Append($"{startingSeparator}{this.ElementResourceCounts[element]}\u00A0{element}");
+                startingSeparator = ", ";
+            }
+
+            this.ElementsValue.text = compositeElements.ToString();
         }
     }
 }

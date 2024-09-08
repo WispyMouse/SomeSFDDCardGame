@@ -1,0 +1,5 @@
+{
+	"Id": "smitenheal",
+	"Name": "Smite n' Heal",
+	"EffectScript": "[GAINELEMENT: 1 SOLAR][DAMAGE: 3][LAUNCH][REQUIRESATLEASTELEMENT: 3 SOLAR][SETTARGETSELF][HEAL: 3]"
+}
