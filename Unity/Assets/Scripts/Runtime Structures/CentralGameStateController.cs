@@ -15,7 +15,8 @@ namespace SFDDCards
             ClearedRoom = 1,
             InCombat = 2,
             Defeat = 3,
-            EnteringRoom = 4
+            EnteringRoom = 4,
+            NonCombatEncounter = 5
         }
 
         public enum TurnStatus
@@ -25,8 +26,15 @@ namespace SFDDCards
             EnemyTurn = 2
         }
 
+        public enum NonCombatEncounterStatus
+        {
+            NotInNonCombatEncounter = 0,
+            AllowedToLeave = 1
+        }
+
         public GameplayCampaignState CurrentGameplayCampaignState { get; private set; } = GameplayCampaignState.NotStarted;
         public TurnStatus CurrentTurnStatus { get; private set; } = TurnStatus.NotInCombat;
+        public NonCombatEncounterStatus CurrentNonCombatEncounterStatus { get; private set; } = NonCombatEncounterStatus.NotInNonCombatEncounter;
 
         public Room CurrentRoom { get; private set; } = null;
         public Deck CurrentDeck { get; private set; } = null;
@@ -56,10 +64,12 @@ namespace SFDDCards
         {
             this.UXController.AddToLog("Resetting game to new state");
 
+            this.UXController.Annihilate();
+
             this.ElementResourceCounts = new Dictionary<string, int>();
             this.AssignStartingDeck();
             
-            this.CurrentPlayer = new Player(50);
+            this.CurrentPlayer = new Player(this.CurrentRunConfiguration.StartingMaximumHealth);
             this.UXController.PlacePlayerCharacter();
 
             this.SetGameCampaignNavigationState(GameplayCampaignState.ClearedRoom);
@@ -72,13 +82,27 @@ namespace SFDDCards
         {
             this.UXController.AddToLog("Proceeding to next room");
 
+            this.CurrentNonCombatEncounterStatus = NonCombatEncounterStatus.NotInNonCombatEncounter;
+            this.CurrentTurnStatus = TurnStatus.NotInCombat;
+
             this.SetGameCampaignNavigationState(GameplayCampaignState.EnteringRoom);
             this.ElementResourceCounts.Clear();
-            this.SpawnEnemiesFromRoom();
-            this.AssignEnemyIntents();
             this.CurrentDeck.ShuffleEntireDeck();
-            this.CurrentDeck.DealCards(5);
-            this.SetGameCampaignNavigationState(GameplayCampaignState.InCombat);
+
+            if (this.CurrentRoom.BasedOnEncounter.IsShopEncounter)
+            {
+                List<Card> cardsToAward = CardDatabase.GetRandomCards(this.CurrentRunConfiguration.CardsInShop);
+                this.UXController.ShowShopPanel(cardsToAward.ToArray());
+                this.CurrentNonCombatEncounterStatus = NonCombatEncounterStatus.AllowedToLeave;
+                this.SetGameCampaignNavigationState(GameplayCampaignState.NonCombatEncounter);
+            }
+            else
+            {
+                this.SpawnEnemiesFromRoom();
+                this.AssignEnemyIntents();
+                this.CurrentDeck.DealCards(5);
+                this.SetGameCampaignNavigationState(GameplayCampaignState.InCombat);
+            }
         }
 
         /// <summary>
@@ -106,12 +130,13 @@ namespace SFDDCards
             if (newState == GameplayCampaignState.ClearedRoom)
             {
                 this.CurrentTurnStatus = TurnStatus.NotInCombat;
+                this?.CurrentDeck.ShuffleEntireDeck();
                 this.UXController.AddToLog($"Room is clear! Press Next Room to proceed to next encounter.");
             }
 
             if (newState == GameplayCampaignState.EnteringRoom)
             {
-                this.CurrentRoom = new Room(EncounterDatabase.GetRandomEncounter());
+                this.CurrentRoom = new Room(EncounterDatabase.GetRandomEncounter(this.CurrentRoom?.BasedOnEncounter));
             }
 
             if (newState == GameplayCampaignState.InCombat)
@@ -120,7 +145,7 @@ namespace SFDDCards
                 this.CurrentTurnStatus = TurnStatus.PlayerTurn;
             }
 
-            this.UXController.GameCampaignNavigationStateChanged(newState, this.CurrentTurnStatus);
+            this.UXController.GameCampaignNavigationStateChanged(newState, this.CurrentTurnStatus, this.CurrentNonCombatEncounterStatus);
         }
 
         void SpawnEnemiesFromRoom()
@@ -212,14 +237,26 @@ namespace SFDDCards
                 this.SetGameCampaignNavigationState(GameplayCampaignState.Defeat);
                 return;
             }
-            if (this.CurrentRoom.Enemies.Count == 0)
+
+            if (this.CurrentGameplayCampaignState == GameplayCampaignState.NonCombatEncounter)
+            {
+                // 
+            }
+            else if (this.CurrentRoom.Enemies.Count == 0)
             {
                 this.UXController.AddToLog($"There are no more enemies!");
-                this.SetGameCampaignNavigationState(GameplayCampaignState.ClearedRoom);
+                this.SetupClearedRoomAndPresentAwards();
                 return;
             }
 
             this.UXController.UpdateUX();
+        }
+
+        void SetupClearedRoomAndPresentAwards()
+        {
+            this.SetGameCampaignNavigationState(GameplayCampaignState.ClearedRoom);
+            List<Card> cardsToAward = CardDatabase.GetRandomCards(this.CurrentRunConfiguration.CardsToAwardOnVictory);
+            this.UXController.ShowRewardsPanel(cardsToAward.ToArray());
         }
 
         void RemoveEnemy(Enemy toRemove)
@@ -236,7 +273,7 @@ namespace SFDDCards
             }
 
             this.CurrentTurnStatus = TurnStatus.EnemyTurn;
-            this.UXController.GameCampaignNavigationStateChanged(this.CurrentGameplayCampaignState, this.CurrentTurnStatus);
+            this.UXController.GameCampaignNavigationStateChanged(this.CurrentGameplayCampaignState, this.CurrentTurnStatus, this.CurrentNonCombatEncounterStatus);
 
             this.UXController.AnimateEnemyTurns(ContinueAfterEndTurnAnimationsFinished);
         }
@@ -249,7 +286,7 @@ namespace SFDDCards
             this.CurrentDeck.DealCards(5);
 
             this.CurrentTurnStatus = TurnStatus.PlayerTurn;
-            this.UXController.GameCampaignNavigationStateChanged(this.CurrentGameplayCampaignState, this.CurrentTurnStatus);
+            this.UXController.GameCampaignNavigationStateChanged(this.CurrentGameplayCampaignState, this.CurrentTurnStatus, this.CurrentNonCombatEncounterStatus);
         }
 
         public void EnemyActsOnIntent(Enemy toAct)
@@ -290,7 +327,22 @@ namespace SFDDCards
                 {
                     string fileText = File.ReadAllText(cardImportScriptName);
                     CardImport importedCard = Newtonsoft.Json.JsonConvert.DeserializeObject<CardImport>(fileText);
-                    CardDatabase.AddCardToDatabase(importedCard);
+
+                    string artLocation = $"{cardImportScriptName.Replace(".cardImport", ".png")}";
+                    Sprite cardArt = null;
+                    if (File.Exists(artLocation))
+                    {
+                        byte[] imageBytes = File.ReadAllBytes(artLocation);
+                        Texture2D texture = new Texture2D(144, 80);
+                        texture.LoadImage(imageBytes);
+                        cardArt = Sprite.Create(texture, new Rect(0, 0, 144, 80), Vector2.zero);
+                    }
+                    else
+                    {
+                        this.UXController.AddToLog($"Could not find art for {cardImportScriptName} at expected location of {artLocation}");
+                    }
+
+                    CardDatabase.AddCardToDatabase(importedCard, cardArt);
                 }
                 catch (Exception e)
                 {

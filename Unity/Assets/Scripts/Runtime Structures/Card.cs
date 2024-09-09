@@ -9,6 +9,7 @@ namespace SFDDCards
         public string Id;
         public string Name;
         public string EffectText;
+        public Sprite Sprite;
 
         public List<IScriptingToken> AttackTokens { get; set; }
 
@@ -18,6 +19,7 @@ namespace SFDDCards
             {
                 Id = this.Id,
                 Name = this.Name,
+                Sprite = this.Sprite,
                 EffectText = this.EffectText,
                 AttackTokens = new List<IScriptingToken>(AttackTokens)
             };

@@ -1,0 +1,8 @@
+{
+	"Id": "shopencounter",
+	"Name": "Shop Encounter",
+	"EnemyIds":
+	[
+	],
+	"IsShopEncounter": true
+}

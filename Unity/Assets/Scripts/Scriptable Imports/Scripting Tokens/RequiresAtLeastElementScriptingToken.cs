@@ -30,7 +30,7 @@ namespace SFDDCards.ScriptingTokens
 
             RequiresAtLeastElementScriptingToken typedMatch = new RequiresAtLeastElementScriptingToken();
             typedMatch.Amount = int.Parse(regexMatch.Groups[1].Value);
-            typedMatch.Element = regexMatch.Groups[2].Value;
+            typedMatch.Element = regexMatch.Groups[2].Value.ToUpper();
             match = typedMatch;
 
             return true;

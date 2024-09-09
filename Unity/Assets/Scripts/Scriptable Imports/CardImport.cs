@@ -17,7 +17,7 @@ namespace SFDDCards
         {
             Card card = new Card();
 
-            card.Id = Id;
+            card.Id = Id.ToLower();
             card.Name = Name;
             card.AttackTokens = ScriptingTokens.ScriptingTokenDatabase.GetAllTokens(this.EffectScript);
             card.EffectText = ScriptTokenEvaluator.DescribeCardText(card);

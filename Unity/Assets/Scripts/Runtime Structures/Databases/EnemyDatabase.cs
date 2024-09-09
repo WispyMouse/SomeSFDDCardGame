@@ -11,13 +11,16 @@ namespace SFDDCards
 
         public static void AddEnemyToDatabase(EnemyImport importData)
         {
-            if (EnemyData.ContainsKey(importData.Id))
+            string lowerId = importData.Id.ToLower();
+
+            if (EnemyData.ContainsKey(lowerId))
             {
-                Debug.LogError($"EnemyData dictionary already contains id {importData.Id}");
+                Debug.LogError($"EnemyData dictionary already contains id {lowerId}");
                 return;
             }
 
             EnemyModel newEnemy = new EnemyModel();
+            newEnemy.Id = lowerId;
             newEnemy.Name = importData.Name;
             newEnemy.MaximumHealth = importData.MaximumHealth;
 
@@ -26,14 +29,16 @@ namespace SFDDCards
                 newEnemy.Attacks.Add(attack.DeriveAttack());
             }
 
-            EnemyData.Add(importData.Id, newEnemy);
+            EnemyData.Add(lowerId, newEnemy);
         }
 
         public static EnemyModel GetModel(string id)
         {
-            if (!EnemyData.TryGetValue(id, out EnemyModel foundModel))
+            string lowerId = id.ToLower();
+
+            if (!EnemyData.TryGetValue(lowerId, out EnemyModel foundModel))
             {
-                Debug.LogError($"EnemyData dictionary lookup does not contain id {id}");
+                Debug.LogError($"EnemyData dictionary lookup does not contain id {lowerId}");
             }
 
             return foundModel;

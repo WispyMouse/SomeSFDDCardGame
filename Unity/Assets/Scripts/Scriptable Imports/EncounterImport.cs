@@ -10,13 +10,14 @@ namespace SFDDCards
     {
         public string Id;
         public List<string> EnemyIds = new List<string>();
-
+        public bool IsShopEncounter;
         public Encounter DeriveEncounter()
         {
             return new Encounter()
             {
-                Id = this.Id,
-                EnemiesInEncounterById = new List<string>(this.EnemyIds)
+                Id = this.Id.ToLower(),
+                EnemiesInEncounterById = new List<string>(this.EnemyIds),
+                IsShopEncounter = this.IsShopEncounter
             };
         }
     }
