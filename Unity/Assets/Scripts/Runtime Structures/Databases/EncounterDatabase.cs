@@ -14,9 +14,30 @@ namespace SFDDCards
             EncounterData.Add(toAdd.Id, toAdd.DeriveEncounter());
         }
 
-        public static Encounter GetRandomEncounter()
+        public static Encounter GetRandomEncounter(params Encounter[] doNotInclude)
         {
             List<string> modelIds = new List<string>(EncounterData.Keys);
+
+            if (modelIds.Count == 0)
+            {
+                Debug.LogError($"Somehow there are no valid encounters.");
+                return null;
+            }
+
+            foreach (Encounter curEncounter in doNotInclude)
+            {
+                if (curEncounter != null)
+                {
+                    modelIds.Remove(curEncounter.Id);
+                }
+            }
+
+            if (modelIds.Count == 0)
+            {
+                Debug.LogError($"There are no encounters left over after excluding all in provided list. Getting random without exclusions.");
+                return GetRandomEncounter();
+            }
+
             int randomIndex = UnityEngine.Random.Range(0, modelIds.Count);
             return EncounterData[modelIds[randomIndex]];
         }

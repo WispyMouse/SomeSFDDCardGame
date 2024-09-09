@@ -17,5 +17,8 @@
 		"threedamagespell",
 		"threedamagespell",
 		"threedamagespell",
-	]
+	],
+	"CardsToAwardOnVictory": 3,
+	"StartingMaximumHealth": 50,
+	"CardsInShop": 12
 }

@@ -9,5 +9,6 @@ namespace SFDDCards
     {
         public string Id;
         public List<string> EnemiesInEncounterById { get; set; } = new List<string>();
+        public bool IsShopEncounter;
     }
 }

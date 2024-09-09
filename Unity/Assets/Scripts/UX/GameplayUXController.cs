@@ -15,13 +15,18 @@ namespace SFDDCards
         private AnimationRunnerController AnimationRunnerController;
 
         [SerializeReference]
+        private RewardsPanelUX RewardsPanelUXInstance;
+        [SerializeReference]
+        private ShopUX ShopPanelUXInstance;
+
+        [SerializeReference]
         private PlayerUX PlayerRepresentationPF;
         private PlayerUX PlayerUXInstance { get; set; }
 
         [SerializeReference]
         private EnemyUX EnemyRepresentationPF;
         [SerializeReference]
-        private CardUX CardRepresentationPF;
+        private CombatCardUX CardRepresentationPF;
         [SerializeReference]
         private Transform PlayerHandTransform;
         [SerializeReference]
@@ -58,7 +63,7 @@ namespace SFDDCards
 
         private Dictionary<Enemy, EnemyUX> spawnedEnemiesLookup { get; set; } = new Dictionary<Enemy, EnemyUX>();
 
-        public CardUX CurrentSelectedCard { get; private set; } = null;
+        public DisplayedCardUX CurrentSelectedCard { get; private set; } = null;
         public bool PlayerIsCurrentlyAnimating { get; private set; } = false;
 
         private void Awake()
@@ -88,19 +93,25 @@ namespace SFDDCards
             this.LifeValue.text = $"{this.CentralGameStateControllerInstance.CurrentPlayer.CurrentHealth} / {this.CentralGameStateControllerInstance.CurrentPlayer.MaxHealth}";
         }
 
-        public void GameCampaignNavigationStateChanged(CentralGameStateController.GameplayCampaignState newState, CentralGameStateController.TurnStatus turnStatus)
+        public void GameCampaignNavigationStateChanged(CentralGameStateController.GameplayCampaignState newState, CentralGameStateController.TurnStatus turnStatus, CentralGameStateController.NonCombatEncounterStatus noncombatStatus)
         {
-            if (newState == CentralGameStateController.GameplayCampaignState.ClearedRoom)
+            if (newState == CentralGameStateController.GameplayCampaignState.ClearedRoom
+                || (newState == CentralGameStateController.GameplayCampaignState.NonCombatEncounter && noncombatStatus == CentralGameStateController.NonCombatEncounterStatus.AllowedToLeave))
             {
                 this.GoNextRoomButton.SetActive(true);
             }
             else
             {
+                this.RewardsPanelUXInstance.gameObject.SetActive(false);
+                this.ShopPanelUXInstance.gameObject.SetActive(false);
                 this.GoNextRoomButton.SetActive(false);
             }
             
             if (newState == CentralGameStateController.GameplayCampaignState.InCombat)
             {
+                this.RewardsPanelUXInstance.gameObject.SetActive(false);
+                this.ShopPanelUXInstance.gameObject.SetActive(false);
+
                 if (turnStatus == CentralGameStateController.TurnStatus.PlayerTurn)
                 {
                     this.EndTurnButton.SetActive(true);
@@ -159,7 +170,7 @@ namespace SFDDCards
             this.spawnedEnemiesLookup.Remove(toRemove);
         }
 
-        public void SelectCurrentCard(CardUX toSelect)
+        public void SelectCurrentCard(DisplayedCardUX toSelect)
         {
             if (this.CentralGameStateControllerInstance.CurrentTurnStatus != CentralGameStateController.TurnStatus.PlayerTurn)
             {
@@ -237,6 +248,18 @@ namespace SFDDCards
             this.StartCoroutine(AnimateEnemyTurnsInternal(continuationAction));
         }
 
+        public void ShowRewardsPanel(params Card[] cardsToReward)
+        {
+            this.RewardsPanelUXInstance.gameObject.SetActive(true);
+            this.RewardsPanelUXInstance.SetRewardCards(cardsToReward);
+        }
+
+        public void ShowShopPanel(params Card[] cardsInShop)
+        {
+            this.ShopPanelUXInstance.gameObject.SetActive(true);
+            this.ShopPanelUXInstance.SetRewardCards(cardsInShop);
+        }
+
         private IEnumerator AnimateEnemyTurnsInternal(Action continuationAction)
         {
             foreach (Enemy curEnemy in this.CentralGameStateControllerInstance.CurrentRoom.Enemies)
@@ -306,6 +329,15 @@ namespace SFDDCards
 
             if (this.CentralGameStateControllerInstance.CurrentGameplayCampaignState != CentralGameStateController.GameplayCampaignState.InCombat)
             {
+                if (this.CentralGameStateControllerInstance.CurrentDeck == null)
+                {
+                    this.CardsInDeckValue.text = "0";
+                }
+                else
+                {
+                    this.CardsInDeckValue.text = this.CentralGameStateControllerInstance.CurrentDeck.AllCardsInDeck.Count.ToString();
+                }
+                this.CardsInDiscardValue.text = "0";
                 ClearAllTargetableIndicators();
                 return;
             }
@@ -315,13 +347,16 @@ namespace SFDDCards
             for (int ii = 0; ii < this.CentralGameStateControllerInstance.CurrentDeck.CardsCurrentlyInHand.Count; ii++)
             {
                 Vector3 objectOffset = new Vector3(leftStartingPoint, 0, 0) + new Vector3(CardFanDistance, 0, 0) * ii;
-                CardUX newCard = Instantiate(this.CardRepresentationPF, this.PlayerHandTransform);
+                CombatCardUX newCard = Instantiate(this.CardRepresentationPF, this.PlayerHandTransform);
                 newCard.transform.localPosition = objectOffset;
                 newCard.SetFromCard(this.CentralGameStateControllerInstance.CurrentDeck.CardsCurrentlyInHand[ii], SelectCurrentCard);
             }
 
-            this.CardsInDeckValue.text = this.CentralGameStateControllerInstance.CurrentDeck.CardsCurrentlyInDeck.Count.ToString();
-            this.CardsInDiscardValue.text = this.CentralGameStateControllerInstance.CurrentDeck.CardsCurrentlyInDiscard.Count.ToString();
+            if (this.CentralGameStateControllerInstance.CurrentGameplayCampaignState == CentralGameStateController.GameplayCampaignState.InCombat)
+            {
+                this.CardsInDeckValue.text = this.CentralGameStateControllerInstance.CurrentDeck.CardsCurrentlyInDeck.Count.ToString();
+                this.CardsInDiscardValue.text = this.CentralGameStateControllerInstance.CurrentDeck.CardsCurrentlyInDiscard.Count.ToString();
+            }
         }
 
         void UpdatePlayerLabelValues()
@@ -418,7 +453,7 @@ namespace SFDDCards
             }
         }
 
-        void Annihilate()
+        public void Annihilate()
         {
             for (int ii = this.PlayerHandTransform.childCount - 1; ii >= 0; ii--)
             {
@@ -440,6 +475,8 @@ namespace SFDDCards
                 Destroy(this.PlayerUXInstance.gameObject);
             }
 
+            this.ShopPanelUXInstance.gameObject.SetActive(false);
+            this.RewardsPanelUXInstance.gameObject.SetActive(false);
             this.UpdateUX();
         }
 

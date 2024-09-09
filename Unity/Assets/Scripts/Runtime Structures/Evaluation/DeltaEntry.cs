@@ -98,13 +98,13 @@ namespace SFDDCards
             string describeElementDelta = DescribeElementDelta();
             if (!string.IsNullOrEmpty(describeElementDelta))
             {
-                compositeDelta.AppendLine(describeElementDelta);
+                compositeDelta.Append(describeElementDelta);
             }
 
             string describeIntensityDelta = DescribeIntensityAsEffect();
             if (!string.IsNullOrEmpty(describeIntensityDelta))
             {
-                compositeDelta.AppendLine(describeIntensityDelta);
+                compositeDelta.Append(describeIntensityDelta);
             }
 
             return compositeDelta.ToString();

@@ -6,6 +6,7 @@ namespace SFDDCards
     using UnityEngine;
     public class EnemyModel
     {
+        public string Id;
         public string Name;
         public int MaximumHealth;
 

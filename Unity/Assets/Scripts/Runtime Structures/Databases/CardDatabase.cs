@@ -9,16 +9,19 @@ namespace SFDDCards
     {
         public static Dictionary<string, Card> CardData { get; private set; } = new Dictionary<string, Card>();
 
-        public static void AddCardToDatabase(CardImport importData)
+        public static void AddCardToDatabase(CardImport importData, Sprite cardArt)
         {
-            if (CardData.ContainsKey(importData.Id))
+            string lowerId = importData.Id.ToLower();
+
+            if (CardData.ContainsKey(lowerId))
             {
-                Debug.LogError($"CardData dictionary already contains id {importData.Id}");
+                Debug.LogError($"CardData dictionary already contains id {lowerId}");
                 return;
             }
 
             Card newCard = importData.DeriveCard();
-            CardData.Add(importData.Id, newCard);
+            CardData.Add(lowerId, newCard);
+            newCard.Sprite = cardArt;
         }
 
         public static Card GetModel(string id)
@@ -29,6 +32,23 @@ namespace SFDDCards
             }
 
             return foundModel;
+        }
+
+        public static List<Card> GetRandomCards(int amount)
+        {
+            List<string> allCardCodes = new List<string>(CardDatabase.CardData.Keys);
+            List<Card> toAward = new List<Card>();
+
+            for (int ii = 0; ii < amount && allCardCodes.Count > 0; ii++)
+            {
+                int randomIndex = UnityEngine.Random.Range(0, allCardCodes.Count);
+                string cardCode = allCardCodes[randomIndex];
+                allCardCodes.RemoveAt(randomIndex);
+                Card thisCard = CardDatabase.GetModel(cardCode);
+                toAward.Add(thisCard);
+            }
+
+            return toAward;
         }
     }
 }
