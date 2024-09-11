@@ -1,5 +1,6 @@
 namespace SFDDCards
 {
+    using SFDDCards.ScriptingTokens.EvaluatableValues;
     using System;
     using System.Collections;
     using System.Collections.Generic;
@@ -10,7 +11,10 @@ namespace SFDDCards
     {
         public ICombatantTarget User;
         public ICombatantTarget Target;
+
         public int Intensity;
+        public IEvaluatableValue<int> AbstractIntensity;
+
         public TokenEvaluatorBuilder.IntensityKind IntensityKindType = TokenEvaluatorBuilder.IntensityKind.None;
         public TokenEvaluatorBuilder.NumberOfCardsRelation NumberOfCardsRelationType = TokenEvaluatorBuilder.NumberOfCardsRelation.None;
         public List<ElementResourceChange> ElementResourceChanges = new List<ElementResourceChange>();
@@ -101,7 +105,7 @@ namespace SFDDCards
                 compositeDelta.Append(describeElementDelta);
             }
 
-            string describeIntensityDelta = DescribeIntensityAsEffect();
+            string describeIntensityDelta = DescribeEffect();
             if (!string.IsNullOrEmpty(describeIntensityDelta))
             {
                 compositeDelta.Append(describeIntensityDelta);
@@ -111,21 +115,21 @@ namespace SFDDCards
         }
 
 
-        public string DescribeIntensityAsEffect()
+        public string DescribeEffect()
         {
             if (IntensityKindType == TokenEvaluatorBuilder.IntensityKind.Damage)
             {
-                return $"Damages {DescribeTarget()} for {Intensity}";
+                return $"Damages {DescribeTarget()} for {DescribeIntensity()}";
             }
             else if (IntensityKindType == TokenEvaluatorBuilder.IntensityKind.Heal)
             {
-                return $"Heals {DescribeTarget()} for {Intensity}";
+                return $"Heals {DescribeTarget()} for {DescribeIntensity()}";
             }
             else if (IntensityKindType == TokenEvaluatorBuilder.IntensityKind.NumberOfCards)
             {
                 if (NumberOfCardsRelationType == TokenEvaluatorBuilder.NumberOfCardsRelation.Draw)
                 {
-                    return $"Draw {Intensity} card(s)";
+                    return $"Draw {DescribeIntensity()} card(s)";
                 }
             }
 
@@ -177,6 +181,16 @@ namespace SFDDCards
             }
 
             return Target.Name;
+        }
+
+        public string DescribeIntensity()
+        {
+            if (this.AbstractIntensity == null)
+            {
+                return this.Intensity.ToString();
+            }
+
+            return this.AbstractIntensity.DescribeEvaluation();
         }
     }
 }

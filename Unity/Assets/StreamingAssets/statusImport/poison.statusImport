@@ -1,0 +1,10 @@
+{
+	"Id": "poison",
+	"Effects":
+	[
+		{
+			"Window": "OWNER_STARTTURN",
+			"Effect": "[SETTARGET: OWNER][DAMAGE: 1][DECREASESTACK]"
+		}
+	]
+}

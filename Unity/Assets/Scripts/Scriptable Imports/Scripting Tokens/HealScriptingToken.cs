@@ -1,36 +1,39 @@
-using System.Text.RegularExpressions;
-
 namespace SFDDCards.ScriptingTokens
 {
-    public class HealScriptingToken : IScriptingToken
-    {
-        public int Healing { get; private set; }
+    using SFDDCards.ScriptingTokens.EvaluatableValues;
+    using System.Collections.Generic;
+    using System.Text.RegularExpressions;
 
-        public void ApplyToken(TokenEvaluatorBuilder tokenBuilder)
+    public class HealScriptingToken : BaseScriptingToken
+    {
+        public IEvaluatableValue<int> HealingAmount { get; private set; }
+
+        public override string ScriptingTokenIdentifier { get; } = "HEAL";
+
+        public override void ApplyToken(TokenEvaluatorBuilder tokenBuilder)
         {
             tokenBuilder.IntensityKindType = TokenEvaluatorBuilder.IntensityKind.Heal;
-            tokenBuilder.Intensity = Healing;
+            tokenBuilder.Intensity = HealingAmount;
+            tokenBuilder.ShouldLaunch = true;
         }
 
-        public bool GetTokenIfMatch(string tokenString, out IScriptingToken match)
+        protected override bool TryGetTokenWithArguments(List<string> arguments, out IScriptingToken scriptingToken)
         {
-            Match regexMatch = Regex.Match(tokenString, @"^\[HEAL: (\d+)\]$");
-            if (!regexMatch.Success)
+            scriptingToken = null;
+
+            // [HEAL: 5] or [HEAL: TARGET_HEALTH] or [HEAL: TARGET_HEALTH - 5] are all valid options
+            // There should only be one resulting evaluated value out of this
+            if (!TryGetIntegerEvaluatableFromStrings(arguments, out IEvaluatableValue<int> output))
             {
-                match = null;
                 return false;
             }
 
-            HealScriptingToken typedMatch = new HealScriptingToken();
-            typedMatch.Healing = int.Parse(regexMatch.Groups[1].Value);
-            match = typedMatch;
+            scriptingToken = new HealScriptingToken()
+            {
+                HealingAmount = output
+            };
 
             return true;
-        }
-
-        public bool IsHarmfulToTarget(ICombatantTarget user, ICombatantTarget target)
-        {
-            return false;
         }
     }
 }

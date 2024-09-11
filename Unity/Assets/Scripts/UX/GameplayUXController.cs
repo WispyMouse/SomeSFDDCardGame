@@ -159,7 +159,7 @@ namespace SFDDCards
             Vector3 objectOffset = new Vector3(3f, 0, 0) * this.EnemyRepresntationTransform.childCount;
             EnemyUX newEnemy = Instantiate(this.EnemyRepresentationPF, this.EnemyRepresntationTransform);
             newEnemy.transform.localPosition = objectOffset;
-            newEnemy.SetFromEnemy(toAdd);
+            newEnemy.SetFromEnemy(toAdd, this.CentralGameStateControllerInstance);
             this.spawnedEnemiesLookup.Add(toAdd, newEnemy);
         }
 
@@ -449,7 +449,7 @@ namespace SFDDCards
                     continue;
                 }
 
-                value.UpdateUX();
+                value.UpdateUX(this.CentralGameStateControllerInstance);
             }
         }
 

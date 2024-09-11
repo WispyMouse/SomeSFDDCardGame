@@ -14,8 +14,7 @@ namespace SFDDCards.ScriptingTokens
             new HealScriptingToken(),
 
             // Meta Token
-            new LaunchScriptingToken(),
-            new SetIntensityScriptingToken(),
+            new ResetScriptingToken(),
 
             // Targeting Token
             new SetTargetFoeScriptingToken(),

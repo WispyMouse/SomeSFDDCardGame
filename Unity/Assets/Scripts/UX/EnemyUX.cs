@@ -23,19 +23,19 @@ namespace SFDDCards
         [SerializeField]
         private TMPro.TMP_Text EffectText;
 
-        public void SetFromEnemy(Enemy toSet)
+        public void SetFromEnemy(Enemy toSet, CentralGameStateController centralGameStateController)
         {
             this.RepresentedEnemy = toSet;
             this.Name.text = toSet.BaseModel.Name;
             this.RepresentedEnemy.UXPositionalTransform = this.transform;
             this.ClearEffectText();
-            this.UpdateUX();
+            this.UpdateUX(centralGameStateController);
         }
 
-        public void UpdateUX()
+        public void UpdateUX(CentralGameStateController centralGameStateController)
         {
             this.Health.text = $"{this.RepresentedEnemy.CurrentHealth} / {this.RepresentedEnemy.BaseModel.MaximumHealth}";
-            this.UpdateIntent();
+            this.UpdateIntent(centralGameStateController);
         }
 
         public void SetEffectText(string toText)
@@ -49,13 +49,13 @@ namespace SFDDCards
             this.EffectText.gameObject.SetActive(false);
         }
 
-        void UpdateIntent()
+        void UpdateIntent(CentralGameStateController centralGameStateController)
         {
             string description = "";
 
             if (this.RepresentedEnemy.Intent != null)
             {
-                description = ScriptTokenEvaluator.DescribeEnemyAttackIntent(this.RepresentedEnemy, this.RepresentedEnemy.Intent);
+                description = ScriptTokenEvaluator.DescribeEnemyAttackIntent(centralGameStateController, this.RepresentedEnemy, this.RepresentedEnemy.Intent);
             }
 
             if (!string.IsNullOrEmpty(description))

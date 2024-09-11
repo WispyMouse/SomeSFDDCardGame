@@ -21,7 +21,7 @@ namespace SFDDCards
 
                 if (builder.MeetsElementRequirements(gameStateController))
                 {
-                    resultingDelta.AppendDelta(builder.GetEffectiveDelta());
+                    resultingDelta.AppendDelta(builder.GetEffectiveDelta(gameStateController));
                 }
             }
 
@@ -137,7 +137,7 @@ namespace SFDDCards
 
                 previousRequirements = currentRequirements;
 
-                GamestateDelta delta = builder.GetEffectiveDelta();
+                GamestateDelta delta = builder.GetAbstractDelta();
 
                 string deltaText = delta.DescribeAsEffect();
 
@@ -150,14 +150,14 @@ namespace SFDDCards
             return effectText.ToString();
         }
 
-        public static string DescribeEnemyAttackIntent(Enemy user, EnemyAttack attack)
+        public static string DescribeEnemyAttackIntent(CentralGameStateController centralGameStateController, Enemy user, EnemyAttack attack)
         {
             List<TokenEvaluatorBuilder> builders = CalculateEvaluatorBuildersFromTokenEvaluation(user, attack);
             StringBuilder effectText = new StringBuilder();
 
             foreach (TokenEvaluatorBuilder builder in builders)
             {
-                GamestateDelta delta = builder.GetEffectiveDelta();
+                GamestateDelta delta = builder.GetEffectiveDelta(centralGameStateController);
 
                 string deltaText = delta.DescribeAsEffect();
 

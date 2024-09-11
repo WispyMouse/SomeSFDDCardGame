@@ -1,6 +1,7 @@
 namespace SFDDCards
 {
     using SFDDCards.ScriptingTokens;
+    using SFDDCards.ScriptingTokens.EvaluatableValues;
     using System;
     using System.Collections;
     using System.Collections.Generic;
@@ -32,14 +33,38 @@ namespace SFDDCards
         public ICombatantTarget User;
         public ICombatantTarget TopOfEffectTarget;
 
-        public int Intensity;
+        public IEvaluatableValue<int> Intensity;
         public IntensityKind IntensityKindType;
         public NumberOfCardsRelation NumberOfCardsRelationType = NumberOfCardsRelation.None;
 
         public List<ElementResourceChange> ElementResourceChanges = new List<ElementResourceChange>();
         public Dictionary<string, int> ElementRequirements = new Dictionary<string, int>();
 
-        public GamestateDelta GetEffectiveDelta()
+        public GamestateDelta GetEffectiveDelta(CentralGameStateController gameStateController)
+        {
+            GamestateDelta delta = new GamestateDelta();
+
+            if (!this.Intensity.TryEvaluateValue(gameStateController, out int evaluatedIntensity))
+            {
+                Debug.Log($"{nameof(TokenEvaluatorBuilder)} ({nameof(GetEffectiveDelta)}): Failed to evaluate {nameof(this.Intensity)}. Cannot have a delta.");
+                return delta;
+            }
+
+            delta.DeltaEntries.Add(new DeltaEntry()
+            {
+                User = this.User,
+                Target = this.Target,
+                Intensity = evaluatedIntensity,
+                IntensityKindType = this.IntensityKindType,
+                NumberOfCardsRelationType = this.NumberOfCardsRelationType,
+                ElementResourceChanges = this.ElementResourceChanges,
+                TopOfEffectTarget = this.TopOfEffectTarget
+            }) ;
+
+            return delta;
+        }
+
+        public GamestateDelta GetAbstractDelta()
         {
             GamestateDelta delta = new GamestateDelta();
 
@@ -47,12 +72,12 @@ namespace SFDDCards
             {
                 User = this.User,
                 Target = this.Target,
-                Intensity = this.Intensity,
+                AbstractIntensity = this.Intensity,
                 IntensityKindType = this.IntensityKindType,
                 NumberOfCardsRelationType = this.NumberOfCardsRelationType,
                 ElementResourceChanges = this.ElementResourceChanges,
                 TopOfEffectTarget = this.TopOfEffectTarget
-            }) ;
+            });
 
             return delta;
         }
