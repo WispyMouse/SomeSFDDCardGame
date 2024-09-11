@@ -3,8 +3,8 @@
 	"Effects":
 	[
 		{
-			"Window": "OWNER_STARTTURN",
-			"Effect": "[SETTARGET: OWNER][DAMAGE: 1][DECREASESTACK]"
+			"Window": "SELF_STARTTURN",
+			"Script": "[SETTARGET: SELF][DAMAGE: 1][DECREASESTACK]"
 		}
 	]
 }

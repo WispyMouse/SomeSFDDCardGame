@@ -1,6 +1,7 @@
 namespace SFDDCards
 {
     using SFDDCards.ScriptingTokens;
+    using SFDDCards.ScriptingTokens.EvaluatableValues;
     using System;
     using System.Collections;
     using System.Collections.Generic;
@@ -14,33 +15,24 @@ namespace SFDDCards
         {
             GamestateDelta resultingDelta = new GamestateDelta();
 
-            List<TokenEvaluatorBuilder> builders = CalculateEvaluatorBuildersFromTokenEvaluation(actor, evaluatedAttack, target: target);
+            List<TokenEvaluatorBuilder> builders = CalculateEvaluatorBuildersFromTokenEvaluation(evaluatedAttack);
             foreach (TokenEvaluatorBuilder builder in builders)
             {
-                ApplyMissingDefaultInformation(builder, actor, gameStateController);
-
                 if (builder.MeetsElementRequirements(gameStateController))
                 {
                     resultingDelta.AppendDelta(builder.GetEffectiveDelta(gameStateController));
                 }
             }
 
+            resultingDelta.EvaluateVariables(gameStateController);
+
             return resultingDelta;
         }
 
-        public static List<TokenEvaluatorBuilder> CalculateEvaluatorBuildersFromTokenEvaluation(ICombatantTarget actor, IAttackTokenHolder evaluatedAttack, ICombatantTarget target = null)
+        public static List<TokenEvaluatorBuilder> CalculateEvaluatorBuildersFromTokenEvaluation(IAttackTokenHolder evaluatedAttack)
         {
             List<TokenEvaluatorBuilder> builders = new List<TokenEvaluatorBuilder>();
             TokenEvaluatorBuilder builder = new TokenEvaluatorBuilder();
-            builder.User = actor;
-            builder.Target = target;
-
-            if (builder.Target == null)
-            {
-                builder.Target = new FoeTarget();
-            }
-
-            builder.TopOfEffectTarget = builder.Target;
 
             Dictionary<string, int> previousRequirements = new Dictionary<string, int>();
 
@@ -64,56 +56,16 @@ namespace SFDDCards
 
                     previousRequirements = builder.ElementRequirements;
 
-                    ICombatantTarget previousTarget = builder.Target;
-
-                    builder = new TokenEvaluatorBuilder();
-                    builder.User = actor;
-                    builder.Target = previousTarget;
-                    builder.TopOfEffectTarget = builder.Target;
+                    builder = TokenEvaluatorBuilder.Continue(builder);
                 }
             }
 
             return builders;
         }
 
-        public static void ApplyMissingDefaultInformation(TokenEvaluatorBuilder builder, ICombatantTarget actor, CentralGameStateController gameStateController)
-        {
-            if (builder.User == null)
-            {
-                builder.User = actor;
-            }
-            else if (builder.User is AbstractPlayerUser)
-            {
-                builder.User = gameStateController.CurrentPlayer;
-            }
-
-            if (builder.Target == null || builder.Target is FoeTarget)
-            {
-                if (builder.IntensityKindType == TokenEvaluatorBuilder.IntensityKind.Damage)
-                {
-                    if (actor is Player)
-                    {
-                        if (gameStateController.CurrentRoom.Enemies.Count > 0)
-                        {
-                            int randomIndex = UnityEngine.Random.Range(0, gameStateController.CurrentRoom.Enemies.Count);
-                            builder.Target = gameStateController.CurrentRoom.Enemies[randomIndex];
-                        }
-                    }
-                    else
-                    {
-                        builder.Target = gameStateController.CurrentPlayer;
-                    }
-                }
-                else
-                {
-                    builder.Target = actor;
-                }
-            }
-        }
-
         public static string DescribeCardText(Card importingCard)
         {
-            List<TokenEvaluatorBuilder> builders = CalculateEvaluatorBuildersFromTokenEvaluation(new AbstractPlayerUser(), importingCard);
+            List<TokenEvaluatorBuilder> builders = CalculateEvaluatorBuildersFromTokenEvaluation(importingCard);
             StringBuilder effectText = new StringBuilder();
 
             // When parsing a card, if three abilities sequentially have the same elemental requirements,
@@ -150,14 +102,14 @@ namespace SFDDCards
             return effectText.ToString();
         }
 
-        public static string DescribeEnemyAttackIntent(CentralGameStateController centralGameStateController, Enemy user, EnemyAttack attack)
+        public static string DescribeEnemyAttackIntent(EnemyAttack attack)
         {
-            List<TokenEvaluatorBuilder> builders = CalculateEvaluatorBuildersFromTokenEvaluation(user, attack);
+            List<TokenEvaluatorBuilder> builders = CalculateEvaluatorBuildersFromTokenEvaluation(attack);
             StringBuilder effectText = new StringBuilder();
 
             foreach (TokenEvaluatorBuilder builder in builders)
             {
-                GamestateDelta delta = builder.GetEffectiveDelta(centralGameStateController);
+                GamestateDelta delta = builder.GetAbstractDelta();
 
                 string deltaText = delta.DescribeAsEffect();
 
@@ -195,13 +147,16 @@ namespace SFDDCards
             {
                 IScriptingToken currentToken = effect.AttackTokens[ii];
 
-                if (currentToken is SetTargetSelfScriptingToken)
+                if (currentToken is SetTargetScriptingToken setTargetToken)
                 {
-                    return user == target;
-                }
-                else if (currentToken is SetTargetFoeScriptingToken)
-                {
-                    return user.IsFoeOf(target);
+                    if (setTargetToken.Target is SelfTargetEvaluatableValue)
+                    {
+                        return user == target;
+                    }
+                    else if (setTargetToken.Target is FoeTargetEvaluatableValue)
+                    {
+                        return user.IsFoeOf(target);
+                    }
                 }
             }
 

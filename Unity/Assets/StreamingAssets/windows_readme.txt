@@ -6,8 +6,8 @@ They're a series of "Windows" and "Effects". For example:
 	"Effects":
 	[
 		{
-			"Window": "OWNER_STARTTURN",
-			"Effect": "[SETTARGET: OWNER][DAMAGE: 1][DECREASESTACK]"
+			"Window": "SELF_STARTTURN",
+			"Effect": "[SETTARGET: SELF][DAMAGE: 1]"
 		}
 	]
 }
@@ -17,5 +17,5 @@ Whenever a Window occurs, there's a set of contextual information.
 
 # Window Glossary
 
-OWNER_STARTTURN
-- OWNER is the entity with the status effect on it
+SELF_STARTTURN
+- SELF is the entity with the status effect on it

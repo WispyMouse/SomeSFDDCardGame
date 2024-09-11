@@ -10,10 +10,14 @@ namespace SFDDCards
     public class DeltaEntry
     {
         public ICombatantTarget User;
+
         public ICombatantTarget Target;
+        public CombatantTargetEvaluatableValue AbstractTarget;
 
         public int Intensity;
         public IEvaluatableValue<int> AbstractIntensity;
+
+        public TokenEvaluatorBuilder MadeFromBuilder;
 
         public TokenEvaluatorBuilder.IntensityKind IntensityKindType = TokenEvaluatorBuilder.IntensityKind.None;
         public TokenEvaluatorBuilder.NumberOfCardsRelation NumberOfCardsRelationType = TokenEvaluatorBuilder.NumberOfCardsRelation.None;
@@ -24,7 +28,7 @@ namespace SFDDCards
         /// If an ability has a 'FoeTarget' as its original target, then it's a targetable card.
         /// If an ability has a 'FoeTarget' after something that isn't a FoeTarget, it becomes random.
         /// </summary>
-        public ICombatantTarget TopOfEffectTarget;
+        public ICombatantTarget OriginalTarget;
 
         /// <summary>
         /// Assuming that the delta is being applied, this describes
@@ -149,7 +153,7 @@ namespace SFDDCards
                 {
                     return "Player";
                 }
-                else if (Target == TopOfEffectTarget)
+                else if (Target == OriginalTarget)
                 {
                     return "Targeted Foe";
                 }

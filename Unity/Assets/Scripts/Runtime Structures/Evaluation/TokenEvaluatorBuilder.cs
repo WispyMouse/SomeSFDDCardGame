@@ -29,9 +29,9 @@ namespace SFDDCards
 
         public bool ShouldLaunch = false;
 
-        public ICombatantTarget Target;
+        public CombatantTargetEvaluatableValue Target;
         public ICombatantTarget User;
-        public ICombatantTarget TopOfEffectTarget;
+        public ICombatantTarget OriginalTarget;
 
         public IEvaluatableValue<int> Intensity;
         public IntensityKind IntensityKindType;
@@ -44,21 +44,25 @@ namespace SFDDCards
         {
             GamestateDelta delta = new GamestateDelta();
 
-            if (!this.Intensity.TryEvaluateValue(gameStateController, out int evaluatedIntensity))
+            if (!this.Intensity.TryEvaluateValue(gameStateController, this, out int evaluatedIntensity))
             {
                 Debug.Log($"{nameof(TokenEvaluatorBuilder)} ({nameof(GetEffectiveDelta)}): Failed to evaluate {nameof(this.Intensity)}. Cannot have a delta.");
                 return delta;
             }
 
+            ICombatantTarget foundTarget = null;
+            this.Target.TryEvaluateValue(gameStateController, this, out foundTarget);
+
             delta.DeltaEntries.Add(new DeltaEntry()
             {
+                MadeFromBuilder = this,
                 User = this.User,
-                Target = this.Target,
+                Target = foundTarget,
                 Intensity = evaluatedIntensity,
                 IntensityKindType = this.IntensityKindType,
                 NumberOfCardsRelationType = this.NumberOfCardsRelationType,
                 ElementResourceChanges = this.ElementResourceChanges,
-                TopOfEffectTarget = this.TopOfEffectTarget
+                OriginalTarget = this.OriginalTarget
             }) ;
 
             return delta;
@@ -70,13 +74,14 @@ namespace SFDDCards
 
             delta.DeltaEntries.Add(new DeltaEntry()
             {
+                MadeFromBuilder = this,
                 User = this.User,
-                Target = this.Target,
+                AbstractTarget = this.Target,
                 AbstractIntensity = this.Intensity,
                 IntensityKindType = this.IntensityKindType,
                 NumberOfCardsRelationType = this.NumberOfCardsRelationType,
                 ElementResourceChanges = this.ElementResourceChanges,
-                TopOfEffectTarget = this.TopOfEffectTarget
+                OriginalTarget = this.OriginalTarget
             });
 
             return delta;
@@ -139,6 +144,17 @@ namespace SFDDCards
             }
 
             return compositeRequirements.ToString();
+        }
+
+        public static TokenEvaluatorBuilder Continue(TokenEvaluatorBuilder previous)
+        {
+            TokenEvaluatorBuilder builder = new TokenEvaluatorBuilder();
+
+            builder.User = previous.User;
+            builder.Target = previous.Target;
+            builder.OriginalTarget = previous.OriginalTarget;
+
+            return builder;
         }
     }
 }

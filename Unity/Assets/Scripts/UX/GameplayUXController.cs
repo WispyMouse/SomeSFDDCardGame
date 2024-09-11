@@ -191,7 +191,7 @@ namespace SFDDCards
 
             // Does the player meet the requirements of at least one of the effects?
             bool anyPassingRequirements = false;
-            List<TokenEvaluatorBuilder> builders = ScriptTokenEvaluator.CalculateEvaluatorBuildersFromTokenEvaluation(this.CentralGameStateControllerInstance.CurrentPlayer, toSelect.RepresentedCard, null);
+            List<TokenEvaluatorBuilder> builders = ScriptTokenEvaluator.CalculateEvaluatorBuildersFromTokenEvaluation(toSelect.RepresentedCard);
             foreach (TokenEvaluatorBuilder builder in builders)
             {
                 if (builder.MeetsElementRequirements(this.CentralGameStateControllerInstance))

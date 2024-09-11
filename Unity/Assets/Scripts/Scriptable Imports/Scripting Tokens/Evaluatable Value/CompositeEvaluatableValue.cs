@@ -7,10 +7,10 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
     {
         public List<IEvaluatableValue<T>> CompositeComponents = new List<IEvaluatableValue<T>>();
 
-        public bool TryEvaluateValue(CentralGameStateController gameStatecontroller, out T evaluatedValue)
+        public bool TryEvaluateValue(CentralGameStateController gameStatecontroller, TokenEvaluatorBuilder currentBuilder, out T evaluatedValue)
         {
             // TODO: Actually composite things! This only takes the first thing, ignoring everything else.
-            if (!this.CompositeComponents[0].TryEvaluateValue(gameStatecontroller, out evaluatedValue))
+            if (!this.CompositeComponents[0].TryEvaluateValue(gameStatecontroller, currentBuilder, out evaluatedValue))
             {
                 return false;
             }

@@ -55,7 +55,7 @@ namespace SFDDCards
 
             if (this.RepresentedEnemy.Intent != null)
             {
-                description = ScriptTokenEvaluator.DescribeEnemyAttackIntent(centralGameStateController, this.RepresentedEnemy, this.RepresentedEnemy.Intent);
+                description = ScriptTokenEvaluator.DescribeEnemyAttackIntent(this.RepresentedEnemy.Intent);
             }
 
             if (!string.IsNullOrEmpty(description))

@@ -17,9 +17,7 @@ namespace SFDDCards.ScriptingTokens
             new ResetScriptingToken(),
 
             // Targeting Token
-            new SetTargetFoeScriptingToken(),
-            new SetTargetSelfScriptingToken(),
-            new SetTargetOriginalScriptingToken(),
+            new SetTargetScriptingToken(),
 
             // Element Token
             new GainElementScriptingToken(),

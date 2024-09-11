@@ -182,7 +182,7 @@ namespace SFDDCards
 
             // Does the player meet the requirements of at least one of the effects?
             bool anyPassingRequirements = false;
-            List<TokenEvaluatorBuilder> builders = ScriptTokenEvaluator.CalculateEvaluatorBuildersFromTokenEvaluation(this.CurrentPlayer, toPlay, toPlayOn);
+            List<TokenEvaluatorBuilder> builders = ScriptTokenEvaluator.CalculateEvaluatorBuildersFromTokenEvaluation(toPlay);
             foreach (TokenEvaluatorBuilder builder in builders)
             {
                 if (builder.MeetsElementRequirements(this))
@@ -300,6 +300,7 @@ namespace SFDDCards
         {
             yield return LoadConfiguration();
             yield return LoadCards();
+            yield return LoadStatusEffects();
             yield return LoadEnemyScripts();
             this.SetupAndStartNewGame();
         }
@@ -352,6 +353,33 @@ namespace SFDDCards
             }
 
             yield return null;
+        }
+
+        IEnumerator LoadStatusEffects()
+        {
+            string statusEffectImportPath = Application.streamingAssetsPath + "/statusImport";
+            string[] statusEffectImportScriptNames = Directory.GetFiles(statusEffectImportPath, "*.statusImport");
+
+            this.UXController.AddToLog($"Searched {statusEffectImportPath}; Found {statusEffectImportScriptNames.Length} scripts");
+
+            foreach (string statusEffectImportScriptName in statusEffectImportScriptNames)
+            {
+                this.UXController.AddToLog($"Loading and parsing {statusEffectImportScriptName}...");
+
+                try
+                {
+                    string fileText = File.ReadAllText(statusEffectImportScriptName);
+                    StatusEffectImport importedStatusEffect = Newtonsoft.Json.JsonConvert.DeserializeObject<StatusEffectImport>(fileText);
+                    StatusEffectDatabase.AddStatusEffectToDatabase(importedStatusEffect);
+                }
+                catch (Exception e)
+                {
+                    this.UXController.AddToLog($"Failed to parse! Debug log has exception details.");
+                    Debug.LogException(e);
+                }
+            }
+
+            yield return new WaitForEndOfFrame();
         }
 
         IEnumerator LoadEnemyScripts()

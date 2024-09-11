@@ -1,3 +1,4 @@
+using SFDDCards.ScriptingTokens.EvaluatableValues;
 using System.Text.RegularExpressions;
 
 namespace SFDDCards.ScriptingTokens
@@ -7,7 +8,7 @@ namespace SFDDCards.ScriptingTokens
         public void ApplyToken(TokenEvaluatorBuilder tokenBuilder)
         {
             tokenBuilder.ElementRequirements.Clear();
-            tokenBuilder.Target = tokenBuilder.TopOfEffectTarget;
+            tokenBuilder.Target = new OriginalTargetEvaluatableValue();
             tokenBuilder.IntensityKindType = TokenEvaluatorBuilder.IntensityKind.None;
             tokenBuilder.NumberOfCardsRelationType = TokenEvaluatorBuilder.NumberOfCardsRelation.None;
             tokenBuilder.Intensity = null;
