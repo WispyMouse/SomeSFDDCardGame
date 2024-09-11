@@ -16,7 +16,8 @@ namespace SFDDCards
             None = 0,
             Damage = 1,
             Heal = 2,
-            NumberOfCards = 3
+            NumberOfCards = 3,
+            StatusEffect = 4
         }
 
         public enum NumberOfCardsRelation
@@ -40,6 +41,8 @@ namespace SFDDCards
         public List<ElementResourceChange> ElementResourceChanges = new List<ElementResourceChange>();
         public Dictionary<string, int> ElementRequirements = new Dictionary<string, int>();
 
+        public StatusEffect StatusEffect;
+
         public GamestateDelta GetEffectiveDelta(CentralGameStateController gameStateController)
         {
             GamestateDelta delta = new GamestateDelta();
@@ -62,7 +65,8 @@ namespace SFDDCards
                 IntensityKindType = this.IntensityKindType,
                 NumberOfCardsRelationType = this.NumberOfCardsRelationType,
                 ElementResourceChanges = this.ElementResourceChanges,
-                OriginalTarget = this.OriginalTarget
+                OriginalTarget = this.OriginalTarget,
+                StatusEffect = this.StatusEffect
             }) ;
 
             return delta;
@@ -81,7 +85,8 @@ namespace SFDDCards
                 IntensityKindType = this.IntensityKindType,
                 NumberOfCardsRelationType = this.NumberOfCardsRelationType,
                 ElementResourceChanges = this.ElementResourceChanges,
-                OriginalTarget = this.OriginalTarget
+                OriginalTarget = this.OriginalTarget,
+                StatusEffect = this.StatusEffect
             });
 
             return delta;
@@ -155,6 +160,19 @@ namespace SFDDCards
             builder.OriginalTarget = previous.OriginalTarget;
 
             return builder;
+        }
+
+        public bool AnyEffectRequiresTarget()
+        {
+            for (int ii = 0; ii < this.AppliedTokens.Count; ii++)
+            {
+                if (this.AppliedTokens[ii].RequiresTarget())
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

@@ -12,5 +12,6 @@ namespace SFDDCards.ScriptingTokens
 
         void ApplyToken(TokenEvaluatorBuilder tokenBuilder);
         bool IsHarmfulToTarget(ICombatantTarget user, ICombatantTarget target);
+        bool RequiresTarget();
     }
 }

@@ -17,13 +17,18 @@ namespace SFDDCards.ScriptingTokens
             tokenBuilder.ShouldLaunch = true;
         }
 
+        public override bool RequiresTarget()
+        {
+            return true;
+        }
+
         protected override bool TryGetTokenWithArguments(List<string> arguments, out IScriptingToken scriptingToken)
         {
             scriptingToken = null;
 
             // [HEAL: 5] or [HEAL: TARGET_HEALTH] or [HEAL: TARGET_HEALTH - 5] are all valid options
             // There should only be one resulting evaluated value out of this
-            if (!TryGetIntegerEvaluatableFromStrings(arguments, out IEvaluatableValue<int> output))
+            if (!TryGetIntegerEvaluatableFromStrings(arguments, out IEvaluatableValue<int> output, out List<string> _))
             {
                 return false;
             }

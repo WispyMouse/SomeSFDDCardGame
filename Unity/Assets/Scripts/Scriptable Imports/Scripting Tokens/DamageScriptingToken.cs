@@ -22,7 +22,7 @@ namespace SFDDCards.ScriptingTokens
 
             // [DAMAGE: 5] or [DAMAGE: TARGET_HEALTH] or [DAMAGE: TARGET_HEALTH - 5] are all valid options
             // There should only be one resulting evaluated value out of this
-            if (!TryGetIntegerEvaluatableFromStrings(arguments, out IEvaluatableValue<int> output))
+            if (!TryGetIntegerEvaluatableFromStrings(arguments, out IEvaluatableValue<int> output, out List<string> _))
             {
                 return false;
             }
@@ -38,6 +38,11 @@ namespace SFDDCards.ScriptingTokens
         public override bool IsHarmfulToTarget(ICombatantTarget user, ICombatantTarget target)
         {
             // Damage is always harmful!
+            return true;
+        }
+
+        public override bool RequiresTarget()
+        {
             return true;
         }
     }

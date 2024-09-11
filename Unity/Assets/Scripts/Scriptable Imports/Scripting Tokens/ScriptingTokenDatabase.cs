@@ -12,6 +12,7 @@ namespace SFDDCards.ScriptingTokens
             new DamageScriptingToken(),
             new DrawScriptingToken(),
             new HealScriptingToken(),
+            new ChangeStatusEffectStacksScriptingToken(),
 
             // Meta Token
             new ResetScriptingToken(),

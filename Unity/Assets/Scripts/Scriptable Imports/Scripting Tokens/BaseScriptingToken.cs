@@ -64,8 +64,9 @@ namespace SFDDCards.ScriptingTokens
             return true;
         }
 
-        public static bool TryGetIntegerEvaluatableFromStrings(List<string> arguments, out IEvaluatableValue<int> output)
+        public static bool TryGetIntegerEvaluatableFromStrings(List<string> arguments, out IEvaluatableValue<int> output, out List<string> remainingStrings)
         {
+            remainingStrings = new List<string>();
             CompositeEvaluatableValue<int> compositeEvaluatable = new CompositeEvaluatableValue<int>();
             output = null;
 
@@ -85,6 +86,8 @@ namespace SFDDCards.ScriptingTokens
                         return false;
                     }
                 }
+
+                remainingStrings.Add(currentArgument);
             }
 
             if (compositeEvaluatable.CompositeComponents.Count == 0)
@@ -97,5 +100,7 @@ namespace SFDDCards.ScriptingTokens
         }
 
         protected abstract bool TryGetTokenWithArguments(List<string> arguments, out IScriptingToken scriptingToken);
+
+        public abstract bool RequiresTarget();
     }
 }

@@ -23,6 +23,8 @@ namespace SFDDCards
         public TokenEvaluatorBuilder.NumberOfCardsRelation NumberOfCardsRelationType = TokenEvaluatorBuilder.NumberOfCardsRelation.None;
         public List<ElementResourceChange> ElementResourceChanges = new List<ElementResourceChange>();
 
+        public StatusEffect StatusEffect;
+
         /// <summary>
         /// An indicator of who the original target of the ability is.
         /// If an ability has a 'FoeTarget' as its original target, then it's a targetable card.
@@ -69,6 +71,21 @@ namespace SFDDCards
                 if (NumberOfCardsRelationType == TokenEvaluatorBuilder.NumberOfCardsRelation.Draw)
                 {
                     return $"Player draws {Intensity} card(s)";
+                }
+            }
+            else if (IntensityKindType == TokenEvaluatorBuilder.IntensityKind.StatusEffect)
+            {
+                if (Intensity > 0)
+                {
+                    return $"{DescribeTarget()} has {Intensity} stacks of {StatusEffect} applied";
+                }
+                else if (Intensity < 0)
+                {
+                    return $"{DescribeTarget()} has {-Intensity} stacks of {StatusEffect} removed";
+                }
+                else
+                {
+                    return null;
                 }
             }
 
@@ -136,12 +153,33 @@ namespace SFDDCards
                     return $"Draw {DescribeIntensity()} card(s)";
                 }
             }
+            else if (IntensityKindType == TokenEvaluatorBuilder.IntensityKind.StatusEffect)
+            {
+                // TODO: This should know if it's gaining or losing stacks
+                return $"Applies/Removes {DescribeIntensity()} stacks of {StatusEffect}";
+            }
 
             return "I have no idea what this will do.";
         }
 
         public string DescribeTarget()
         {
+            if (AbstractTarget != null)
+            {
+                return AbstractTarget.DescribeEvaluation();
+            }
+
+            if (Target == null)
+            {
+                return "No Target";
+            }
+
+            if (User == null)
+            {
+                Debug.LogError($"User is null! This is unusual.");
+                return String.Empty;
+            }
+
             if (User == Target)
             {
                 return "Self";

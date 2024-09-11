@@ -71,11 +71,14 @@ namespace SFDDCards
             return stringLog.ToString();
         }
 
-        public void EvaluateVariables(CentralGameStateController controller)
+        public void EvaluateVariables(CentralGameStateController controller, ICombatantTarget user, ICombatantTarget target)
         {
             for (int ii = 0; ii < this.DeltaEntries.Count; ii++)
             {
                 DeltaEntry curEntry = this.DeltaEntries[ii];
+
+                curEntry.OriginalTarget = target;
+                curEntry.User = user;
                 
                 if (curEntry.AbstractTarget != null)
                 {

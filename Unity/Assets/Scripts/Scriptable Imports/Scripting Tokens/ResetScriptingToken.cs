@@ -1,11 +1,14 @@
 using SFDDCards.ScriptingTokens.EvaluatableValues;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
 namespace SFDDCards.ScriptingTokens
 {
-    public class ResetScriptingToken : IScriptingToken
+    public class ResetScriptingToken : BaseScriptingToken
     {
-        public void ApplyToken(TokenEvaluatorBuilder tokenBuilder)
+        public override string ScriptingTokenIdentifier => "RESET";
+
+        public override void ApplyToken(TokenEvaluatorBuilder tokenBuilder)
         {
             tokenBuilder.ElementRequirements.Clear();
             tokenBuilder.Target = new OriginalTargetEvaluatableValue();
@@ -15,24 +18,15 @@ namespace SFDDCards.ScriptingTokens
             tokenBuilder.ElementResourceChanges.Clear();
         }
 
-        public bool GetTokenIfMatch(string tokenString, out IScriptingToken match)
-        {
-            Match regexMatch = Regex.Match(tokenString, @"^\[RESET\]$");
-            if (!regexMatch.Success)
-            {
-                match = null;
-                return false;
-            }
-
-            ResetScriptingToken typedMatch = new ResetScriptingToken();
-            match = typedMatch;
-
-            return true;
-        }
-
-        public bool IsHarmfulToTarget(ICombatantTarget user, ICombatantTarget target)
+        public override bool RequiresTarget()
         {
             return false;
+        }
+
+        protected override bool TryGetTokenWithArguments(List<string> arguments, out IScriptingToken scriptingToken)
+        {
+            scriptingToken = new ResetScriptingToken();
+            return true;
         }
     }
 }

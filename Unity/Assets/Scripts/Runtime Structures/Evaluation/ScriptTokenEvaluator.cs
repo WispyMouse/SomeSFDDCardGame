@@ -15,7 +15,8 @@ namespace SFDDCards
         {
             GamestateDelta resultingDelta = new GamestateDelta();
 
-            List<TokenEvaluatorBuilder> builders = CalculateEvaluatorBuildersFromTokenEvaluation(evaluatedAttack);
+            List<TokenEvaluatorBuilder> builders = CalculateEvaluatorBuildersFromTokenEvaluation(evaluatedAttack, actor, target);
+
             foreach (TokenEvaluatorBuilder builder in builders)
             {
                 if (builder.MeetsElementRequirements(gameStateController))
@@ -24,15 +25,26 @@ namespace SFDDCards
                 }
             }
 
-            resultingDelta.EvaluateVariables(gameStateController);
+            resultingDelta.EvaluateVariables(gameStateController, actor, target);
 
             return resultingDelta;
         }
 
-        public static List<TokenEvaluatorBuilder> CalculateEvaluatorBuildersFromTokenEvaluation(IAttackTokenHolder evaluatedAttack)
+        public static List<TokenEvaluatorBuilder> CalculateEvaluatorBuildersFromTokenEvaluation(IAttackTokenHolder evaluatedAttack, ICombatantTarget actor = null, ICombatantTarget target = null)
         {
             List<TokenEvaluatorBuilder> builders = new List<TokenEvaluatorBuilder>();
             TokenEvaluatorBuilder builder = new TokenEvaluatorBuilder();
+
+            if (actor != null)
+            {
+                builder.User = actor;
+            }
+            
+            if (target != null)
+            {
+                builder.OriginalTarget = target;
+                builder.Target = new SpecificTargetEvaluatableValue(target);
+            }
 
             Dictionary<string, int> previousRequirements = new Dictionary<string, int>();
 

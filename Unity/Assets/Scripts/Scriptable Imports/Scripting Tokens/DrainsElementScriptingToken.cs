@@ -41,5 +41,10 @@ namespace SFDDCards.ScriptingTokens
         {
             return false;
         }
+
+        public bool RequiresTarget()
+        {
+            return false;
+        }
     }
 }

@@ -1,5 +1,5 @@
 {
 	"Id": "smitendraw",
 	"Name": "Smite n' Draw",
-	"EffectScript": "[GAINELEMENT: 1 CYBER][DAMAGE: 3][REQUIRESATLEASTELEMENT: 3 CYBER][DRAW: 1]"
+	"EffectScript": "[SETTARGET: FOE][GAINELEMENT: 1 CYBER][DAMAGE: 3][REQUIRESATLEASTELEMENT: 3 CYBER][DRAW: 1]"
 }
