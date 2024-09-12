@@ -19,13 +19,13 @@ namespace SFDDCards
                 {
                     if (entry.NumberOfCardsRelationType == TokenEvaluatorBuilder.NumberOfCardsRelation.Draw)
                     {
-                        gameStateController.CurrentCampaignContext.CampaignDeck.DealCards(entry.Intensity);
+                        gameStateController.CurrentCampaignContext.CurrentCombatContext.PlayerCombatDeck.DealCards(entry.Intensity);
                     }
                 }
 
                 foreach (ElementResourceChange change in entry.ElementResourceChanges)
                 {
-                    gameStateController.CurrentCombatContext.ApplyElementResourceChange(change);
+                    gameStateController.CurrentCampaignContext.CurrentCombatContext.ApplyElementResourceChange(change);
                 }
                 
                 entry.Target.ApplyDelta(entry);

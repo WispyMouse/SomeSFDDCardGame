@@ -32,7 +32,6 @@ namespace SFDDCards
         public Player CurrentPlayer { get; private set; } = null;
 
         public CampaignContext CurrentCampaignContext { get; private set; } = null;
-        public CombatContext CurrentCombatContext { get; private set; } = null;
 
         [SerializeReference]
         public GameplayUXController UXController;
@@ -76,10 +75,9 @@ namespace SFDDCards
             this.UXController.AddToLog("Proceeding to next room");
 
             this.CurrentNonCombatEncounterStatus = NonCombatEncounterStatus.NotInNonCombatEncounter;
-            this.CurrentCombatContext = null;
+            this.CurrentCampaignContext.LeaveCurrentCombat();
 
             this.SetGameCampaignNavigationState(GameplayCampaignState.EnteringRoom);
-            this.CurrentCampaignContext.CampaignDeck.ShuffleEntireDeck();
 
             if (this.CurrentRoom.BasedOnEncounter.IsShopEncounter)
             {
@@ -92,7 +90,7 @@ namespace SFDDCards
             {
                 this.SpawnEnemiesFromRoom();
                 this.AssignEnemyIntents();
-                this.CurrentCampaignContext.CampaignDeck.DealCards(5);
+                this.CurrentCampaignContext.CurrentCombatContext.PlayerCombatDeck.DealCards(5);
                 this.SetGameCampaignNavigationState(GameplayCampaignState.InCombat);
             }
         }
@@ -119,8 +117,7 @@ namespace SFDDCards
             // If the room is cleared, prepare to go to the next one by allowing for the button to be active.
             if (newState == GameplayCampaignState.ClearedRoom)
             {
-                this.CurrentCombatContext = null;
-                this.CurrentCampaignContext.CampaignDeck.ShuffleEntireDeck();
+                this.CurrentCampaignContext.LeaveCurrentCombat();
                 this.UXController.AddToLog($"Room is clear! Press Next Room to proceed to next encounter.");
             }
 
@@ -132,8 +129,8 @@ namespace SFDDCards
             if (newState == GameplayCampaignState.InCombat)
             {
                 this.UXController.AddToLog($"Combat start! Left click a card to select it, then left click an enemy to play it on them. Right click to deselect the currently selected card.");
-                this.CurrentCombatContext = new CombatContext();
-                this.CurrentCombatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.PlayerTurn);
+                this.CurrentCampaignContext.StartCombat();
+                this.CurrentCampaignContext.CurrentCombatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.PlayerTurn);
             }
 
             UpdateUXGlobalEvent.UpdateUXEvent?.Invoke();
@@ -165,7 +162,7 @@ namespace SFDDCards
                 return;
             }
 
-            if (this.CurrentCombatContext.CurrentTurnStatus != CombatContext.TurnStatus.PlayerTurn)
+            if (this.CurrentCampaignContext.CurrentCombatContext.CurrentTurnStatus != CombatContext.TurnStatus.PlayerTurn)
             {
                 this.UXController.CancelAllSelections();
                 return;
@@ -176,7 +173,7 @@ namespace SFDDCards
             List<TokenEvaluatorBuilder> builders = ScriptTokenEvaluator.CalculateEvaluatorBuildersFromTokenEvaluation(toPlay);
             foreach (TokenEvaluatorBuilder builder in builders)
             {
-                if (builder.MeetsElementRequirements(this.CurrentCombatContext))
+                if (builder.MeetsElementRequirements(this.CurrentCampaignContext.CurrentCombatContext))
                 {
                     anyPassingRequirements = true;
                     break;
@@ -192,7 +189,7 @@ namespace SFDDCards
 
             this.UXController.AddToLog($"Playing card {toPlay.Name} on {toPlayOn.Name}");
             this.UXController.CancelAllSelections();
-            this.CurrentCampaignContext.CampaignDeck.CardsCurrentlyInHand.Remove(toPlay);
+            this.CurrentCampaignContext.CurrentCombatContext.PlayerCombatDeck.CardsCurrentlyInHand.Remove(toPlay);
 
             this.UXController.AnimateCardPlay(
                 toPlay,
@@ -264,12 +261,12 @@ namespace SFDDCards
                 return;
             }
 
-            if (this.CurrentCombatContext.CurrentTurnStatus != CombatContext.TurnStatus.PlayerTurn)
+            if (this.CurrentCampaignContext.CurrentCombatContext.CurrentTurnStatus != CombatContext.TurnStatus.PlayerTurn)
             {
                 return;
             }
 
-            this.CurrentCombatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.EnemyTurn);
+            this.CurrentCampaignContext.CurrentCombatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.EnemyTurn);
 
             this.UXController.AnimateEnemyTurns(ContinueAfterEndTurnAnimationsFinished);
         }
@@ -278,10 +275,10 @@ namespace SFDDCards
         {
             this.CheckAllStateEffectsAndKnockouts();
             this.AssignEnemyIntents();
-            this.CurrentCampaignContext.CampaignDeck.DiscardHand();
-            this.CurrentCampaignContext.CampaignDeck.DealCards(5);
+            this.CurrentCampaignContext.CurrentCombatContext.PlayerCombatDeck.DiscardHand();
+            this.CurrentCampaignContext.CurrentCombatContext.PlayerCombatDeck.DealCards(5);
 
-            this.CurrentCombatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.PlayerTurn);
+            this.CurrentCampaignContext.CurrentCombatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.PlayerTurn);
         }
 
         public void EnemyActsOnIntent(Enemy toAct)

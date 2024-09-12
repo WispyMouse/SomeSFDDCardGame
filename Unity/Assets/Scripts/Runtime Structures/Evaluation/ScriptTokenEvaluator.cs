@@ -19,7 +19,7 @@ namespace SFDDCards
 
             foreach (TokenEvaluatorBuilder builder in builders)
             {
-                if (builder.MeetsElementRequirements(gameStateController.CurrentCombatContext))
+                if (builder.MeetsElementRequirements(gameStateController.CurrentCampaignContext.CurrentCombatContext))
                 {
                     resultingDelta.AppendDelta(builder.GetEffectiveDelta(gameStateController));
                 }

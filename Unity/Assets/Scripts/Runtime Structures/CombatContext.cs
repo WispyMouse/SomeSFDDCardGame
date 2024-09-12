@@ -6,14 +6,22 @@ namespace SFDDCards
 
     public class CombatContext
     {
-        public Dictionary<string, int> ElementResourceCounts { get; private set; } = new Dictionary<string, int>();
-        public TurnStatus CurrentTurnStatus { get; private set; } = TurnStatus.NotInCombat;
-
         public enum TurnStatus
         {
             NotInCombat = 0,
             PlayerTurn = 1,
             EnemyTurn = 2
+        }
+
+        public Dictionary<string, int> ElementResourceCounts { get; private set; } = new Dictionary<string, int>();
+        public TurnStatus CurrentTurnStatus { get; private set; } = TurnStatus.NotInCombat;
+
+        public readonly CombatDeck PlayerCombatDeck;
+
+        public CombatContext(CampaignContext fromCampaign)
+        {
+            this.PlayerCombatDeck = new CombatDeck(fromCampaign.CampaignDeck);
+            this.PlayerCombatDeck.ShuffleEntireDeck();
         }
 
         public bool MeetsElementRequirement(string element, int minimumCount)
