@@ -25,7 +25,7 @@ namespace SFDDCards
 
         public void CardSelected(DisplayedCardUX selectedCard)
         {
-            this.CentralGameStateControllerInstance.CurrentDeck.AddCardToDeck(selectedCard.RepresentedCard);
+            this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignDeck.AddCardToDeck(selectedCard.RepresentedCard);
             Destroy(selectedCard.gameObject);
         }
 

@@ -358,35 +358,40 @@ namespace SFDDCards
                 Destroy(this.PlayerHandTransform.GetChild(ii).gameObject);
             }
 
+            if (this.CentralGameStateControllerInstance.CurrentCampaignContext == null)
+            {
+                return;
+            }
+
             if (this.CentralGameStateControllerInstance.CurrentGameplayCampaignState != CentralGameStateController.GameplayCampaignState.InCombat)
             {
-                if (this.CentralGameStateControllerInstance.CurrentDeck == null)
+                if (this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignDeck == null)
                 {
                     this.CardsInDeckValue.text = "0";
                 }
                 else
                 {
-                    this.CardsInDeckValue.text = this.CentralGameStateControllerInstance.CurrentDeck.AllCardsInDeck.Count.ToString();
+                    this.CardsInDeckValue.text = this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignDeck.AllCardsInDeck.Count.ToString();
                 }
                 this.CardsInDiscardValue.text = "0";
                 ClearAllTargetableIndicators();
                 return;
             }
 
-            float leftStartingPoint = -CardFanDistance * (this.CentralGameStateControllerInstance.CurrentDeck.CardsCurrentlyInHand.Count - 1) / 2f;
+            float leftStartingPoint = -CardFanDistance * (this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignDeck.CardsCurrentlyInHand.Count - 1) / 2f;
 
-            for (int ii = 0; ii < this.CentralGameStateControllerInstance.CurrentDeck.CardsCurrentlyInHand.Count; ii++)
+            for (int ii = 0; ii < this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignDeck.CardsCurrentlyInHand.Count; ii++)
             {
                 Vector3 objectOffset = new Vector3(leftStartingPoint, 0, 0) + new Vector3(CardFanDistance, 0, 0) * ii;
                 CombatCardUX newCard = Instantiate(this.CardRepresentationPF, this.PlayerHandTransform);
                 newCard.transform.localPosition = objectOffset;
-                newCard.SetFromCard(this.CentralGameStateControllerInstance.CurrentDeck.CardsCurrentlyInHand[ii], SelectCurrentCard);
+                newCard.SetFromCard(this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignDeck.CardsCurrentlyInHand[ii], SelectCurrentCard);
             }
 
             if (this.CentralGameStateControllerInstance.CurrentGameplayCampaignState == CentralGameStateController.GameplayCampaignState.InCombat)
             {
-                this.CardsInDeckValue.text = this.CentralGameStateControllerInstance.CurrentDeck.CardsCurrentlyInDeck.Count.ToString();
-                this.CardsInDiscardValue.text = this.CentralGameStateControllerInstance.CurrentDeck.CardsCurrentlyInDiscard.Count.ToString();
+                this.CardsInDeckValue.text = this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignDeck.CardsCurrentlyInDeck.Count.ToString();
+                this.CardsInDiscardValue.text = this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignDeck.CardsCurrentlyInDiscard.Count.ToString();
             }
         }
 

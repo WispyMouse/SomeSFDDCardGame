@@ -29,9 +29,9 @@ namespace SFDDCards
         public NonCombatEncounterStatus CurrentNonCombatEncounterStatus { get; private set; } = NonCombatEncounterStatus.NotInNonCombatEncounter;
 
         public Room CurrentRoom { get; private set; } = null;
-        public Deck CurrentDeck { get; private set; } = null;
         public Player CurrentPlayer { get; private set; } = null;
 
+        public CampaignContext CurrentCampaignContext { get; private set; } = null;
         public CombatContext CurrentCombatContext { get; private set; } = null;
 
         [SerializeReference]
@@ -59,6 +59,7 @@ namespace SFDDCards
 
             this.UXController.Annihilate();
 
+            this.CurrentCampaignContext = new CampaignContext();
             this.AssignStartingDeck();
             
             this.CurrentPlayer = new Player(this.CurrentRunConfiguration.StartingMaximumHealth);
@@ -78,7 +79,7 @@ namespace SFDDCards
             this.CurrentCombatContext = null;
 
             this.SetGameCampaignNavigationState(GameplayCampaignState.EnteringRoom);
-            this.CurrentDeck.ShuffleEntireDeck();
+            this.CurrentCampaignContext.CampaignDeck.ShuffleEntireDeck();
 
             if (this.CurrentRoom.BasedOnEncounter.IsShopEncounter)
             {
@@ -91,7 +92,7 @@ namespace SFDDCards
             {
                 this.SpawnEnemiesFromRoom();
                 this.AssignEnemyIntents();
-                this.CurrentDeck.DealCards(5);
+                this.CurrentCampaignContext.CampaignDeck.DealCards(5);
                 this.SetGameCampaignNavigationState(GameplayCampaignState.InCombat);
             }
         }
@@ -101,11 +102,9 @@ namespace SFDDCards
         /// </summary>
         void AssignStartingDeck()
         {
-            this.CurrentDeck = new Deck();
-
             foreach (string startingCard in this.CurrentRunConfiguration.StartingDeck)
             {
-                this.CurrentDeck.AddCardToDeck(CardDatabase.GetModel(startingCard).Clone());
+                this.CurrentCampaignContext.CampaignDeck.AddCardToDeck(CardDatabase.GetModel(startingCard).Clone());
             }
         }
 
@@ -121,7 +120,7 @@ namespace SFDDCards
             if (newState == GameplayCampaignState.ClearedRoom)
             {
                 this.CurrentCombatContext = null;
-                this?.CurrentDeck.ShuffleEntireDeck();
+                this.CurrentCampaignContext.CampaignDeck.ShuffleEntireDeck();
                 this.UXController.AddToLog($"Room is clear! Press Next Room to proceed to next encounter.");
             }
 
@@ -193,7 +192,7 @@ namespace SFDDCards
 
             this.UXController.AddToLog($"Playing card {toPlay.Name} on {toPlayOn.Name}");
             this.UXController.CancelAllSelections();
-            this.CurrentDeck.CardsCurrentlyInHand.Remove(toPlay);
+            this.CurrentCampaignContext.CampaignDeck.CardsCurrentlyInHand.Remove(toPlay);
 
             this.UXController.AnimateCardPlay(
                 toPlay,
@@ -279,8 +278,8 @@ namespace SFDDCards
         {
             this.CheckAllStateEffectsAndKnockouts();
             this.AssignEnemyIntents();
-            this.CurrentDeck.DiscardHand();
-            this.CurrentDeck.DealCards(5);
+            this.CurrentCampaignContext.CampaignDeck.DiscardHand();
+            this.CurrentCampaignContext.CampaignDeck.DealCards(5);
 
             this.CurrentCombatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.PlayerTurn);
         }

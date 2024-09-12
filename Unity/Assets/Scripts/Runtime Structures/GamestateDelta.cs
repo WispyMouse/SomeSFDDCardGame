@@ -19,7 +19,7 @@ namespace SFDDCards
                 {
                     if (entry.NumberOfCardsRelationType == TokenEvaluatorBuilder.NumberOfCardsRelation.Draw)
                     {
-                        gameStateController.CurrentDeck.DealCards(entry.Intensity);
+                        gameStateController.CurrentCampaignContext.CampaignDeck.DealCards(entry.Intensity);
                     }
                 }
 
