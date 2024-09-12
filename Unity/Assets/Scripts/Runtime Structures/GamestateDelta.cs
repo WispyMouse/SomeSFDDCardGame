@@ -11,7 +11,7 @@ namespace SFDDCards
     {
         public List<DeltaEntry> DeltaEntries { get; set; } = new List<DeltaEntry>();
 
-        public void ApplyDelta(CentralGameStateController gameStateController, Action<string> logFunction)
+        public void ApplyDelta(CampaignContext campaignContext, Action<string> logFunction)
         {
             foreach (DeltaEntry entry in DeltaEntries)
             {
@@ -19,13 +19,13 @@ namespace SFDDCards
                 {
                     if (entry.NumberOfCardsRelationType == TokenEvaluatorBuilder.NumberOfCardsRelation.Draw)
                     {
-                        gameStateController.CurrentCampaignContext.CurrentCombatContext.PlayerCombatDeck.DealCards(entry.Intensity);
+                        campaignContext.CurrentCombatContext.PlayerCombatDeck.DealCards(entry.Intensity);
                     }
                 }
 
                 foreach (ElementResourceChange change in entry.ElementResourceChanges)
                 {
-                    gameStateController.CurrentCampaignContext.CurrentCombatContext.ApplyElementResourceChange(change);
+                    campaignContext.CurrentCombatContext.ApplyElementResourceChange(change);
                 }
                 
                 entry.Target.ApplyDelta(entry);

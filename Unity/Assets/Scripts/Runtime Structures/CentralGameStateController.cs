@@ -174,7 +174,7 @@ namespace SFDDCards
                 {
                     GamestateDelta delta = ScriptTokenEvaluator.CalculateDifferenceFromTokenEvaluation(this.CurrentCampaignContext, this.CurrentCampaignContext.CampaignPlayer, toPlay, toPlayOn);
                     this.UXController.AddToLog(delta.DescribeDelta());
-                    delta.ApplyDelta(this, this.UXController.AddToLog);
+                    delta.ApplyDelta(this.CurrentCampaignContext, this.UXController.AddToLog);
                     this.CheckAllStateEffectsAndKnockouts();
                 },
                 () =>
@@ -264,7 +264,7 @@ namespace SFDDCards
         {
             GamestateDelta delta = ScriptTokenEvaluator.CalculateDifferenceFromTokenEvaluation(this.CurrentCampaignContext, toAct, toAct.Intent, this.CurrentCampaignContext.CampaignPlayer);
             this.UXController.AddToLog(delta.DescribeDelta());
-            delta.ApplyDelta(this, this.UXController.AddToLog);
+            delta.ApplyDelta(this.CurrentCampaignContext, this.UXController.AddToLog);
         }
 
         IEnumerator BootupSequence()
