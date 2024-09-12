@@ -6,7 +6,15 @@ namespace SFDDCards
 
     public class CombatContext
     {
-        public Dictionary<string, int> ElementResourceCounts { get; private set; } = null;
+        public Dictionary<string, int> ElementResourceCounts { get; private set; } = new Dictionary<string, int>();
+        public TurnStatus CurrentTurnStatus { get; private set; } = TurnStatus.NotInCombat;
+
+        public enum TurnStatus
+        {
+            NotInCombat = 0,
+            PlayerTurn = 1,
+            EnemyTurn = 2
+        }
 
         public bool MeetsElementRequirement(string element, int minimumCount)
         {
@@ -54,6 +62,11 @@ namespace SFDDCards
             }
 
             UpdateUXGlobalEvent.UpdateUXEvent.Invoke();
+        }
+
+        public void EndCurrentTurnAndChangeTurn(TurnStatus toTurn)
+        {
+            this.CurrentTurnStatus = toTurn;
         }
     }
 }

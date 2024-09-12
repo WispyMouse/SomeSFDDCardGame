@@ -68,6 +68,10 @@ namespace SFDDCards
         public DisplayedCardUX CurrentSelectedCard { get; private set; } = null;
         public bool PlayerIsCurrentlyAnimating { get; private set; } = false;
 
+        private CentralGameStateController.GameplayCampaignState previousCampaignState { get; set; } = CentralGameStateController.GameplayCampaignState.NotStarted;
+        private CombatContext.TurnStatus previousCombatTurnState { get; set; } = CombatContext.TurnStatus.NotInCombat;
+        private CentralGameStateController.NonCombatEncounterStatus previousNonCombatEncounterState { get; set; } = CentralGameStateController.NonCombatEncounterStatus.NotInNonCombatEncounter;
+
         private void Awake()
         {
             this.Annihilate();
@@ -105,10 +109,21 @@ namespace SFDDCards
             this.LifeValue.text = $"{this.CentralGameStateControllerInstance.CurrentPlayer.CurrentHealth} / {this.CentralGameStateControllerInstance.CurrentPlayer.MaxHealth}";
         }
 
-        public void GameCampaignNavigationStateChanged(CentralGameStateController.GameplayCampaignState newState, CentralGameStateController.TurnStatus turnStatus, CentralGameStateController.NonCombatEncounterStatus noncombatStatus)
+        public void CheckAndActIfGameCampaignNavigationStateChanged()
         {
-            if (newState == CentralGameStateController.GameplayCampaignState.ClearedRoom
-                || (newState == CentralGameStateController.GameplayCampaignState.NonCombatEncounter && noncombatStatus == CentralGameStateController.NonCombatEncounterStatus.AllowedToLeave))
+            CentralGameStateController.GameplayCampaignState newCampaignState = this.CentralGameStateControllerInstance.CurrentGameplayCampaignState;
+            CentralGameStateController.NonCombatEncounterStatus newNonCombatState = this.CentralGameStateControllerInstance.CurrentNonCombatEncounterStatus;
+            CombatContext.TurnStatus newTurnState = this.CentralGameStateControllerInstance.CurrentCombatContext == null ? CombatContext.TurnStatus.NotInCombat : this.CentralGameStateControllerInstance.CurrentCombatContext.CurrentTurnStatus;
+
+            if (this.previousCampaignState == newCampaignState
+                && this.previousNonCombatEncounterState == newNonCombatState
+                && this.previousCombatTurnState == newTurnState)
+            {
+                return;
+            }
+
+            if (newCampaignState == CentralGameStateController.GameplayCampaignState.ClearedRoom
+                || (newCampaignState == CentralGameStateController.GameplayCampaignState.NonCombatEncounter && newNonCombatState == CentralGameStateController.NonCombatEncounterStatus.AllowedToLeave))
             {
                 this.GoNextRoomButton.SetActive(true);
             }
@@ -119,12 +134,12 @@ namespace SFDDCards
                 this.GoNextRoomButton.SetActive(false);
             }
             
-            if (newState == CentralGameStateController.GameplayCampaignState.InCombat)
+            if (newCampaignState == CentralGameStateController.GameplayCampaignState.InCombat)
             {
                 this.RewardsPanelUXInstance.gameObject.SetActive(false);
                 this.ShopPanelUXInstance.gameObject.SetActive(false);
 
-                if (turnStatus == CentralGameStateController.TurnStatus.PlayerTurn)
+                if (newTurnState == CombatContext.TurnStatus.PlayerTurn)
                 {
                     this.EndTurnButton.SetActive(true);
                 }
@@ -138,11 +153,14 @@ namespace SFDDCards
                 this.EndTurnButton.SetActive(false);
             }
 
-            this.UpdateUX();
+            this.previousCampaignState = newCampaignState;
+            this.previousNonCombatEncounterState = newNonCombatState;
+            this.previousCombatTurnState = newTurnState;
         }
 
         public void UpdateUX()
         {
+            this.CheckAndActIfGameCampaignNavigationStateChanged();
             this.SetElementValueLabel();
             this.UpdateEnemyUX();
             this.UpdatePlayerLabelValues();
@@ -152,12 +170,12 @@ namespace SFDDCards
 
         public void SelectTarget(ICombatantTarget toSelect)
         {
-            if (this.CurrentSelectedCard == null)
+            if (this.CurrentSelectedCard == null || this.CentralGameStateControllerInstance.CurrentCombatContext == null)
             {
                 return;
             }
 
-            if (this.CentralGameStateControllerInstance.CurrentTurnStatus != CentralGameStateController.TurnStatus.PlayerTurn)
+            if (this.CentralGameStateControllerInstance.CurrentCombatContext.CurrentTurnStatus != CombatContext.TurnStatus.PlayerTurn)
             {
                 return;
             }
@@ -184,7 +202,8 @@ namespace SFDDCards
 
         public void SelectCurrentCard(DisplayedCardUX toSelect)
         {
-            if (this.CentralGameStateControllerInstance.CurrentTurnStatus != CentralGameStateController.TurnStatus.PlayerTurn)
+            if (this.CentralGameStateControllerInstance.CurrentCombatContext == null ||
+                this.CentralGameStateControllerInstance.CurrentCombatContext.CurrentTurnStatus != CombatContext.TurnStatus.PlayerTurn)
             {
                 return;
             }
@@ -504,7 +523,7 @@ namespace SFDDCards
                 return;
             }
 
-            if (this.CentralGameStateControllerInstance.CurrentTurnStatus != CentralGameStateController.TurnStatus.PlayerTurn)
+            if (this.CentralGameStateControllerInstance.CurrentCombatContext.CurrentTurnStatus != CombatContext.TurnStatus.PlayerTurn)
             {
                 ClearAllTargetableIndicators();
                 return;

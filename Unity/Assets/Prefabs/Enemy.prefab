@@ -618,7 +618,7 @@ MonoBehaviour:
   Name: {fileID: 4979762536446494084}
   Health: {fileID: 3269529192816836327}
   EffectText: {fileID: 3071023965675290611}
-  OwnStatusEffectHolder: {fileID: 0}
+  OwnStatusEffectHolder: {fileID: 3285045025034412310}
 --- !u!1 &6975603675141098182
 GameObject:
   m_ObjectHideFlags: 0

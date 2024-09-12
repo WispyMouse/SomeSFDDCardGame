@@ -19,13 +19,6 @@ namespace SFDDCards
             NonCombatEncounter = 5
         }
 
-        public enum TurnStatus
-        {
-            NotInCombat = 0,
-            PlayerTurn = 1,
-            EnemyTurn = 2
-        }
-
         public enum NonCombatEncounterStatus
         {
             NotInNonCombatEncounter = 0,
@@ -33,7 +26,6 @@ namespace SFDDCards
         }
 
         public GameplayCampaignState CurrentGameplayCampaignState { get; private set; } = GameplayCampaignState.NotStarted;
-        public TurnStatus CurrentTurnStatus { get; private set; } = TurnStatus.NotInCombat;
         public NonCombatEncounterStatus CurrentNonCombatEncounterStatus { get; private set; } = NonCombatEncounterStatus.NotInNonCombatEncounter;
 
         public Room CurrentRoom { get; private set; } = null;
@@ -83,7 +75,7 @@ namespace SFDDCards
             this.UXController.AddToLog("Proceeding to next room");
 
             this.CurrentNonCombatEncounterStatus = NonCombatEncounterStatus.NotInNonCombatEncounter;
-            this.CurrentTurnStatus = TurnStatus.NotInCombat;
+            this.CurrentCombatContext = null;
 
             this.SetGameCampaignNavigationState(GameplayCampaignState.EnteringRoom);
             this.CurrentDeck.ShuffleEntireDeck();
@@ -128,7 +120,7 @@ namespace SFDDCards
             // If the room is cleared, prepare to go to the next one by allowing for the button to be active.
             if (newState == GameplayCampaignState.ClearedRoom)
             {
-                this.CurrentTurnStatus = TurnStatus.NotInCombat;
+                this.CurrentCombatContext = null;
                 this?.CurrentDeck.ShuffleEntireDeck();
                 this.UXController.AddToLog($"Room is clear! Press Next Room to proceed to next encounter.");
             }
@@ -141,10 +133,11 @@ namespace SFDDCards
             if (newState == GameplayCampaignState.InCombat)
             {
                 this.UXController.AddToLog($"Combat start! Left click a card to select it, then left click an enemy to play it on them. Right click to deselect the currently selected card.");
-                this.CurrentTurnStatus = TurnStatus.PlayerTurn;
+                this.CurrentCombatContext = new CombatContext();
+                this.CurrentCombatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.PlayerTurn);
             }
 
-            this.UXController.GameCampaignNavigationStateChanged(newState, this.CurrentTurnStatus, this.CurrentNonCombatEncounterStatus);
+            UpdateUXGlobalEvent.UpdateUXEvent?.Invoke();
         }
 
         void SpawnEnemiesFromRoom()
@@ -173,7 +166,7 @@ namespace SFDDCards
                 return;
             }
 
-            if (this.CurrentTurnStatus != TurnStatus.PlayerTurn)
+            if (this.CurrentCombatContext.CurrentTurnStatus != CombatContext.TurnStatus.PlayerTurn)
             {
                 this.UXController.CancelAllSelections();
                 return;
@@ -266,13 +259,18 @@ namespace SFDDCards
 
         public void EndTurn()
         {
-            if (this.CurrentTurnStatus != TurnStatus.PlayerTurn)
+            if (this.UXController.PlayerIsCurrentlyAnimating)
+            {
+                this.UXController.AddToLog($"Player is currently animating, please wait until finished. (Being able to play faster will be fixed soon!)");
+                return;
+            }
+
+            if (this.CurrentCombatContext.CurrentTurnStatus != CombatContext.TurnStatus.PlayerTurn)
             {
                 return;
             }
 
-            this.CurrentTurnStatus = TurnStatus.EnemyTurn;
-            this.UXController.GameCampaignNavigationStateChanged(this.CurrentGameplayCampaignState, this.CurrentTurnStatus, this.CurrentNonCombatEncounterStatus);
+            this.CurrentCombatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.EnemyTurn);
 
             this.UXController.AnimateEnemyTurns(ContinueAfterEndTurnAnimationsFinished);
         }
@@ -284,8 +282,7 @@ namespace SFDDCards
             this.CurrentDeck.DiscardHand();
             this.CurrentDeck.DealCards(5);
 
-            this.CurrentTurnStatus = TurnStatus.PlayerTurn;
-            this.UXController.GameCampaignNavigationStateChanged(this.CurrentGameplayCampaignState, this.CurrentTurnStatus, this.CurrentNonCombatEncounterStatus);
+            this.CurrentCombatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.PlayerTurn);
         }
 
         public void EnemyActsOnIntent(Enemy toAct)
