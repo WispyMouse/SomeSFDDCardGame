@@ -92,25 +92,11 @@ namespace SFDDCards
             return delta;
         }
 
-        public bool MeetsElementRequirements(CentralGameStateController gamestateController)
+        public bool MeetsElementRequirements(CombatContext combatContext)
         {
             foreach (string element in this.ElementRequirements.Keys)
             {
-                int requirementAmount = this.ElementRequirements[element];
-
-                if (requirementAmount <= 0)
-                {
-                    continue;
-                }
-
-                if (gamestateController.ElementResourceCounts.TryGetValue(element, out int amountHeld))
-                {
-                    if (amountHeld < requirementAmount)
-                    {
-                        return false;
-                    }
-                }
-                else
+                if (!combatContext.MeetsElementRequirement(element, this.ElementRequirements[element]))
                 {
                     return false;
                 }

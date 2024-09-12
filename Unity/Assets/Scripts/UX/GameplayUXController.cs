@@ -73,6 +73,16 @@ namespace SFDDCards
             this.Annihilate();
         }
 
+        private void OnEnable()
+        {
+            UpdateUXGlobalEvent.UpdateUXEvent.AddListener(UpdateUX);
+        }
+
+        private void OnDestroy()
+        {
+            UpdateUXGlobalEvent.UpdateUXEvent.RemoveListener(UpdateUX);
+        }
+
         private void Update()
         {
             if (Input.GetMouseButtonDown(1))
@@ -196,7 +206,7 @@ namespace SFDDCards
             List<TokenEvaluatorBuilder> builders = ScriptTokenEvaluator.CalculateEvaluatorBuildersFromTokenEvaluation(toSelect.RepresentedCard);
             foreach (TokenEvaluatorBuilder builder in builders)
             {
-                if (builder.MeetsElementRequirements(this.CentralGameStateControllerInstance))
+                if (builder.MeetsElementRequirements(this.CentralGameStateControllerInstance.CurrentCombatContext))
                 {
                     anyPassingRequirements = true;
                     break;
@@ -374,7 +384,8 @@ namespace SFDDCards
 
         private void SetElementValueLabel()
         {
-            if (this.CentralGameStateControllerInstance.ElementResourceCounts == null || this.CentralGameStateControllerInstance.ElementResourceCounts.Count == 0)
+            if (this.CentralGameStateControllerInstance.CurrentCombatContext == null ||
+                this.CentralGameStateControllerInstance.CurrentCombatContext.ElementResourceCounts == null || this.CentralGameStateControllerInstance.CurrentCombatContext.ElementResourceCounts.Count == 0)
             {
                 this.ElementsValue.text = "None";
                 return;
@@ -382,9 +393,9 @@ namespace SFDDCards
 
             string startingSeparator = "";
             StringBuilder compositeElements = new StringBuilder();
-            foreach (string element in this.CentralGameStateControllerInstance.ElementResourceCounts.Keys)
+            foreach (string element in this.CentralGameStateControllerInstance.CurrentCombatContext.ElementResourceCounts.Keys)
             {
-                compositeElements.Append($"{startingSeparator}{this.CentralGameStateControllerInstance.ElementResourceCounts[element]}\u00A0{element}");
+                compositeElements.Append($"{startingSeparator}{this.CentralGameStateControllerInstance.CurrentCombatContext.ElementResourceCounts[element]}\u00A0{element}");
                 startingSeparator = ", ";
             }
 

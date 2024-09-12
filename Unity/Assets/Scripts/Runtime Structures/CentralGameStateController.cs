@@ -39,7 +39,8 @@ namespace SFDDCards
         public Room CurrentRoom { get; private set; } = null;
         public Deck CurrentDeck { get; private set; } = null;
         public Player CurrentPlayer { get; private set; } = null;
-        public Dictionary<string, int> ElementResourceCounts { get; private set; } = null;
+
+        public CombatContext CurrentCombatContext { get; private set; } = null;
 
         [SerializeReference]
         public GameplayUXController UXController;
@@ -66,7 +67,6 @@ namespace SFDDCards
 
             this.UXController.Annihilate();
 
-            this.ElementResourceCounts = new Dictionary<string, int>();
             this.AssignStartingDeck();
             
             this.CurrentPlayer = new Player(this.CurrentRunConfiguration.StartingMaximumHealth);
@@ -86,7 +86,6 @@ namespace SFDDCards
             this.CurrentTurnStatus = TurnStatus.NotInCombat;
 
             this.SetGameCampaignNavigationState(GameplayCampaignState.EnteringRoom);
-            this.ElementResourceCounts.Clear();
             this.CurrentDeck.ShuffleEntireDeck();
 
             if (this.CurrentRoom.BasedOnEncounter.IsShopEncounter)
@@ -185,7 +184,7 @@ namespace SFDDCards
             List<TokenEvaluatorBuilder> builders = ScriptTokenEvaluator.CalculateEvaluatorBuildersFromTokenEvaluation(toPlay);
             foreach (TokenEvaluatorBuilder builder in builders)
             {
-                if (builder.MeetsElementRequirements(this))
+                if (builder.MeetsElementRequirements(this.CurrentCombatContext))
                 {
                     anyPassingRequirements = true;
                     break;
@@ -434,32 +433,6 @@ namespace SFDDCards
         public void PlayerModelClicked()
         {
             this.UXController.SelectTarget(this.CurrentPlayer);
-        }
-
-        public void ApplyElementResourceChange(ElementResourceChange toChange)
-        {
-            if (this.ElementResourceCounts.TryGetValue(toChange.Element, out int currentAmount))
-            {
-                int newAmount = Mathf.Max(0, currentAmount + toChange.GainOrLoss);
-
-                if (newAmount > 0)
-                {
-                    this.ElementResourceCounts[toChange.Element] = newAmount;
-                }
-                else
-                {
-                    this.ElementResourceCounts.Remove(toChange.Element);
-                }
-            }
-            else
-            {
-                if (toChange.GainOrLoss > 0)
-                {
-                    this.ElementResourceCounts.Add(toChange.Element, toChange.GainOrLoss);
-                }
-            }
-
-            this.UXController.UpdateUX();
         }
 
         void AssignEnemyIntents()
