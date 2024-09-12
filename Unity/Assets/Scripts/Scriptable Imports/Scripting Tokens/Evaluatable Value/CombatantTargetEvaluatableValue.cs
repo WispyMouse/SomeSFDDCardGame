@@ -7,6 +7,6 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
     {
         public abstract string DescribeEvaluation();
 
-        public abstract bool TryEvaluateValue(CentralGameStateController gameStatecontroller, TokenEvaluatorBuilder currentBuilder, out ICombatantTarget evaluatedValue);
+        public abstract bool TryEvaluateValue(CampaignContext campaignContext, TokenEvaluatorBuilder currentBuilder, out ICombatantTarget evaluatedValue);
     }
 }

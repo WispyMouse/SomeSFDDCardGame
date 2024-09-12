@@ -7,9 +7,9 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
             return "Foe";
         }
 
-        public override bool TryEvaluateValue(CentralGameStateController gameStateController, TokenEvaluatorBuilder currentBuilder, out ICombatantTarget evaluatedValue)
+        public override bool TryEvaluateValue(CampaignContext campaignContext, TokenEvaluatorBuilder currentBuilder, out ICombatantTarget evaluatedValue)
         {
-            if (TryGetFoe(gameStateController, currentBuilder.User, out evaluatedValue))
+            if (TryGetFoe(campaignContext, currentBuilder.User, out evaluatedValue))
             {
                 return true;
             }
@@ -18,20 +18,20 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
             return false;
         }
 
-        private bool TryGetFoe(CentralGameStateController gameStateController, ICombatantTarget user, out ICombatantTarget foe)
+        private bool TryGetFoe(CampaignContext campaignContext, ICombatantTarget user, out ICombatantTarget foe)
         {
             if (user is Enemy)
             {
-                foe = gameStateController.CurrentPlayer;
+                foe = campaignContext.CampaignPlayer;
                 return true;
             }
 
             if (user is Player)
             {
-                if (gameStateController.CurrentCampaignContext.CurrentCombatContext.Enemies.Count > 0)
+                if (campaignContext.CurrentCombatContext.Enemies.Count > 0)
                 {
-                    int randomIndex = UnityEngine.Random.Range(0, gameStateController.CurrentCampaignContext.CurrentCombatContext.Enemies.Count);
-                    foe = gameStateController.CurrentCampaignContext.CurrentCombatContext.Enemies[randomIndex];
+                    int randomIndex = UnityEngine.Random.Range(0, campaignContext.CurrentCombatContext.Enemies.Count);
+                    foe = campaignContext.CurrentCombatContext.Enemies[randomIndex];
                     return true;
                 }
             }

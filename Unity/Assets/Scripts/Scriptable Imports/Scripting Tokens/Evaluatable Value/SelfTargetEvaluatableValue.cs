@@ -7,7 +7,7 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
             return "Self";
         }
 
-        public override bool TryEvaluateValue(CentralGameStateController gameStatecontroller, TokenEvaluatorBuilder currentBuilder, out ICombatantTarget evaluatedValue)
+        public override bool TryEvaluateValue(CampaignContext campaignContext, TokenEvaluatorBuilder currentBuilder, out ICombatantTarget evaluatedValue)
         {
             evaluatedValue = currentBuilder.User;
             return true;

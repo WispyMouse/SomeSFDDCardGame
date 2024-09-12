@@ -9,8 +9,6 @@ namespace SFDDCards
 
     public class CentralGameStateController : MonoBehaviour
     {
-        public Player CurrentPlayer { get; private set; } = null;
-
         public CampaignContext CurrentCampaignContext { get; private set; } = null;
 
         [SerializeReference]
@@ -38,10 +36,9 @@ namespace SFDDCards
 
             this.UXController.Annihilate();
 
-            this.CurrentCampaignContext = new CampaignContext();
+            this.CurrentCampaignContext = new CampaignContext(this.CurrentRunConfiguration);
             this.AssignStartingDeck();
             
-            this.CurrentPlayer = new Player(this.CurrentRunConfiguration.StartingMaximumHealth);
             this.UXController.PlacePlayerCharacter();
 
             this.SetGameCampaignNavigationState(CampaignContext.GameplayCampaignState.ClearedRoom);
@@ -175,7 +172,7 @@ namespace SFDDCards
                 toPlayOn,
                 () =>
                 {
-                    GamestateDelta delta = ScriptTokenEvaluator.CalculateDifferenceFromTokenEvaluation(this, this.CurrentPlayer, toPlay, toPlayOn);
+                    GamestateDelta delta = ScriptTokenEvaluator.CalculateDifferenceFromTokenEvaluation(this.CurrentCampaignContext, this.CurrentCampaignContext.CampaignPlayer, toPlay, toPlayOn);
                     this.UXController.AddToLog(delta.DescribeDelta());
                     delta.ApplyDelta(this, this.UXController.AddToLog);
                     this.CheckAllStateEffectsAndKnockouts();
@@ -201,7 +198,7 @@ namespace SFDDCards
                 }
             }
 
-            if (this.CurrentPlayer.CurrentHealth <= 0)
+            if (this.CurrentCampaignContext.CampaignPlayer.CurrentHealth <= 0)
             {
                 this.UXController.AddToLog($"The player has run out of health! This run is over.");
                 this.SetGameCampaignNavigationState(CampaignContext.GameplayCampaignState.Defeat);
@@ -265,7 +262,7 @@ namespace SFDDCards
 
         public void EnemyActsOnIntent(Enemy toAct)
         {
-            GamestateDelta delta = ScriptTokenEvaluator.CalculateDifferenceFromTokenEvaluation(this, toAct, toAct.Intent, this.CurrentPlayer);
+            GamestateDelta delta = ScriptTokenEvaluator.CalculateDifferenceFromTokenEvaluation(this.CurrentCampaignContext, toAct, toAct.Intent, this.CurrentCampaignContext.CampaignPlayer);
             this.UXController.AddToLog(delta.DescribeDelta());
             delta.ApplyDelta(this, this.UXController.AddToLog);
         }
@@ -407,7 +404,7 @@ namespace SFDDCards
 
         public void PlayerModelClicked()
         {
-            this.UXController.SelectTarget(this.CurrentPlayer);
+            this.UXController.SelectTarget(this.CurrentCampaignContext.CampaignPlayer);
         }
 
         void AssignEnemyIntents()
@@ -421,7 +418,7 @@ namespace SFDDCards
                 List<ICombatantTarget> consideredTargets = new List<ICombatantTarget>()
                 {
                     curEnemy,
-                    this.CurrentPlayer
+                    this.CurrentCampaignContext.CampaignPlayer
                 };
 
                 List<ICombatantTarget> filteredTargets = ScriptTokenEvaluator.GetTargetsThatCanBeTargeted(curEnemy, curEnemy.Intent, consideredTargets);

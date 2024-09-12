@@ -104,9 +104,9 @@ namespace SFDDCards
             }
 
             this.PlayerUXInstance = Instantiate(this.PlayerRepresentationPF, this.PlayerRepresentationTransform);
-            this.PlayerUXInstance.SetFromPlayer(CentralGameStateControllerInstance.CurrentPlayer);
+            this.PlayerUXInstance.SetFromPlayer(this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignPlayer);
 
-            this.LifeValue.text = $"{this.CentralGameStateControllerInstance.CurrentPlayer.CurrentHealth} / {this.CentralGameStateControllerInstance.CurrentPlayer.MaxHealth}";
+            this.LifeValue.text = $"{this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignPlayer.CurrentHealth} / {this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignPlayer.MaxHealth}";
         }
 
         public void CheckAndActIfGameCampaignNavigationStateChanged()
@@ -402,13 +402,13 @@ namespace SFDDCards
 
         void UpdatePlayerLabelValues()
         {
-            if (this.CentralGameStateControllerInstance.CurrentPlayer == null)
+            if (this.CentralGameStateControllerInstance?.CurrentCampaignContext?.CampaignPlayer == null)
             {
                 return;
             }
 
-            this.LifeValue.text = this.CentralGameStateControllerInstance.CurrentPlayer.CurrentHealth.ToString();
-            this.PlayerStatusEffectUXHolderInstance.SetStatusEffects(this.CentralGameStateControllerInstance.CurrentPlayer.AppliedStatusEffects);
+            this.LifeValue.text = this.CentralGameStateControllerInstance?.CurrentCampaignContext?.CampaignPlayer.CurrentHealth.ToString();
+            this.PlayerStatusEffectUXHolderInstance.SetStatusEffects(this.CentralGameStateControllerInstance?.CurrentCampaignContext?.CampaignPlayer.AppliedStatusEffects);
         }
 
         private void SetElementValueLabel()
@@ -452,14 +452,14 @@ namespace SFDDCards
             this.ClearAllTargetableIndicators();
 
             List<ICombatantTarget> possibleTargets = new List<ICombatantTarget>();
-            possibleTargets.Add(this.CentralGameStateControllerInstance.CurrentPlayer);
+            possibleTargets.Add(this.CentralGameStateControllerInstance?.CurrentCampaignContext?.CampaignPlayer);
 
             foreach (Enemy curEnemy in this.spawnedEnemiesLookup.Keys)
             {
                 possibleTargets.Add(curEnemy);
             }
 
-            List<ICombatantTarget> remainingTargets = ScriptTokenEvaluator.GetTargetsThatCanBeTargeted(this.CentralGameStateControllerInstance.CurrentPlayer, toTarget, possibleTargets);
+            List<ICombatantTarget> remainingTargets = ScriptTokenEvaluator.GetTargetsThatCanBeTargeted(this.CentralGameStateControllerInstance?.CurrentCampaignContext?.CampaignPlayer, toTarget, possibleTargets);
 
             if (remainingTargets.Count > 0)
             {

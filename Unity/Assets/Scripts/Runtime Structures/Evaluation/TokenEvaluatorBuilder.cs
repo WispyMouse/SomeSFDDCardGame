@@ -43,18 +43,18 @@ namespace SFDDCards
 
         public StatusEffect StatusEffect;
 
-        public GamestateDelta GetEffectiveDelta(CentralGameStateController gameStateController)
+        public GamestateDelta GetEffectiveDelta(CampaignContext campaignContext)
         {
             GamestateDelta delta = new GamestateDelta();
 
-            if (!this.Intensity.TryEvaluateValue(gameStateController, this, out int evaluatedIntensity))
+            if (!this.Intensity.TryEvaluateValue(campaignContext, this, out int evaluatedIntensity))
             {
                 Debug.Log($"{nameof(TokenEvaluatorBuilder)} ({nameof(GetEffectiveDelta)}): Failed to evaluate {nameof(this.Intensity)}. Cannot have a delta.");
                 return delta;
             }
 
             ICombatantTarget foundTarget = null;
-            this.Target.TryEvaluateValue(gameStateController, this, out foundTarget);
+            this.Target.TryEvaluateValue(campaignContext, this, out foundTarget);
 
             delta.DeltaEntries.Add(new DeltaEntry()
             {

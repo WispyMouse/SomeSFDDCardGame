@@ -11,7 +11,7 @@ namespace SFDDCards
 
     public static class ScriptTokenEvaluator
     {
-        public static GamestateDelta CalculateDifferenceFromTokenEvaluation(CentralGameStateController gameStateController, ICombatantTarget actor, IAttackTokenHolder evaluatedAttack, ICombatantTarget target)
+        public static GamestateDelta CalculateDifferenceFromTokenEvaluation(CampaignContext campaignContext, ICombatantTarget actor, IAttackTokenHolder evaluatedAttack, ICombatantTarget target)
         {
             GamestateDelta resultingDelta = new GamestateDelta();
 
@@ -19,13 +19,13 @@ namespace SFDDCards
 
             foreach (TokenEvaluatorBuilder builder in builders)
             {
-                if (builder.MeetsElementRequirements(gameStateController.CurrentCampaignContext.CurrentCombatContext))
+                if (builder.MeetsElementRequirements(campaignContext.CurrentCombatContext))
                 {
-                    resultingDelta.AppendDelta(builder.GetEffectiveDelta(gameStateController));
+                    resultingDelta.AppendDelta(builder.GetEffectiveDelta(campaignContext));
                 }
             }
 
-            resultingDelta.EvaluateVariables(gameStateController, actor, target);
+            resultingDelta.EvaluateVariables(campaignContext, actor, target);
 
             return resultingDelta;
         }

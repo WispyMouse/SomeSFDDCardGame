@@ -79,6 +79,8 @@ namespace SFDDCards
         public void EndCurrentTurnAndChangeTurn(TurnStatus toTurn)
         {
             this.CurrentTurnStatus = toTurn;
+
+            UpdateUXGlobalEvent.UpdateUXEvent.Invoke();
         }
     }
 }

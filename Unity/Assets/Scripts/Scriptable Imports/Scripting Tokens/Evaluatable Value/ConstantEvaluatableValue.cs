@@ -9,7 +9,7 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
             this.ConstantValue = inputValue;
         }
 
-        public bool TryEvaluateValue(CentralGameStateController gameStatecontroller, TokenEvaluatorBuilder currentBuilder, out T evaluatedValue)
+        public bool TryEvaluateValue(CampaignContext campaignContext, TokenEvaluatorBuilder currentBuilder, out T evaluatedValue)
         {
             evaluatedValue = this.ConstantValue;
             return true;

@@ -71,7 +71,7 @@ namespace SFDDCards
             return stringLog.ToString();
         }
 
-        public void EvaluateVariables(CentralGameStateController controller, ICombatantTarget user, ICombatantTarget target)
+        public void EvaluateVariables(CampaignContext campaignContext, ICombatantTarget user, ICombatantTarget target)
         {
             for (int ii = 0; ii < this.DeltaEntries.Count; ii++)
             {
@@ -82,13 +82,13 @@ namespace SFDDCards
                 
                 if (curEntry.AbstractTarget != null)
                 {
-                    curEntry.AbstractTarget.TryEvaluateValue(controller, curEntry.MadeFromBuilder, out curEntry.Target);
+                    curEntry.AbstractTarget.TryEvaluateValue(campaignContext, curEntry.MadeFromBuilder, out curEntry.Target);
                     curEntry.AbstractTarget = null;
                 }
 
                 if (curEntry.AbstractIntensity != null)
                 {
-                    curEntry.AbstractIntensity.TryEvaluateValue(controller, curEntry.MadeFromBuilder, out curEntry.Intensity);
+                    curEntry.AbstractIntensity.TryEvaluateValue(campaignContext, curEntry.MadeFromBuilder, out curEntry.Intensity);
                     curEntry.AbstractIntensity = null;
                 }
             }

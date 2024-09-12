@@ -25,9 +25,15 @@ namespace SFDDCards
         public readonly Deck CampaignDeck = new Deck();
         public CombatContext CurrentCombatContext { get; private set; } = null;
         public Encounter CurrentEncounter { get; private set; } = null;
+        public readonly Player CampaignPlayer;
 
         public GameplayCampaignState CurrentGameplayCampaignState { get; private set; } = GameplayCampaignState.NotStarted;
         public NonCombatEncounterStatus CurrentNonCombatEncounterStatus { get; private set; } = NonCombatEncounterStatus.NotInNonCombatEncounter;
+
+        public CampaignContext(RunConfiguration runConfig)
+        {
+            this.CampaignPlayer = new Player(runConfig.StartingMaximumHealth);
+        }
 
         public void AddCardToDeck(Card toAdd)
         {
