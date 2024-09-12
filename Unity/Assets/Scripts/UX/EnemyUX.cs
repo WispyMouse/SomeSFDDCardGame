@@ -14,21 +14,26 @@ namespace SFDDCards
 
         public bool IsNotDestroyed => this != null && this?.gameObject != null;
 
-        [SerializeField]
+        [SerializeReference]
         private TMPro.TMP_Text Name;
 
-        [SerializeField]
+        [SerializeReference]
         private TMPro.TMP_Text Health;
 
-        [SerializeField]
+        [SerializeReference]
         private TMPro.TMP_Text EffectText;
 
+        [SerializeReference]
+        private EnemyStatusEffectUXHolder OwnStatusEffectHolder;
         public void SetFromEnemy(Enemy toSet, CentralGameStateController centralGameStateController)
         {
             this.RepresentedEnemy = toSet;
             this.Name.text = toSet.BaseModel.Name;
             this.RepresentedEnemy.UXPositionalTransform = this.transform;
+
             this.ClearEffectText();
+            this.OwnStatusEffectHolder.Annihilate();
+
             this.UpdateUX(centralGameStateController);
         }
 
@@ -36,6 +41,8 @@ namespace SFDDCards
         {
             this.Health.text = $"{this.RepresentedEnemy.CurrentHealth} / {this.RepresentedEnemy.BaseModel.MaximumHealth}";
             this.UpdateIntent(centralGameStateController);
+
+            this.OwnStatusEffectHolder.SetStatusEffects(this.RepresentedEnemy.AppliedStatusEffects);
         }
 
         public void SetEffectText(string toText)
