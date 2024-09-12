@@ -18,8 +18,12 @@ namespace SFDDCards
 
         public readonly CombatDeck PlayerCombatDeck;
 
-        public CombatContext(CampaignContext fromCampaign)
+        public readonly Encounter BasedOnEncounter;
+        public readonly List<Enemy> Enemies = new List<Enemy>();
+
+        public CombatContext(CampaignContext fromCampaign, Encounter basedOnEncounter)
         {
+            this.BasedOnEncounter = basedOnEncounter;
             this.PlayerCombatDeck = new CombatDeck(fromCampaign.CampaignDeck);
             this.PlayerCombatDeck.ShuffleEntireDeck();
         }

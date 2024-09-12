@@ -9,7 +9,6 @@ namespace SFDDCards
 
     public class CentralGameStateController : MonoBehaviour
     {
-        public Room CurrentRoom { get; private set; } = null;
         public Player CurrentPlayer { get; private set; } = null;
 
         public CampaignContext CurrentCampaignContext { get; private set; } = null;
@@ -58,7 +57,10 @@ namespace SFDDCards
             this.CurrentCampaignContext.LeaveCurrentCombat();
             this.SetGameCampaignNavigationState(CampaignContext.GameplayCampaignState.EnteringRoom);
 
-            if (this.CurrentRoom.BasedOnEncounter.IsShopEncounter)
+            Encounter newEncounter = EncounterDatabase.GetRandomEncounter();
+            this.CurrentCampaignContext.StartNextRoomFromEncounter(newEncounter);
+
+            if (newEncounter.IsShopEncounter)
             {
                 List<Card> cardsToAward = CardDatabase.GetRandomCards(this.CurrentRunConfiguration.CardsInShop);
                 this.UXController.ShowShopPanel(cardsToAward.ToArray());
@@ -99,15 +101,9 @@ namespace SFDDCards
                 this.UXController.AddToLog($"Room is clear! Press Next Room to proceed to next encounter.");
             }
 
-            if (newState == CampaignContext.GameplayCampaignState.EnteringRoom)
-            {
-                this.CurrentRoom = new Room(EncounterDatabase.GetRandomEncounter(this.CurrentRoom?.BasedOnEncounter));
-            }
-
             if (newState == CampaignContext.GameplayCampaignState.InCombat)
             {
                 this.UXController.AddToLog($"Combat start! Left click a card to select it, then left click an enemy to play it on them. Right click to deselect the currently selected card.");
-                this.CurrentCampaignContext.StartCombat();
                 this.CurrentCampaignContext.CurrentCombatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.PlayerTurn);
             }
 
@@ -116,16 +112,21 @@ namespace SFDDCards
 
         void SpawnEnemiesFromRoom()
         {
-            if (this.CurrentRoom == null)
+            if (this.CurrentCampaignContext.CurrentCombatContext == null
+                || this.CurrentCampaignContext.CurrentCombatContext.BasedOnEncounter == null)
             {
                 Debug.LogException(new System.NullReferenceException($"The current room is null, and cannot have enemies added to it."));
                 return;
             }
 
-            foreach (Enemy curEnemy in this.CurrentRoom.Enemies)
+            foreach (string curEnemyId in this.CurrentCampaignContext.CurrentCombatContext.BasedOnEncounter.EnemiesInEncounterById)
             {
-                this.UXController.AddEnemy(curEnemy);
-                this.UXController.AddToLog($"Enemy {curEnemy.Name} spawned");
+                EnemyModel curEnemyModel = EnemyDatabase.GetModel(curEnemyId);
+                Enemy enemyInstance = new Enemy(curEnemyModel);
+                this.CurrentCampaignContext.CurrentCombatContext.Enemies.Add(enemyInstance);
+
+                this.UXController.AddEnemy(enemyInstance);
+                this.UXController.AddToLog($"Enemy {enemyInstance.Name} spawned");
             }
         }
 
@@ -187,13 +188,16 @@ namespace SFDDCards
 
         void CheckAllStateEffectsAndKnockouts()
         {
-            List<Enemy> enemies = new List<Enemy>(this.CurrentRoom.Enemies);
-            foreach (Enemy curEnemy in enemies)
+            if (this.CurrentCampaignContext?.CurrentCombatContext?.Enemies != null)
             {
-                if (curEnemy.ShouldBecomeDefeated)
+                List<Enemy> enemies = new List<Enemy>(this.CurrentCampaignContext.CurrentCombatContext.Enemies);
+                foreach (Enemy curEnemy in enemies)
                 {
-                    this.UXController.AddToLog($"{curEnemy.Name} has been defeated!");
-                    this.RemoveEnemy(curEnemy);
+                    if (curEnemy.ShouldBecomeDefeated)
+                    {
+                        this.UXController.AddToLog($"{curEnemy.Name} has been defeated!");
+                        this.RemoveEnemy(curEnemy);
+                    }
                 }
             }
 
@@ -208,7 +212,7 @@ namespace SFDDCards
             {
                 // 
             }
-            else if (this.CurrentRoom.Enemies.Count == 0)
+            else if (this.CurrentCampaignContext.CurrentCombatContext.Enemies.Count == 0)
             {
                 this.UXController.AddToLog($"There are no more enemies!");
                 this.SetupClearedRoomAndPresentAwards();
@@ -228,7 +232,7 @@ namespace SFDDCards
         void RemoveEnemy(Enemy toRemove)
         {
             this.UXController.RemoveEnemy(toRemove);
-            this.CurrentRoom.Enemies.Remove(toRemove);
+            this.CurrentCampaignContext.CurrentCombatContext.Enemies.Remove(toRemove);
         }
 
         public void EndTurn()
@@ -408,7 +412,7 @@ namespace SFDDCards
 
         void AssignEnemyIntents()
         {
-            foreach (Enemy curEnemy in this.CurrentRoom.Enemies)
+            foreach (Enemy curEnemy in this.CurrentCampaignContext.CurrentCombatContext.Enemies)
             {
                 int randomAttackIndex = UnityEngine.Random.Range(0, curEnemy.BaseModel.Attacks.Count);
                 EnemyAttack randomAttack = curEnemy.BaseModel.Attacks[randomAttackIndex];

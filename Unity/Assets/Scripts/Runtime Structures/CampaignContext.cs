@@ -24,6 +24,7 @@ namespace SFDDCards
 
         public readonly Deck CampaignDeck = new Deck();
         public CombatContext CurrentCombatContext { get; private set; } = null;
+        public Encounter CurrentEncounter { get; private set; } = null;
 
         public GameplayCampaignState CurrentGameplayCampaignState { get; private set; } = GameplayCampaignState.NotStarted;
         public NonCombatEncounterStatus CurrentNonCombatEncounterStatus { get; private set; } = NonCombatEncounterStatus.NotInNonCombatEncounter;
@@ -38,9 +39,19 @@ namespace SFDDCards
             this.CurrentCombatContext = null;
         }
 
-        public void StartCombat()
+        public void StartNextRoomFromEncounter(Encounter basedOn)
         {
-            this.CurrentCombatContext = new CombatContext(this);
+            this.CurrentEncounter = basedOn;
+
+            if (basedOn.IsShopEncounter)
+            {
+                this.LeaveCurrentCombat();
+                this.CurrentGameplayCampaignState = GameplayCampaignState.NonCombatEncounter;
+                this.CurrentNonCombatEncounterStatus = NonCombatEncounterStatus.AllowedToLeave;
+                return;
+            }
+
+            this.CurrentCombatContext = new CombatContext(this, basedOn);
         }
 
         public void SetCampaignState(GameplayCampaignState toState, NonCombatEncounterStatus nonCombatState = NonCombatEncounterStatus.NotInNonCombatEncounter)

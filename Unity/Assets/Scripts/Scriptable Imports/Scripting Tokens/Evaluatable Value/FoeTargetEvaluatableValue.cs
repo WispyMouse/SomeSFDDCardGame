@@ -28,10 +28,10 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
 
             if (user is Player)
             {
-                if (gameStateController.CurrentRoom.Enemies.Count > 0)
+                if (gameStateController.CurrentCampaignContext.CurrentCombatContext.Enemies.Count > 0)
                 {
-                    int randomIndex = UnityEngine.Random.Range(0, gameStateController.CurrentRoom.Enemies.Count);
-                    foe = gameStateController.CurrentRoom.Enemies[randomIndex];
+                    int randomIndex = UnityEngine.Random.Range(0, gameStateController.CurrentCampaignContext.CurrentCombatContext.Enemies.Count);
+                    foe = gameStateController.CurrentCampaignContext.CurrentCombatContext.Enemies[randomIndex];
                     return true;
                 }
             }

@@ -111,6 +111,11 @@ namespace SFDDCards
 
         public void CheckAndActIfGameCampaignNavigationStateChanged()
         {
+            if (this.CentralGameStateControllerInstance.CurrentCampaignContext == null)
+            {
+                return;
+            }
+
             CampaignContext.GameplayCampaignState newCampaignState = this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentGameplayCampaignState;
             CampaignContext.NonCombatEncounterStatus newNonCombatState = this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentNonCombatEncounterStatus;
             CombatContext.TurnStatus newTurnState = this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext == null ? CombatContext.TurnStatus.NotInCombat : this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.CurrentTurnStatus;
@@ -293,7 +298,7 @@ namespace SFDDCards
 
         private IEnumerator AnimateEnemyTurnsInternal(Action continuationAction)
         {
-            foreach (Enemy curEnemy in this.CentralGameStateControllerInstance.CurrentRoom.Enemies)
+            foreach (Enemy curEnemy in this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.Enemies)
             {
                 yield return AnimateAction(this.spawnedEnemiesLookup[curEnemy], curEnemy.Intent, curEnemy.Intent.PrecalculatedTarget, () => { this.CentralGameStateControllerInstance.EnemyActsOnIntent(curEnemy); });
             }
@@ -474,12 +479,12 @@ namespace SFDDCards
 
         void UpdateEnemyUX()
         {
-            if (this.CentralGameStateControllerInstance.CurrentRoom == null || this.CentralGameStateControllerInstance.CurrentRoom.Enemies.Count == 0)
+            if (this.CentralGameStateControllerInstance?.CurrentCampaignContext?.CurrentCombatContext?.Enemies == null || this.CentralGameStateControllerInstance?.CurrentCampaignContext?.CurrentCombatContext?.Enemies?.Count == 0)
             {
                 return;
             }
 
-            foreach (Enemy curEnemy in this.CentralGameStateControllerInstance.CurrentRoom.Enemies)
+            foreach (Enemy curEnemy in this.CentralGameStateControllerInstance?.CurrentCampaignContext?.CurrentCombatContext?.Enemies)
             {
                 if (!this.spawnedEnemiesLookup.TryGetValue(curEnemy, out EnemyUX value))
                 {
@@ -523,6 +528,12 @@ namespace SFDDCards
 
         void RepresentTargetables()
         {
+            if (this.CentralGameStateControllerInstance.CurrentCampaignContext?.CurrentCombatContext == null)
+            {
+                ClearAllTargetableIndicators();
+                return;
+            }
+
             if (this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentGameplayCampaignState != CampaignContext.GameplayCampaignState.InCombat)
             {
                 ClearAllTargetableIndicators();
