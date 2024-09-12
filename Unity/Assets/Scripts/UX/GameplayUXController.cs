@@ -13,6 +13,8 @@ namespace SFDDCards
         private CentralGameStateController CentralGameStateControllerInstance;
         [SerializeReference]
         private AnimationRunnerController AnimationRunnerController;
+        [SerializeReference]
+        private PlayerStatusEffectUXHolder PlayerStatusEffectUXHolderInstance;
 
         [SerializeReference]
         private RewardsPanelUX RewardsPanelUXInstance;
@@ -367,6 +369,7 @@ namespace SFDDCards
             }
 
             this.LifeValue.text = this.CentralGameStateControllerInstance.CurrentPlayer.CurrentHealth.ToString();
+            this.PlayerStatusEffectUXHolderInstance.SetStatusEffects(this.CentralGameStateControllerInstance.CurrentPlayer.AppliedStatusEffects);
         }
 
         private void SetElementValueLabel()
@@ -477,6 +480,8 @@ namespace SFDDCards
 
             this.ShopPanelUXInstance.gameObject.SetActive(false);
             this.RewardsPanelUXInstance.gameObject.SetActive(false);
+            this.PlayerStatusEffectUXHolderInstance.Annihilate();
+
             this.UpdateUX();
         }
 

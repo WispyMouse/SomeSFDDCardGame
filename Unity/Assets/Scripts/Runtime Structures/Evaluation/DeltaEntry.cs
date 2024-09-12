@@ -156,7 +156,7 @@ namespace SFDDCards
             else if (IntensityKindType == TokenEvaluatorBuilder.IntensityKind.StatusEffect)
             {
                 // TODO: This should know if it's gaining or losing stacks
-                return $"Applies/Removes {DescribeIntensity()} stacks of {StatusEffect}";
+                return $"Applies/Removes {DescribeIntensity()} stacks of {StatusEffect.Name}";
             }
 
             return "I have no idea what this will do.";

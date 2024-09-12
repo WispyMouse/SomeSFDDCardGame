@@ -9,6 +9,7 @@ namespace SFDDCards
     [Serializable]
     public class StatusEffectImport 
     {
+        public string Name;
         public string Id;
         public List<EffectOnProcImport> Effects;
 
@@ -16,6 +17,7 @@ namespace SFDDCards
         {
             StatusEffect newEffect = new StatusEffect();
 
+            newEffect.Name = this.Name;
             newEffect.Id = this.Id.ToLower();
 
             foreach (EffectOnProcImport import in this.Effects)

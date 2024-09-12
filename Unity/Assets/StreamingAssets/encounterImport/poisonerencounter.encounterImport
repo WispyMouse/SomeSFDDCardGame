@@ -1,0 +1,8 @@
+{
+	"Id": "testencounter_poisoner",
+	"Name": "Test Encounter Versus Poisoner",
+	"EnemyIds":
+	[
+		"poisoner"
+	]
+}

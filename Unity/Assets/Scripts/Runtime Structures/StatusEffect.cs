@@ -7,6 +7,7 @@ namespace SFDDCards
 
     public class StatusEffect
     {
+        public string Name;
         public string Id;
         public Dictionary<string, List<ScriptingTokens.IScriptingToken>> EffectTokens = new Dictionary<string, List<ScriptingTokens.IScriptingToken>>();
 
