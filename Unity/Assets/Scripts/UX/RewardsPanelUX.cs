@@ -27,8 +27,9 @@ namespace SFDDCards
         {
             this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignDeck.AddCardToDeck(selectedCard.RepresentedCard);
             this.DestroyRewardCards();
-            this.CentralGameStateControllerInstance.UXController.UpdateUX();
             this.gameObject.SetActive(false);
+
+            UpdateUXGlobalEvent.UpdateUXEvent?.Invoke();
         }
 
         public void SetRewardCards(params Card[] toReward)

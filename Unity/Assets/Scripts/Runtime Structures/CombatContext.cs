@@ -26,6 +26,8 @@ namespace SFDDCards
             this.BasedOnEncounter = basedOnEncounter;
             this.PlayerCombatDeck = new CombatDeck(fromCampaign.CampaignDeck);
             this.PlayerCombatDeck.ShuffleEntireDeck();
+
+            this.InitializeStartingEnemies();
         }
 
         public bool MeetsElementRequirement(string element, int minimumCount)
@@ -81,6 +83,16 @@ namespace SFDDCards
             this.CurrentTurnStatus = toTurn;
 
             UpdateUXGlobalEvent.UpdateUXEvent.Invoke();
+        }
+
+        private void InitializeStartingEnemies()
+        {
+            foreach (string curEnemyId in this.BasedOnEncounter.EnemiesInEncounterById)
+            {
+                EnemyModel curEnemyModel = EnemyDatabase.GetModel(curEnemyId);
+                Enemy enemyInstance = new Enemy(curEnemyModel);
+                this.Enemies.Add(enemyInstance);
+            }
         }
     }
 }

@@ -37,9 +37,10 @@ namespace SFDDCards
             {
                 RewardCardUX rewardedCard = Instantiate(this.RewardCardUXPF, this.RewardCardUXHolderTransform);
                 rewardedCard.SetFromCard(curCard, CardSelected);
-                this.CentralGameStateControllerInstance.UXController.UpdateUX();
                 this.ActiveRewardCardUX.Add(rewardedCard);
             }
+
+            UpdateUXGlobalEvent.UpdateUXEvent?.Invoke();
         }
 
         void DestroyRewardCards()

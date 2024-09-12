@@ -12,7 +12,10 @@ namespace SFDDCards
         public CampaignContext CurrentCampaignContext { get; private set; } = null;
 
         [SerializeReference]
-        public GameplayUXController UXController;
+        private GameplayUXController UXController;
+
+        [SerializeReference]
+        private CombatTurnController CombatTurnControllerInstance;
 
         RunConfiguration CurrentRunConfiguration { get; set; } = null;
 
@@ -65,8 +68,7 @@ namespace SFDDCards
             }
             else
             {
-                this.SpawnEnemiesFromRoom();
-                this.AssignEnemyIntents();
+                this.CombatTurnControllerInstance.BeginHandlingCombat();
                 this.CurrentCampaignContext.CurrentCombatContext.PlayerCombatDeck.DealCards(5);
                 this.SetGameCampaignNavigationState(CampaignContext.GameplayCampaignState.InCombat);
             }
@@ -105,26 +107,6 @@ namespace SFDDCards
             }
 
             UpdateUXGlobalEvent.UpdateUXEvent?.Invoke();
-        }
-
-        void SpawnEnemiesFromRoom()
-        {
-            if (this.CurrentCampaignContext.CurrentCombatContext == null
-                || this.CurrentCampaignContext.CurrentCombatContext.BasedOnEncounter == null)
-            {
-                Debug.LogException(new System.NullReferenceException($"The current room is null, and cannot have enemies added to it."));
-                return;
-            }
-
-            foreach (string curEnemyId in this.CurrentCampaignContext.CurrentCombatContext.BasedOnEncounter.EnemiesInEncounterById)
-            {
-                EnemyModel curEnemyModel = EnemyDatabase.GetModel(curEnemyId);
-                Enemy enemyInstance = new Enemy(curEnemyModel);
-                this.CurrentCampaignContext.CurrentCombatContext.Enemies.Add(enemyInstance);
-
-                this.UXController.AddEnemy(enemyInstance);
-                this.UXController.AddToLog($"Enemy {enemyInstance.Name} spawned");
-            }
         }
 
         /// <summary>
@@ -221,6 +203,7 @@ namespace SFDDCards
 
         void SetupClearedRoomAndPresentAwards()
         {
+            this.CombatTurnControllerInstance.EndHandlingCombat();
             this.SetGameCampaignNavigationState(CampaignContext.GameplayCampaignState.ClearedRoom);
             List<Card> cardsToAward = CardDatabase.GetRandomCards(this.CurrentRunConfiguration.CardsToAwardOnVictory);
             this.UXController.ShowRewardsPanel(cardsToAward.ToArray());
