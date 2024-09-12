@@ -9,25 +9,6 @@ namespace SFDDCards
 
     public class CentralGameStateController : MonoBehaviour
     {
-        public enum GameplayCampaignState
-        {
-            NotStarted = 0,
-            ClearedRoom = 1,
-            InCombat = 2,
-            Defeat = 3,
-            EnteringRoom = 4,
-            NonCombatEncounter = 5
-        }
-
-        public enum NonCombatEncounterStatus
-        {
-            NotInNonCombatEncounter = 0,
-            AllowedToLeave = 1
-        }
-
-        public GameplayCampaignState CurrentGameplayCampaignState { get; private set; } = GameplayCampaignState.NotStarted;
-        public NonCombatEncounterStatus CurrentNonCombatEncounterStatus { get; private set; } = NonCombatEncounterStatus.NotInNonCombatEncounter;
-
         public Room CurrentRoom { get; private set; } = null;
         public Player CurrentPlayer { get; private set; } = null;
 
@@ -64,7 +45,7 @@ namespace SFDDCards
             this.CurrentPlayer = new Player(this.CurrentRunConfiguration.StartingMaximumHealth);
             this.UXController.PlacePlayerCharacter();
 
-            this.SetGameCampaignNavigationState(GameplayCampaignState.ClearedRoom);
+            this.SetGameCampaignNavigationState(CampaignContext.GameplayCampaignState.ClearedRoom);
         }
 
         /// <summary>
@@ -74,24 +55,21 @@ namespace SFDDCards
         {
             this.UXController.AddToLog("Proceeding to next room");
 
-            this.CurrentNonCombatEncounterStatus = NonCombatEncounterStatus.NotInNonCombatEncounter;
             this.CurrentCampaignContext.LeaveCurrentCombat();
-
-            this.SetGameCampaignNavigationState(GameplayCampaignState.EnteringRoom);
+            this.SetGameCampaignNavigationState(CampaignContext.GameplayCampaignState.EnteringRoom);
 
             if (this.CurrentRoom.BasedOnEncounter.IsShopEncounter)
             {
                 List<Card> cardsToAward = CardDatabase.GetRandomCards(this.CurrentRunConfiguration.CardsInShop);
                 this.UXController.ShowShopPanel(cardsToAward.ToArray());
-                this.CurrentNonCombatEncounterStatus = NonCombatEncounterStatus.AllowedToLeave;
-                this.SetGameCampaignNavigationState(GameplayCampaignState.NonCombatEncounter);
+                this.SetGameCampaignNavigationState(CampaignContext.GameplayCampaignState.NonCombatEncounter, CampaignContext.NonCombatEncounterStatus.AllowedToLeave);
             }
             else
             {
                 this.SpawnEnemiesFromRoom();
                 this.AssignEnemyIntents();
                 this.CurrentCampaignContext.CurrentCombatContext.PlayerCombatDeck.DealCards(5);
-                this.SetGameCampaignNavigationState(GameplayCampaignState.InCombat);
+                this.SetGameCampaignNavigationState(CampaignContext.GameplayCampaignState.InCombat);
             }
         }
 
@@ -110,23 +88,23 @@ namespace SFDDCards
         /// Sets up the current navigation state, and then reflects that on the UX.
         /// </summary>
         /// <param name="newState">The incoming state to configure for.</param>
-        void SetGameCampaignNavigationState(GameplayCampaignState newState)
+        void SetGameCampaignNavigationState(CampaignContext.GameplayCampaignState newState, CampaignContext.NonCombatEncounterStatus noncombatState = CampaignContext.NonCombatEncounterStatus.NotInNonCombatEncounter)
         {
-            this.CurrentGameplayCampaignState = newState;
+            this.CurrentCampaignContext.SetCampaignState(newState, noncombatState);
 
             // If the room is cleared, prepare to go to the next one by allowing for the button to be active.
-            if (newState == GameplayCampaignState.ClearedRoom)
+            if (newState == CampaignContext.GameplayCampaignState.ClearedRoom)
             {
                 this.CurrentCampaignContext.LeaveCurrentCombat();
                 this.UXController.AddToLog($"Room is clear! Press Next Room to proceed to next encounter.");
             }
 
-            if (newState == GameplayCampaignState.EnteringRoom)
+            if (newState == CampaignContext.GameplayCampaignState.EnteringRoom)
             {
                 this.CurrentRoom = new Room(EncounterDatabase.GetRandomEncounter(this.CurrentRoom?.BasedOnEncounter));
             }
 
-            if (newState == GameplayCampaignState.InCombat)
+            if (newState == CampaignContext.GameplayCampaignState.InCombat)
             {
                 this.UXController.AddToLog($"Combat start! Left click a card to select it, then left click an enemy to play it on them. Right click to deselect the currently selected card.");
                 this.CurrentCampaignContext.StartCombat();
@@ -222,11 +200,11 @@ namespace SFDDCards
             if (this.CurrentPlayer.CurrentHealth <= 0)
             {
                 this.UXController.AddToLog($"The player has run out of health! This run is over.");
-                this.SetGameCampaignNavigationState(GameplayCampaignState.Defeat);
+                this.SetGameCampaignNavigationState(CampaignContext.GameplayCampaignState.Defeat);
                 return;
             }
 
-            if (this.CurrentGameplayCampaignState == GameplayCampaignState.NonCombatEncounter)
+            if (this.CurrentCampaignContext.CurrentGameplayCampaignState == CampaignContext.GameplayCampaignState.NonCombatEncounter)
             {
                 // 
             }
@@ -242,7 +220,7 @@ namespace SFDDCards
 
         void SetupClearedRoomAndPresentAwards()
         {
-            this.SetGameCampaignNavigationState(GameplayCampaignState.ClearedRoom);
+            this.SetGameCampaignNavigationState(CampaignContext.GameplayCampaignState.ClearedRoom);
             List<Card> cardsToAward = CardDatabase.GetRandomCards(this.CurrentRunConfiguration.CardsToAwardOnVictory);
             this.UXController.ShowRewardsPanel(cardsToAward.ToArray());
         }
