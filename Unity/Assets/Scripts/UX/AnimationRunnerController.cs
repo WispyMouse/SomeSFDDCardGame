@@ -18,7 +18,7 @@ namespace SFDDCards
             public bool FinishedAnimation = false;
         }
 
-        public IEnumerator AnimateShoveAttack(IAnimationPuppet attacking, IAnimationPuppet beingAttacked, Action actionAtTimeOfImpact)
+        public IEnumerator AnimateShoveAttack(IAnimationPuppet attacking, IAnimationPuppet beingAttacked)
         {
             AnimationQueueToken queueToken = new AnimationQueueToken();
             yield return this.YieldUntilAllActorsReady(queueToken, attacking, beingAttacked);
@@ -38,8 +38,6 @@ namespace SFDDCards
                 attacking.OwnTransform.position = newPosition;
                 yield return new WaitForFixedUpdate();
             } while (curAnimationTime < AttackAnimationTime);
-
-            actionAtTimeOfImpact.Invoke();
 
             if (beingAttacked.IsNotDestroyed)
             {
@@ -83,7 +81,7 @@ namespace SFDDCards
             this.RemoveTokenFromQueues(queueToken, attacking, beingAttacked);
         }
 
-        public IEnumerator AnimateUpwardNod(IAnimationPuppet nodding, Action actionAtTopOfNod)
+        public IEnumerator AnimateUpwardNod(IAnimationPuppet nodding)
         {
             AnimationQueueToken queueToken = new AnimationQueueToken();
             yield return this.YieldUntilAllActorsReady(queueToken, nodding);
@@ -103,7 +101,6 @@ namespace SFDDCards
                 yield return new WaitForFixedUpdate();
             } while (curAnimationTime < NodToTopTime);
 
-            actionAtTopOfNod.Invoke();
             curAnimationTime = 0;
 
             const float ReturnAnimationTime = .05f;

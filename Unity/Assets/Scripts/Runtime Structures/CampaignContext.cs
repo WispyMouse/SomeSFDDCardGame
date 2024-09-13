@@ -30,8 +30,11 @@ namespace SFDDCards
         public GameplayCampaignState CurrentGameplayCampaignState { get; private set; } = GameplayCampaignState.NotStarted;
         public NonCombatEncounterStatus CurrentNonCombatEncounterStatus { get; private set; } = NonCombatEncounterStatus.NotInNonCombatEncounter;
 
-        public CampaignContext(RunConfiguration runConfig)
+        private readonly GameplayUXController UXController = null;
+
+        public CampaignContext(RunConfiguration runConfig, GameplayUXController uxController)
         {
+            this.UXController = uxController;
             this.CampaignPlayer = new Player(runConfig.StartingMaximumHealth);
 
             foreach (string startingCard in runConfig.StartingDeck)
@@ -62,13 +65,19 @@ namespace SFDDCards
                 return;
             }
 
-            this.CurrentCombatContext = new CombatContext(this, basedOn);
+            this.CurrentCombatContext = new CombatContext(this, basedOn, this.UXController);
         }
 
         public void SetCampaignState(GameplayCampaignState toState, NonCombatEncounterStatus nonCombatState = NonCombatEncounterStatus.NotInNonCombatEncounter)
         {
             this.CurrentGameplayCampaignState = toState;
             this.CurrentNonCombatEncounterStatus = nonCombatState;
+
+            if (toState == GameplayCampaignState.ClearedRoom && this.CurrentEncounter != null && this.CurrentCombatContext.Enemies.Count == 0)
+            {
+                this.LeaveCurrentCombat();
+                UXController.PresentAwards();
+            }
         }
     }
 }

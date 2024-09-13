@@ -17,7 +17,7 @@ namespace SFDDCards
         [SerializeReference]
         private CombatTurnController CombatTurnControllerInstance;
 
-        RunConfiguration CurrentRunConfiguration { get; set; } = null;
+        public RunConfiguration CurrentRunConfiguration { get; set; } = null;
 
         private void Awake()
         {
@@ -39,7 +39,7 @@ namespace SFDDCards
 
             this.UXController.Annihilate();
 
-            this.CurrentCampaignContext = new CampaignContext(this.CurrentRunConfiguration);
+            this.CurrentCampaignContext = new CampaignContext(this.CurrentRunConfiguration, this.UXController);
             
             this.UXController.PlacePlayerCharacter();
 
@@ -76,7 +76,7 @@ namespace SFDDCards
         /// Sets up the current navigation state, and then reflects that on the UX.
         /// </summary>
         /// <param name="newState">The incoming state to configure for.</param>
-        void SetGameCampaignNavigationState(CampaignContext.GameplayCampaignState newState, CampaignContext.NonCombatEncounterStatus noncombatState = CampaignContext.NonCombatEncounterStatus.NotInNonCombatEncounter)
+        public void SetGameCampaignNavigationState(CampaignContext.GameplayCampaignState newState, CampaignContext.NonCombatEncounterStatus noncombatState = CampaignContext.NonCombatEncounterStatus.NotInNonCombatEncounter)
         {
             this.CurrentCampaignContext.SetCampaignState(newState, noncombatState);
 
@@ -88,140 +88,6 @@ namespace SFDDCards
             }
 
             UpdateUXGlobalEvent.UpdateUXEvent?.Invoke();
-        }
-
-        /// <summary>
-        /// Plays a specified card on the specified target.
-        /// </summary>
-        public void PlayCard(Card toPlay, ICombatantTarget toPlayOn)
-        {
-            if (this.UXController.PlayerIsCurrentlyAnimating)
-            {
-                this.UXController.AddToLog($"Player is currently animating, please wait until finished. (Being able to play faster will be fixed soon!)");
-                return;
-            }
-
-            if (this.CurrentCampaignContext.CurrentCombatContext.CurrentTurnStatus != CombatContext.TurnStatus.PlayerTurn)
-            {
-                this.UXController.CancelAllSelections();
-                return;
-            }
-
-            // Does the player meet the requirements of at least one of the effects?
-            bool anyPassingRequirements = false;
-            List<TokenEvaluatorBuilder> builders = ScriptTokenEvaluator.CalculateEvaluatorBuildersFromTokenEvaluation(toPlay);
-            foreach (TokenEvaluatorBuilder builder in builders)
-            {
-                if (builder.MeetsElementRequirements(this.CurrentCampaignContext.CurrentCombatContext))
-                {
-                    anyPassingRequirements = true;
-                    break;
-                }
-            }
-
-            if (!anyPassingRequirements)
-            {
-                this.UXController.AddToLog($"Unable to play card {toPlay.Name}. No requirements for any of the card's effects have been met.");
-                this.UXController.CancelAllSelections();
-                return;
-            }
-
-            this.UXController.AddToLog($"Playing card {toPlay.Name} on {toPlayOn.Name}");
-            this.UXController.CancelAllSelections();
-            this.CurrentCampaignContext.CurrentCombatContext.PlayerCombatDeck.CardsCurrentlyInHand.Remove(toPlay);
-
-            this.UXController.AnimateCardPlay(
-                toPlay,
-                toPlayOn,
-                () =>
-                {
-                    GamestateDelta delta = ScriptTokenEvaluator.CalculateDifferenceFromTokenEvaluation(this.CurrentCampaignContext, this.CurrentCampaignContext.CampaignPlayer, toPlay, toPlayOn);
-                    this.UXController.AddToLog(delta.DescribeDelta());
-                    delta.ApplyDelta(this.CurrentCampaignContext, this.UXController.AddToLog);
-                    this.CheckAllStateEffectsAndKnockouts();
-                },
-                () =>
-                {
-                }
-                );
-        }
-
-        void CheckAllStateEffectsAndKnockouts()
-        {
-            if (this.CurrentCampaignContext?.CurrentCombatContext?.Enemies != null)
-            {
-                List<Enemy> enemies = new List<Enemy>(this.CurrentCampaignContext.CurrentCombatContext.Enemies);
-                foreach (Enemy curEnemy in enemies)
-                {
-                    if (curEnemy.ShouldBecomeDefeated)
-                    {
-                        this.UXController.AddToLog($"{curEnemy.Name} has been defeated!");
-                        this.RemoveEnemy(curEnemy);
-                    }
-                }
-            }
-
-            if (this.CurrentCampaignContext.CampaignPlayer.CurrentHealth <= 0)
-            {
-                this.UXController.AddToLog($"The player has run out of health! This run is over.");
-                this.SetGameCampaignNavigationState(CampaignContext.GameplayCampaignState.Defeat);
-                return;
-            }
-
-            if (this.CurrentCampaignContext.CurrentGameplayCampaignState == CampaignContext.GameplayCampaignState.NonCombatEncounter)
-            {
-                // 
-            }
-            else if (this.CurrentCampaignContext.CurrentCombatContext.Enemies.Count == 0)
-            {
-                this.UXController.AddToLog($"There are no more enemies!");
-                this.SetupClearedRoomAndPresentAwards();
-                return;
-            }
-
-            this.UXController.UpdateUX();
-        }
-
-        void SetupClearedRoomAndPresentAwards()
-        {
-            this.CombatTurnControllerInstance.EndHandlingCombat();
-            this.SetGameCampaignNavigationState(CampaignContext.GameplayCampaignState.ClearedRoom);
-            List<Card> cardsToAward = CardDatabase.GetRandomCards(this.CurrentRunConfiguration.CardsToAwardOnVictory);
-            this.UXController.ShowRewardsPanel(cardsToAward.ToArray());
-        }
-
-        void RemoveEnemy(Enemy toRemove)
-        {
-            this.UXController.RemoveEnemy(toRemove);
-            this.CurrentCampaignContext.CurrentCombatContext.Enemies.Remove(toRemove);
-        }
-
-        public void EndTurn()
-        {
-            if (this.UXController.PlayerIsCurrentlyAnimating)
-            {
-                this.UXController.AddToLog($"Player is currently animating, please wait until finished. (Being able to play faster will be fixed soon!)");
-                return;
-            }
-
-            if (this.CurrentCampaignContext.CurrentCombatContext.CurrentTurnStatus != CombatContext.TurnStatus.PlayerTurn)
-            {
-                return;
-            }
-
-            this.CurrentCampaignContext.CurrentCombatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.EnemyTurn);
-
-            this.UXController.AnimateEnemyTurns(ContinueAfterEndTurnAnimationsFinished);
-        }
-
-        void ContinueAfterEndTurnAnimationsFinished()
-        {
-            this.CheckAllStateEffectsAndKnockouts();
-            this.AssignEnemyIntents();
-            this.CurrentCampaignContext.CurrentCombatContext.PlayerCombatDeck.DiscardHand();
-            this.CurrentCampaignContext.CurrentCombatContext.PlayerCombatDeck.DealCards(5);
-
-            this.CurrentCampaignContext.CurrentCombatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.PlayerTurn);
         }
 
         public void EnemyActsOnIntent(Enemy toAct)
@@ -369,34 +235,6 @@ namespace SFDDCards
         public void PlayerModelClicked()
         {
             this.UXController.SelectTarget(this.CurrentCampaignContext.CampaignPlayer);
-        }
-
-        void AssignEnemyIntents()
-        {
-            foreach (Enemy curEnemy in this.CurrentCampaignContext.CurrentCombatContext.Enemies)
-            {
-                int randomAttackIndex = UnityEngine.Random.Range(0, curEnemy.BaseModel.Attacks.Count);
-                EnemyAttack randomAttack = curEnemy.BaseModel.Attacks[randomAttackIndex];
-                curEnemy.Intent = randomAttack;
-
-                List<ICombatantTarget> consideredTargets = new List<ICombatantTarget>()
-                {
-                    curEnemy,
-                    this.CurrentCampaignContext.CampaignPlayer
-                };
-
-                List<ICombatantTarget> filteredTargets = ScriptTokenEvaluator.GetTargetsThatCanBeTargeted(curEnemy, curEnemy.Intent, consideredTargets);
-                if (filteredTargets.Count == 0)
-                {
-                    randomAttack.PrecalculatedTarget = null;
-                }
-                else
-                {
-                    randomAttack.PrecalculatedTarget = filteredTargets[0];
-                }
-            }
-
-            this.UXController.UpdateUX();
         }
     }
 }

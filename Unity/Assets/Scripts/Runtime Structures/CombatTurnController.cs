@@ -10,6 +10,8 @@ namespace SFDDCards
 
     public class CombatTurnController : MonoBehaviour
     {
+        private static CombatTurnController Instance { get; set; }
+
         [SerializeReference]
         private CentralGameStateController CentralGameStateControllerInstance;
 
@@ -21,9 +23,20 @@ namespace SFDDCards
         public bool CurrentlyActive { get; private set; } = false;
         public static readonly List<GameplaySequenceEvent> StackedSequenceEvents = new List<GameplaySequenceEvent>();
 
-        private Coroutine AnimationCoroutine { get; set; } = null;
-        private bool AnimationCoroutineIsRunning { get; set; } = false;
-        private GameplaySequenceEvent CurrentSequenceEvent { get; set; } = null;
+        private static Coroutine AnimationCoroutine { get; set; } = null;
+        private static bool AnimationCoroutineIsRunning { get; set; } = false;
+        private static GameplaySequenceEvent CurrentSequenceEvent { get; set; } = null;
+
+        private void Awake()
+        {
+            if (Instance != null)
+            {
+                this.enabled = false;
+                return;
+            }
+
+            Instance = this;
+        }
 
         public void BeginHandlingCombat()
         {
@@ -47,12 +60,12 @@ namespace SFDDCards
         {
             do
             {
-                if (StackedSequenceEvents.Count == 0 && this.CurrentSequenceEvent == null)
+                if (StackedSequenceEvents.Count == 0 && CurrentSequenceEvent == null)
                 {
                     return;
                 }
 
-                if (this.AnimationCoroutineIsRunning)
+                if (AnimationCoroutineIsRunning)
                 {
                     return;
                 }
@@ -69,29 +82,29 @@ namespace SFDDCards
                 return;
             }
 
-            this.CurrentSequenceEvent = StackedSequenceEvents[0];
+            CurrentSequenceEvent = StackedSequenceEvents[0];
             StackedSequenceEvents.RemoveAt(0);
             
-            if (this.CurrentSequenceEvent.AnimationDelegate != null)
+            if (CurrentSequenceEvent.AnimationDelegate != null)
             {
-                this.AnimationCoroutine = this.StartCoroutine(HandleSequenceEventWithAnimation(this.CurrentSequenceEvent));
+                AnimationCoroutine = this.StartCoroutine(HandleSequenceEventWithAnimation(CurrentSequenceEvent));
             }
             else
             {
-                this.CurrentSequenceEvent.ConsequentialAction?.Invoke();
-                this.CurrentSequenceEvent = null;
+                CurrentSequenceEvent.ConsequentialAction?.Invoke();
+                CurrentSequenceEvent = null;
             }
         }
 
         private IEnumerator HandleSequenceEventWithAnimation(GameplaySequenceEvent runningEvent)
         {
-            this.AnimationCoroutineIsRunning = true;
+            AnimationCoroutineIsRunning = true;
 
             yield return runningEvent.AnimationDelegate();
             runningEvent.ConsequentialAction?.Invoke();
 
-            this.AnimationCoroutineIsRunning = false;
-            this.AnimationCoroutine = null;
+            AnimationCoroutineIsRunning = false;
+            AnimationCoroutine = null;
         }
 
         #endregion
@@ -118,6 +131,18 @@ namespace SFDDCards
             StackedSequenceEvents.Insert(0, eventToPush);
         }
 
+        public static void StopAllSequences()
+        {
+            if (AnimationCoroutine != null)
+            {
+                Instance.StopCoroutine(AnimationCoroutine);
+                AnimationCoroutine = null;
+            }
+
+            StackedSequenceEvents.Clear();
+            CurrentSequenceEvent = null;
+        }
+
         #endregion
 
         #region Specific Gameplay Turn Concepts
@@ -133,6 +158,16 @@ namespace SFDDCards
         private void SpawnEnemy(Enemy toSpawn)
         {
             this.UXController.AddEnemy(toSpawn);
+        }
+
+        public void EndPlayerTurn()
+        {
+            this.Context.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.EnemyTurn);
+        }
+
+        public void PlayCard(Card toPlay, ICombatantTarget toPlayOn)
+        {
+            this.Context.PlayCard(toPlay, toPlayOn);
         }
 
         #endregion

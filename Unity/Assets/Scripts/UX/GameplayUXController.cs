@@ -15,6 +15,8 @@ namespace SFDDCards
         private AnimationRunnerController AnimationRunnerController;
         [SerializeReference]
         private PlayerStatusEffectUXHolder PlayerStatusEffectUXHolderInstance;
+        [SerializeReference]
+        private CombatTurnController CombatTurnCounterInstance;
 
         [SerializeReference]
         private RewardsPanelUX RewardsPanelUXInstance;
@@ -185,7 +187,7 @@ namespace SFDDCards
                 return;
             }
 
-            this.CentralGameStateControllerInstance.PlayCard(this.CurrentSelectedCard.RepresentedCard, toSelect);
+            this.CombatTurnCounterInstance.PlayCard(this.CurrentSelectedCard.RepresentedCard, toSelect);
             this.CurrentSelectedCard = null;
         }
 
@@ -200,9 +202,12 @@ namespace SFDDCards
 
         public void RemoveEnemy(Enemy toRemove)
         {
-            EnemyUX representation = this.spawnedEnemiesLookup[toRemove];
-            Destroy(representation.gameObject);
-            this.spawnedEnemiesLookup.Remove(toRemove);
+            if (this.spawnedEnemiesLookup.TryGetValue(toRemove, out EnemyUX ux))
+            {
+                EnemyUX representation = this.spawnedEnemiesLookup[toRemove];
+                Destroy(representation.gameObject);
+                this.spawnedEnemiesLookup.Remove(toRemove);
+            }
         }
 
         public void SelectCurrentCard(DisplayedCardUX toSelect)
@@ -288,6 +293,7 @@ namespace SFDDCards
         {
             this.RewardsPanelUXInstance.gameObject.SetActive(true);
             this.RewardsPanelUXInstance.SetRewardCards(cardsToReward);
+            this.UpdateUX();
         }
 
         public void ShowShopPanel(params Card[] cardsInShop)
@@ -300,28 +306,27 @@ namespace SFDDCards
         {
             foreach (Enemy curEnemy in this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.Enemies)
             {
-                yield return AnimateAction(this.spawnedEnemiesLookup[curEnemy], curEnemy.Intent, curEnemy.Intent.PrecalculatedTarget, () => { this.CentralGameStateControllerInstance.EnemyActsOnIntent(curEnemy); });
+                yield return AnimateAction(this.spawnedEnemiesLookup[curEnemy], curEnemy.Intent, curEnemy.Intent.PrecalculatedTarget);
             }
 
             continuationAction.Invoke();
         }
 
-        public void AnimateCardPlay(Card toPlay, ICombatantTarget target, Action executionAction, Action continuationAction)
+        public IEnumerator AnimateCardPlay(Card toPlay, ICombatantTarget target)
         {
-            this.StartCoroutine(AnimateCardPlayInternal(toPlay, target, executionAction, continuationAction));
+            yield return AnimateCardPlayInternal(toPlay, target);
         }
 
-        private IEnumerator AnimateCardPlayInternal(Card toPlay, ICombatantTarget target, Action executionAction, Action continuationAction)
+        private IEnumerator AnimateCardPlayInternal(Card toPlay, ICombatantTarget target)
         {
             PlayerIsCurrentlyAnimating = true;
 
-            yield return AnimateAction(this.PlayerUXInstance, toPlay, target, executionAction);
+            yield return AnimateAction(this.PlayerUXInstance, toPlay, target);
 
             PlayerIsCurrentlyAnimating = false;
-            continuationAction.Invoke();
         }
 
-        private IEnumerator AnimateAction(IAnimationPuppet puppet, IAttackTokenHolder attack, ICombatantTarget target, Action executionAction)
+        private IEnumerator AnimateAction(IAnimationPuppet puppet, IAttackTokenHolder attack, ICombatantTarget target)
         {
             IAnimationPuppet targetPuppet = null;
 
@@ -337,16 +342,14 @@ namespace SFDDCards
             if (targetPuppet == null || targetPuppet == puppet)
             {
                 yield return this.AnimationRunnerController.AnimateUpwardNod(
-                    puppet,
-                    executionAction
+                    puppet
                 );
             }
             else
             {
                 yield return this.AnimationRunnerController.AnimateShoveAttack(
                     puppet,
-                    targetPuppet,
-                    executionAction
+                    targetPuppet
                 );
             }
         }
@@ -365,6 +368,13 @@ namespace SFDDCards
 
             if (this.CentralGameStateControllerInstance.CurrentCampaignContext == null)
             {
+                return;
+            }
+
+            if (this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext == null)
+            {
+                this.CardsInDeckValue.text = this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignDeck.AllCardsInDeck.Count.ToString();
+                this.CardsInDiscardValue.text = "0";
                 return;
             }
 
@@ -553,6 +563,30 @@ namespace SFDDCards
             }
 
             this.AppointTargetableIndicatorsToValidTargets(this.CurrentSelectedCard.RepresentedCard);
+        }
+
+        public void EndTurn()
+        {
+            if (CombatTurnController.StackedSequenceEvents.Count > 0)
+            {
+                this.AddToLog($"Animations and events are happening, can't end turn yet.");
+                return;
+            }
+
+            if (this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.CurrentTurnStatus != CombatContext.TurnStatus.PlayerTurn)
+            {
+                this.AddToLog($"It's not the player's turn, can't end turn.");
+                return;
+            }
+
+            this.CombatTurnCounterInstance.EndPlayerTurn();
+        }
+
+        public void PresentAwards()
+        {
+            this.CombatTurnCounterInstance.EndHandlingCombat();
+            List<Card> cardsToAward = CardDatabase.GetRandomCards(this.CentralGameStateControllerInstance.CurrentRunConfiguration.CardsToAwardOnVictory);
+            this.ShowRewardsPanel(cardsToAward.ToArray());
         }
     }
 }

@@ -298,6 +298,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 815d46a554662174f9806d3b4a743257, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  CentralGameStateControllerInstance: {fileID: 557897350}
+  UXController: {fileID: 596646348}
 --- !u!1 &123241142
 GameObject:
   m_ObjectHideFlags: 0
@@ -1133,6 +1135,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   UXController: {fileID: 596646348}
+  CombatTurnControllerInstance: {fileID: 90712379}
 --- !u!4 &557897351
 Transform:
   m_ObjectHideFlags: 0
@@ -1179,6 +1182,7 @@ MonoBehaviour:
   CentralGameStateControllerInstance: {fileID: 557897350}
   AnimationRunnerController: {fileID: 664588369}
   PlayerStatusEffectUXHolderInstance: {fileID: 123241145}
+  CombatTurnCounterInstance: {fileID: 90712379}
   RewardsPanelUXInstance: {fileID: 951658352}
   ShopPanelUXInstance: {fileID: 1237346909}
   PlayerRepresentationPF: {fileID: 8670198336706055196, guid: 590b34b4a42297142a9ad49bab93f0a2, type: 3}
@@ -3348,9 +3352,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 557897350}
-        m_TargetAssemblyTypeName: SFDDCards.CentralGameStateController, Assembly-CSharp
-        m_MethodName: EndTurn
+      - m_Target: {fileID: 90712379}
+        m_TargetAssemblyTypeName: SFDDCards.CombatTurnController, Assembly-CSharp
+        m_MethodName: EndPlayerTurn
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

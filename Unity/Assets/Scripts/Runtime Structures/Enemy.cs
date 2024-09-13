@@ -19,6 +19,8 @@ namespace SFDDCards
             }
         }
 
+        public bool DefeatHasBeenSignaled { get; set; } = false;
+
         public Enemy(EnemyModel baseModel)
         {
             this.BaseModel = baseModel;
