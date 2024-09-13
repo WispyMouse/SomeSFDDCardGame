@@ -33,6 +33,11 @@ namespace SFDDCards
         public CampaignContext(RunConfiguration runConfig)
         {
             this.CampaignPlayer = new Player(runConfig.StartingMaximumHealth);
+
+            foreach (string startingCard in runConfig.StartingDeck)
+            {
+                this.CampaignDeck.AddCardToDeck(CardDatabase.GetModel(startingCard).Clone());
+            }
         }
 
         public void AddCardToDeck(Card toAdd)

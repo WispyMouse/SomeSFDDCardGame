@@ -40,7 +40,6 @@ namespace SFDDCards
             this.UXController.Annihilate();
 
             this.CurrentCampaignContext = new CampaignContext(this.CurrentRunConfiguration);
-            this.AssignStartingDeck();
             
             this.UXController.PlacePlayerCharacter();
 
@@ -69,19 +68,7 @@ namespace SFDDCards
             else
             {
                 this.CombatTurnControllerInstance.BeginHandlingCombat();
-                this.CurrentCampaignContext.CurrentCombatContext.PlayerCombatDeck.DealCards(5);
                 this.SetGameCampaignNavigationState(CampaignContext.GameplayCampaignState.InCombat);
-            }
-        }
-
-        /// <summary>
-        /// Creates the data structures for a deck, fills it with the starter cards, and sets that as the player's deck.
-        /// </summary>
-        void AssignStartingDeck()
-        {
-            foreach (string startingCard in this.CurrentRunConfiguration.StartingDeck)
-            {
-                this.CurrentCampaignContext.CampaignDeck.AddCardToDeck(CardDatabase.GetModel(startingCard).Clone());
             }
         }
 
@@ -98,12 +85,6 @@ namespace SFDDCards
             {
                 this.CurrentCampaignContext.LeaveCurrentCombat();
                 this.UXController.AddToLog($"Room is clear! Press Next Room to proceed to next encounter.");
-            }
-
-            if (newState == CampaignContext.GameplayCampaignState.InCombat)
-            {
-                this.UXController.AddToLog($"Combat start! Left click a card to select it, then left click an enemy to play it on them. Right click to deselect the currently selected card.");
-                this.CurrentCampaignContext.CurrentCombatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.PlayerTurn);
             }
 
             UpdateUXGlobalEvent.UpdateUXEvent?.Invoke();
