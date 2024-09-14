@@ -2,7 +2,7 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
 {
     public class ConstantEvaluatableValue<T> : IEvaluatableValue<T>
     {
-        protected T ConstantValue;
+        public readonly T ConstantValue;
 
         public ConstantEvaluatableValue(T inputValue)
         {

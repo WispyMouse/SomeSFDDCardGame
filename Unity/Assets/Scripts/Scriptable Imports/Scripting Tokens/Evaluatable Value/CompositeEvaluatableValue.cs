@@ -29,5 +29,20 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
 
             return builtString.ToString();
         }
+
+        /// <summary>
+        /// If this composite has only one element, assigns the ref value to it.
+        /// </summary>
+        /// <param name="component">Either the only component in this object, or this object.</param>
+        public void AttemptAssignSingleComponent(ref IEvaluatableValue<T> component)
+        {
+            if (this.CompositeComponents.Count == 1)
+            {
+                component = this.CompositeComponents[0];
+                return;
+            }
+
+            component = this;
+        }
     }
 }

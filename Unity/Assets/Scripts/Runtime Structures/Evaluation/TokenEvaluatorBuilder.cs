@@ -42,6 +42,7 @@ namespace SFDDCards
         public Dictionary<string, int> ElementRequirements = new Dictionary<string, int>();
 
         public StatusEffect StatusEffect;
+        public string LogText;
 
         public GamestateDelta GetEffectiveDelta(CampaignContext campaignContext)
         {

@@ -95,7 +95,7 @@ namespace SFDDCards.ScriptingTokens
                 return false;
             }
 
-            output = compositeEvaluatable;
+            compositeEvaluatable.AttemptAssignSingleComponent(ref output);
             return true;
         }
 

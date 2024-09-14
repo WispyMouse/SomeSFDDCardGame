@@ -40,5 +40,10 @@ namespace SFDDCards
             int randomIndex = UnityEngine.Random.Range(0, modelIds.Count);
             return GetModel(modelIds[randomIndex]);
         }
+
+        public static void ClearDatabase()
+        {
+            EnemyData.Clear();
+        }
     }
 }

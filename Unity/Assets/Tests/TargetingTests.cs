@@ -9,14 +9,8 @@ namespace SFDDCards.Tests.EditMode
     using UnityEngine;
 
 
-    public class TargetingTests
+    public class TargetingTests : EditModeTestBase
     {
-        [TearDown]
-        public void TearDown()
-        {
-            GlobalSequenceEventHolder.StopAllSequences();
-        }
-
         /// <summary>
         /// Ensures that [SETTARGET: FOE] does not override an original, specific target.
         /// 
