@@ -1,37 +1,45 @@
-using System.Text.RegularExpressions;
-
 namespace SFDDCards.ScriptingTokens
 {
-    public class DrawScriptingToken : IScriptingToken
-    {
-        public int Amount { get; private set; }
+    using SFDDCards.ScriptingTokens.EvaluatableValues;
+    using System.Collections.Generic;
+    using System.Text.RegularExpressions;
 
-        public void ApplyToken(TokenEvaluatorBuilder tokenBuilder)
+    public class DrawScriptingToken : BaseScriptingToken
+    {
+        public IEvaluatableValue<int> DrawAmount { get; private set; }
+
+        public override string ScriptingTokenIdentifier { get; } = "DRAW";
+
+        public override void ApplyToken(TokenEvaluatorBuilder tokenBuilder)
         {
             tokenBuilder.IntensityKindType = TokenEvaluatorBuilder.IntensityKind.NumberOfCards;
             tokenBuilder.NumberOfCardsRelationType = TokenEvaluatorBuilder.NumberOfCardsRelation.Draw;
-            tokenBuilder.Intensity = Amount;
+            tokenBuilder.Intensity = DrawAmount;
+            tokenBuilder.ShouldLaunch = true;
         }
 
-        public bool GetTokenIfMatch(string tokenString, out IScriptingToken match)
+        public override bool RequiresTarget()
         {
-            Match regexMatch = Regex.Match(tokenString, @"^\[DRAW: (\d+)\]$");
-            if (!regexMatch.Success)
+            return false;
+        }
+
+        protected override bool TryGetTokenWithArguments(List<string> arguments, out IScriptingToken scriptingToken)
+        {
+            scriptingToken = null;
+
+            // [DRAW: 5] or [DRAW: TARGET_HEALTH] or [DRAW: TARGET_HEALTH - 5] are all valid options
+            // There should only be one resulting evaluated value out of this
+            if (!TryGetIntegerEvaluatableFromStrings(arguments, out IEvaluatableValue<int> output, out List<string> _))
             {
-                match = null;
                 return false;
             }
 
-            DrawScriptingToken typedMatch = new DrawScriptingToken();
-            typedMatch.Amount = int.Parse(regexMatch.Groups[1].Value);
-            match = typedMatch;
+            scriptingToken = new DrawScriptingToken()
+            {
+                DrawAmount = output
+            };
 
             return true;
-        }
-
-        public bool IsHarmfulToTarget(ICombatantTarget user, ICombatantTarget target)
-        {
-            return false;
         }
     }
 }

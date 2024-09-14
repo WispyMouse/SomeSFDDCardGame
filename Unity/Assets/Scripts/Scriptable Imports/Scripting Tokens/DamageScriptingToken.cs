@@ -1,34 +1,47 @@
-using System.Text.RegularExpressions;
-
 namespace SFDDCards.ScriptingTokens
 {
-    public class DamageScriptingToken : IScriptingToken
-    {
-        public int Damage { get; private set; }
+    using SFDDCards.ScriptingTokens.EvaluatableValues;
+    using System.Collections.Generic;
 
-        public void ApplyToken(TokenEvaluatorBuilder tokenBuilder)
+    public class DamageScriptingToken : BaseScriptingToken
+    {
+        public IEvaluatableValue<int> Damage { get; private set; }
+
+        public override string ScriptingTokenIdentifier { get; } = "DAMAGE";
+
+        public override void ApplyToken(TokenEvaluatorBuilder tokenBuilder)
         {
             tokenBuilder.IntensityKindType = TokenEvaluatorBuilder.IntensityKind.Damage;
             tokenBuilder.Intensity = Damage;
+            tokenBuilder.ShouldLaunch = true;
         }
 
-        public bool GetTokenIfMatch(string tokenString, out IScriptingToken match)
+        protected override bool TryGetTokenWithArguments(List<string> arguments, out IScriptingToken scriptingToken)
         {
-            Match regexMatch = Regex.Match(tokenString, @"^\[DAMAGE: (\d+)\]$");
-            if (!regexMatch.Success)
+            scriptingToken = null;
+
+            // [DAMAGE: 5] or [DAMAGE: TARGET_HEALTH] or [DAMAGE: TARGET_HEALTH - 5] are all valid options
+            // There should only be one resulting evaluated value out of this
+            if (!TryGetIntegerEvaluatableFromStrings(arguments, out IEvaluatableValue<int> output, out List<string> _))
             {
-                match = null;
                 return false;
             }
 
-            DamageScriptingToken typedMatch = new DamageScriptingToken();
-            typedMatch.Damage = int.Parse(regexMatch.Groups[1].Value);
-            match = typedMatch;
+            scriptingToken = new DamageScriptingToken()
+            {
+                Damage = output
+            };
 
             return true;
         }
 
-        public bool IsHarmfulToTarget(ICombatantTarget user, ICombatantTarget target)
+        public override bool IsHarmfulToTarget(ICombatantTarget user, ICombatantTarget target)
+        {
+            // Damage is always harmful!
+            return true;
+        }
+
+        public override bool RequiresTarget()
         {
             return true;
         }

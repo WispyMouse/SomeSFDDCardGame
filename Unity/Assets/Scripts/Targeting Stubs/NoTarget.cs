@@ -7,7 +7,7 @@ namespace SFDDCards
         public string Name => "No Target";
         public Transform UXPositionalTransform { get; set; }
 
-        public void ApplyDelta(DeltaEntry deltaEntry)
+        public void ApplyDelta(CombatContext combatContext, DeltaEntry deltaEntry)
         {
             // No-op
         }

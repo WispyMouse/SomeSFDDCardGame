@@ -11,7 +11,7 @@ namespace SFDDCards
     {
         public List<DeltaEntry> DeltaEntries { get; set; } = new List<DeltaEntry>();
 
-        public void ApplyDelta(CentralGameStateController gameStateController, Action<string> logFunction)
+        public void ApplyDelta(CampaignContext campaignContext, Action<string> logFunction)
         {
             foreach (DeltaEntry entry in DeltaEntries)
             {
@@ -19,16 +19,16 @@ namespace SFDDCards
                 {
                     if (entry.NumberOfCardsRelationType == TokenEvaluatorBuilder.NumberOfCardsRelation.Draw)
                     {
-                        gameStateController.CurrentDeck.DealCards(entry.Intensity);
+                        campaignContext.CurrentCombatContext.PlayerCombatDeck.DealCards(entry.Intensity);
                     }
                 }
 
                 foreach (ElementResourceChange change in entry.ElementResourceChanges)
                 {
-                    gameStateController.ApplyElementResourceChange(change);
+                    campaignContext.CurrentCombatContext.ApplyElementResourceChange(change);
                 }
                 
-                entry.Target.ApplyDelta(entry);
+                entry.Target.ApplyDelta(campaignContext.CurrentCombatContext, entry);
             }
         }
 
@@ -69,6 +69,29 @@ namespace SFDDCards
             }
 
             return stringLog.ToString();
+        }
+
+        public void EvaluateVariables(CampaignContext campaignContext, ICombatantTarget user, ICombatantTarget target)
+        {
+            for (int ii = 0; ii < this.DeltaEntries.Count; ii++)
+            {
+                DeltaEntry curEntry = this.DeltaEntries[ii];
+
+                curEntry.OriginalTarget = target;
+                curEntry.User = user;
+                
+                if (curEntry.AbstractTarget != null)
+                {
+                    curEntry.AbstractTarget.TryEvaluateValue(campaignContext, curEntry.MadeFromBuilder, out curEntry.Target);
+                    curEntry.AbstractTarget = null;
+                }
+
+                if (curEntry.AbstractIntensity != null)
+                {
+                    curEntry.AbstractIntensity.TryEvaluateValue(campaignContext, curEntry.MadeFromBuilder, out curEntry.Intensity);
+                    curEntry.AbstractIntensity = null;
+                }
+            }
         }
     }
 }

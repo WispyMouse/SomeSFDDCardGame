@@ -12,15 +12,13 @@ namespace SFDDCards.ScriptingTokens
             new DamageScriptingToken(),
             new DrawScriptingToken(),
             new HealScriptingToken(),
+            new ChangeStatusEffectStacksScriptingToken(),
 
             // Meta Token
-            new LaunchScriptingToken(),
-            new SetIntensityScriptingToken(),
+            new ResetScriptingToken(),
 
             // Targeting Token
-            new SetTargetFoeScriptingToken(),
-            new SetTargetSelfScriptingToken(),
-            new SetTargetOriginalScriptingToken(),
+            new SetTargetScriptingToken(),
 
             // Element Token
             new GainElementScriptingToken(),

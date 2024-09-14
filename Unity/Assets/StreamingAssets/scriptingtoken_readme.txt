@@ -13,26 +13,12 @@ Foe
 
 # Scripting Tokens:
 
-[SETTARGETSELF]
-- The user of the ability will be set as the target.
-- You can separate abilities that affect an opponent and yourself with [LAUNCH]
-
-[SETTARGETFOE]
-- If this is the first targeting token found, it uses the target of the effect selected when playing the card.
-- Otherwise, it picks a random Foe.
-
-[SETTARGETORIGINAL]
-- Sets the target to the originally targeted opponent.
-- You could use this to have a "[SETTARGETFOE][DAMAGE: 1][LAUNCH][SETTARGETSELF][HEAL: 1][LAUNCH][REQUIRESATLEASTELEMENT: 1 CYBER][SETTARGETORIGINAL][DAMAGE: 3]" to have the attack deal additional damage to the original target.
-
-[SETINTENSITY: 3]
-- Sets Intensity to 3. Does not change IntensityType.
-
-[LAUNCH]
-- Executes all commands in the script since either the last [LAUNCH] or the start of the script.
-- If a script doesn't contain this, it's assumed at the end of the script.
-- "[DAMAGE: 4][LAUNCH][DRAW:1][LAUNCH]" would deal 1 damage to a foe, and then draw a card.
-- An effect can't have multiple intensities in the same [LAUNCH] group. If an effect has multiple scaling attributes, it likely needs separation with [LAUNCH].
+[SETTARGET: SELF]
+- SETTARGET is the primary way to target something.
+- Valid values are contextual.
+- - SELF -> Target the user of the ability.
+- - ORIGINAL -> Target the original target of the ability.
+- - FOE -> Target a random valid foe. Targets the original if the original is a foe of the owner.
 
 [DAMAGE: 3]
 - Sets IntensityType to Damage, Intensity to 3.
@@ -55,12 +41,12 @@ Foe
 
 [REQUIRESATLEASTELEMENT: 3 CYBER]
 - The rest of the card, until the next section with its own explicit requirements, will require 3 Cyber Element in the player's pool to use.
-- In the script "[DAMAGE: 1][LAUNCH][REQUIRESATLESTELEMENT: 2 BIO][DAMAGE: 2][LAUNCH][REQUIRESATLEASTELEMENT: 3 VOID][DAMAGE: 3]"
+- In the script "[DAMAGE: 1][REQUIRESATLESTELEMENT: 2 BIO][DAMAGE: 2][REQUIRESATLEASTELEMENT: 3 VOID][DAMAGE: 3]"
 > [DAMAGE: 1] will always execute, [DAMAGE: 2] will only execute if the player has at least 2 Bio, and separately [DAMAEG: 3] will only
 > execute if the player has 3 VOID.
 - One section can have multiple requirements. "[REQUIRESATLEASTELEMENT: 2 BIO][REQUIRESATLEASTELMENT: 2 SOLAR][DAMAGE: 3]" will require both elements.
 - If you have a requirement in a section, all following sections are assumed to have the same requirements until one is specified.
-> In the script "[REQUIREATLEASTELEMENT: 2 BIO][DAMAGE: 1][LAUNCH][SETTARGETSELF][HEAL: 1]", all of the effects will require 2 BIO. Heal 1 will only happen with the same conditions.
+> In the script "[REQUIREATLEASTELEMENT: 2 BIO][DAMAGE: 1][SETTARGETSELF][HEAL: 1]", all of the effects will require 2 BIO. Heal 1 will only happen with the same conditions.
 - If a player can't meet any of the requirements for any of the abilities of a card, they cannot play it.
 
 [DRAINSELEMENT: 3 CYBER]

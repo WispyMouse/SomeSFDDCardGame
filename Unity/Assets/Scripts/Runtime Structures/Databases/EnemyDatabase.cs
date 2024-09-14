@@ -19,17 +19,7 @@ namespace SFDDCards
                 return;
             }
 
-            EnemyModel newEnemy = new EnemyModel();
-            newEnemy.Id = lowerId;
-            newEnemy.Name = importData.Name;
-            newEnemy.MaximumHealth = importData.MaximumHealth;
-
-            foreach (EnemyAttackImport attack in importData.Attacks)
-            {
-                newEnemy.Attacks.Add(attack.DeriveAttack());
-            }
-
-            EnemyData.Add(lowerId, newEnemy);
+            EnemyData.Add(lowerId, importData.DeriveEnemyModel());
         }
 
         public static EnemyModel GetModel(string id)

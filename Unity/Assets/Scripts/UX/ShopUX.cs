@@ -25,7 +25,7 @@ namespace SFDDCards
 
         public void CardSelected(DisplayedCardUX selectedCard)
         {
-            this.CentralGameStateControllerInstance.CurrentDeck.AddCardToDeck(selectedCard.RepresentedCard);
+            this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignDeck.AddCardToDeck(selectedCard.RepresentedCard);
             Destroy(selectedCard.gameObject);
         }
 
@@ -37,9 +37,10 @@ namespace SFDDCards
             {
                 RewardCardUX rewardedCard = Instantiate(this.RewardCardUXPF, this.RewardCardUXHolderTransform);
                 rewardedCard.SetFromCard(curCard, CardSelected);
-                this.CentralGameStateControllerInstance.UXController.UpdateUX();
                 this.ActiveRewardCardUX.Add(rewardedCard);
             }
+
+            UpdateUXGlobalEvent.UpdateUXEvent?.Invoke();
         }
 
         void DestroyRewardCards()

@@ -1,6 +1,7 @@
 namespace SFDDCards
 {
     using SFDDCards.ScriptingTokens;
+    using SFDDCards.ScriptingTokens.EvaluatableValues;
     using System;
     using System.Collections;
     using System.Collections.Generic;
@@ -15,7 +16,8 @@ namespace SFDDCards
             None = 0,
             Damage = 1,
             Heal = 2,
-            NumberOfCards = 3
+            NumberOfCards = 3,
+            StatusEffect = 4
         }
 
         public enum NumberOfCardsRelation
@@ -28,54 +30,73 @@ namespace SFDDCards
 
         public bool ShouldLaunch = false;
 
-        public ICombatantTarget Target;
+        public CombatantTargetEvaluatableValue Target;
         public ICombatantTarget User;
-        public ICombatantTarget TopOfEffectTarget;
+        public ICombatantTarget OriginalTarget;
 
-        public int Intensity;
+        public IEvaluatableValue<int> Intensity;
         public IntensityKind IntensityKindType;
         public NumberOfCardsRelation NumberOfCardsRelationType = NumberOfCardsRelation.None;
 
         public List<ElementResourceChange> ElementResourceChanges = new List<ElementResourceChange>();
         public Dictionary<string, int> ElementRequirements = new Dictionary<string, int>();
 
-        public GamestateDelta GetEffectiveDelta()
+        public StatusEffect StatusEffect;
+
+        public GamestateDelta GetEffectiveDelta(CampaignContext campaignContext)
         {
             GamestateDelta delta = new GamestateDelta();
 
+            if (!this.Intensity.TryEvaluateValue(campaignContext, this, out int evaluatedIntensity))
+            {
+                Debug.Log($"{nameof(TokenEvaluatorBuilder)} ({nameof(GetEffectiveDelta)}): Failed to evaluate {nameof(this.Intensity)}. Cannot have a delta.");
+                return delta;
+            }
+
+            ICombatantTarget foundTarget = null;
+            this.Target.TryEvaluateValue(campaignContext, this, out foundTarget);
+
             delta.DeltaEntries.Add(new DeltaEntry()
             {
+                MadeFromBuilder = this,
                 User = this.User,
-                Target = this.Target,
-                Intensity = this.Intensity,
+                Target = foundTarget,
+                Intensity = evaluatedIntensity,
                 IntensityKindType = this.IntensityKindType,
                 NumberOfCardsRelationType = this.NumberOfCardsRelationType,
                 ElementResourceChanges = this.ElementResourceChanges,
-                TopOfEffectTarget = this.TopOfEffectTarget
+                OriginalTarget = this.OriginalTarget,
+                StatusEffect = this.StatusEffect
             }) ;
 
             return delta;
         }
 
-        public bool MeetsElementRequirements(CentralGameStateController gamestateController)
+        public GamestateDelta GetAbstractDelta()
+        {
+            GamestateDelta delta = new GamestateDelta();
+
+            delta.DeltaEntries.Add(new DeltaEntry()
+            {
+                MadeFromBuilder = this,
+                User = this.User,
+                AbstractTarget = this.Target,
+                AbstractIntensity = this.Intensity,
+                IntensityKindType = this.IntensityKindType,
+                NumberOfCardsRelationType = this.NumberOfCardsRelationType,
+                ElementResourceChanges = this.ElementResourceChanges,
+                OriginalTarget = this.OriginalTarget,
+                StatusEffect = this.StatusEffect
+            });
+
+            return delta;
+        }
+
+        public bool MeetsElementRequirements(CombatContext combatContext)
         {
             foreach (string element in this.ElementRequirements.Keys)
             {
-                int requirementAmount = this.ElementRequirements[element];
-
-                if (requirementAmount <= 0)
-                {
-                    continue;
-                }
-
-                if (gamestateController.ElementResourceCounts.TryGetValue(element, out int amountHeld))
-                {
-                    if (amountHeld < requirementAmount)
-                    {
-                        return false;
-                    }
-                }
-                else
+                if (!combatContext.MeetsElementRequirement(element, this.ElementRequirements[element]))
                 {
                     return false;
                 }
@@ -114,6 +135,30 @@ namespace SFDDCards
             }
 
             return compositeRequirements.ToString();
+        }
+
+        public static TokenEvaluatorBuilder Continue(TokenEvaluatorBuilder previous)
+        {
+            TokenEvaluatorBuilder builder = new TokenEvaluatorBuilder();
+
+            builder.User = previous.User;
+            builder.Target = previous.Target;
+            builder.OriginalTarget = previous.OriginalTarget;
+
+            return builder;
+        }
+
+        public bool AnyEffectRequiresTarget()
+        {
+            for (int ii = 0; ii < this.AppliedTokens.Count; ii++)
+            {
+                if (this.AppliedTokens[ii].RequiresTarget())
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

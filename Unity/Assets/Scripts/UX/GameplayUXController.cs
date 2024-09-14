@@ -13,6 +13,10 @@ namespace SFDDCards
         private CentralGameStateController CentralGameStateControllerInstance;
         [SerializeReference]
         private AnimationRunnerController AnimationRunnerController;
+        [SerializeReference]
+        private PlayerStatusEffectUXHolder PlayerStatusEffectUXHolderInstance;
+        [SerializeReference]
+        private CombatTurnController CombatTurnCounterInstance;
 
         [SerializeReference]
         private RewardsPanelUX RewardsPanelUXInstance;
@@ -66,9 +70,23 @@ namespace SFDDCards
         public DisplayedCardUX CurrentSelectedCard { get; private set; } = null;
         public bool PlayerIsCurrentlyAnimating { get; private set; } = false;
 
+        private CampaignContext.GameplayCampaignState previousCampaignState { get; set; } = CampaignContext.GameplayCampaignState.NotStarted;
+        private CombatContext.TurnStatus previousCombatTurnState { get; set; } = CombatContext.TurnStatus.NotInCombat;
+        private CampaignContext.NonCombatEncounterStatus previousNonCombatEncounterState { get; set; } = CampaignContext.NonCombatEncounterStatus.NotInNonCombatEncounter;
+
         private void Awake()
         {
             this.Annihilate();
+        }
+
+        private void OnEnable()
+        {
+            UpdateUXGlobalEvent.UpdateUXEvent.AddListener(UpdateUX);
+        }
+
+        private void OnDestroy()
+        {
+            UpdateUXGlobalEvent.UpdateUXEvent.RemoveListener(UpdateUX);
         }
 
         private void Update()
@@ -88,15 +106,31 @@ namespace SFDDCards
             }
 
             this.PlayerUXInstance = Instantiate(this.PlayerRepresentationPF, this.PlayerRepresentationTransform);
-            this.PlayerUXInstance.SetFromPlayer(CentralGameStateControllerInstance.CurrentPlayer);
+            this.PlayerUXInstance.SetFromPlayer(this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignPlayer);
 
-            this.LifeValue.text = $"{this.CentralGameStateControllerInstance.CurrentPlayer.CurrentHealth} / {this.CentralGameStateControllerInstance.CurrentPlayer.MaxHealth}";
+            this.LifeValue.text = $"{this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignPlayer.CurrentHealth} / {this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignPlayer.MaxHealth}";
         }
 
-        public void GameCampaignNavigationStateChanged(CentralGameStateController.GameplayCampaignState newState, CentralGameStateController.TurnStatus turnStatus, CentralGameStateController.NonCombatEncounterStatus noncombatStatus)
+        public void CheckAndActIfGameCampaignNavigationStateChanged()
         {
-            if (newState == CentralGameStateController.GameplayCampaignState.ClearedRoom
-                || (newState == CentralGameStateController.GameplayCampaignState.NonCombatEncounter && noncombatStatus == CentralGameStateController.NonCombatEncounterStatus.AllowedToLeave))
+            if (this.CentralGameStateControllerInstance.CurrentCampaignContext == null)
+            {
+                return;
+            }
+
+            CampaignContext.GameplayCampaignState newCampaignState = this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentGameplayCampaignState;
+            CampaignContext.NonCombatEncounterStatus newNonCombatState = this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentNonCombatEncounterStatus;
+            CombatContext.TurnStatus newTurnState = this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext == null ? CombatContext.TurnStatus.NotInCombat : this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.CurrentTurnStatus;
+
+            if (this.previousCampaignState == newCampaignState
+                && this.previousNonCombatEncounterState == newNonCombatState
+                && this.previousCombatTurnState == newTurnState)
+            {
+                return;
+            }
+
+            if (newCampaignState == CampaignContext.GameplayCampaignState.ClearedRoom
+                || (newCampaignState == CampaignContext.GameplayCampaignState.NonCombatEncounter && newNonCombatState == CampaignContext.NonCombatEncounterStatus.AllowedToLeave))
             {
                 this.GoNextRoomButton.SetActive(true);
             }
@@ -107,12 +141,12 @@ namespace SFDDCards
                 this.GoNextRoomButton.SetActive(false);
             }
             
-            if (newState == CentralGameStateController.GameplayCampaignState.InCombat)
+            if (newCampaignState == CampaignContext.GameplayCampaignState.InCombat)
             {
                 this.RewardsPanelUXInstance.gameObject.SetActive(false);
                 this.ShopPanelUXInstance.gameObject.SetActive(false);
 
-                if (turnStatus == CentralGameStateController.TurnStatus.PlayerTurn)
+                if (newTurnState == CombatContext.TurnStatus.PlayerTurn)
                 {
                     this.EndTurnButton.SetActive(true);
                 }
@@ -126,11 +160,14 @@ namespace SFDDCards
                 this.EndTurnButton.SetActive(false);
             }
 
-            this.UpdateUX();
+            this.previousCampaignState = newCampaignState;
+            this.previousNonCombatEncounterState = newNonCombatState;
+            this.previousCombatTurnState = newTurnState;
         }
 
         public void UpdateUX()
         {
+            this.CheckAndActIfGameCampaignNavigationStateChanged();
             this.SetElementValueLabel();
             this.UpdateEnemyUX();
             this.UpdatePlayerLabelValues();
@@ -140,17 +177,17 @@ namespace SFDDCards
 
         public void SelectTarget(ICombatantTarget toSelect)
         {
-            if (this.CurrentSelectedCard == null)
+            if (this.CurrentSelectedCard == null || this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext == null)
             {
                 return;
             }
 
-            if (this.CentralGameStateControllerInstance.CurrentTurnStatus != CentralGameStateController.TurnStatus.PlayerTurn)
+            if (this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.CurrentTurnStatus != CombatContext.TurnStatus.PlayerTurn)
             {
                 return;
             }
 
-            this.CentralGameStateControllerInstance.PlayCard(this.CurrentSelectedCard.RepresentedCard, toSelect);
+            this.CombatTurnCounterInstance.PlayCard(this.CurrentSelectedCard.RepresentedCard, toSelect);
             this.CurrentSelectedCard = null;
         }
 
@@ -159,20 +196,24 @@ namespace SFDDCards
             Vector3 objectOffset = new Vector3(3f, 0, 0) * this.EnemyRepresntationTransform.childCount;
             EnemyUX newEnemy = Instantiate(this.EnemyRepresentationPF, this.EnemyRepresntationTransform);
             newEnemy.transform.localPosition = objectOffset;
-            newEnemy.SetFromEnemy(toAdd);
+            newEnemy.SetFromEnemy(toAdd, this.CentralGameStateControllerInstance);
             this.spawnedEnemiesLookup.Add(toAdd, newEnemy);
         }
 
         public void RemoveEnemy(Enemy toRemove)
         {
-            EnemyUX representation = this.spawnedEnemiesLookup[toRemove];
-            Destroy(representation.gameObject);
-            this.spawnedEnemiesLookup.Remove(toRemove);
+            if (this.spawnedEnemiesLookup.TryGetValue(toRemove, out EnemyUX ux))
+            {
+                EnemyUX representation = this.spawnedEnemiesLookup[toRemove];
+                Destroy(representation.gameObject);
+                this.spawnedEnemiesLookup.Remove(toRemove);
+            }
         }
 
         public void SelectCurrentCard(DisplayedCardUX toSelect)
         {
-            if (this.CentralGameStateControllerInstance.CurrentTurnStatus != CentralGameStateController.TurnStatus.PlayerTurn)
+            if (this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext == null ||
+                this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.CurrentTurnStatus != CombatContext.TurnStatus.PlayerTurn)
             {
                 return;
             }
@@ -191,10 +232,10 @@ namespace SFDDCards
 
             // Does the player meet the requirements of at least one of the effects?
             bool anyPassingRequirements = false;
-            List<TokenEvaluatorBuilder> builders = ScriptTokenEvaluator.CalculateEvaluatorBuildersFromTokenEvaluation(this.CentralGameStateControllerInstance.CurrentPlayer, toSelect.RepresentedCard, null);
+            List<TokenEvaluatorBuilder> builders = ScriptTokenEvaluator.CalculateEvaluatorBuildersFromTokenEvaluation(toSelect.RepresentedCard);
             foreach (TokenEvaluatorBuilder builder in builders)
             {
-                if (builder.MeetsElementRequirements(this.CentralGameStateControllerInstance))
+                if (builder.MeetsElementRequirements(this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext))
                 {
                     anyPassingRequirements = true;
                     break;
@@ -252,6 +293,7 @@ namespace SFDDCards
         {
             this.RewardsPanelUXInstance.gameObject.SetActive(true);
             this.RewardsPanelUXInstance.SetRewardCards(cardsToReward);
+            this.UpdateUX();
         }
 
         public void ShowShopPanel(params Card[] cardsInShop)
@@ -262,30 +304,29 @@ namespace SFDDCards
 
         private IEnumerator AnimateEnemyTurnsInternal(Action continuationAction)
         {
-            foreach (Enemy curEnemy in this.CentralGameStateControllerInstance.CurrentRoom.Enemies)
+            foreach (Enemy curEnemy in this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.Enemies)
             {
-                yield return AnimateAction(this.spawnedEnemiesLookup[curEnemy], curEnemy.Intent, curEnemy.Intent.PrecalculatedTarget, () => { this.CentralGameStateControllerInstance.EnemyActsOnIntent(curEnemy); });
+                yield return AnimateAction(this.spawnedEnemiesLookup[curEnemy], curEnemy.Intent, curEnemy.Intent.PrecalculatedTarget);
             }
 
             continuationAction.Invoke();
         }
 
-        public void AnimateCardPlay(Card toPlay, ICombatantTarget target, Action executionAction, Action continuationAction)
+        public IEnumerator AnimateCardPlay(Card toPlay, ICombatantTarget target)
         {
-            this.StartCoroutine(AnimateCardPlayInternal(toPlay, target, executionAction, continuationAction));
+            yield return AnimateCardPlayInternal(toPlay, target);
         }
 
-        private IEnumerator AnimateCardPlayInternal(Card toPlay, ICombatantTarget target, Action executionAction, Action continuationAction)
+        private IEnumerator AnimateCardPlayInternal(Card toPlay, ICombatantTarget target)
         {
             PlayerIsCurrentlyAnimating = true;
 
-            yield return AnimateAction(this.PlayerUXInstance, toPlay, target, executionAction);
+            yield return AnimateAction(this.PlayerUXInstance, toPlay, target);
 
             PlayerIsCurrentlyAnimating = false;
-            continuationAction.Invoke();
         }
 
-        private IEnumerator AnimateAction(IAnimationPuppet puppet, IAttackTokenHolder attack, ICombatantTarget target, Action executionAction)
+        private IEnumerator AnimateAction(IAnimationPuppet puppet, IAttackTokenHolder attack, ICombatantTarget target)
         {
             IAnimationPuppet targetPuppet = null;
 
@@ -301,16 +342,14 @@ namespace SFDDCards
             if (targetPuppet == null || targetPuppet == puppet)
             {
                 yield return this.AnimationRunnerController.AnimateUpwardNod(
-                    puppet,
-                    executionAction
+                    puppet
                 );
             }
             else
             {
                 yield return this.AnimationRunnerController.AnimateShoveAttack(
                     puppet,
-                    targetPuppet,
-                    executionAction
+                    targetPuppet
                 );
             }
         }
@@ -327,51 +366,66 @@ namespace SFDDCards
                 Destroy(this.PlayerHandTransform.GetChild(ii).gameObject);
             }
 
-            if (this.CentralGameStateControllerInstance.CurrentGameplayCampaignState != CentralGameStateController.GameplayCampaignState.InCombat)
+            if (this.CentralGameStateControllerInstance.CurrentCampaignContext == null)
             {
-                if (this.CentralGameStateControllerInstance.CurrentDeck == null)
+                return;
+            }
+
+            if (this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext == null)
+            {
+                this.CardsInDeckValue.text = this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignDeck.AllCardsInDeck.Count.ToString();
+                this.CardsInDiscardValue.text = "0";
+                return;
+            }
+
+            if (this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentGameplayCampaignState != CampaignContext.GameplayCampaignState.InCombat)
+            {
+                if (this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignDeck == null)
                 {
                     this.CardsInDeckValue.text = "0";
                 }
                 else
                 {
-                    this.CardsInDeckValue.text = this.CentralGameStateControllerInstance.CurrentDeck.AllCardsInDeck.Count.ToString();
+                    this.CardsInDeckValue.text = this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignDeck.AllCardsInDeck.Count.ToString();
                 }
                 this.CardsInDiscardValue.text = "0";
                 ClearAllTargetableIndicators();
                 return;
             }
 
-            float leftStartingPoint = -CardFanDistance * (this.CentralGameStateControllerInstance.CurrentDeck.CardsCurrentlyInHand.Count - 1) / 2f;
+            float leftStartingPoint = -CardFanDistance * (this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.PlayerCombatDeck.CardsCurrentlyInHand.Count - 1) / 2f;
 
-            for (int ii = 0; ii < this.CentralGameStateControllerInstance.CurrentDeck.CardsCurrentlyInHand.Count; ii++)
+            for (int ii = 0; ii < this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.PlayerCombatDeck.CardsCurrentlyInHand.Count; ii++)
             {
                 Vector3 objectOffset = new Vector3(leftStartingPoint, 0, 0) + new Vector3(CardFanDistance, 0, 0) * ii;
                 CombatCardUX newCard = Instantiate(this.CardRepresentationPF, this.PlayerHandTransform);
                 newCard.transform.localPosition = objectOffset;
-                newCard.SetFromCard(this.CentralGameStateControllerInstance.CurrentDeck.CardsCurrentlyInHand[ii], SelectCurrentCard);
+                newCard.SetFromCard(this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.PlayerCombatDeck.CardsCurrentlyInHand[ii], SelectCurrentCard);
             }
 
-            if (this.CentralGameStateControllerInstance.CurrentGameplayCampaignState == CentralGameStateController.GameplayCampaignState.InCombat)
+            if (this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentGameplayCampaignState == CampaignContext.GameplayCampaignState.InCombat)
             {
-                this.CardsInDeckValue.text = this.CentralGameStateControllerInstance.CurrentDeck.CardsCurrentlyInDeck.Count.ToString();
-                this.CardsInDiscardValue.text = this.CentralGameStateControllerInstance.CurrentDeck.CardsCurrentlyInDiscard.Count.ToString();
+                this.CardsInDeckValue.text = this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.PlayerCombatDeck.CardsCurrentlyInDeck.Count.ToString();
+                this.CardsInDiscardValue.text = this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.PlayerCombatDeck.CardsCurrentlyInDiscard.Count.ToString();
             }
         }
 
         void UpdatePlayerLabelValues()
         {
-            if (this.CentralGameStateControllerInstance.CurrentPlayer == null)
+            if (this.CentralGameStateControllerInstance?.CurrentCampaignContext?.CampaignPlayer == null)
             {
                 return;
             }
 
-            this.LifeValue.text = this.CentralGameStateControllerInstance.CurrentPlayer.CurrentHealth.ToString();
+            this.LifeValue.text = this.CentralGameStateControllerInstance?.CurrentCampaignContext?.CampaignPlayer.CurrentHealth.ToString();
+            this.PlayerStatusEffectUXHolderInstance.SetStatusEffects(this.CentralGameStateControllerInstance?.CurrentCampaignContext?.CampaignPlayer.AppliedStatusEffects);
         }
 
         private void SetElementValueLabel()
         {
-            if (this.CentralGameStateControllerInstance.ElementResourceCounts == null || this.CentralGameStateControllerInstance.ElementResourceCounts.Count == 0)
+            if (this.CentralGameStateControllerInstance.CurrentCampaignContext == null ||
+                this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext == null ||
+                this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.ElementResourceCounts == null || this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.ElementResourceCounts.Count == 0)
             {
                 this.ElementsValue.text = "None";
                 return;
@@ -379,9 +433,9 @@ namespace SFDDCards
 
             string startingSeparator = "";
             StringBuilder compositeElements = new StringBuilder();
-            foreach (string element in this.CentralGameStateControllerInstance.ElementResourceCounts.Keys)
+            foreach (string element in this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.ElementResourceCounts.Keys)
             {
-                compositeElements.Append($"{startingSeparator}{this.CentralGameStateControllerInstance.ElementResourceCounts[element]}\u00A0{element}");
+                compositeElements.Append($"{startingSeparator}{this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.ElementResourceCounts[element]}\u00A0{element}");
                 startingSeparator = ", ";
             }
 
@@ -408,14 +462,14 @@ namespace SFDDCards
             this.ClearAllTargetableIndicators();
 
             List<ICombatantTarget> possibleTargets = new List<ICombatantTarget>();
-            possibleTargets.Add(this.CentralGameStateControllerInstance.CurrentPlayer);
+            possibleTargets.Add(this.CentralGameStateControllerInstance?.CurrentCampaignContext?.CampaignPlayer);
 
             foreach (Enemy curEnemy in this.spawnedEnemiesLookup.Keys)
             {
                 possibleTargets.Add(curEnemy);
             }
 
-            List<ICombatantTarget> remainingTargets = ScriptTokenEvaluator.GetTargetsThatCanBeTargeted(this.CentralGameStateControllerInstance.CurrentPlayer, toTarget, possibleTargets);
+            List<ICombatantTarget> remainingTargets = ScriptTokenEvaluator.GetTargetsThatCanBeTargeted(this.CentralGameStateControllerInstance?.CurrentCampaignContext?.CampaignPlayer, toTarget, possibleTargets);
 
             if (remainingTargets.Count > 0)
             {
@@ -435,12 +489,12 @@ namespace SFDDCards
 
         void UpdateEnemyUX()
         {
-            if (this.CentralGameStateControllerInstance.CurrentRoom == null || this.CentralGameStateControllerInstance.CurrentRoom.Enemies.Count == 0)
+            if (this.CentralGameStateControllerInstance?.CurrentCampaignContext?.CurrentCombatContext?.Enemies == null || this.CentralGameStateControllerInstance?.CurrentCampaignContext?.CurrentCombatContext?.Enemies?.Count == 0)
             {
                 return;
             }
 
-            foreach (Enemy curEnemy in this.CentralGameStateControllerInstance.CurrentRoom.Enemies)
+            foreach (Enemy curEnemy in this.CentralGameStateControllerInstance?.CurrentCampaignContext?.CurrentCombatContext?.Enemies)
             {
                 if (!this.spawnedEnemiesLookup.TryGetValue(curEnemy, out EnemyUX value))
                 {
@@ -449,7 +503,7 @@ namespace SFDDCards
                     continue;
                 }
 
-                value.UpdateUX();
+                value.UpdateUX(this.CentralGameStateControllerInstance);
             }
         }
 
@@ -477,18 +531,26 @@ namespace SFDDCards
 
             this.ShopPanelUXInstance.gameObject.SetActive(false);
             this.RewardsPanelUXInstance.gameObject.SetActive(false);
+            this.PlayerStatusEffectUXHolderInstance.Annihilate();
+
             this.UpdateUX();
         }
 
         void RepresentTargetables()
         {
-            if (this.CentralGameStateControllerInstance.CurrentGameplayCampaignState != CentralGameStateController.GameplayCampaignState.InCombat)
+            if (this.CentralGameStateControllerInstance.CurrentCampaignContext?.CurrentCombatContext == null)
             {
                 ClearAllTargetableIndicators();
                 return;
             }
 
-            if (this.CentralGameStateControllerInstance.CurrentTurnStatus != CentralGameStateController.TurnStatus.PlayerTurn)
+            if (this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentGameplayCampaignState != CampaignContext.GameplayCampaignState.InCombat)
+            {
+                ClearAllTargetableIndicators();
+                return;
+            }
+
+            if (this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.CurrentTurnStatus != CombatContext.TurnStatus.PlayerTurn)
             {
                 ClearAllTargetableIndicators();
                 return;
@@ -501,6 +563,30 @@ namespace SFDDCards
             }
 
             this.AppointTargetableIndicatorsToValidTargets(this.CurrentSelectedCard.RepresentedCard);
+        }
+
+        public void EndTurn()
+        {
+            if (CombatTurnController.StackedSequenceEvents.Count > 0)
+            {
+                this.AddToLog($"Animations and events are happening, can't end turn yet.");
+                return;
+            }
+
+            if (this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.CurrentTurnStatus != CombatContext.TurnStatus.PlayerTurn)
+            {
+                this.AddToLog($"It's not the player's turn, can't end turn.");
+                return;
+            }
+
+            this.CombatTurnCounterInstance.EndPlayerTurn();
+        }
+
+        public void PresentAwards()
+        {
+            this.CombatTurnCounterInstance.EndHandlingCombat();
+            List<Card> cardsToAward = CardDatabase.GetRandomCards(this.CentralGameStateControllerInstance.CurrentRunConfiguration.CardsToAwardOnVictory);
+            this.ShowRewardsPanel(cardsToAward.ToArray());
         }
     }
 }

@@ -1,5 +1,6 @@
 namespace SFDDCards
 {
+    using SFDDCards.ScriptingTokens.EvaluatableValues;
     using System;
     using System.Collections;
     using System.Collections.Generic;
@@ -9,18 +10,27 @@ namespace SFDDCards
     public class DeltaEntry
     {
         public ICombatantTarget User;
+
         public ICombatantTarget Target;
+        public CombatantTargetEvaluatableValue AbstractTarget;
+
         public int Intensity;
+        public IEvaluatableValue<int> AbstractIntensity;
+
+        public TokenEvaluatorBuilder MadeFromBuilder;
+
         public TokenEvaluatorBuilder.IntensityKind IntensityKindType = TokenEvaluatorBuilder.IntensityKind.None;
         public TokenEvaluatorBuilder.NumberOfCardsRelation NumberOfCardsRelationType = TokenEvaluatorBuilder.NumberOfCardsRelation.None;
         public List<ElementResourceChange> ElementResourceChanges = new List<ElementResourceChange>();
+
+        public StatusEffect StatusEffect;
 
         /// <summary>
         /// An indicator of who the original target of the ability is.
         /// If an ability has a 'FoeTarget' as its original target, then it's a targetable card.
         /// If an ability has a 'FoeTarget' after something that isn't a FoeTarget, it becomes random.
         /// </summary>
-        public ICombatantTarget TopOfEffectTarget;
+        public ICombatantTarget OriginalTarget;
 
         /// <summary>
         /// Assuming that the delta is being applied, this describes
@@ -63,6 +73,21 @@ namespace SFDDCards
                     return $"Player draws {Intensity} card(s)";
                 }
             }
+            else if (IntensityKindType == TokenEvaluatorBuilder.IntensityKind.StatusEffect)
+            {
+                if (Intensity > 0)
+                {
+                    return $"{DescribeTarget()} has {Intensity} stacks of {StatusEffect} applied";
+                }
+                else if (Intensity < 0)
+                {
+                    return $"{DescribeTarget()} has {-Intensity} stacks of {StatusEffect} removed";
+                }
+                else
+                {
+                    return null;
+                }
+            }
 
             return null;
         }
@@ -101,7 +126,7 @@ namespace SFDDCards
                 compositeDelta.Append(describeElementDelta);
             }
 
-            string describeIntensityDelta = DescribeIntensityAsEffect();
+            string describeIntensityDelta = DescribeEffect();
             if (!string.IsNullOrEmpty(describeIntensityDelta))
             {
                 compositeDelta.Append(describeIntensityDelta);
@@ -111,22 +136,27 @@ namespace SFDDCards
         }
 
 
-        public string DescribeIntensityAsEffect()
+        public string DescribeEffect()
         {
             if (IntensityKindType == TokenEvaluatorBuilder.IntensityKind.Damage)
             {
-                return $"Damages {DescribeTarget()} for {Intensity}";
+                return $"Damages {DescribeTarget()} for {DescribeIntensity()}";
             }
             else if (IntensityKindType == TokenEvaluatorBuilder.IntensityKind.Heal)
             {
-                return $"Heals {DescribeTarget()} for {Intensity}";
+                return $"Heals {DescribeTarget()} for {DescribeIntensity()}";
             }
             else if (IntensityKindType == TokenEvaluatorBuilder.IntensityKind.NumberOfCards)
             {
                 if (NumberOfCardsRelationType == TokenEvaluatorBuilder.NumberOfCardsRelation.Draw)
                 {
-                    return $"Draw {Intensity} card(s)";
+                    return $"Draw {DescribeIntensity()} card(s)";
                 }
+            }
+            else if (IntensityKindType == TokenEvaluatorBuilder.IntensityKind.StatusEffect)
+            {
+                // TODO: This should know if it's gaining or losing stacks
+                return $"Applies/Removes {DescribeIntensity()} stacks of {StatusEffect.Name}";
             }
 
             return "I have no idea what this will do.";
@@ -134,6 +164,22 @@ namespace SFDDCards
 
         public string DescribeTarget()
         {
+            if (AbstractTarget != null)
+            {
+                return AbstractTarget.DescribeEvaluation();
+            }
+
+            if (Target == null)
+            {
+                return "No Target";
+            }
+
+            if (User == null)
+            {
+                Debug.LogError($"User is null! This is unusual.");
+                return String.Empty;
+            }
+
             if (User == Target)
             {
                 return "Self";
@@ -145,7 +191,7 @@ namespace SFDDCards
                 {
                     return "Player";
                 }
-                else if (Target == TopOfEffectTarget)
+                else if (Target == OriginalTarget)
                 {
                     return "Targeted Foe";
                 }
@@ -177,6 +223,16 @@ namespace SFDDCards
             }
 
             return Target.Name;
+        }
+
+        public string DescribeIntensity()
+        {
+            if (this.AbstractIntensity == null)
+            {
+                return this.Intensity.ToString();
+            }
+
+            return this.AbstractIntensity.DescribeEvaluation();
         }
     }
 }

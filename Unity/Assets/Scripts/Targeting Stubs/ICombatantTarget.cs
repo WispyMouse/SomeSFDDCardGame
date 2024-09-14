@@ -9,7 +9,7 @@ namespace SFDDCards
     public interface ICombatantTarget
     {
         string Name { get; }
-        void ApplyDelta(DeltaEntry deltaEntry);
+        void ApplyDelta(CombatContext combatContext, DeltaEntry deltaEntry);
         Transform UXPositionalTransform { get; }
 
         bool IsFoeOf(ICombatantTarget otherTarget);
