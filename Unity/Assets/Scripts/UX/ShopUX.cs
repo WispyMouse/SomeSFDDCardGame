@@ -40,7 +40,7 @@ namespace SFDDCards
                 this.ActiveRewardCardUX.Add(rewardedCard);
             }
 
-            UpdateUXGlobalEvent.UpdateUXEvent?.Invoke();
+            GlobalUpdateUX.UpdateUXEvent?.Invoke();
         }
 
         void DestroyRewardCards()

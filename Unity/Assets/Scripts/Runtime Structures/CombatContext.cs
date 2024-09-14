@@ -17,7 +17,7 @@ namespace SFDDCards
         public TurnStatus CurrentTurnStatus { get; private set; } = TurnStatus.NotInCombat;
 
         public readonly CombatDeck PlayerCombatDeck;
-        public Player CombatPlayer => this?.FromCampaign?.CampaignPlayer;
+        public Player CombatPlayer;
 
         public CampaignContext FromCampaign;
         public readonly Encounter BasedOnEncounter;
@@ -30,6 +30,7 @@ namespace SFDDCards
         public CombatContext(CampaignContext fromCampaign, Encounter basedOnEncounter, GameplayUXController uxController)
         {
             this.UXController = uxController;
+            this.CombatPlayer = fromCampaign.CampaignPlayer;
 
             this.FromCampaign = fromCampaign;
             this.BasedOnEncounter = basedOnEncounter;
@@ -84,7 +85,7 @@ namespace SFDDCards
                 }
             }
 
-            UpdateUXGlobalEvent.UpdateUXEvent.Invoke();
+            GlobalUpdateUX.UpdateUXEvent.Invoke();
         }
 
         public void EndCurrentTurnAndChangeTurn(TurnStatus toTurn)
@@ -105,7 +106,7 @@ namespace SFDDCards
                 this.PlayerStartTurn();
             }
 
-            UpdateUXGlobalEvent.UpdateUXEvent.Invoke();
+            GlobalUpdateUX.UpdateUXEvent.Invoke();
             return;
         }
 
@@ -116,13 +117,13 @@ namespace SFDDCards
         {
             if (this.CurrentTurnStatus != TurnStatus.PlayerTurn)
             {
-                UXController.AddToLog($"Card {toPlay.Name} can't be played, it isn't the player's turn.");
+                GlobalUpdateUX.LogTextEvent.Invoke($"Card {toPlay.Name} can't be played, it isn't the player's turn.", GlobalUpdateUX.LogType.GameEvent);
                 return;
             }
 
             if (!this.PlayerCombatDeck.CardsCurrentlyInHand.Contains(toPlay))
             {
-                UXController.AddToLog($"Card {toPlay.Name} appears to not be in hand. Has it already been played?");
+                GlobalUpdateUX.LogTextEvent.Invoke($"Card {toPlay.Name} appears to not be in hand. Has it already been played?", GlobalUpdateUX.LogType.GameEvent);
                 return;
             }
 
@@ -140,24 +141,24 @@ namespace SFDDCards
 
             if (!anyPassingRequirements)
             {
-                UXController.AddToLog($"Unable to play card {toPlay.Name}. No requirements for any of the card's effects have been met.");
-                UXController.CancelAllSelections();
+                GlobalUpdateUX.LogTextEvent.Invoke($"Unable to play card {toPlay.Name}. No requirements for any of the card's effects have been met.", GlobalUpdateUX.LogType.GameEvent);
+                UXController?.CancelAllSelections();
                 return;
             }
 
-            UXController.AddToLog($"Playing card {toPlay.Name} on {toPlayOn.Name}");
-            UXController.CancelAllSelections();
+            GlobalUpdateUX.LogTextEvent.Invoke($"Playing card {toPlay.Name} on {toPlayOn.Name}", GlobalUpdateUX.LogType.GameEvent);
+            UXController?.CancelAllSelections();
             this.PlayerCombatDeck.CardsCurrentlyInHand.Remove(toPlay);
 
-            CombatTurnController.PushSequenceToTop(new GameplaySequenceEvent(
+            GlobalSequenceEventHolder.PushSequenceToTop(new GameplaySequenceEvent(
             () =>
             {
                 GamestateDelta delta = ScriptTokenEvaluator.CalculateDifferenceFromTokenEvaluation(this.FromCampaign, this.CombatPlayer, toPlay, toPlayOn);
-                UXController.AddToLog(delta.DescribeDelta());
-                delta.ApplyDelta(this.FromCampaign, UXController.AddToLog);
+                GlobalUpdateUX.LogTextEvent.Invoke(delta.DescribeDelta(), GlobalUpdateUX.LogType.GameEvent);
+                delta.ApplyDelta(this.FromCampaign);
                 this.CheckAllStateEffectsAndKnockouts();
             },
-            () => UXController.AnimateCardPlay(
+            () => UXController?.AnimateCardPlay(
                 toPlay,
                 toPlayOn)
             ));
@@ -167,13 +168,13 @@ namespace SFDDCards
         {
             if (toAct?.Intent == null)
             {
-                UXController.AddToLog($"Enemy {toAct.Name} has no Intent, cannot take action.");
+                GlobalUpdateUX.LogTextEvent.Invoke($"Enemy {toAct.Name} has no Intent, cannot take action.", GlobalUpdateUX.LogType.GameEvent);
                 return;
             }
 
-            GamestateDelta delta = ScriptTokenEvaluator.CalculateDifferenceFromTokenEvaluation(this.FromCampaign, toAct, toAct.Intent, this.CombatPlayer);
-            UXController.AddToLog(delta.DescribeDelta());
-            delta.ApplyDelta(this.FromCampaign, UXController.AddToLog);
+            GamestateDelta delta = ScriptTokenEvaluator.CalculateDifferenceFromTokenEvaluation(this.FromCampaign, toAct, toAct.Intent, this.CombatPlayer);GlobalUpdateUX.LogTextEvent.Invoke($"The player has run out of health! This run is over.", GlobalUpdateUX.LogType.GameEvent);
+            GlobalUpdateUX.LogTextEvent.Invoke(delta.DescribeDelta(), GlobalUpdateUX.LogType.GameEvent);
+            delta.ApplyDelta(this.FromCampaign);
 
             this.CheckAllStateEffectsAndKnockouts();
         }
@@ -181,17 +182,16 @@ namespace SFDDCards
         public void StatusEffectHappeningProc(StatusEffectHappening happening)
         {
             GamestateDelta delta = ScriptTokenEvaluator.CalculateDifferenceFromTokenEvaluation(this.FromCampaign, happening.OwnedStatusEffect.Owner, happening, this.CombatPlayer);
-            UXController.AddToLog(delta.DescribeDelta());
-            delta.ApplyDelta(this.FromCampaign, UXController.AddToLog);
+            GlobalUpdateUX.LogTextEvent.Invoke(delta.DescribeDelta(), GlobalUpdateUX.LogType.GameEvent);
+            delta.ApplyDelta(this.FromCampaign);
 
             this.CheckAllStateEffectsAndKnockouts();
         }
 
         private void InitializeStartingEnemies()
         {
-            foreach (string curEnemyId in this.BasedOnEncounter.EnemiesInEncounterById)
+            foreach (EnemyModel curEnemyModel in this.BasedOnEncounter.GetEnemyModels())
             {
-                EnemyModel curEnemyModel = EnemyDatabase.GetModel(curEnemyId);
                 Enemy enemyInstance = new Enemy(curEnemyModel);
                 this.Enemies.Add(enemyInstance);
             }
@@ -202,6 +202,11 @@ namespace SFDDCards
             foreach (Enemy curEnemy in this.Enemies)
             {
                 if (curEnemy.Intent != null)
+                {
+                    continue;
+                }
+
+                if (curEnemy.BaseModel.Attacks.Count == 0)
                 {
                     continue;
                 }
@@ -227,7 +232,7 @@ namespace SFDDCards
                 }
             }
 
-            UpdateUXGlobalEvent.UpdateUXEvent.Invoke();
+            GlobalUpdateUX.UpdateUXEvent.Invoke();
         }
 
         public void CheckAllStateEffectsAndKnockouts()
@@ -249,13 +254,13 @@ namespace SFDDCards
 
             if (this.FromCampaign.CurrentNonCombatEncounterStatus == CampaignContext.NonCombatEncounterStatus.NotInNonCombatEncounter && enemies.Count == 0)
             {
-                this.UXController.AddToLog($"There are no more enemies!");
+                GlobalUpdateUX.LogTextEvent.Invoke($"There are no more enemies!", GlobalUpdateUX.LogType.GameEvent);
                 this.FromCampaign.SetCampaignState(CampaignContext.GameplayCampaignState.ClearedRoom);
                 // this.SetupClearedRoomAndPresentAwards();
                 return;
             }
 
-            this.UXController.UpdateUX();
+            this.UXController?.UpdateUX();
         }
 
         public void CheckAndApplyReactionWindow(ReactionWindowContext context)
@@ -265,7 +270,7 @@ namespace SFDDCards
                 return;
             }
 
-            CombatTurnController.PushSequencesToTop(eventsThatWouldFollow.ToArray());
+            GlobalSequenceEventHolder.PushSequencesToTop(eventsThatWouldFollow.ToArray());
         }
 
         public bool TryGetReactionWindowSequenceEvents(ReactionWindowContext context, out List<GameplaySequenceEvent> eventsThatWouldFollow)
@@ -334,23 +339,23 @@ namespace SFDDCards
                 this.UnsubscribeReactor(effect);
             }
 
-            this.UXController.AddToLog($"The player has run out of health! This run is over.");
+            GlobalUpdateUX.LogTextEvent.Invoke($"The player has run out of health! This run is over.", GlobalUpdateUX.LogType.GameEvent);
             this.FromCampaign.SetCampaignState(CampaignContext.GameplayCampaignState.Defeat);
             this.UnsubscribeReactor(this.CombatPlayer);
 
-            CombatTurnController.StopAllSequences();
+            GlobalSequenceEventHolder.StopAllSequences();
         }
 
         private void RemoveEnemy(Enemy toRemove)
         {
             toRemove.DefeatHasBeenSignaled = true;
 
-            this.UXController.AddToLog($"{toRemove.Name} has been defeated!");
+            GlobalUpdateUX.LogTextEvent.Invoke($"{toRemove.Name} has been defeated!", GlobalUpdateUX.LogType.GameEvent);
 
-            CombatTurnController.PushSequenceToTop(new GameplaySequenceEvent(
+            GlobalSequenceEventHolder.PushSequenceToTop(new GameplaySequenceEvent(
                 () =>
                 {
-                    this.UXController.RemoveEnemy(toRemove);
+                    this.UXController?.RemoveEnemy(toRemove);
                     this.Enemies.Remove(toRemove);
 
                     foreach (AppliedStatusEffect effect in toRemove.AppliedStatusEffects)
@@ -371,7 +376,7 @@ namespace SFDDCards
             this.CheckAndApplyReactionWindow(new ReactionWindowContext(KnownReactionWindows.OwnerStartsTurn, this.CombatPlayer));
 
             const int playerhandsize = 5;
-            CombatTurnController.PushSequencesToTop(
+            GlobalSequenceEventHolder.PushSequencesToTop(
                 new GameplaySequenceEvent(
                     () => this.PlayerCombatDeck.DealCards(playerhandsize),
                     null)
@@ -390,7 +395,7 @@ namespace SFDDCards
                 nextEvents.Add(new GameplaySequenceEvent(() => { this.EnemyStartTurn(); }));
             }
 
-            CombatTurnController.PushSequencesToTop(nextEvents.ToArray());
+            GlobalSequenceEventHolder.PushSequencesToTop(nextEvents.ToArray());
         }
 
         private void EnemyStartTurn()
@@ -418,7 +423,7 @@ namespace SFDDCards
             
             nextEvents.Add(new GameplaySequenceEvent(() => this.EndEnemyTurn(TurnStatus.PlayerTurn)));
 
-            CombatTurnController.PushSequencesToTop(nextEvents.ToArray());
+            GlobalSequenceEventHolder.PushSequencesToTop(nextEvents.ToArray());
         }
 
         private void EndEnemyTurn(TurnStatus toTurn)
@@ -435,7 +440,7 @@ namespace SFDDCards
                 nextEvents.Add(new GameplaySequenceEvent(() => { this.PlayerStartTurn(); }));
             }
 
-            CombatTurnController.PushSequencesToTop(nextEvents.ToArray());
+            GlobalSequenceEventHolder.PushSequencesToTop(nextEvents.ToArray());
         }
     }
 }
