@@ -118,16 +118,21 @@ namespace SFDDCards
         /// Used because it is intuitive to list things 
         /// in the order they happen while programming.
         /// </summary>
-        public static void PushSequencesToTop(params GameplaySequenceEvent[] eventsTopush)
+        public static void PushSequencesToTop(params GameplaySequenceEvent[] eventsToPush)
         {
-            for (int ii = eventsTopush.Length - 1; ii >= 0; ii--)
+            for (int ii = eventsToPush.Length - 1; ii >= 0; ii--)
             {
-                PushSequenceToTop(eventsTopush[ii]);
+                PushSequenceToTop(eventsToPush[ii]);
             }
         }
 
         public static void PushSequenceToTop(GameplaySequenceEvent eventToPush)
         {
+            if (eventToPush == null)
+            {
+                Debug.LogError($"{nameof(CombatTurnController)} ({nameof(PushSequenceToTop)}): Null event tried to push to top.");
+            }
+
             StackedSequenceEvents.Insert(0, eventToPush);
         }
 

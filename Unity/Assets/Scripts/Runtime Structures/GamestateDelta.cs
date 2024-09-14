@@ -28,7 +28,7 @@ namespace SFDDCards
                     campaignContext.CurrentCombatContext.ApplyElementResourceChange(change);
                 }
                 
-                entry.Target.ApplyDelta(entry);
+                entry.Target.ApplyDelta(campaignContext.CurrentCombatContext, entry);
             }
         }
 

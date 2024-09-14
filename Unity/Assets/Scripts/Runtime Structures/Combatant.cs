@@ -3,7 +3,7 @@ namespace SFDDCards
     using System.Collections;
     using System.Collections.Generic;
     using UnityEngine;
-    public abstract class Combatant : ICombatantTarget
+    public abstract class Combatant : ICombatantTarget, IReactionWindowReactor
     {
         public abstract string Name { get; }
         public abstract int MaxHealth { get; }
@@ -11,7 +11,7 @@ namespace SFDDCards
         public Transform UXPositionalTransform { get; set; }
         public List<AppliedStatusEffect> AppliedStatusEffects { get; set; } = new List<AppliedStatusEffect>();
 
-        public void ApplyDelta(DeltaEntry deltaEntry)
+        public void ApplyDelta(CombatContext combatContext, DeltaEntry deltaEntry)
         {
             if (deltaEntry.IntensityKindType == TokenEvaluatorBuilder.IntensityKind.Damage)
             {
@@ -40,15 +40,23 @@ namespace SFDDCards
                     existingEffect.Stacks += deltaEntry.Intensity;
                     if (existingEffect.Stacks <= 0)
                     {
+                        combatContext.UnsubscribeReactor(existingEffect);
                         AppliedStatusEffects.Remove(existingEffect);
                     }
                 }
                 else if (deltaEntry.Intensity > 0)
                 {
-                    AppliedStatusEffect newEffect = new AppliedStatusEffect(deltaEntry.StatusEffect, deltaEntry.Intensity);
+                    AppliedStatusEffect newEffect = new AppliedStatusEffect(this, deltaEntry.StatusEffect, deltaEntry.Intensity);
                     this.AppliedStatusEffects.Add(newEffect);
+                    newEffect.SetSubscriptions(combatContext);
                 }
             }
+        }
+
+        public bool TryGetReactionEvents(CombatContext combatContext, ReactionWindowContext reactionContext, out List<GameplaySequenceEvent> events)
+        {
+            events = null;
+            return false;
         }
 
         public bool IsFoeOf(ICombatantTarget otherTarget)

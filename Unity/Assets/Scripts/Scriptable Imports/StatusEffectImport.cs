@@ -22,19 +22,13 @@ namespace SFDDCards
 
             foreach (EffectOnProcImport import in this.Effects)
             {
-                if (!newEffect.EffectTokens.TryGetValue(import.Window.ToLower(), out List<ScriptingTokens.IScriptingToken> tokens))
+                if (!newEffect.EffectTokens.TryGetValue(import.Window.ToLower(), out List<List<ScriptingTokens.IScriptingToken>> tokens))
                 {
-                    tokens = new List<ScriptingTokens.IScriptingToken>();
+                    tokens = new List<List<ScriptingTokens.IScriptingToken>>();
                     newEffect.EffectTokens.Add(import.Window.ToLower(), tokens);
                 }
-                else
-                {
-                    // If there are more scripting tokens to add to this window, make sure to separate them with a [RESET]
-                    // that way effects don't bleed context into eachother
-                    tokens.Add(new ScriptingTokens.ResetScriptingToken());
-                }
 
-                tokens.AddRange(ScriptingTokens.ScriptingTokenDatabase.GetAllTokens(import.Script));
+                tokens.Add(ScriptingTokens.ScriptingTokenDatabase.GetAllTokens(import.Script));
             }
 
             return newEffect;

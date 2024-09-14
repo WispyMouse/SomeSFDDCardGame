@@ -6,8 +6,15 @@ namespace SFDDCards
     using UnityEngine;
 
 
-    public class StatusEffectHappening : IAttackTokenHolder
+    public struct StatusEffectHappening : IAttackTokenHolder
     {
-        public List<IScriptingToken> AttackTokens { get; set; } = new List<IScriptingToken>();
+        public List<IScriptingToken> AttackTokens { get; set; }
+        public AppliedStatusEffect OwnedStatusEffect { get; set; }
+
+        public StatusEffectHappening(AppliedStatusEffect ownedStatusEffect, List<IScriptingToken> attackTokens)
+        {
+            this.AttackTokens = attackTokens;
+            this.OwnedStatusEffect = ownedStatusEffect;
+        }
     }
 }
