@@ -68,12 +68,12 @@ namespace SFDDCards.Tests.EditMode
                 Assert.AreEqual(previousHealth - 1, target.CurrentHealth, $"The chosen target should have one less health.");
 
                 // No one else should be affected
-                Assert.AreEqual(combatContext.CombatPlayer.CurrentHealth == combatContext.CombatPlayer.MaxHealth, $"The player should have maximum health.");
+                Assert.AreEqual(combatContext.CombatPlayer.MaxHealth, combatContext.CombatPlayer.CurrentHealth, $"The player should have maximum health.");
 
                 // Skip the first index, since that enemy should be our target
                 for (int jj = 1; jj < combatContext.Enemies.Count; jj++)
                 {
-                    Assert.AreEqual(combatContext.Enemies[jj].CurrentHealth == combatContext.Enemies[jj].MaxHealth, $"Enemies not targeted should have maximum health.");
+                    Assert.AreEqual(combatContext.Enemies[jj].MaxHealth, combatContext.Enemies[jj].CurrentHealth, $"Enemies not targeted should have maximum health.");
                 }
             }
         }

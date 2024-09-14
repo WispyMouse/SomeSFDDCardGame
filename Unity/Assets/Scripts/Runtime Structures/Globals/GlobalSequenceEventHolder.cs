@@ -6,14 +6,14 @@ namespace SFDDCards
     using System.IO;
     using System.Text;
     using UnityEngine;
-
+    using UnityEngine.Events;
 
     public static class GlobalSequenceEventHolder
     {
         public static readonly List<GameplaySequenceEvent> StackedSequenceEvents = new List<GameplaySequenceEvent>();
         public static GameplaySequenceEvent CurrentSequenceEvent { get; set; } = null;
 
-        public static event Action OnStopAllSequences;
+        public static UnityEvent OnStopAllSequences = new UnityEvent();
 
         public static void SynchronouslyResolveAllEvents()
         {

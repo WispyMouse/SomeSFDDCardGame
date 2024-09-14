@@ -35,7 +35,7 @@ namespace SFDDCards
 
             Instance = this;
 
-            GlobalSequenceEventHolder.OnStopAllSequences += StopSequenceAnimation;
+            GlobalSequenceEventHolder.OnStopAllSequences.AddListener(StopSequenceAnimation);
         }
 
         public void BeginHandlingCombat()

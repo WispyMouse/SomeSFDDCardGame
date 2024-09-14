@@ -24,6 +24,13 @@ public static class GlobalUpdateUX
 
     private static void LogText(string toLog, LogType type)
     {
+        if (string.IsNullOrEmpty(toLog))
+        {
+            return;
+        }
+
+        toLog = toLog.Trim();
+
         switch (type)
         {
             case LogType.Info:

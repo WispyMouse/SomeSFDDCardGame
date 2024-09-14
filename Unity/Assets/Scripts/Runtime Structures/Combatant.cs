@@ -71,5 +71,10 @@ namespace SFDDCards
             }
             return false;
         }
+
+        public bool Valid()
+        {
+            return this.CurrentHealth > 0;
+        }
     }
 }
