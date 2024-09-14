@@ -165,19 +165,7 @@ namespace SFDDCards
 
             foreach (string statusEffectImportScriptName in statusEffectImportScriptNames)
             {
-                GlobalUpdateUX.LogTextEvent.Invoke($"Loading and parsing {statusEffectImportScriptName}...", GlobalUpdateUX.LogType.GameEvent);
-
-                try
-                {
-                    string fileText = File.ReadAllText(statusEffectImportScriptName);
-                    StatusEffectImport importedStatusEffect = Newtonsoft.Json.JsonConvert.DeserializeObject<StatusEffectImport>(fileText);
-                    StatusEffectDatabase.AddStatusEffectToDatabase(importedStatusEffect);
-                }
-                catch (Exception e)
-                {
-                    GlobalUpdateUX.LogTextEvent.Invoke($"Failed to parse! Debug log has exception details.", GlobalUpdateUX.LogType.GameEvent);
-                    Debug.LogException(e);
-                }
+                StatusEffectDatabase.TryImportStatusEffectFromFile(statusEffectImportScriptName, out _);
             }
 
             yield return new WaitForEndOfFrame();
