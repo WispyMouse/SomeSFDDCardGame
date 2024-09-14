@@ -6,7 +6,7 @@ namespace SFDDCards.ScriptingTokens
     public class ChangeStatusEffectStacksScriptingToken : BaseScriptingToken
     {
         public IEvaluatableValue<int> AmountOfStacks { get; private set; }
-        public StatusEffect StatusEffect { get; private set; }
+        public string StatusEffect { get; private set; }
 
         public override string ScriptingTokenIdentifier { get; } = "CHANGESTATUSEFFECTSTACKS";
 
@@ -14,7 +14,7 @@ namespace SFDDCards.ScriptingTokens
         {
             tokenBuilder.IntensityKindType = TokenEvaluatorBuilder.IntensityKind.StatusEffect;
             tokenBuilder.Intensity = AmountOfStacks;
-            tokenBuilder.StatusEffect = this.StatusEffect;
+            tokenBuilder.StatusEffect = StatusEffectDatabase.GetModel(this.StatusEffect);
             tokenBuilder.ShouldLaunch = true;
         }
 
@@ -36,16 +36,11 @@ namespace SFDDCards.ScriptingTokens
             }
 
             string remainingArgument = remainingArguments[0];
-            StatusEffect effect = StatusEffectDatabase.GetModel(remainingArgument.ToLower());
-            if (effect == null)
-            {
-                return false;
-            }
 
             scriptingToken = new ChangeStatusEffectStacksScriptingToken()
             {
                 AmountOfStacks = output,
-                StatusEffect = effect
+                StatusEffect = remainingArgument
             };
 
             return true;

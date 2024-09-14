@@ -13,5 +13,7 @@ namespace SFDDCards
         Transform UXPositionalTransform { get; }
 
         bool IsFoeOf(ICombatantTarget otherTarget);
+        bool Valid();
+        int CountStacks(string countFor);
     }
 }

@@ -35,7 +35,7 @@ namespace SFDDCards
         /// </summary>
         public void SetupAndStartNewGame()
         {
-            this.UXController.AddToLog("Resetting game to new state");
+            GlobalUpdateUX.LogTextEvent.Invoke("Resetting game to new state", GlobalUpdateUX.LogType.GameEvent);
 
             this.UXController.Annihilate();
 
@@ -51,7 +51,7 @@ namespace SFDDCards
         /// </summary>
         public void ProceedToNextRoom()
         {
-            this.UXController.AddToLog("Proceeding to next room");
+            GlobalUpdateUX.LogTextEvent.Invoke("Proceeding to next room", GlobalUpdateUX.LogType.GameEvent);
 
             this.CurrentCampaignContext.LeaveCurrentCombat();
             this.SetGameCampaignNavigationState(CampaignContext.GameplayCampaignState.EnteringRoom);
@@ -84,17 +84,17 @@ namespace SFDDCards
             if (newState == CampaignContext.GameplayCampaignState.ClearedRoom)
             {
                 this.CurrentCampaignContext.LeaveCurrentCombat();
-                this.UXController.AddToLog($"Room is clear! Press Next Room to proceed to next encounter.");
+                GlobalUpdateUX.LogTextEvent.Invoke($"Room is clear! Press Next Room to proceed to next encounter.", GlobalUpdateUX.LogType.GameEvent);
             }
 
-            UpdateUXGlobalEvent.UpdateUXEvent?.Invoke();
+            GlobalUpdateUX.UpdateUXEvent?.Invoke();
         }
 
         public void EnemyActsOnIntent(Enemy toAct)
         {
             GamestateDelta delta = ScriptTokenEvaluator.CalculateDifferenceFromTokenEvaluation(this.CurrentCampaignContext, toAct, toAct.Intent, this.CurrentCampaignContext.CampaignPlayer);
-            this.UXController.AddToLog(delta.DescribeDelta());
-            delta.ApplyDelta(this.CurrentCampaignContext, this.UXController.AddToLog);
+            GlobalUpdateUX.LogTextEvent.Invoke(delta.DescribeDelta(), GlobalUpdateUX.LogType.GameEvent);
+            delta.ApplyDelta(this.CurrentCampaignContext);
         }
 
         IEnumerator BootupSequence()
@@ -119,11 +119,11 @@ namespace SFDDCards
             string cardImportPath = Application.streamingAssetsPath + "/cardImport";
             string[] cardImportScriptNames = Directory.GetFiles(cardImportPath, "*.cardimport");
 
-            this.UXController.AddToLog($"Searched {cardImportPath}; Found {cardImportScriptNames.Length} scripts");
+            GlobalUpdateUX.LogTextEvent.Invoke($"Searched {cardImportPath}; Found {cardImportScriptNames.Length} scripts", GlobalUpdateUX.LogType.GameEvent);
 
             foreach (string cardImportScriptName in cardImportScriptNames)
             {
-                this.UXController.AddToLog($"Loading and parsing {cardImportScriptName}...");
+                GlobalUpdateUX.LogTextEvent.Invoke($"Loading and parsing {cardImportScriptName}...", GlobalUpdateUX.LogType.GameEvent);
 
                 try
                 {
@@ -141,14 +141,14 @@ namespace SFDDCards
                     }
                     else
                     {
-                        this.UXController.AddToLog($"Could not find art for {cardImportScriptName} at expected location of {artLocation}");
+                        GlobalUpdateUX.LogTextEvent.Invoke($"Could not find art for {cardImportScriptName} at expected location of {artLocation}", GlobalUpdateUX.LogType.GameEvent);
                     }
 
                     CardDatabase.AddCardToDatabase(importedCard, cardArt);
                 }
                 catch (Exception e)
                 {
-                    this.UXController.AddToLog($"Failed to parse! Debug log has exception details.");
+                    GlobalUpdateUX.LogTextEvent.Invoke($"Failed to parse! Debug log has exception details.", GlobalUpdateUX.LogType.GameEvent);
                     Debug.LogException(e);
                 }
             }
@@ -161,23 +161,11 @@ namespace SFDDCards
             string statusEffectImportPath = Application.streamingAssetsPath + "/statusImport";
             string[] statusEffectImportScriptNames = Directory.GetFiles(statusEffectImportPath, "*.statusImport");
 
-            this.UXController.AddToLog($"Searched {statusEffectImportPath}; Found {statusEffectImportScriptNames.Length} scripts");
+            GlobalUpdateUX.LogTextEvent.Invoke($"Searched {statusEffectImportPath}; Found {statusEffectImportScriptNames.Length} scripts", GlobalUpdateUX.LogType.GameEvent);
 
             foreach (string statusEffectImportScriptName in statusEffectImportScriptNames)
             {
-                this.UXController.AddToLog($"Loading and parsing {statusEffectImportScriptName}...");
-
-                try
-                {
-                    string fileText = File.ReadAllText(statusEffectImportScriptName);
-                    StatusEffectImport importedStatusEffect = Newtonsoft.Json.JsonConvert.DeserializeObject<StatusEffectImport>(fileText);
-                    StatusEffectDatabase.AddStatusEffectToDatabase(importedStatusEffect);
-                }
-                catch (Exception e)
-                {
-                    this.UXController.AddToLog($"Failed to parse! Debug log has exception details.");
-                    Debug.LogException(e);
-                }
+                StatusEffectDatabase.TryImportStatusEffectFromFile(statusEffectImportScriptName, out _);
             }
 
             yield return new WaitForEndOfFrame();
@@ -188,11 +176,11 @@ namespace SFDDCards
             string enemyImportPath = Application.streamingAssetsPath + "/enemyImport";
             string[] enemyImportScriptNames = Directory.GetFiles(enemyImportPath, "*.enemyimport");
 
-            this.UXController.AddToLog($"Searched {enemyImportPath}; Found {enemyImportScriptNames.Length} scripts");
+            GlobalUpdateUX.LogTextEvent.Invoke($"Searched {enemyImportPath}; Found {enemyImportScriptNames.Length} scripts", GlobalUpdateUX.LogType.GameEvent);
 
             foreach (string enemyImportScriptName in enemyImportScriptNames)
             {
-                this.UXController.AddToLog($"Loading and parsing {enemyImportScriptName}...");
+                GlobalUpdateUX.LogTextEvent.Invoke($"Loading and parsing {enemyImportScriptName}...", GlobalUpdateUX.LogType.GameEvent);
 
                 try
                 {
@@ -202,7 +190,7 @@ namespace SFDDCards
                 }
                 catch (Exception e)
                 {
-                    this.UXController.AddToLog($"Failed to parse! Debug log has exception details.");
+                    GlobalUpdateUX.LogTextEvent.Invoke($"Failed to parse! Debug log has exception details.", GlobalUpdateUX.LogType.GameEvent);
                     Debug.LogException(e);
                 }
             }
@@ -210,11 +198,11 @@ namespace SFDDCards
             string encounterImportPath = Application.streamingAssetsPath + "/encounterImport";
             string[] encounterImportNames = Directory.GetFiles(encounterImportPath, "*.encounterImport");
 
-            this.UXController.AddToLog($"Searched {encounterImportPath}; Found {encounterImportNames.Length} scripts");
+            GlobalUpdateUX.LogTextEvent.Invoke($"Searched {encounterImportPath}; Found {encounterImportNames.Length} scripts", GlobalUpdateUX.LogType.GameEvent);
 
             foreach (string encounterImportScriptNames in encounterImportNames)
             {
-                this.UXController.AddToLog($"Loading and parsing {encounterImportScriptNames}...");
+                GlobalUpdateUX.LogTextEvent.Invoke($"Loading and parsing {encounterImportScriptNames}...", GlobalUpdateUX.LogType.GameEvent);
 
                 try
                 {
@@ -224,7 +212,7 @@ namespace SFDDCards
                 }
                 catch (Exception e)
                 {
-                    this.UXController.AddToLog($"Failed to parse! Debug log has exception details.");
+                    GlobalUpdateUX.LogTextEvent.Invoke($"Failed to parse! Debug log has exception details.", GlobalUpdateUX.LogType.GameEvent);
                     Debug.LogException(e);
                 }
             }

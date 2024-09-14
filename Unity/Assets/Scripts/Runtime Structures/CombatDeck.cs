@@ -39,7 +39,7 @@ namespace SFDDCards
             this.CardsCurrentlyInDiscard.Clear();
             this.CardsCurrentlyInHand.Clear();
 
-            UpdateUXGlobalEvent.UpdateUXEvent.Invoke();
+            GlobalUpdateUX.UpdateUXEvent.Invoke();
         }
 
         /// <summary>
@@ -72,7 +72,7 @@ namespace SFDDCards
                 }
             }
 
-            UpdateUXGlobalEvent.UpdateUXEvent.Invoke();
+            GlobalUpdateUX.UpdateUXEvent.Invoke();
         }
 
         public void ShuffleDiscardIntoDeck()
@@ -81,7 +81,7 @@ namespace SFDDCards
             this.CardsCurrentlyInDiscard.Clear();
             this.CardsCurrentlyInDeck = this.CardsCurrentlyInDeck.ShuffleList();
 
-            UpdateUXGlobalEvent.UpdateUXEvent.Invoke();
+            GlobalUpdateUX.UpdateUXEvent.Invoke();
         }
 
         public void DiscardHand()
@@ -93,7 +93,7 @@ namespace SFDDCards
 
             this.CardsCurrentlyInHand.Clear();
 
-            UpdateUXGlobalEvent.UpdateUXEvent.Invoke();
+            GlobalUpdateUX.UpdateUXEvent.Invoke();
         }
     }
 }

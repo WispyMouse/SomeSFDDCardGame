@@ -77,16 +77,19 @@ namespace SFDDCards
         private void Awake()
         {
             this.Annihilate();
+
+            GlobalUpdateUX.LogTextEvent.AddListener(this.AddToLog);
         }
 
         private void OnEnable()
         {
-            UpdateUXGlobalEvent.UpdateUXEvent.AddListener(UpdateUX);
+            GlobalUpdateUX.UpdateUXEvent.AddListener(UpdateUX);
         }
 
         private void OnDestroy()
         {
-            UpdateUXGlobalEvent.UpdateUXEvent.RemoveListener(UpdateUX);
+            GlobalUpdateUX.UpdateUXEvent.RemoveListener(UpdateUX);
+            GlobalUpdateUX.LogTextEvent.RemoveListener(AddToLog);
         }
 
         private void Update()
@@ -220,7 +223,7 @@ namespace SFDDCards
 
             if (this.PlayerIsCurrentlyAnimating)
             {
-                this.AddToLog($"Player is currently animating, please wait until finished. (Being able to play faster will be fixed soon!)");
+                GlobalUpdateUX.LogTextEvent.Invoke($"Player is currently animating, please wait until finished.", GlobalUpdateUX.LogType.GameEvent);
                 return;
             }
 
@@ -244,17 +247,17 @@ namespace SFDDCards
 
             if (!anyPassingRequirements)
             {
-                this.AddToLog($"Unable to play card {toSelect.RepresentedCard.Name}. No requirements for any of the card's effects have been met.");
+                GlobalUpdateUX.LogTextEvent.Invoke($"Unable to play card {toSelect.RepresentedCard.Name}. No requirements for any of the card's effects have been met.", GlobalUpdateUX.LogType.GameEvent);
                 return;
             }
 
             this.CurrentSelectedCard = toSelect;
             this.CurrentSelectedCard.EnableSelectionGlow();
             this.AppointTargetableIndicatorsToValidTargets(toSelect.RepresentedCard);
-            AddToLog($"Selected card {toSelect.RepresentedCard.Name}");
+            GlobalUpdateUX.LogTextEvent.Invoke($"Selected card {toSelect.RepresentedCard.Name}", GlobalUpdateUX.LogType.GameEvent);
         }
 
-        public void AddToLog(string text)
+        public void AddToLog(string text, GlobalUpdateUX.LogType logType)
         {
             if (string.IsNullOrEmpty(text))
             {
@@ -567,15 +570,15 @@ namespace SFDDCards
 
         public void EndTurn()
         {
-            if (CombatTurnController.StackedSequenceEvents.Count > 0)
+            if (GlobalSequenceEventHolder.StackedSequenceEvents.Count > 0)
             {
-                this.AddToLog($"Animations and events are happening, can't end turn yet.");
+                GlobalUpdateUX.LogTextEvent.Invoke($"Animations and events are happening, can't end turn yet.", GlobalUpdateUX.LogType.GameEvent);
                 return;
             }
 
             if (this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.CurrentTurnStatus != CombatContext.TurnStatus.PlayerTurn)
             {
-                this.AddToLog($"It's not the player's turn, can't end turn.");
+                GlobalUpdateUX.LogTextEvent.Invoke($"It's not the player's turn, can't end turn.", GlobalUpdateUX.LogType.GameEvent);
                 return;
             }
 

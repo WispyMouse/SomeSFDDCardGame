@@ -9,7 +9,7 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
 
         public override bool TryEvaluateValue(CampaignContext campaignContext, TokenEvaluatorBuilder currentBuilder, out ICombatantTarget evaluatedValue)
         {
-            if (TryGetFoe(campaignContext, currentBuilder.User, out evaluatedValue))
+            if (TryGetFoe(campaignContext, currentBuilder, currentBuilder.User, out evaluatedValue))
             {
                 return true;
             }
@@ -18,8 +18,18 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
             return false;
         }
 
-        private bool TryGetFoe(CampaignContext campaignContext, ICombatantTarget user, out ICombatantTarget foe)
+        private bool TryGetFoe(CampaignContext campaignContext, TokenEvaluatorBuilder currentBuilder, ICombatantTarget user, out ICombatantTarget foe)
         {
+            // If the original target still exists, and is a foe of the user,
+            // then use the original target
+            if (currentBuilder.OriginalTarget != null
+                && currentBuilder.OriginalTarget.Valid()
+                && currentBuilder.OriginalTarget.IsFoeOf(user))
+            {
+                foe = currentBuilder.OriginalTarget;
+                return true;
+            }
+
             if (user is Enemy)
             {
                 foe = campaignContext.CampaignPlayer;

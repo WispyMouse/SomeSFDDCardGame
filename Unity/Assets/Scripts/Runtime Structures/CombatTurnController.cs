@@ -21,11 +21,9 @@ namespace SFDDCards
         private CombatContext Context => this.CentralGameStateControllerInstance?.CurrentCampaignContext?.CurrentCombatContext;
         
         public bool CurrentlyActive { get; private set; } = false;
-        public static readonly List<GameplaySequenceEvent> StackedSequenceEvents = new List<GameplaySequenceEvent>();
 
         private static Coroutine AnimationCoroutine { get; set; } = null;
         private static bool AnimationCoroutineIsRunning { get; set; } = false;
-        private static GameplaySequenceEvent CurrentSequenceEvent { get; set; } = null;
 
         private void Awake()
         {
@@ -36,13 +34,15 @@ namespace SFDDCards
             }
 
             Instance = this;
+
+            GlobalSequenceEventHolder.OnStopAllSequences.AddListener(StopSequenceAnimation);
         }
 
         public void BeginHandlingCombat()
         {
             this.CurrentlyActive = true;
 
-            PushSequencesToTop(
+            GlobalSequenceEventHolder.PushSequencesToTop(
                 new GameplaySequenceEvent(this.SpawnInitialEnemies, null),
                 new GameplaySequenceEvent(() => this.Context.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.PlayerTurn), null)
                 );
@@ -51,7 +51,16 @@ namespace SFDDCards
         public void EndHandlingCombat()
         {
             this.CurrentlyActive = false;
-            StackedSequenceEvents.Clear();
+            GlobalSequenceEventHolder.StopAllSequences();
+        }
+
+        private void StopSequenceAnimation()
+        {
+            if (AnimationCoroutine != null)
+            {
+                Instance.StopCoroutine(AnimationCoroutine);
+                AnimationCoroutine = null;
+            }
         }
 
         #region Sequence Resolution
@@ -60,7 +69,7 @@ namespace SFDDCards
         {
             do
             {
-                if (StackedSequenceEvents.Count == 0 && CurrentSequenceEvent == null)
+                if (GlobalSequenceEventHolder.StackedSequenceEvents.Count == 0 && GlobalSequenceEventHolder.CurrentSequenceEvent == null)
                 {
                     return;
                 }
@@ -70,33 +79,17 @@ namespace SFDDCards
                     return;
                 }
 
-                this.PopAndExecuteNextSequence();
+                GlobalSequenceEventHolder.ApplyNextSequenceWithAnimationHandler(this);
             }
-            while (StackedSequenceEvents.Count > 0);
+            while (GlobalSequenceEventHolder.StackedSequenceEvents.Count > 0);
         }
 
-        private void PopAndExecuteNextSequence()
+        public void HandleSequenceEventWithAnimation(GameplaySequenceEvent sequenceEvent)
         {
-            if (StackedSequenceEvents.Count == 0)
-            {
-                return;
-            }
-
-            CurrentSequenceEvent = StackedSequenceEvents[0];
-            StackedSequenceEvents.RemoveAt(0);
-            
-            if (CurrentSequenceEvent.AnimationDelegate != null)
-            {
-                AnimationCoroutine = this.StartCoroutine(HandleSequenceEventWithAnimation(CurrentSequenceEvent));
-            }
-            else
-            {
-                CurrentSequenceEvent.ConsequentialAction?.Invoke();
-                CurrentSequenceEvent = null;
-            }
+            AnimationCoroutine = this.StartCoroutine(AnimateHandleSequenceEventWithAnimation(sequenceEvent));
         }
 
-        private IEnumerator HandleSequenceEventWithAnimation(GameplaySequenceEvent runningEvent)
+        private IEnumerator AnimateHandleSequenceEventWithAnimation(GameplaySequenceEvent runningEvent)
         {
             AnimationCoroutineIsRunning = true;
 
@@ -105,47 +98,6 @@ namespace SFDDCards
 
             AnimationCoroutineIsRunning = false;
             AnimationCoroutine = null;
-        }
-
-        #endregion
-
-        #region Sequence Alteration
-
-        /// <summary>
-        /// Pushes a list of sequences to the top.
-        /// The first element will be put in last, so it is
-        /// the next thing that will happen.
-        /// Used because it is intuitive to list things 
-        /// in the order they happen while programming.
-        /// </summary>
-        public static void PushSequencesToTop(params GameplaySequenceEvent[] eventsToPush)
-        {
-            for (int ii = eventsToPush.Length - 1; ii >= 0; ii--)
-            {
-                PushSequenceToTop(eventsToPush[ii]);
-            }
-        }
-
-        public static void PushSequenceToTop(GameplaySequenceEvent eventToPush)
-        {
-            if (eventToPush == null)
-            {
-                Debug.LogError($"{nameof(CombatTurnController)} ({nameof(PushSequenceToTop)}): Null event tried to push to top.");
-            }
-
-            StackedSequenceEvents.Insert(0, eventToPush);
-        }
-
-        public static void StopAllSequences()
-        {
-            if (AnimationCoroutine != null)
-            {
-                Instance.StopCoroutine(AnimationCoroutine);
-                AnimationCoroutine = null;
-            }
-
-            StackedSequenceEvents.Clear();
-            CurrentSequenceEvent = null;
         }
 
         #endregion

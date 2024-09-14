@@ -42,6 +42,15 @@ namespace SFDDCards
         public Dictionary<string, int> ElementRequirements = new Dictionary<string, int>();
 
         public StatusEffect StatusEffect;
+        public string LogText;
+
+        public List<Action<TokenEvaluatorBuilder>> ActionsToExecute = new List<Action<TokenEvaluatorBuilder>>();
+
+        public TokenEvaluatorBuilder(ICombatantTarget inUser, ICombatantTarget inOriginalTarget)
+        {
+            this.User = inUser;
+            this.OriginalTarget = inOriginalTarget;
+        }
 
         public GamestateDelta GetEffectiveDelta(CampaignContext campaignContext)
         {
@@ -139,11 +148,9 @@ namespace SFDDCards
 
         public static TokenEvaluatorBuilder Continue(TokenEvaluatorBuilder previous)
         {
-            TokenEvaluatorBuilder builder = new TokenEvaluatorBuilder();
+            TokenEvaluatorBuilder builder = new TokenEvaluatorBuilder(previous.User, previous.OriginalTarget);
 
-            builder.User = previous.User;
             builder.Target = previous.Target;
-            builder.OriginalTarget = previous.OriginalTarget;
 
             return builder;
         }

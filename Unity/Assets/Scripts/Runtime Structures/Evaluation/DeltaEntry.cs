@@ -185,33 +185,6 @@ namespace SFDDCards
                 return "Self";
             }
 
-            if (Target is FoeTarget)
-            {
-                if (User is Enemy)
-                {
-                    return "Player";
-                }
-                else if (Target == OriginalTarget)
-                {
-                    return "Targeted Foe";
-                }
-                else
-                {
-                    if (User is AbstractPlayerUser)
-                    {
-                        return "Random Foe";
-                    }
-                    else if (User is Player)
-                    {
-                        return "Random Foe";
-                    }
-                    else
-                    {
-                        return "Player";
-                    }
-                }
-            }
-
             if (User == null && Target == null)
             {
                 return "Any Target";

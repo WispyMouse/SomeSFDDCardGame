@@ -74,17 +74,15 @@ namespace SFDDCards.ScriptingTokens
             {
                 string currentArgument = arguments[ii];
 
-                if (Regex.IsMatch(currentArgument, @"\-?\d+"))
+                if (ConstantEvaluatableValue<int>.TryGetConstantEvaluatableValue(currentArgument, out ConstantEvaluatableValue<int> outputCEVI))
                 {
-                    if (int.TryParse(currentArgument, out int result))
-                    {
-                        compositeEvaluatable.CompositeComponents.Add(new ConstantEvaluatableValue<int>(result));
-                        continue;
-                    }
-                    else
-                    {
-                        return false;
-                    }
+                    compositeEvaluatable.CompositeComponents.Add(outputCEVI);
+                    continue;
+                }
+                else if (CountStacksEvaluatableValue.TryGetConstantEvaluatableValue(currentArgument, out CountStacksEvaluatableValue outputCSEV))
+                {
+                    compositeEvaluatable.CompositeComponents.Add(outputCSEV);
+                    continue;
                 }
 
                 remainingStrings.Add(currentArgument);
@@ -95,7 +93,7 @@ namespace SFDDCards.ScriptingTokens
                 return false;
             }
 
-            output = compositeEvaluatable;
+            compositeEvaluatable.AttemptAssignSingleComponent(ref output);
             return true;
         }
 

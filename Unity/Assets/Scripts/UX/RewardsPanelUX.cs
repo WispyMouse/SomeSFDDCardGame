@@ -29,7 +29,7 @@ namespace SFDDCards
             this.DestroyRewardCards();
             this.gameObject.SetActive(false);
 
-            UpdateUXGlobalEvent.UpdateUXEvent?.Invoke();
+            GlobalUpdateUX.UpdateUXEvent?.Invoke();
         }
 
         public void SetRewardCards(params Card[] toReward)

@@ -11,7 +11,7 @@ namespace SFDDCards
     {
         public List<DeltaEntry> DeltaEntries { get; set; } = new List<DeltaEntry>();
 
-        public void ApplyDelta(CampaignContext campaignContext, Action<string> logFunction)
+        public void ApplyDelta(CampaignContext campaignContext)
         {
             foreach (DeltaEntry entry in DeltaEntries)
             {
