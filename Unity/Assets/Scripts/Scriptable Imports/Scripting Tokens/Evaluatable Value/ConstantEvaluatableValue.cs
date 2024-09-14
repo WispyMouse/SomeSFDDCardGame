@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+
 namespace SFDDCards.ScriptingTokens.EvaluatableValues
 {
     public class ConstantEvaluatableValue<T> : IEvaluatableValue<T>
@@ -18,6 +20,26 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
         public string DescribeEvaluation()
         {
             return this.ConstantValue.ToString();
+        }
+
+        public static bool TryGetConstantEvaluatableValue(string argument, out ConstantEvaluatableValue<int> output)
+        {
+            if (Regex.IsMatch(argument, @"\-?\d+"))
+            {
+                if (int.TryParse(argument, out int result))
+                {
+                    output = new ConstantEvaluatableValue<int>(result);
+                    return true;
+                }
+                else
+                {
+                    output = null;
+                    return false;
+                }
+            }
+
+            output = null;
+            return false;
         }
     }
 }

@@ -33,17 +33,25 @@ namespace SFDDCards
         public static List<TokenEvaluatorBuilder> CalculateEvaluatorBuildersFromTokenEvaluation(IAttackTokenHolder evaluatedAttack, ICombatantTarget actor = null, ICombatantTarget target = null)
         {
             List<TokenEvaluatorBuilder> builders = new List<TokenEvaluatorBuilder>();
-            TokenEvaluatorBuilder builder = new TokenEvaluatorBuilder();
+            TokenEvaluatorBuilder builder = new TokenEvaluatorBuilder(actor, target);
 
             if (actor != null)
             {
                 builder.User = actor;
+            }
+            else
+            {
+                builder.User = new NoTarget();
             }
             
             if (target != null)
             {
                 builder.OriginalTarget = target;
                 builder.Target = new SpecificTargetEvaluatableValue(target);
+            }
+            else
+            {
+                builder.OriginalTarget = new NoTarget();
             }
 
             Dictionary<string, int> previousRequirements = new Dictionary<string, int>();

@@ -33,5 +33,10 @@ namespace SFDDCards
 
             return foundModel;
         }
+
+        public static void ClearDatabase()
+        {
+            EffectData.Clear();
+        }
     }
 }

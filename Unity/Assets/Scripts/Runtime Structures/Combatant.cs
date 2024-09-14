@@ -76,5 +76,17 @@ namespace SFDDCards
         {
             return this.CurrentHealth > 0;
         }
+
+        public int CountStacks(string countFor)
+        {
+            AppliedStatusEffect effect = this.AppliedStatusEffects.Find(x => x.BasedOnStatusEffect.Id.ToLower() == countFor.ToLower());
+
+            if (effect == null)
+            {
+                return 0;
+            }
+
+            return effect.Stacks;
+        }
     }
 }

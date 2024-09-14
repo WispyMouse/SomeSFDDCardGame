@@ -12,6 +12,11 @@ namespace SFDDCards
             // No-op
         }
 
+        public int CountStacks(string countFor)
+        {
+            return 0;
+        }
+
         public bool IsFoeOf(ICombatantTarget otherTarget)
         {
             return false;

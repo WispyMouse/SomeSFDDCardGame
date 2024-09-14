@@ -12,10 +12,13 @@ namespace SFDDCards.ScriptingTokens
 
         public override void ApplyToken(TokenEvaluatorBuilder tokenBuilder)
         {
-            if (this.ValueToLog.TryEvaluateValue(null, tokenBuilder, out int evaluatedValue))
+            tokenBuilder.ActionsToExecute.Add((TokenEvaluatorBuilder currentBuilder) =>
             {
-                GlobalUpdateUX.LogTextEvent?.Invoke(evaluatedValue.ToString(), GlobalUpdateUX.LogType.Info);
-            }
+                if (this.ValueToLog.TryEvaluateValue(null, currentBuilder, out int evaluatedValue))
+                {
+                    GlobalUpdateUX.LogTextEvent?.Invoke(evaluatedValue.ToString(), GlobalUpdateUX.LogType.Info);
+                }
+            });
         }
 
         public override bool RequiresTarget()

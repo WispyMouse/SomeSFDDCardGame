@@ -16,6 +16,7 @@ namespace SFDDCards.Tests.EditMode
         {
             GlobalSequenceEventHolder.StopAllSequences();
             EnemyDatabase.ClearDatabase();
+            StatusEffectDatabase.ClearDatabase();
         }
     }
 }

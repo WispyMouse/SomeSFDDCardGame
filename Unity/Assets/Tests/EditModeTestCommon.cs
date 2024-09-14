@@ -1,5 +1,6 @@
 namespace SFDDCards.Tests.EditMode
 {
+    using SFDDCards.ScriptingTokens.EvaluatableValues;
     using System;
     using System.Collections;
     using System.Collections.Generic;
@@ -52,6 +53,19 @@ namespace SFDDCards.Tests.EditMode
         public static void PlayerDrawsDeck(CombatContext combatContext)
         {
             combatContext.PlayerCombatDeck.DealCards(combatContext.PlayerCombatDeck.CardsCurrentlyInDeck.Count);
+        }
+
+        public static void ApplyStatusEffectStacks(string toApply, CombatContext combatContext, ICombatantTarget toTarget, int mod)
+        {
+            toTarget.ApplyDelta(combatContext, new DeltaEntry()
+            {
+                Target = toTarget,
+                IntensityKindType = TokenEvaluatorBuilder.IntensityKind.StatusEffect,
+                Intensity = mod,
+                StatusEffect = StatusEffectDatabase.GetModel(toApply)
+            });
+
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
         }
     }
 }
