@@ -12,6 +12,5 @@ namespace SFDDCards
         public List<string> StartingDeck = new List<string>();
         public int CardsToAwardOnVictory = 3;
         public int StartingMaximumHealth = 50;
-        public int CardsInShop = 12;
     }
 }

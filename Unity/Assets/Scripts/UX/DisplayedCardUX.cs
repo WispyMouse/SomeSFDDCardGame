@@ -6,7 +6,7 @@ namespace SFDDCards
     using UnityEngine;
     using UnityEngine.EventSystems;
 
-    public class DisplayedCardUX : MonoBehaviour
+    public class DisplayedCardUX : MonoBehaviour, IMouseHoverListener
     {
         public Card RepresentedCard { get; private set; } = null;
         
@@ -18,6 +18,16 @@ namespace SFDDCards
         public void Awake()
         {
             this.DisableSelectionGlow();
+        }
+
+        public virtual void MouseEnterStartHover()
+        {
+            GlobalUpdateUX.MouseStartHoveredEvent.Invoke(this);
+        }
+
+        public virtual void MouseExitStopHover()
+        {
+            GlobalUpdateUX.MouseEndHoveredEvent.Invoke(this);
         }
 
         public virtual void Clicked()
@@ -39,6 +49,17 @@ namespace SFDDCards
             this.cardSelectedAction = inCardSelectedAction;
 
             this.RenderedCard.SetFromCard(toSet);
+        }
+
+        public Transform GetTransform()
+        {
+            return this.transform;
+        }
+
+        public bool TryGetCard(out Card toShow)
+        {
+            toShow = this.RenderedCard?.RepresentedCard;
+            return toShow != null;
         }
     }
 }

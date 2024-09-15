@@ -1,0 +1,11 @@
+{
+    "Name": "Delayed Draw",
+	"Id": "delayeddraw",
+	"Effects":
+	[
+		{
+			"Window": "OWNERSTARTSTURN",
+			"Script": "[SETTARGET: SELF][DRAW: COUNTSTACKS_DELAYEDDRAW][CHANGESTATUSEFFECTSTACKS: -COUNTSTACKS_DELAYEDDRAW DELAYEDDRAW]"
+		}
+	]
+}

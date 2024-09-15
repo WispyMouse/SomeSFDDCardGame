@@ -1,0 +1,11 @@
+{
+    "Name": "Regen",
+	"Id": "regen",
+	"Effects":
+	[
+		{
+			"Window": "OWNERSTARTSTURN",
+			"Script": "[SETTARGET: SELF][HEAL: COUNTSTACKS_REGEN][CHANGESTATUSEFFECTSTACKS: -1 REGEN]"
+		}
+	]
+}

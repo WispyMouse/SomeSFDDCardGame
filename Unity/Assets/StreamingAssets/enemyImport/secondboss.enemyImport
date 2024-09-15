@@ -1,0 +1,27 @@
+{
+	"Id": "secondboss",
+	"Name": "Second Boss",
+	"MaximumHealth": 60,
+	"Attacks":
+	[
+		{
+			"AttackScript": "[SETTARGET: FOE][DAMAGE: 4][CHANGESTATUSEFFECTSTACKS: 5 POISON]"
+		},
+		{
+			"AttackScript": "[SETTARGET: FOE][DAMAGE: 6]"
+		},
+		{
+			"AttackScript": "[SETTARGET: FOE][DAMAGE: 8]"
+		},
+		{
+			"AttackScript": "[SETTARGET: FOE][DAMAGE: 6][CHANGESTATUSEFFECTSTACKS: 3 POISON]"
+		},
+		{
+			"AttackScript": "[SETTARGET: SELF][CHANGESTATUSEFFECTSTACKS: 8 REGEN]"
+		}
+	],
+	"Tags":
+	[
+		"SecondBoss"
+	]
+}

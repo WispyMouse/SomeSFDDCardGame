@@ -1,0 +1,13 @@
+{
+	"Id": "firstfight_superezpz",
+	"Name": "Easiest Fight In The Game",
+	"Description": "This guy showed up, but...",
+	"EnemyIds":
+	[
+		"beginnerenemy_easiest"
+	],
+	"Tags":
+	[
+		"FirstFight"
+	]
+}

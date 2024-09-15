@@ -1,0 +1,15 @@
+{
+	"Id": "midfight",
+	"Name": "Fight Some Mooks",
+	"Description": "Here are some mooks.",
+	"EnemyIds":
+	[
+		"[MidFight]",
+		"[MidFight]",
+		"[MidFight]"
+	],
+	"Tags":
+	[
+		"MidFight"
+	]
+}

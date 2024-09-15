@@ -1,0 +1,19 @@
+{
+	"Id": "shopencounter_void",
+	"Name": "Void Shop",
+	"Description": "A shop with mostly void cards.",
+	"EnemyIds":
+	[
+	],
+	"IsShopEncounter": true,
+	"Arguments":
+	[
+		"[COMMON] [COMMON] [COMMON][VOID] [COMMON][VOID] [COMMON][VOID] [COMMON][VOID] [UNCOMMON][VOID] [UNCOMMON][VOID] [RARE][VOID]"
+	],
+	"Tags":
+	[
+		"SHOP",
+		"ELEMENTALSHOP",
+		"VOID"
+	]
+}

@@ -1,8 +1,10 @@
+using SFDDCards.ScriptingTokens.EvaluatableValues;
+
 namespace SFDDCards
 {
     public struct ElementResourceChange
     {
-        public string Element;
-        public int GainOrLoss;
+        public Element Element;
+        public IEvaluatableValue<int> GainOrLoss;
     }
 }

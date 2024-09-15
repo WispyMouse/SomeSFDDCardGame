@@ -1,0 +1,13 @@
+{
+	"Id": "firstfight_hardest",
+	"Name": "Hardest First Fight",
+	"Description": "How tough are you?",
+	"EnemyIds":
+	[
+		"beginnerenemy_hardest",
+	],
+	"Tags":
+	[
+		"FirstFight"
+	]
+}

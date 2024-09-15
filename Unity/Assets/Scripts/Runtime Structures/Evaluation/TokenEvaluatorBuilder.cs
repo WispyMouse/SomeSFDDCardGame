@@ -39,7 +39,8 @@ namespace SFDDCards
         public NumberOfCardsRelation NumberOfCardsRelationType = NumberOfCardsRelation.None;
 
         public List<ElementResourceChange> ElementResourceChanges = new List<ElementResourceChange>();
-        public Dictionary<string, int> ElementRequirements = new Dictionary<string, int>();
+        public Dictionary<Element, IEvaluatableValue<int>> ElementRequirements = new Dictionary<Element, IEvaluatableValue<int>>();
+        public List<RequiresComparisonScriptingToken> RequiresComparisons = new List<RequiresComparisonScriptingToken>();
 
         public StatusEffect StatusEffect;
         public string LogText;
@@ -55,15 +56,23 @@ namespace SFDDCards
         public GamestateDelta GetEffectiveDelta(CampaignContext campaignContext)
         {
             GamestateDelta delta = new GamestateDelta();
+            int evaluatedIntensity = 0;
 
-            if (!this.Intensity.TryEvaluateValue(campaignContext, this, out int evaluatedIntensity))
+            if (this.Intensity != null)
             {
-                Debug.Log($"{nameof(TokenEvaluatorBuilder)} ({nameof(GetEffectiveDelta)}): Failed to evaluate {nameof(this.Intensity)}. Cannot have a delta.");
-                return delta;
+                if (!this.Intensity.TryEvaluateValue(campaignContext, this, out evaluatedIntensity))
+                {
+                    GlobalUpdateUX.LogTextEvent?.Invoke($"{nameof(TokenEvaluatorBuilder)} ({nameof(GetEffectiveDelta)}): Failed to evaluate {nameof(this.Intensity)}. Cannot have a delta.", GlobalUpdateUX.LogType.RuntimeError);
+                    return delta;
+                }
             }
 
             ICombatantTarget foundTarget = null;
-            this.Target.TryEvaluateValue(campaignContext, this, out foundTarget);
+
+            if (!(this.Target != null && this.Target.TryEvaluateValue(campaignContext, this, out foundTarget)))
+            {
+                GlobalUpdateUX.LogTextEvent?.Invoke($"Failed to evaluate a target for this ability", GlobalUpdateUX.LogType.RuntimeError);
+            }
 
             delta.DeltaEntries.Add(new DeltaEntry()
             {
@@ -101,11 +110,62 @@ namespace SFDDCards
             return delta;
         }
 
+        public bool MeetsComparisonRequirements(CombatContext combatContext)
+        {
+            foreach (RequiresComparisonScriptingToken comparison in this.RequiresComparisons)
+            {
+                if (!comparison.Left.TryEvaluateValue(combatContext.FromCampaign, this, out int leftValue))
+                {
+                    return false;
+                }
+
+                if (!comparison.Right.TryEvaluateValue(combatContext.FromCampaign, this, out int rightValue))
+                {
+                    return false;
+                }
+
+                bool evaluationResult = false;
+
+                switch (comparison.ComparisonType)
+                {
+                    case RequiresComparisonScriptingToken.Comparison.LessThan:
+                        evaluationResult = leftValue < rightValue;
+                        break;
+                    case RequiresComparisonScriptingToken.Comparison.LessThanOrEqual:
+                        evaluationResult = leftValue <= rightValue;
+                        break;
+                    case RequiresComparisonScriptingToken.Comparison.EqualTo:
+                        evaluationResult = leftValue == rightValue;
+                        break;
+                    case RequiresComparisonScriptingToken.Comparison.GreaterThan:
+                        evaluationResult = leftValue > rightValue;
+                        break;
+                    case RequiresComparisonScriptingToken.Comparison.GreaterThanOrEqual:
+                        evaluationResult = leftValue >= rightValue;
+                        break;
+                }
+            }
+
+            return true;
+        }
+
         public bool MeetsElementRequirements(CombatContext combatContext)
         {
-            foreach (string element in this.ElementRequirements.Keys)
+            foreach (Element element in this.ElementRequirements.Keys)
             {
-                if (!combatContext.MeetsElementRequirement(element, this.ElementRequirements[element]))
+                if (!this.ElementRequirements.TryGetValue(element, out IEvaluatableValue<int> variable))
+                {
+                    GlobalUpdateUX.LogTextEvent?.Invoke($"Could not parse a variable for meeting requirements.", GlobalUpdateUX.LogType.RuntimeError);
+                    return false;
+                }
+
+                if (!variable.TryEvaluateValue(combatContext.FromCampaign, this, out int evaluatedValue))
+                {
+                    GlobalUpdateUX.LogTextEvent?.Invoke($"Failed to evaluate value while trying to meet requirements.", GlobalUpdateUX.LogType.RuntimeError);
+                    return false;
+                }
+
+                if (!combatContext.MeetsElementRequirement(element, evaluatedValue))
                 {
                     return false;
                 }
@@ -126,14 +186,9 @@ namespace SFDDCards
             string startingComma = "";
             bool nonzeroFound = false;
 
-            foreach (string element in this.ElementRequirements.Keys)
+            foreach (Element element in this.ElementRequirements.Keys)
             {
-                if (this.ElementRequirements[element] <= 0)
-                {
-                    continue;
-                }
-
-                compositeRequirements.Append($"{startingComma}{this.ElementRequirements[element]} {element}");
+                compositeRequirements.Append($"{startingComma}{this.ElementRequirements[element].DescribeEvaluation()} {element.GetNameOrIcon()}");
                 startingComma = ", ";
                 nonzeroFound = true;
             }

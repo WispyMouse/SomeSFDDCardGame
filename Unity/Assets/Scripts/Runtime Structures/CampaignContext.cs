@@ -77,6 +77,11 @@ namespace SFDDCards
             this.CurrentGameplayCampaignState = toState;
             this.CurrentNonCombatEncounterStatus = nonCombatState;
 
+            if (toState != GameplayCampaignState.InCombat)
+            {
+                this.CampaignPlayer.AppliedStatusEffects.Clear();
+            }
+
             if (toState == GameplayCampaignState.ClearedRoom && this.CurrentEncounter != null && this.CurrentCombatContext.Enemies.Count == 0)
             {
                 this.LeaveCurrentCombat();

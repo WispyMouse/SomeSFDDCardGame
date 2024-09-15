@@ -1,5 +1,0 @@
-{
-	"Id": "drawtwo",
-	"Name": "Draw Two",
-	"EffectScript": "[GAINELEMENT: 1 CYBER][DRAW: 2]"
-}

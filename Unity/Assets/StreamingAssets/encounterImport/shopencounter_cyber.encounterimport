@@ -1,0 +1,19 @@
+{
+	"Id": "shopencounter_cyber",
+	"Name": "Cyber Shop",
+	"Description": "A shop with mostly cyber cards.",
+	"EnemyIds":
+	[
+	],
+	"IsShopEncounter": true,
+	"Arguments":
+	[
+		"[COMMON] [COMMON] [COMMON][CYBER] [COMMON][CYBER] [COMMON][CYBER] [COMMON][CYBER] [UNCOMMON][CYBER] [UNCOMMON][CYBER] [RARE][CYBER]"
+	],
+	"Tags":
+	[
+		"SHOP",
+		"ELEMENTALSHOP",
+		"CYBER"
+	]
+}

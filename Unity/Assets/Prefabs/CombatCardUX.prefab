@@ -38,7 +38,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 150, y: 200}
+  m_SizeDelta: {x: 180, y: 250}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!223 &8624548574278219049
 Canvas:
@@ -233,6 +233,30 @@ PrefabInstance:
       propertyPath: m_Delegates.Array.data[0].callback.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: -2401335007970755610}
+    - target: {fileID: 333989122132833145, guid: a59470bf4290660488c8860a48339429, type: 3}
+      propertyPath: m_Delegates.Array.data[1].callback.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: -2401335007970755610}
+    - target: {fileID: 333989122132833145, guid: a59470bf4290660488c8860a48339429, type: 3}
+      propertyPath: m_Delegates.Array.data[2].callback.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: -2401335007970755610}
+    - target: {fileID: 333989122132833145, guid: a59470bf4290660488c8860a48339429, type: 3}
+      propertyPath: m_Delegates.Array.data[1].callback.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: MouseEnterStartHover
+      objectReference: {fileID: 0}
+    - target: {fileID: 333989122132833145, guid: a59470bf4290660488c8860a48339429, type: 3}
+      propertyPath: m_Delegates.Array.data[2].callback.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: MouseExitStopHover
+      objectReference: {fileID: 0}
+    - target: {fileID: 333989122132833145, guid: a59470bf4290660488c8860a48339429, type: 3}
+      propertyPath: m_Delegates.Array.data[1].callback.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: SFDDCards.DisplayedCardUX, Scripts
+      objectReference: {fileID: 0}
+    - target: {fileID: 333989122132833145, guid: a59470bf4290660488c8860a48339429, type: 3}
+      propertyPath: m_Delegates.Array.data[2].callback.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: SFDDCards.DisplayedCardUX, Scripts
+      objectReference: {fileID: 0}
     - target: {fileID: 703761511490020856, guid: a59470bf4290660488c8860a48339429, type: 3}
       propertyPath: m_Name
       value: Rendered Card
@@ -381,3 +405,5 @@ MonoBehaviour:
   NameText: {fileID: 5055186948856385443}
   EffectText: {fileID: 944950792409491386}
   CardImage: {fileID: 0}
+  ElementResourceIconUXPF: {fileID: 0}
+  ElementResourceIconHolder: {fileID: 0}

@@ -10,6 +10,7 @@ namespace SFDDCards
     {
         public List<IScriptingToken> AttackTokens { get; set; }
         public AppliedStatusEffect OwnedStatusEffect { get; set; }
+        public Dictionary<Element, int> BaseElementGain => new Dictionary<Element, int>();
 
         public StatusEffectHappening(AppliedStatusEffect ownedStatusEffect, List<IScriptingToken> attackTokens)
         {

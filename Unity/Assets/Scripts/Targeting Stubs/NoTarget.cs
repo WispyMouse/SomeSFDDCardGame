@@ -17,6 +17,11 @@ namespace SFDDCards
             return 0;
         }
 
+        public int GetTotalHealth()
+        {
+            return 0;
+        }
+
         public bool IsFoeOf(ICombatantTarget otherTarget)
         {
             return false;

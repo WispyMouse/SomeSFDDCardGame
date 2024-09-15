@@ -1,0 +1,11 @@
+{
+    "Name": "Cyber Gain",
+	"Id": "cybergain",
+	"Effects":
+	[
+		{
+			"Window": "OWNERSTARTSTURN",
+			"Script": "[SETTARGET: SELF][GAINELEMENT: COUNTSTACKS_CYBERGAIN CYBER][CHANGESTATUSEFFECTSTACKS: -COUNTSTACKS_CYBERGAIN CYBERGAIN]"
+		}
+	]
+}

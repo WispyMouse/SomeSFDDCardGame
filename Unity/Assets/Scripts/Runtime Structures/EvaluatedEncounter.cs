@@ -32,7 +32,7 @@ namespace SFDDCards
             }
 
             List<Card> cards = new List<Card>();
-            RandomDecider<Card> cardDecider = new RandomDecider<Card>();
+            RandomDecider<Card> cardDecider = new DoNotRepeatRandomDecider<Card>();
             foreach (string argList in this.BasedOn.Arguments)
             {
                 string[] splitList = argList.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);

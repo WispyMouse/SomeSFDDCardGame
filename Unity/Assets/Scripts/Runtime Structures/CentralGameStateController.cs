@@ -17,6 +17,9 @@ namespace SFDDCards
         [SerializeReference]
         private CombatTurnController CombatTurnControllerInstance;
 
+        [SerializeReference]
+        private TextMeshProSpriteController TextMeshProSpriteControllerInstance;
+
         public RunConfiguration CurrentRunConfiguration { get; set; } = null;
 
         private void Awake()
@@ -45,8 +48,9 @@ namespace SFDDCards
         IEnumerator BootupSequence()
         {
             yield return LoadConfiguration();
-            yield return LoadCards();
+            yield return LoadElements();
             yield return LoadStatusEffects();
+            yield return LoadCards();
             yield return LoadEnemyScripts();
             yield return LoadRoutes();
             this.SetupAndStartNewGame();
@@ -60,10 +64,78 @@ namespace SFDDCards
             yield return null;
         }
 
+        IEnumerator LoadElements()
+        {
+            string elementImportPath = Application.streamingAssetsPath + "/elementImport";
+            string[] elementImportScriptNames = Directory.GetFiles(elementImportPath, "*.elementimport", SearchOption.AllDirectories);
+
+            GlobalUpdateUX.LogTextEvent.Invoke($"Searched {elementImportPath}; Found {elementImportScriptNames.Length} scripts", GlobalUpdateUX.LogType.Info);
+
+            foreach (string elementImportScriptName in elementImportScriptNames)
+            {
+                GlobalUpdateUX.LogTextEvent.Invoke($"Loading and parsing {elementImportScriptName}...", GlobalUpdateUX.LogType.Info);
+
+                try
+                {
+                    string fileText = File.ReadAllText(elementImportScriptName);
+                    ElementImport importedElement = Newtonsoft.Json.JsonConvert.DeserializeObject<ElementImport>(fileText);
+
+                    if (importedElement == null)
+                    {
+                        GlobalUpdateUX.LogTextEvent.Invoke($"Failed to parse json at {elementImportScriptName}.", GlobalUpdateUX.LogType.RuntimeError);
+                        continue;
+                    }
+
+                    string artLocation = $"{elementImportScriptName.ToLower().Replace(".elementimport", ".png")}";
+                    Sprite elementArt = null;
+                    if (File.Exists(artLocation))
+                    {
+                        byte[] imageBytes = File.ReadAllBytes(artLocation);
+                        Texture2D texture = new Texture2D(64, 64);
+                        texture.LoadImage(imageBytes);
+                        elementArt = Sprite.Create(texture, new Rect(0, 0, 64, 64), Vector2.zero);
+                    }
+                    else
+                    {
+                        GlobalUpdateUX.LogTextEvent.Invoke($"Could not find art for {elementImportScriptName} at expected location of {artLocation}", GlobalUpdateUX.LogType.Info);
+                    }
+
+                    int? spriteIndex = null;
+                    if (elementArt != null)
+                    {
+                        spriteIndex = this.TextMeshProSpriteControllerInstance.AddSprite(elementArt);
+                    }
+
+                    string greyscaleArtLocation = $"{elementImportScriptName.ToLower().Replace(".elementimport", ".greyscale.png")}";
+                    Sprite greyscaleArt = null;
+                    if (File.Exists(greyscaleArtLocation))
+                    {
+                        byte[] imageBytes = File.ReadAllBytes(greyscaleArtLocation);
+                        Texture2D texture = new Texture2D(64, 64);
+                        texture.LoadImage(imageBytes);
+                        greyscaleArt = Sprite.Create(texture, new Rect(0, 0, 64, 64), Vector2.zero);
+                    }
+                    else
+                    {
+                        GlobalUpdateUX.LogTextEvent.Invoke($"Could not find art for {greyscaleArtLocation} at expected location of {artLocation}", GlobalUpdateUX.LogType.Info);
+                    }
+
+                    ElementDatabase.AddElement(importedElement, elementArt, greyscaleArt, spriteIndex);
+                }
+                catch (Exception e)
+                {
+                    GlobalUpdateUX.LogTextEvent.Invoke($"Failed to parse! Debug log has exception details.", GlobalUpdateUX.LogType.RuntimeError);
+                    Debug.LogException(e);
+                }
+            }
+
+            yield return null;
+        }
+
         IEnumerator LoadCards()
         {
             string cardImportPath = Application.streamingAssetsPath + "/cardImport";
-            string[] cardImportScriptNames = Directory.GetFiles(cardImportPath, "*.cardimport");
+            string[] cardImportScriptNames = Directory.GetFiles(cardImportPath, "*.cardimport", SearchOption.AllDirectories);
 
             GlobalUpdateUX.LogTextEvent.Invoke($"Searched {cardImportPath}; Found {cardImportScriptNames.Length} scripts", GlobalUpdateUX.LogType.GameEvent);
 
@@ -76,7 +148,13 @@ namespace SFDDCards
                     string fileText = File.ReadAllText(cardImportScriptName);
                     CardImport importedCard = Newtonsoft.Json.JsonConvert.DeserializeObject<CardImport>(fileText);
 
-                    string artLocation = $"{cardImportScriptName.Replace(".cardImport", ".png")}";
+                    if (importedCard == null)
+                    {
+                        GlobalUpdateUX.LogTextEvent.Invoke($"Failed to parse json at {cardImportScriptName}.", GlobalUpdateUX.LogType.RuntimeError);
+                        continue;
+                    }
+
+                    string artLocation = $"{cardImportScriptName.ToLower().Replace(".cardimport", ".png")}";
                     Sprite cardArt = null;
                     if (File.Exists(artLocation))
                     {
@@ -87,14 +165,14 @@ namespace SFDDCards
                     }
                     else
                     {
-                        GlobalUpdateUX.LogTextEvent.Invoke($"Could not find art for {cardImportScriptName} at expected location of {artLocation}", GlobalUpdateUX.LogType.GameEvent);
+                        GlobalUpdateUX.LogTextEvent.Invoke($"Could not find art for {cardImportScriptName} at expected location of {artLocation}", GlobalUpdateUX.LogType.Info);
                     }
 
                     CardDatabase.AddCardToDatabase(importedCard, cardArt);
                 }
                 catch (Exception e)
                 {
-                    GlobalUpdateUX.LogTextEvent.Invoke($"Failed to parse! Debug log has exception details.", GlobalUpdateUX.LogType.GameEvent);
+                    GlobalUpdateUX.LogTextEvent.Invoke($"Failed to parse! Debug log has exception details.", GlobalUpdateUX.LogType.RuntimeError);
                     Debug.LogException(e);
                 }
             }
@@ -105,7 +183,7 @@ namespace SFDDCards
         IEnumerator LoadStatusEffects()
         {
             string statusEffectImportPath = Application.streamingAssetsPath + "/statusImport";
-            string[] statusEffectImportScriptNames = Directory.GetFiles(statusEffectImportPath, "*.statusImport");
+            string[] statusEffectImportScriptNames = Directory.GetFiles(statusEffectImportPath, "*.statusImport", SearchOption.AllDirectories);
 
             GlobalUpdateUX.LogTextEvent.Invoke($"Searched {statusEffectImportPath}; Found {statusEffectImportScriptNames.Length} scripts", GlobalUpdateUX.LogType.GameEvent);
 
@@ -120,7 +198,7 @@ namespace SFDDCards
         IEnumerator LoadEnemyScripts()
         {
             string enemyImportPath = Application.streamingAssetsPath + "/enemyImport";
-            string[] enemyImportScriptNames = Directory.GetFiles(enemyImportPath, "*.enemyimport");
+            string[] enemyImportScriptNames = Directory.GetFiles(enemyImportPath, "*.enemyimport", SearchOption.AllDirectories);
 
             GlobalUpdateUX.LogTextEvent.Invoke($"Searched {enemyImportPath}; Found {enemyImportScriptNames.Length} scripts", GlobalUpdateUX.LogType.Info);
 
@@ -147,12 +225,12 @@ namespace SFDDCards
         IEnumerator LoadRoutes()
         {
             string routeImportPath = Application.streamingAssetsPath + "/routeImport";
-            string[] routeImportScriptNames = Directory.GetFiles(routeImportPath, "*.routeImport");
+            string[] routeImportScriptNames = Directory.GetFiles(routeImportPath, "*.routeImport", SearchOption.AllDirectories);
 
             GlobalUpdateUX.LogTextEvent.Invoke($"Searched {routeImportPath}; Found {routeImportScriptNames.Length} scripts", GlobalUpdateUX.LogType.Info);
 
             string encounterImportPath = Application.streamingAssetsPath + "/encounterImport";
-            string[] encounterImportNames = Directory.GetFiles(encounterImportPath, "*.encounterImport");
+            string[] encounterImportNames = Directory.GetFiles(encounterImportPath, "*.encounterImport", SearchOption.AllDirectories);
 
             GlobalUpdateUX.LogTextEvent.Invoke($"Searched {encounterImportPath}; Found {encounterImportNames.Length} scripts", GlobalUpdateUX.LogType.Info);
 

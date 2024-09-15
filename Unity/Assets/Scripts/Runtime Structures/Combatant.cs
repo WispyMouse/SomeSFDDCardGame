@@ -88,5 +88,10 @@ namespace SFDDCards
 
             return effect.Stacks;
         }
+
+        public int GetTotalHealth()
+        {
+            return this.CurrentHealth;
+        }
     }
 }

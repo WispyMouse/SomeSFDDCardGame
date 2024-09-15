@@ -1,0 +1,11 @@
+{
+    "Name": "Void Gain",
+	"Id": "voidgain",
+	"Effects":
+	[
+		{
+			"Window": "OWNERSTARTSTURN",
+			"Script": "[SETTARGET: SELF][GAINELEMENT: COUNTSTACKS_VOID VOIDGAIN]"
+		}
+	]
+}

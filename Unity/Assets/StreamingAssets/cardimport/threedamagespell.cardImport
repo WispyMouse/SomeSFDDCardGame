@@ -1,5 +1,0 @@
-{
-	"Id": "threedamagespell",
-	"Name": "Three Damage Spell",
-	"EffectScript": "[SETTARGET: FOE][GAINELEMENT: 1 VOID][DAMAGE: 1][REQUIRESATLEASTELEMENT: 3 VOID][DAMAGE: 2]"
-}

@@ -13,7 +13,7 @@ namespace SFDDCards
         public CampaignRoute(RunConfiguration runConfiguration, RouteImport basedOn)
         {
             this.BasedOn = basedOn;
-            RandomDecider<EncounterModel> decider = new RandomDecider<EncounterModel>();
+            RandomDecider<EncounterModel> decider = new DoNotRepeatRandomDecider<EncounterModel>();
 
             foreach (ChoiceNodeImport node in basedOn.RouteNodes)
             {

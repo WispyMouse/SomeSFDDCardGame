@@ -15,5 +15,6 @@ namespace SFDDCards
         bool IsFoeOf(ICombatantTarget otherTarget);
         bool Valid();
         int CountStacks(string countFor);
+        int GetTotalHealth();
     }
 }

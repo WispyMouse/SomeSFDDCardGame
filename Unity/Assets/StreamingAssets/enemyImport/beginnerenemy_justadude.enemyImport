@@ -1,0 +1,15 @@
+{
+	"Id": "beginnerenemy_justadude",
+	"Name": "Just A Dude",
+	"MaximumHealth": 3,
+	"Attacks":
+	[
+		{
+			"AttackScript": "[SETTARGET: FOE][DAMAGE: 2]"
+		}
+	],
+	"Tags":
+	[
+		"FirstFight"
+	]
+}

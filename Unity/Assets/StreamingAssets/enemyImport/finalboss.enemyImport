@@ -1,0 +1,27 @@
+{
+	"Id": "finalboss",
+	"Name": "Final Boss",
+	"MaximumHealth": 100,
+	"Attacks":
+	[
+		{
+			"AttackScript": "[SETTARGET: FOE][DAMAGE: 6][CHANGESTATUSEFFECTSTACKS: 7 POISON]"
+		},
+		{
+			"AttackScript": "[SETTARGET: FOE][DAMAGE: 8]"
+		},
+		{
+			"AttackScript": "[SETTARGET: FOE][DAMAGE: 10]"
+		},
+		{
+			"AttackScript": "[SETTARGET: FOE][DAMAGE: 6][CHANGESTATUSEFFECTSTACKS: 5 POISON]"
+		},
+		{
+			"AttackScript": "[SETTARGET: SELF][CHANGESTATUSEFFECTSTACKS: 16 REGEN]"
+		}
+	],
+	"Tags":
+	[
+		"FinalBoss"
+	]
+}

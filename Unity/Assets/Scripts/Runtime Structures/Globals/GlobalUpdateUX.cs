@@ -1,3 +1,4 @@
+using SFDDCards;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -16,6 +17,8 @@ public static class GlobalUpdateUX
 
     public static UnityEvent UpdateUXEvent = new UnityEvent();
     public static UnityEvent<string, LogType> LogTextEvent = new UnityEvent<string, LogType>();
+    public static UnityEvent<IMouseHoverListener> MouseStartHoveredEvent = new UnityEvent<IMouseHoverListener>();
+    public static UnityEvent<IMouseHoverListener> MouseEndHoveredEvent = new UnityEvent<IMouseHoverListener>();
 
     static GlobalUpdateUX()
     {

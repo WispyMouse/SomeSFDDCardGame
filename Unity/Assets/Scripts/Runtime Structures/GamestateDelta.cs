@@ -25,7 +25,7 @@ namespace SFDDCards
 
                 foreach (ElementResourceChange change in entry.ElementResourceChanges)
                 {
-                    campaignContext.CurrentCombatContext.ApplyElementResourceChange(change);
+                    campaignContext.CurrentCombatContext.ApplyElementResourceChange(entry.MadeFromBuilder, change);
                 }
                 
                 entry.Target.ApplyDelta(campaignContext.CurrentCombatContext, entry);

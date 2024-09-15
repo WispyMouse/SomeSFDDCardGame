@@ -1,0 +1,18 @@
+{
+	"Id": "midfight_mook",
+	"Name": "Greater Mook",
+	"MaximumHealth": 20,
+	"Attacks":
+	[
+		{
+			"AttackScript": "[SETTARGET: FOE][DAMAGE: 4]"
+		},
+		{
+			"AttackScript": "[SETTARGET: FOE][DAMAGE: 6]"
+		}
+	],
+	"Tags":
+	[
+		"MidFight"
+	]
+}
