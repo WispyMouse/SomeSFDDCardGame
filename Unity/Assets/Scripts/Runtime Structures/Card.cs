@@ -8,12 +8,12 @@ namespace SFDDCards
     {
         public string Id;
         public string Name;
-        public string EffectText;
         public Sprite Sprite;
 
         public HashSet<string> Tags;
+        public Dictionary<Element, int> BaseElementGain { get; set; } = new Dictionary<Element, int>();
 
-        public List<IScriptingToken> AttackTokens { get; set; }
+        public List<IScriptingToken> AttackTokens { get; set; } = new List<IScriptingToken>();
 
         public Card Clone()
         {
@@ -22,15 +22,38 @@ namespace SFDDCards
                 Id = this.Id,
                 Name = this.Name,
                 Sprite = this.Sprite,
-                EffectText = this.EffectText,
                 AttackTokens = new List<IScriptingToken>(AttackTokens),
-                Tags = this.Tags
+                Tags = this.Tags,
+                BaseElementGain = this.BaseElementGain
             };
         }
 
         public bool MeetsAllTags(HashSet<string> tags)
         {
-            return this.Tags.Overlaps(tags);
+            foreach (string tag in tags)
+            {
+                if (!this.Tags.Contains(tag))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public string GetDescription()
+        {
+            return ScriptTokenEvaluator.DescribeCardText(this);
+        }
+
+        public int GetElementGain(Element element)
+        {
+            if (this.BaseElementGain.TryGetValue(element, out int gain))
+            {
+                return gain;
+            }
+
+            return 0;
         }
     }
 }

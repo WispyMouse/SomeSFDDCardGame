@@ -19,21 +19,173 @@
 			"NodeName": "Shopping Line",
 			"Options": [
 				{
+					"ChoiceNodeKind": "[ELEMENTALSHOP]"
+				},
+				{
+					"ChoiceNodeKind": "[ELEMENTALSHOP]"
+				},
+				{
+					"ChoiceNodeKind": "[ELEMENTALSHOP]"
+				},
+				{
 					"ChoiceNodeKind": "shopencounter"
 				}
 			]
 		},
 		{
-			"NodeName": "Finishing Line",
+			"NodeName": "Early Outset One",
 			"Options": [
 				{
-					"ChoiceNodeKind": "[FirstFight]"
+					"ChoiceNodeKind": "[EarlyFight]"
 				},
 				{
-					"ChoiceNodeKind": "[FirstFight]"
+					"ChoiceNodeKind": "[EarlyFight]"
+				}
+			]
+		},
+		{
+			"NodeName": "Early Outset Two",
+			"Options": [
+				{
+					"ChoiceNodeKind": "[EarlyFight]"
 				},
 				{
-					"ChoiceNodeKind": "[FirstFight]"
+					"ChoiceNodeKind": "[EarlyFight]"
+				}
+			]
+		},
+		{
+			"NodeName": "Early Outset Three",
+			"Options": [
+				{
+					"ChoiceNodeKind": "[EarlyFight]"
+				},
+				{
+					"ChoiceNodeKind": "[EarlyFight]"
+				}
+			]
+		},
+		{
+			"NodeName": "Shopping Line Before Boss",
+			"Options": [
+				{
+					"ChoiceNodeKind": "[ELEMENTALSHOP]"
+				},
+				{
+					"ChoiceNodeKind": "[ELEMENTALSHOP]"
+				},
+				{
+					"ChoiceNodeKind": "[ELEMENTALSHOP]"
+				},
+				{
+					"ChoiceNodeKind": "shopencounter"
+				}
+			]
+		},
+		{
+			"NodeName": "First Boss",
+			"Options": [
+				{
+					"ChoiceNodeKind": "[FirstBoss]"
+				}
+			]
+		},
+		{
+			"NodeName": "Mid Outset One",
+			"Options": [
+				{
+					"ChoiceNodeKind": "[MidFight]"
+				},
+				{
+					"ChoiceNodeKind": "[MidFight]"
+				}
+			]
+		},
+		{
+			"NodeName": "Mid Outset Two",
+			"Options": [
+				{
+					"ChoiceNodeKind": "[MidFight]"
+				},
+				{
+					"ChoiceNodeKind": "[MidFight]"
+				}
+			]
+		},
+		{
+			"NodeName": "Mid Outset Three",
+			"Options": [
+				{
+					"ChoiceNodeKind": "[MidFight]"
+				},
+				{
+					"ChoiceNodeKind": "[MidFight]"
+				}
+			]
+		},
+		{
+			"NodeName": "Shopping Line Before Boss",
+			"Options": [
+				{
+					"ChoiceNodeKind": "[ELEMENTALSHOP]"
+				},
+				{
+					"ChoiceNodeKind": "[ELEMENTALSHOP]"
+				},
+				{
+					"ChoiceNodeKind": "[ELEMENTALSHOP]"
+				},
+				{
+					"ChoiceNodeKind": "shopencounter"
+				}
+			]
+		},
+		{
+			"NodeName": "Second Boss",
+			"Options": [
+				{
+					"ChoiceNodeKind": "[SecondBoss]"
+				}
+			]
+		},
+		{
+			"NodeName": "Late Outset One",
+			"Options": [
+				{
+					"ChoiceNodeKind": "[LateFight]"
+				},
+				{
+					"ChoiceNodeKind": "[LateFight]"
+				}
+			]
+		},
+		{
+			"NodeName": "Late Outset Two",
+			"Options": [
+				{
+					"ChoiceNodeKind": "[LateFight]"
+				},
+				{
+					"ChoiceNodeKind": "[LateFight]"
+				}
+			]
+		},
+		{
+			"NodeName": "Late Outset Three",
+			"Options": [
+				{
+					"ChoiceNodeKind": "[LateFight]"
+				},
+				{
+					"ChoiceNodeKind": "[LateFight]"
+				}
+			]
+		},
+		{
+			"NodeName": "Final Boss",
+			"Options": [
+				{
+					"ChoiceNodeKind": "[FinalBoss]"
 				}
 			]
 		}

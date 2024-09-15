@@ -1,0 +1,13 @@
+{
+	"Id": "finalboss",
+	"Name": "Final Boss",
+	"Description": "One more fight to win!",
+	"EnemyIds":
+	[
+		"[finalboss]"
+	],
+	"Tags":
+	[
+		"FinalBoss"
+	]
+}

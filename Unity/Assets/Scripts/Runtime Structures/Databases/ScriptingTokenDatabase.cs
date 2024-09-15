@@ -17,6 +17,7 @@ namespace SFDDCards.ScriptingTokens
             // Meta Token
             new ResetScriptingToken(),
             new LogIntScriptingToken(),
+            new RequiresComparisonScriptingToken(),
 
             // Targeting Token
             new SetTargetScriptingToken(),

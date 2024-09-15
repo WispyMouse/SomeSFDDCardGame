@@ -1,0 +1,19 @@
+{
+	"Id": "shopencounter_solar",
+	"Name": "Solar Shop",
+	"Description": "A shop with mostly solar cards.",
+	"EnemyIds":
+	[
+	],
+	"IsShopEncounter": true,
+	"Arguments":
+	[
+		"[COMMON] [COMMON] [COMMON][SOLAR] [COMMON][SOLAR] [COMMON][SOLAR] [COMMON][SOLAR] [UNCOMMON][SOLAR] [UNCOMMON][SOLAR] [RARE][SOLAR]"
+	],
+	"Tags":
+	[
+		"SHOP",
+		"ELEMENTALSHOP",
+		"SOLAR"
+	]
+}

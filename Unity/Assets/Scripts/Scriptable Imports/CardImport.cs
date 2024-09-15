@@ -13,6 +13,7 @@ namespace SFDDCards
         public string Name;
         public string EffectScript;
         public HashSet<string> Tags = new HashSet<string>();
+        public List<ResourceGainImport> ElementGain = new List<ResourceGainImport>();
 
         public Card DeriveCard()
         {
@@ -21,12 +22,16 @@ namespace SFDDCards
             card.Id = Id.ToLower();
             card.Name = Name;
             card.AttackTokens = ScriptingTokens.ScriptingTokenDatabase.GetAllTokens(this.EffectScript);
-            card.EffectText = ScriptTokenEvaluator.DescribeCardText(card);
 
             HashSet<string> lowerCaseTags = new HashSet<string>();
             foreach (string tag in this.Tags)
             {
                 lowerCaseTags.Add(tag.ToLower());
+            }
+
+            foreach (ResourceGainImport gain in this.ElementGain)
+            {
+                card.BaseElementGain.Add(ElementDatabase.GetElement(gain.Element), gain.Gain);
             }
 
             card.Tags = lowerCaseTags;

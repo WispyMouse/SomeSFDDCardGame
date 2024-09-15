@@ -1,49 +1,56 @@
+using SFDDCards.ScriptingTokens.EvaluatableValues;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
 namespace SFDDCards.ScriptingTokens
 {
-    public class RequiresAtLeastElementScriptingToken : IScriptingToken
+    public class RequiresAtLeastElementScriptingToken : BaseScriptingToken
     {
         public string Element { get; private set; }
-        public int Amount { get; private set; }
+        public IEvaluatableValue<int> Amount { get; private set; }
 
-        public void ApplyToken(TokenEvaluatorBuilder tokenBuilder)
+        public override string ScriptingTokenIdentifier => "requiresatleastelement";
+
+        public override void ApplyToken(TokenEvaluatorBuilder tokenBuilder)
         {
-            if (tokenBuilder.ElementRequirements.ContainsKey(this.Element))
+            Element thisElement = ElementDatabase.GetElement(this.Element);
+
+            if (tokenBuilder.ElementRequirements.ContainsKey(thisElement))
             {
-                tokenBuilder.ElementRequirements[this.Element] = this.Amount;
+                tokenBuilder.ElementRequirements[thisElement] = this.Amount;
             }
             else
             {
-                tokenBuilder.ElementRequirements.Add(this.Element, this.Amount);
+                tokenBuilder.ElementRequirements.Add(thisElement, this.Amount);
             }
         }
 
-        public bool GetTokenIfMatch(string tokenString, out IScriptingToken match)
+        public override bool RequiresTarget()
         {
-            Match regexMatch = Regex.Match(tokenString, @"^\[REQUIRESATLEASTELEMENT: (\d+) (\w+)\]$");
-            if (!regexMatch.Success)
+            return false;
+        }
+
+        protected override bool TryGetTokenWithArguments(List<string> arguments, out IScriptingToken scriptingToken)
+        {
+            scriptingToken = null;
+
+            if (!TryGetIntegerEvaluatableFromStrings(arguments, out IEvaluatableValue<int> output, out List<string> remainingArgs))
             {
-                match = null;
                 return false;
             }
 
-            RequiresAtLeastElementScriptingToken typedMatch = new RequiresAtLeastElementScriptingToken();
-            typedMatch.Amount = int.Parse(regexMatch.Groups[1].Value);
-            typedMatch.Element = regexMatch.Groups[2].Value.ToUpper();
-            match = typedMatch;
+            if (remainingArgs.Count != 1)
+            {
+                return false;
+            }
+
+            scriptingToken = new RequiresAtLeastElementScriptingToken()
+            {
+                Element = remainingArgs[0],
+                Amount = output
+            };
 
             return true;
-        }
-
-        public bool IsHarmfulToTarget(ICombatantTarget user, ICombatantTarget target)
-        {
-            return false;
-        }
-
-        public bool RequiresTarget()
-        {
-            return false;
         }
     }
 }

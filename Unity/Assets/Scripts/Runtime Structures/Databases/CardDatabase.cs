@@ -23,12 +23,6 @@ namespace SFDDCards
 
             Card newCard = importData.DeriveCard();
 
-            if (!TestCardValidity(newCard))
-            {
-                Debug.LogError($"{newCard.Id} is rejected for not being suitable.");
-                return;
-            }
-
             CardData.Add(lowerId, newCard);
             newCard.Sprite = cardArt;
         }
@@ -41,7 +35,7 @@ namespace SFDDCards
             }
 
             // If there are brackets, this might be a set of tag criteria.
-            Match tagMatches = Regex.Match(id, @"\[([^]]+)\]");
+            Match tagMatches = Regex.Match(id, @"(?:\[(?<tag>[^]]+)\])+");
             if (tagMatches.Success)
             {
                 HashSet<string> tags = new HashSet<string>();
@@ -83,29 +77,6 @@ namespace SFDDCards
             }
 
             return toAward;
-        }
-
-        public static bool TestCardValidity(Card toTest)
-        {
-            List<TokenEvaluatorBuilder> builders = ScriptTokenEvaluator.CalculateEvaluatorBuildersFromTokenEvaluation(toTest);
-
-            for (int ii = 0; ii < builders.Count; ii++)
-            {
-                TokenEvaluatorBuilder currentBuilder = builders[ii];
-
-                // TEST ONE: Any ability requiring a target, needs to have a target set
-                for (int jj = 0; jj < currentBuilder.AppliedTokens.Count; jj++)
-                {
-                    IScriptingToken currentToken = currentBuilder.AppliedTokens[jj];
-                    if (currentToken.RequiresTarget() && currentBuilder.Target == null)
-                    {
-                        Debug.LogError($"Card {toTest.Id} has a targeted ability, but no target set. The effect should begin with a targeter, such as [SETTARGET: FOE].");
-                        return false;
-                    }
-                }
-            }
-
-            return true;
         }
 
         public static bool TryGetCardWithAllTags(RandomDecider<Card> decider, HashSet<string> tags, out Card card)

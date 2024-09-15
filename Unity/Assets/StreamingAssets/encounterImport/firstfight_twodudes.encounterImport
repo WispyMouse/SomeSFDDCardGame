@@ -1,0 +1,14 @@
+{
+	"Id": "firstfight_twodudes",
+	"Name": "Two Dudes",
+	"Description": "Here comes the dudes!",
+	"EnemyIds":
+	[
+		"beginnerenemy_justadude",
+		"beginnerenemy_justadude"
+	],
+	"Tags":
+	[
+		"FirstFight"
+	]
+}

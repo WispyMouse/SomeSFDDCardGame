@@ -35,6 +35,9 @@ namespace SFDDCards.ScriptingTokens
                 case "foe":
                     scriptingToken = new SetTargetScriptingToken() { Target = new FoeTargetEvaluatableValue() };
                     return true;
+                case "allfoes":
+                    scriptingToken = new SetTargetScriptingToken() { Target = new AllFoeTargetEvaluatableValue() };
+                    return true;
                 case "original":
                     scriptingToken = new SetTargetScriptingToken() { Target = new OriginalTargetEvaluatableValue() };
                     return true;

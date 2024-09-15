@@ -1,24 +1,17 @@
 {
 	"StartingDeck": [
-		"onedamagespell",
-		"onedamagespell",
-		"onedamagespell",
-		"onedamagespell",
-		"onedamagespell",
-		"drawtwo",
-		"drawthreecyber",
-		"smitenheal",
-		"smitenheal",
-		"smitendraw",
-		"healself",
-		"drawtwo",
-		"threedamagespell",
-		"threedamagespell",
-		"threedamagespell",
-		"threedamagespell",
-		"threedamagespell",
+		"starter_mortalstruggle",
+		"starter_mortalstruggle",
+		"starter_mortalstruggle",
+		"starter_mortalstruggle",
+		"starter_mortalstruggle",
+		
+		"starter_beginascension",
+		"starter_beginascension",
+		"starter_beginascension",
+		"starter_beginascension",
+		"starter_beginascension",
 	],
 	"CardsToAwardOnVictory": 3,
-	"StartingMaximumHealth": 50,
-	"CardsInShop": 12
+	"StartingMaximumHealth": 50
 }

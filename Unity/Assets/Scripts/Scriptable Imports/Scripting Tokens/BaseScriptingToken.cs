@@ -79,9 +79,19 @@ namespace SFDDCards.ScriptingTokens
                     compositeEvaluatable.CompositeComponents.Add(outputCEVI);
                     continue;
                 }
-                else if (CountStacksEvaluatableValue.TryGetConstantEvaluatableValue(currentArgument, out CountStacksEvaluatableValue outputCSEV))
+                else if (CountStacksEvaluatableValue.TryGetCountStacksEvaluatableValue(currentArgument, out CountStacksEvaluatableValue outputCSEV))
                 {
                     compositeEvaluatable.CompositeComponents.Add(outputCSEV);
+                    continue;
+                }
+                else if (CountElementEvaluatableValue.TryGetCountElementalEvaluatableValue(currentArgument, out CountElementEvaluatableValue outputCEEV))
+                {
+                    compositeEvaluatable.CompositeComponents.Add(outputCEEV);
+                    continue;
+                }
+                else if (HealthEvaluatableValue.TryGetHealthEvaluatableValue(currentArgument, out HealthEvaluatableValue outputHEV))
+                {
+                    compositeEvaluatable.CompositeComponents.Add(outputHEV);
                     continue;
                 }
 

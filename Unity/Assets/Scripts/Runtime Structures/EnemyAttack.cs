@@ -11,5 +11,6 @@ namespace SFDDCards
     {
         public List<IScriptingToken> AttackTokens { get; set; }
         public ICombatantTarget PrecalculatedTarget { get; set; }
+        public Dictionary<Element, int> BaseElementGain => new Dictionary<Element, int>();
     }
 }

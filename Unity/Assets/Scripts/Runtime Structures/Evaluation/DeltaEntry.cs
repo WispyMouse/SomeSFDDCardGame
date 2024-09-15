@@ -98,14 +98,7 @@ namespace SFDDCards
 
             foreach (ElementResourceChange change in this.ElementResourceChanges)
             {
-                if (change.GainOrLoss > 0)
-                {
-                    elementDelta.AppendLine($"Gain {change.GainOrLoss} {change.Element}.");
-                }
-                else if (change.GainOrLoss < 0)
-                {
-                    elementDelta.AppendLine($"Lose {change.GainOrLoss} {change.Element}.");
-                }
+                elementDelta.AppendLine($"Modify {change.Element.GetNameOrIcon()} by {change.GainOrLoss.DescribeEvaluation()}.");
             }
 
             return elementDelta.ToString();

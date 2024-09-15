@@ -1,0 +1,27 @@
+{
+	"Id": "firstboss",
+	"Name": "First Boss",
+	"MaximumHealth": 40,
+	"Attacks":
+	[
+		{
+			"AttackScript": "[SETTARGET: FOE][DAMAGE: 2][CHANGESTATUSEFFECTSTACKS: 3 POISON]"
+		},
+		{
+			"AttackScript": "[SETTARGET: FOE][DAMAGE: 4]"
+		},
+		{
+			"AttackScript": "[SETTARGET: FOE][DAMAGE: 6]"
+		},
+		{
+			"AttackScript": "[SETTARGET: FOE][DAMAGE: 4][CHANGESTATUSEFFECTSTACKS: 3 POISON]"
+		},
+		{
+			"AttackScript": "[SETTARGET: SELF][CHANGESTATUSEFFECTSTACKS: 8 REGEN]"
+		}
+	],
+	"Tags":
+	[
+		"FirstBoss"
+	]
+}

@@ -1,0 +1,18 @@
+{
+	"Id": "latefight_mook",
+	"Name": "Greatest Mook",
+	"MaximumHealth": 30,
+	"Attacks":
+	[
+		{
+			"AttackScript": "[SETTARGET: FOE][DAMAGE: 6]"
+		},
+		{
+			"AttackScript": "[SETTARGET: FOE][DAMAGE: 8]"
+		}
+	],
+	"Tags":
+	[
+		"LateFight"
+	]
+}

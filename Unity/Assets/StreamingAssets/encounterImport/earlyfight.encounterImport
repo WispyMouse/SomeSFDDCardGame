@@ -1,0 +1,15 @@
+{
+	"Id": "earlyfight",
+	"Name": "Hit Some Mooks",
+	"Description": "Here are some mooks.",
+	"EnemyIds":
+	[
+		"[earlyfight]",
+		"[earlyfight]",
+		"[earlyfight]"
+	],
+	"Tags":
+	[
+		"EarlyFight"
+	]
+}

@@ -1,0 +1,19 @@
+{
+	"Id": "shopencounter_force",
+	"Name": "Force Shop",
+	"Description": "A shop with mostly force cards.",
+	"EnemyIds":
+	[
+	],
+	"IsShopEncounter": true,
+	"Arguments":
+	[
+		"[COMMON] [COMMON] [COMMON][FORCE] [COMMON][FORCE] [COMMON][FORCE] [COMMON][FORCE] [UNCOMMON][FORCE] [UNCOMMON][FORCE] [RARE][FORCE]"
+	],
+	"Tags":
+	[
+		"SHOP",
+		"ELEMENTALSHOP",
+		"FORCE"
+	]
+}

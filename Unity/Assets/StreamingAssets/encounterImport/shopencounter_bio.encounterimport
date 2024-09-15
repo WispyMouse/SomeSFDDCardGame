@@ -1,0 +1,19 @@
+{
+	"Id": "shopencounter_bio",
+	"Name": "Bio Shop",
+	"Description": "A shop with mostly bio cards.",
+	"EnemyIds":
+	[
+	],
+	"IsShopEncounter": true,
+	"Arguments":
+	[
+		"[COMMON] [COMMON] [COMMON][BIO] [COMMON][BIO] [COMMON][BIO] [COMMON][BIO] [UNCOMMON][BIO] [UNCOMMON][BIO] [RARE][BIO]"
+	],
+	"Tags":
+	[
+		"SHOP",
+		"ELEMENTALSHOP",
+		"BIO"
+	]
+}

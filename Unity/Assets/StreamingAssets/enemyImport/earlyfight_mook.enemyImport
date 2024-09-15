@@ -1,0 +1,18 @@
+{
+	"Id": "earlyfight_mook",
+	"Name": "Mook",
+	"MaximumHealth": 10,
+	"Attacks":
+	[
+		{
+			"AttackScript": "[SETTARGET: FOE][DAMAGE: 2]"
+		},
+		{
+			"AttackScript": "[SETTARGET: FOE][DAMAGE: 4]"
+		}
+	],
+	"Tags":
+	[
+		"EarlyFight"
+	]
+}

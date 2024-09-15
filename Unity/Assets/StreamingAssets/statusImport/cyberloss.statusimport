@@ -1,0 +1,11 @@
+{
+    "Name": "Cyber Loss",
+	"Id": "cyberloss",
+	"Effects":
+	[
+		{
+			"Window": "OWNERENDSTURN",
+			"Script": "[SETTARGET: SELF][GAINELEMENT: -COUNTELEMENT_CYBER CYBER]"
+		}
+	]
+}

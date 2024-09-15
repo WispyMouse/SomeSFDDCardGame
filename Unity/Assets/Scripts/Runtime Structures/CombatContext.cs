@@ -13,7 +13,7 @@ namespace SFDDCards
             EnemyTurn = 2
         }
 
-        public Dictionary<string, int> ElementResourceCounts { get; private set; } = new Dictionary<string, int>();
+        public Dictionary<Element, int> ElementResourceCounts { get; private set; } = new Dictionary<Element, int>();
         public TurnStatus CurrentTurnStatus { get; private set; } = TurnStatus.NotInCombat;
 
         public readonly CombatDeck PlayerCombatDeck;
@@ -40,7 +40,7 @@ namespace SFDDCards
             this.InitializeStartingEnemies();
         }
 
-        public bool MeetsElementRequirement(string element, int minimumCount)
+        public bool MeetsElementRequirement(Element element, int minimumCount)
         {
             if (minimumCount <= 0)
             {
@@ -62,11 +62,17 @@ namespace SFDDCards
             return true;
         }
 
-        public void ApplyElementResourceChange(ElementResourceChange toChange)
+        public void ApplyElementResourceChange(TokenEvaluatorBuilder fromBuilder, ElementResourceChange toChange)
         {
+            if (!toChange.GainOrLoss.TryEvaluateValue(this.FromCampaign, fromBuilder, out int evaluatedValue))
+            {
+                GlobalUpdateUX.LogTextEvent?.Invoke($"Failed to parse evaluatable value for applying resource change.", GlobalUpdateUX.LogType.RuntimeError);
+                return;
+            }
+
             if (this.ElementResourceCounts.TryGetValue(toChange.Element, out int currentAmount))
             {
-                int newAmount = Mathf.Max(0, currentAmount + toChange.GainOrLoss);
+                int newAmount = Mathf.Max(0, currentAmount + evaluatedValue);
 
                 if (newAmount > 0)
                 {
@@ -79,9 +85,9 @@ namespace SFDDCards
             }
             else
             {
-                if (toChange.GainOrLoss > 0)
+                if (evaluatedValue > 0)
                 {
-                    this.ElementResourceCounts.Add(toChange.Element, toChange.GainOrLoss);
+                    this.ElementResourceCounts.Add(toChange.Element, evaluatedValue);
                 }
             }
 
@@ -132,7 +138,7 @@ namespace SFDDCards
             List<TokenEvaluatorBuilder> builders = ScriptTokenEvaluator.CalculateEvaluatorBuildersFromTokenEvaluation(toPlay);
             foreach (TokenEvaluatorBuilder builder in builders)
             {
-                if (builder.MeetsElementRequirements(this))
+                if (builder.MeetsElementRequirements(this) && builder.MeetsComparisonRequirements(this))
                 {
                     anyPassingRequirements = true;
                     break;
@@ -256,7 +262,6 @@ namespace SFDDCards
             {
                 GlobalUpdateUX.LogTextEvent.Invoke($"There are no more enemies!", GlobalUpdateUX.LogType.GameEvent);
                 this.FromCampaign.SetCampaignState(CampaignContext.GameplayCampaignState.ClearedRoom);
-                // this.SetupClearedRoomAndPresentAwards();
                 return;
             }
 

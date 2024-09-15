@@ -1,0 +1,18 @@
+{
+	"Id": "beginnerenemy_hardest",
+	"Name": "Beginner",
+	"MaximumHealth": 15,
+	"Attacks":
+	[
+		{
+			"AttackScript": "[SETTARGET: FOE][DAMAGE: 3]"
+		},
+		{
+			"AttackScript": "[SETTARGET: FOE][DAMAGE: 4]"
+		}
+	],
+	"Tags":
+	[
+		"FirstFight"
+	]
+}

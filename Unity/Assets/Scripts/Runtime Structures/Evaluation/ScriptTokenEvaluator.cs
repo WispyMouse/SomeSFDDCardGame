@@ -19,7 +19,7 @@ namespace SFDDCards
 
             foreach (TokenEvaluatorBuilder builder in builders)
             {
-                if (builder.MeetsElementRequirements(campaignContext.CurrentCombatContext))
+                if (builder.MeetsElementRequirements(campaignContext.CurrentCombatContext) && builder.MeetsComparisonRequirements(campaignContext.CurrentCombatContext))
                 {
                     resultingDelta.AppendDelta(builder.GetEffectiveDelta(campaignContext));
                 }
@@ -35,13 +35,19 @@ namespace SFDDCards
             List<TokenEvaluatorBuilder> builders = new List<TokenEvaluatorBuilder>();
             TokenEvaluatorBuilder builder = new TokenEvaluatorBuilder(actor, target);
 
+            foreach (Element baseElement in evaluatedAttack.BaseElementGain.Keys)
+            {
+                builder.ElementResourceChanges.Add(new ElementResourceChange() { Element = baseElement, GainOrLoss = new ConstantEvaluatableValue<int>(evaluatedAttack.BaseElementGain[baseElement]) });
+            }
+
             if (actor != null)
             {
                 builder.User = actor;
             }
             else
             {
-                builder.User = new NoTarget();
+                actor = new NoTarget();
+                builder.User = actor;
             }
             
             if (target != null)
@@ -51,10 +57,18 @@ namespace SFDDCards
             }
             else
             {
-                builder.OriginalTarget = new NoTarget();
+                target = new NoTarget();
+                builder.OriginalTarget = target;
             }
 
-            Dictionary<string, int> previousRequirements = new Dictionary<string, int>();
+            if (builder.ElementResourceChanges.Count > 0)
+            {
+                builder.ShouldLaunch = true;
+                builders.Add(builder);
+                builder = new TokenEvaluatorBuilder(actor, target);
+            }
+
+            Dictionary<Element, IEvaluatableValue<int>> previousRequirements = new Dictionary<Element, IEvaluatableValue<int>>();
 
             int finalIndex = evaluatedAttack.AttackTokens.Count - 1;
             for (int scriptIndex = 0; scriptIndex < evaluatedAttack.AttackTokens.Count; scriptIndex++)
@@ -70,7 +84,7 @@ namespace SFDDCards
                     // This will allow for an easier set up of "if you meet this element criteria, play the rest of the card"
                     if (builder.ElementRequirements.Count == 0 && previousRequirements.Count != 0)
                     {
-                        builder.ElementRequirements = new Dictionary<string, int>(previousRequirements);
+                        builder.ElementRequirements = new Dictionary<Element, IEvaluatableValue<int>>(previousRequirements);
                     }
                     builders.Add(builder);
 
@@ -94,6 +108,28 @@ namespace SFDDCards
 
             foreach (TokenEvaluatorBuilder builder in builders)
             {
+                // If this builder is just a constant resource gain in one or more categories, skip it for generating card text
+                if (builder.ElementResourceChanges.Count != 0)
+                {
+                    bool nonConstantFound = false;
+
+                    foreach (ElementResourceChange change in builder.ElementResourceChanges)
+                    {
+                        if (change.GainOrLoss is ConstantEvaluatableValue<int> constantEvaluatable)
+                        {
+                            continue;
+                        }
+
+                        nonConstantFound = true;
+                        break;
+                    }
+
+                    if (!nonConstantFound)
+                    {
+                        continue;
+                    }
+                }
+
                 string currentRequirements = builder.DescribeElementRequirements();
 
                 if (string.IsNullOrEmpty(currentRequirements) && !string.IsNullOrEmpty(previousRequirements))
@@ -177,6 +213,10 @@ namespace SFDDCards
                     {
                         return user.IsFoeOf(target);
                     }
+                    else if (setTargetToken.Target is AllFoeTargetEvaluatableValue)
+                    {
+                        return target is AllFoesTarget;
+                    }
                 }
             }
 
@@ -186,7 +226,7 @@ namespace SFDDCards
             {
                 IScriptingToken currentToken = effect.AttackTokens[ii];
 
-                if (currentToken.IsHarmfulToTarget(user, target) && user.IsFoeOf(target))
+                if (currentToken.IsHarmfulToTarget(user, target) && user.IsFoeOf(target) && !(target is AllFoesTarget))
                 {
                     return true;
                 }

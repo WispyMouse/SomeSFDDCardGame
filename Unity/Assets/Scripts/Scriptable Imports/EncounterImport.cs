@@ -13,13 +13,13 @@ namespace SFDDCards
         public string Description;
         public List<string> EnemyIds = new List<string>();
         public bool IsShopEncounter;
-        public HashSet<string> EncounterTags = new HashSet<string>();
+        public HashSet<string> Tags = new HashSet<string>();
         public List<string> Arguments = new List<string>();
 
         public EncounterModel DeriveEncounter()
         {
             HashSet<string> lowerCaseTags = new HashSet<string>();
-            foreach (string tag in this.EncounterTags)
+            foreach (string tag in this.Tags)
             {
                 lowerCaseTags.Add(tag.ToLower());
             }
