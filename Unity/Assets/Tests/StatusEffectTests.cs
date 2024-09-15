@@ -26,9 +26,9 @@ namespace SFDDCards.Tests.EditMode
                 Assert.Fail($"Expected to find poison at {poisonFilePath}, did not find it there.");
             }
 
-            Encounter testEncounter = EditModeTestCommon.GetEncounterWithPunchingBags(2, 100);
+            EncounterModel testEncounter = EditModeTestCommon.GetEncounterWithPunchingBags(2, 100);
             CampaignContext campaignContext = EditModeTestCommon.GetBlankCampaignContext();
-            campaignContext.StartNextRoomFromEncounter(testEncounter);
+            campaignContext.StartNextRoomFromEncounter(new EvaluatedEncounter(testEncounter));
             CombatContext combatContext = campaignContext.CurrentCombatContext;
             combatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.PlayerTurn);
             GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();

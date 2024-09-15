@@ -10,7 +10,7 @@ namespace SFDDCards.Tests.EditMode
 
     public static class EditModeTestCommon
     {
-        public static Encounter GetEncounterWithPunchingBags(int numberOfPunchingBags, int amountOfHealth)
+        public static EncounterModel GetEncounterWithPunchingBags(int numberOfPunchingBags, int amountOfHealth)
         {
             EnemyImport punchingBag = new EnemyImport()
             {
@@ -22,7 +22,7 @@ namespace SFDDCards.Tests.EditMode
 
             EnemyDatabase.AddEnemyToDatabase(punchingBag);
 
-            Encounter toEncounter = new Encounter();
+            EncounterModel toEncounter = new EncounterModel();
 
             toEncounter.Id = nameof(GetEncounterWithPunchingBags) + numberOfPunchingBags.ToString() + amountOfHealth.ToString();
 

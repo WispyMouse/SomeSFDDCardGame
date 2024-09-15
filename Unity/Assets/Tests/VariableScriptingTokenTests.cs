@@ -74,9 +74,9 @@ namespace SFDDCards.Tests.EditMode
 
             CountStacksEvaluatableValue selfCountVariable = selfCountToken.ValueToLog as CountStacksEvaluatableValue;
 
-            Encounter testEncounter = EditModeTestCommon.GetEncounterWithPunchingBags(1, 100);
+            EncounterModel testEncounter = EditModeTestCommon.GetEncounterWithPunchingBags(1, 100);
             CampaignContext campaignContext = EditModeTestCommon.GetBlankCampaignContext();
-            campaignContext.StartNextRoomFromEncounter(testEncounter);
+            campaignContext.StartNextRoomFromEncounter(new EvaluatedEncounter(testEncounter));
             CombatContext combatContext = campaignContext.CurrentCombatContext;
 
             // Count the number of stacks, which should be zero on everyone now
@@ -112,9 +112,9 @@ namespace SFDDCards.Tests.EditMode
 
         public void TestVariableInCombatContext(IAttackTokenHolder attackHolderStack, IEvaluatableValue<int> variable, int expectedValue, int builderIndexContainingToken = 0)
         {
-            Encounter testEncounter = EditModeTestCommon.GetEncounterWithPunchingBags(1, 100);
+            EncounterModel testEncounter = EditModeTestCommon.GetEncounterWithPunchingBags(1, 100);
             CampaignContext campaignContext = EditModeTestCommon.GetBlankCampaignContext();
-            campaignContext.StartNextRoomFromEncounter(testEncounter);
+            campaignContext.StartNextRoomFromEncounter(new EvaluatedEncounter(testEncounter));
             CombatContext combatContext = campaignContext.CurrentCombatContext;
             TestVariableInCombatContext(attackHolderStack, variable, expectedValue, combatContext, combatContext.CombatPlayer, combatContext.Enemies[0], builderIndexContainingToken);
         }

@@ -38,63 +38,8 @@ namespace SFDDCards
             GlobalUpdateUX.LogTextEvent.Invoke("Resetting game to new state", GlobalUpdateUX.LogType.GameEvent);
 
             this.UXController.Annihilate();
-
-            this.CurrentCampaignContext = new CampaignContext(this.CurrentRunConfiguration, this.UXController);
-            
-            this.UXController.PlacePlayerCharacter();
-
-            this.SetGameCampaignNavigationState(CampaignContext.GameplayCampaignState.ClearedRoom);
-        }
-
-        /// <summary>
-        /// Leaves the current room, and loads in the next one, ready for gameplay.
-        /// </summary>
-        public void ProceedToNextRoom()
-        {
-            GlobalUpdateUX.LogTextEvent.Invoke("Proceeding to next room", GlobalUpdateUX.LogType.GameEvent);
-
-            this.CurrentCampaignContext.LeaveCurrentCombat();
-            this.SetGameCampaignNavigationState(CampaignContext.GameplayCampaignState.EnteringRoom);
-
-            Encounter newEncounter = EncounterDatabase.GetRandomEncounter();
-            this.CurrentCampaignContext.StartNextRoomFromEncounter(newEncounter);
-
-            if (newEncounter.IsShopEncounter)
-            {
-                List<Card> cardsToAward = CardDatabase.GetRandomCards(this.CurrentRunConfiguration.CardsInShop);
-                this.UXController.ShowShopPanel(cardsToAward.ToArray());
-                this.SetGameCampaignNavigationState(CampaignContext.GameplayCampaignState.NonCombatEncounter, CampaignContext.NonCombatEncounterStatus.AllowedToLeave);
-            }
-            else
-            {
-                this.CombatTurnControllerInstance.BeginHandlingCombat();
-                this.SetGameCampaignNavigationState(CampaignContext.GameplayCampaignState.InCombat);
-            }
-        }
-
-        /// <summary>
-        /// Sets up the current navigation state, and then reflects that on the UX.
-        /// </summary>
-        /// <param name="newState">The incoming state to configure for.</param>
-        public void SetGameCampaignNavigationState(CampaignContext.GameplayCampaignState newState, CampaignContext.NonCombatEncounterStatus noncombatState = CampaignContext.NonCombatEncounterStatus.NotInNonCombatEncounter)
-        {
-            this.CurrentCampaignContext.SetCampaignState(newState, noncombatState);
-
-            // If the room is cleared, prepare to go to the next one by allowing for the button to be active.
-            if (newState == CampaignContext.GameplayCampaignState.ClearedRoom)
-            {
-                this.CurrentCampaignContext.LeaveCurrentCombat();
-                GlobalUpdateUX.LogTextEvent.Invoke($"Room is clear! Press Next Room to proceed to next encounter.", GlobalUpdateUX.LogType.GameEvent);
-            }
-
-            GlobalUpdateUX.UpdateUXEvent?.Invoke();
-        }
-
-        public void EnemyActsOnIntent(Enemy toAct)
-        {
-            GamestateDelta delta = ScriptTokenEvaluator.CalculateDifferenceFromTokenEvaluation(this.CurrentCampaignContext, toAct, toAct.Intent, this.CurrentCampaignContext.CampaignPlayer);
-            GlobalUpdateUX.LogTextEvent.Invoke(delta.DescribeDelta(), GlobalUpdateUX.LogType.GameEvent);
-            delta.ApplyDelta(this.CurrentCampaignContext);
+            this.CurrentCampaignContext = null;
+            this.UXController.ShowCampaignChooser();
         }
 
         IEnumerator BootupSequence()
@@ -103,6 +48,7 @@ namespace SFDDCards
             yield return LoadCards();
             yield return LoadStatusEffects();
             yield return LoadEnemyScripts();
+            yield return LoadRoutes();
             this.SetupAndStartNewGame();
         }
 
@@ -176,11 +122,11 @@ namespace SFDDCards
             string enemyImportPath = Application.streamingAssetsPath + "/enemyImport";
             string[] enemyImportScriptNames = Directory.GetFiles(enemyImportPath, "*.enemyimport");
 
-            GlobalUpdateUX.LogTextEvent.Invoke($"Searched {enemyImportPath}; Found {enemyImportScriptNames.Length} scripts", GlobalUpdateUX.LogType.GameEvent);
+            GlobalUpdateUX.LogTextEvent.Invoke($"Searched {enemyImportPath}; Found {enemyImportScriptNames.Length} scripts", GlobalUpdateUX.LogType.Info);
 
             foreach (string enemyImportScriptName in enemyImportScriptNames)
             {
-                GlobalUpdateUX.LogTextEvent.Invoke($"Loading and parsing {enemyImportScriptName}...", GlobalUpdateUX.LogType.GameEvent);
+                GlobalUpdateUX.LogTextEvent.Invoke($"Loading and parsing {enemyImportScriptName}...", GlobalUpdateUX.LogType.Info);
 
                 try
                 {
@@ -190,19 +136,29 @@ namespace SFDDCards
                 }
                 catch (Exception e)
                 {
-                    GlobalUpdateUX.LogTextEvent.Invoke($"Failed to parse! Debug log has exception details.", GlobalUpdateUX.LogType.GameEvent);
+                    GlobalUpdateUX.LogTextEvent.Invoke($"Failed to parse! Debug log has exception details.", GlobalUpdateUX.LogType.Info);
                     Debug.LogException(e);
                 }
             }
 
+            yield return new WaitForEndOfFrame();
+        }
+
+        IEnumerator LoadRoutes()
+        {
+            string routeImportPath = Application.streamingAssetsPath + "/routeImport";
+            string[] routeImportScriptNames = Directory.GetFiles(routeImportPath, "*.routeImport");
+
+            GlobalUpdateUX.LogTextEvent.Invoke($"Searched {routeImportPath}; Found {routeImportScriptNames.Length} scripts", GlobalUpdateUX.LogType.Info);
+
             string encounterImportPath = Application.streamingAssetsPath + "/encounterImport";
             string[] encounterImportNames = Directory.GetFiles(encounterImportPath, "*.encounterImport");
 
-            GlobalUpdateUX.LogTextEvent.Invoke($"Searched {encounterImportPath}; Found {encounterImportNames.Length} scripts", GlobalUpdateUX.LogType.GameEvent);
+            GlobalUpdateUX.LogTextEvent.Invoke($"Searched {encounterImportPath}; Found {encounterImportNames.Length} scripts", GlobalUpdateUX.LogType.Info);
 
             foreach (string encounterImportScriptNames in encounterImportNames)
             {
-                GlobalUpdateUX.LogTextEvent.Invoke($"Loading and parsing {encounterImportScriptNames}...", GlobalUpdateUX.LogType.GameEvent);
+                GlobalUpdateUX.LogTextEvent.Invoke($"Loading and parsing {encounterImportScriptNames}...", GlobalUpdateUX.LogType.Info);
 
                 try
                 {
@@ -212,7 +168,24 @@ namespace SFDDCards
                 }
                 catch (Exception e)
                 {
-                    GlobalUpdateUX.LogTextEvent.Invoke($"Failed to parse! Debug log has exception details.", GlobalUpdateUX.LogType.GameEvent);
+                    GlobalUpdateUX.LogTextEvent.Invoke($"Failed to parse! Debug log has exception details.", GlobalUpdateUX.LogType.Info);
+                    Debug.LogException(e);
+                }
+            }
+
+            foreach (string routeImportScriptName in routeImportScriptNames)
+            {
+                GlobalUpdateUX.LogTextEvent.Invoke($"Loading and parsing {routeImportScriptName}...", GlobalUpdateUX.LogType.Info);
+
+                try
+                {
+                    string fileText = File.ReadAllText(routeImportScriptName);
+                    RouteImport importedRoute = Newtonsoft.Json.JsonConvert.DeserializeObject<RouteImport>(fileText);
+                    RouteDatabase.AddRouteToDatabase(importedRoute);
+                }
+                catch (Exception e)
+                {
+                    GlobalUpdateUX.LogTextEvent.Invoke($"Failed to parse! Debug log has exception details.", GlobalUpdateUX.LogType.Info);
                     Debug.LogException(e);
                 }
             }
@@ -220,9 +193,16 @@ namespace SFDDCards
             yield return new WaitForEndOfFrame();
         }
 
-        public void PlayerModelClicked()
+        public void RouteChosen(RouteImport route)
         {
-            this.UXController.SelectTarget(this.CurrentCampaignContext.CampaignPlayer);
+            this.CurrentCampaignContext = new CampaignContext(this.CurrentRunConfiguration, this.UXController);
+            this.CurrentCampaignContext.SetRoute(this.CurrentRunConfiguration, route);
+
+            this.UXController.PlacePlayerCharacter();
+
+            this.CurrentCampaignContext.SetCampaignState(CampaignContext.GameplayCampaignState.ClearedRoom);
+
+            GlobalUpdateUX.UpdateUXEvent?.Invoke();
         }
     }
 }

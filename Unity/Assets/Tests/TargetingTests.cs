@@ -31,9 +31,9 @@ namespace SFDDCards.Tests.EditMode
                 EffectScript = "[SETTARGET: FOE][DAMAGE: 1]"
             };
 
-            Encounter testEncounter = EditModeTestCommon.GetEncounterWithPunchingBags(10, 100);
+            EncounterModel testEncounter = EditModeTestCommon.GetEncounterWithPunchingBags(10, 100);
             CampaignContext campaignContext = EditModeTestCommon.GetBlankCampaignContext();
-            campaignContext.StartNextRoomFromEncounter(testEncounter);
+            campaignContext.StartNextRoomFromEncounter(new EvaluatedEncounter(testEncounter));
             CombatContext combatContext = campaignContext.CurrentCombatContext;
 
             for (int ii = 0; ii < TimesToRunTest; ii++)

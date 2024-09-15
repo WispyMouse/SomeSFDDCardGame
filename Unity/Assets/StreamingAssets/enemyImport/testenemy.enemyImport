@@ -10,5 +10,9 @@
 		{
 			"AttackScript": "[DAMAGE: 2]"
 		}
+	],
+	"Tags":
+	[
+		"FirstFight"
 	]
 }

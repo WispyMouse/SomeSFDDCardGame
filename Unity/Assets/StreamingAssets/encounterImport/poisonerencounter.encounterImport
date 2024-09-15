@@ -1,8 +1,13 @@
 {
-	"Id": "testencounter_poisoner",
+	"Id": "poisonerencounter",
 	"Name": "Test Encounter Versus Poisoner",
+	"Description": "Fight against a Poisoner",
 	"EnemyIds":
 	[
 		"poisoner"
+	],
+	"EncounterTags":
+	[
+		"FirstFight"
 	]
 }
