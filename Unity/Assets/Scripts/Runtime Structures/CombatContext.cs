@@ -20,20 +20,20 @@ namespace SFDDCards
         public Player CombatPlayer;
 
         public CampaignContext FromCampaign;
-        public readonly Encounter BasedOnEncounter;
+        public readonly EncounterModel BasedOnEncounter;
         public readonly List<Enemy> Enemies = new List<Enemy>();
 
         private readonly GameplayUXController UXController = null;
         private readonly Dictionary<string, List<ReactionWindowSubscription>> WindowsToReactors = new Dictionary<string, List<ReactionWindowSubscription>>();
         private readonly Dictionary<IReactionWindowReactor, HashSet<ReactionWindowSubscription>> ReactorsToSubscriptions = new Dictionary<IReactionWindowReactor, HashSet<ReactionWindowSubscription>>();
 
-        public CombatContext(CampaignContext fromCampaign, Encounter basedOnEncounter, GameplayUXController uxController)
+        public CombatContext(CampaignContext fromCampaign, EvaluatedEncounter basedOnEncounter, GameplayUXController uxController)
         {
             this.UXController = uxController;
             this.CombatPlayer = fromCampaign.CampaignPlayer;
 
             this.FromCampaign = fromCampaign;
-            this.BasedOnEncounter = basedOnEncounter;
+            this.BasedOnEncounter = basedOnEncounter.BasedOn;
             this.PlayerCombatDeck = new CombatDeck(fromCampaign.CampaignDeck);
             this.PlayerCombatDeck.ShuffleEntireDeck();
 

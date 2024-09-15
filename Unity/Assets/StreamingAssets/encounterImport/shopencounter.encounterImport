@@ -1,8 +1,13 @@
 {
 	"Id": "shopencounter",
 	"Name": "Shop Encounter",
+	"Description": "Visit a shop",
 	"EnemyIds":
 	[
 	],
-	"IsShopEncounter": true
+	"IsShopEncounter": true,
+	"Arguments":
+	[
+		"[COMMON] [COMMON] [COMMON] [COMMON] [UNCOMMON] [UNCOMMON] [RARE]"
+	]
 }

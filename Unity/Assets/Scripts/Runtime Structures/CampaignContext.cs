@@ -13,7 +13,9 @@ namespace SFDDCards
             InCombat = 2,
             Defeat = 3,
             EnteringRoom = 4,
-            NonCombatEncounter = 5
+            NonCombatEncounter = 5,
+            MakingRouteChoice = 6,
+            Victory = 7
         }
 
         public enum NonCombatEncounterStatus
@@ -24,8 +26,10 @@ namespace SFDDCards
 
         public readonly Deck CampaignDeck = new Deck();
         public CombatContext CurrentCombatContext { get; private set; } = null;
-        public Encounter CurrentEncounter { get; private set; } = null;
+        public EvaluatedEncounter CurrentEncounter { get; private set; } = null;
         public readonly Player CampaignPlayer;
+        public CampaignRoute OnRoute { get; private set; } = null;
+        public int CampaignRouteNodeIndex { get; private set; } = -1;
 
         public GameplayCampaignState CurrentGameplayCampaignState { get; private set; } = GameplayCampaignState.NotStarted;
         public NonCombatEncounterStatus CurrentNonCombatEncounterStatus { get; private set; } = NonCombatEncounterStatus.NotInNonCombatEncounter;
@@ -53,19 +57,19 @@ namespace SFDDCards
             this.CurrentCombatContext = null;
         }
 
-        public void StartNextRoomFromEncounter(Encounter basedOn)
+        public void StartNextRoomFromEncounter(EvaluatedEncounter basedOn)
         {
             this.CurrentEncounter = basedOn;
 
-            if (basedOn.IsShopEncounter)
+            if (basedOn.BasedOn.IsShopEncounter)
             {
                 this.LeaveCurrentCombat();
-                this.CurrentGameplayCampaignState = GameplayCampaignState.NonCombatEncounter;
-                this.CurrentNonCombatEncounterStatus = NonCombatEncounterStatus.AllowedToLeave;
+                this.SetCampaignState(GameplayCampaignState.NonCombatEncounter, NonCombatEncounterStatus.AllowedToLeave);
                 return;
             }
 
             this.CurrentCombatContext = new CombatContext(this, basedOn, this.UXController);
+            this.SetCampaignState(GameplayCampaignState.InCombat);
         }
 
         public void SetCampaignState(GameplayCampaignState toState, NonCombatEncounterStatus nonCombatState = NonCombatEncounterStatus.NotInNonCombatEncounter)
@@ -76,8 +80,42 @@ namespace SFDDCards
             if (toState == GameplayCampaignState.ClearedRoom && this.CurrentEncounter != null && this.CurrentCombatContext.Enemies.Count == 0)
             {
                 this.LeaveCurrentCombat();
-                UXController.PresentAwards();
+                UXController?.PresentAwards();
             }
+
+            if (toState == GameplayCampaignState.MakingRouteChoice)
+            {
+                this.CampaignRouteNodeIndex++;
+
+                if (this.OnRoute != null && this.CampaignRouteNodeIndex >= this.OnRoute.Nodes.Count)
+                {
+                    this.SetCampaignState(GameplayCampaignState.Victory);
+                }
+            }
+
+            GlobalUpdateUX.UpdateUXEvent?.Invoke();
+        }
+
+        public void SetRoute(RunConfiguration configuration, RouteImport routeToStart)
+        {
+            this.OnRoute = new CampaignRoute(configuration, routeToStart);
+        }
+
+        public void MakeChoiceNodeDecision(ChoiceNodeOption chosen)
+        {
+            chosen.WasSelected = true;
+            this.CurrentEncounter = chosen.WillEncounter;
+            this.StartNextRoomFromEncounter(chosen.WillEncounter);
+        }
+
+        public ChoiceNode GetCampaignCurrentNode()
+        {
+            if (this.OnRoute == null || this.OnRoute.Nodes.Count <= this.CampaignRouteNodeIndex)
+            {
+                return null;
+            }
+
+            return this.OnRoute.Nodes[this.CampaignRouteNodeIndex];
         }
     }
 }

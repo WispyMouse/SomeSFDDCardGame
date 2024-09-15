@@ -4,6 +4,7 @@ namespace SFDDCards
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Text.RegularExpressions;
     using UnityEngine;
 
     public static class CardDatabase
@@ -32,14 +33,39 @@ namespace SFDDCards
             newCard.Sprite = cardArt;
         }
 
-        public static Card GetModel(string id)
+        public static Card GetModel(string id, RandomDecider<Card> decider = null)
         {
-            if (!CardData.TryGetValue(id, out Card foundModel))
+            if (decider == null)
             {
-                Debug.LogError($"CardData dictionary lookup does not contain id {id}");
+                decider = new RandomDecider<Card>();
             }
 
-            return foundModel;
+            // If there are brackets, this might be a set of tag criteria.
+            Match tagMatches = Regex.Match(id, @"\[([^]]+)\]");
+            if (tagMatches.Success)
+            {
+                HashSet<string> tags = new HashSet<string>();
+                foreach (Capture curCapture in tagMatches.Groups[1].Captures)
+                {
+                    tags.Add(curCapture.Value.ToLower());
+                }
+
+                if (!TryGetCardWithAllTags(decider, tags, out Card model))
+                {
+                    return null;
+                }
+
+                return model;
+            }
+            else
+            {
+                if (!CardData.TryGetValue(id, out Card foundModel))
+                {
+                    Debug.LogError($"CardData dictionary lookup does not contain id {id}");
+                }
+
+                return foundModel;
+            }
         }
 
         public static List<Card> GetRandomCards(int amount)
@@ -79,6 +105,28 @@ namespace SFDDCards
                 }
             }
 
+            return true;
+        }
+
+        public static bool TryGetCardWithAllTags(RandomDecider<Card> decider, HashSet<string> tags, out Card card)
+        {
+            List<Card> candidates = new List<Card>();
+
+            foreach (Card model in CardData.Values)
+            {
+                if (model.MeetsAllTags(tags))
+                {
+                    candidates.Add(model);
+                }
+            }
+
+            if (candidates.Count == 0)
+            {
+                card = null;
+                return false;
+            }
+
+            card = decider.ChooseRandomly(candidates);
             return true;
         }
     }

@@ -17,6 +17,8 @@ namespace SFDDCards
         private PlayerStatusEffectUXHolder PlayerStatusEffectUXHolderInstance;
         [SerializeReference]
         private CombatTurnController CombatTurnCounterInstance;
+        [SerializeReference]
+        private CampaignChooserUX CampaignChooserUXInstance;
 
         [SerializeReference]
         private RewardsPanelUX RewardsPanelUXInstance;
@@ -44,6 +46,13 @@ namespace SFDDCards
         private GameObject ResetGameButton;
         [SerializeReference]
         private GameObject EndTurnButton;
+
+        [SerializeReference]
+        private ChoiceNodeSelectorUX ChoiceSelectorUX;
+        [SerializeReference]
+        private GameObject CombatUXFolder;
+        [SerializeReference]
+        private GameObject ChoiceUXFolder;
 
         [SerializeReference]
         private GameObject DeckStatPanel;
@@ -121,16 +130,26 @@ namespace SFDDCards
                 return;
             }
 
+            this.CampaignChooserUXInstance.HideChooser();
+
             CampaignContext.GameplayCampaignState newCampaignState = this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentGameplayCampaignState;
             CampaignContext.NonCombatEncounterStatus newNonCombatState = this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentNonCombatEncounterStatus;
             CombatContext.TurnStatus newTurnState = this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext == null ? CombatContext.TurnStatus.NotInCombat : this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.CurrentTurnStatus;
 
-            if (this.previousCampaignState == newCampaignState
-                && this.previousNonCombatEncounterState == newNonCombatState
-                && this.previousCombatTurnState == newTurnState)
+            CampaignContext.GameplayCampaignState wasPreviousCampaignState = this.previousCampaignState;
+            CampaignContext.NonCombatEncounterStatus wasPreviousNonCombatState = this.previousNonCombatEncounterState;
+            CombatContext.TurnStatus wasPreviousTurnState = this.previousCombatTurnState;
+
+            if (wasPreviousCampaignState == newCampaignState
+                && wasPreviousNonCombatState == newNonCombatState
+                && wasPreviousTurnState == newTurnState)
             {
                 return;
             }
+
+            this.previousCampaignState = newCampaignState;
+            this.previousNonCombatEncounterState = newNonCombatState;
+            this.previousCombatTurnState = newTurnState;
 
             if (newCampaignState == CampaignContext.GameplayCampaignState.ClearedRoom
                 || (newCampaignState == CampaignContext.GameplayCampaignState.NonCombatEncounter && newNonCombatState == CampaignContext.NonCombatEncounterStatus.AllowedToLeave))
@@ -143,11 +162,28 @@ namespace SFDDCards
                 this.ShopPanelUXInstance.gameObject.SetActive(false);
                 this.GoNextRoomButton.SetActive(false);
             }
+
+            if (newCampaignState == CampaignContext.GameplayCampaignState.NonCombatEncounter)
+            {
+                if (wasPreviousCampaignState != CampaignContext.GameplayCampaignState.NonCombatEncounter &&
+                    this.CentralGameStateControllerInstance.CurrentCampaignContext != null &&
+                    this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentEncounter != null &&
+                    this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentEncounter.BasedOn.IsShopEncounter)
+                {
+                    this.ShowShopPanel(this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentEncounter.GetCards().ToArray());
+                }
+            }
             
             if (newCampaignState == CampaignContext.GameplayCampaignState.InCombat)
             {
+                this.CombatUXFolder.SetActive(true);
                 this.RewardsPanelUXInstance.gameObject.SetActive(false);
                 this.ShopPanelUXInstance.gameObject.SetActive(false);
+
+                if (wasPreviousCampaignState != CampaignContext.GameplayCampaignState.InCombat)
+                {
+                    this.CombatTurnCounterInstance.BeginHandlingCombat();
+                }
 
                 if (newTurnState == CombatContext.TurnStatus.PlayerTurn)
                 {
@@ -160,12 +196,28 @@ namespace SFDDCards
             }
             else
             {
+                if (wasPreviousCampaignState == CampaignContext.GameplayCampaignState.InCombat)
+                {
+                    this.CombatTurnCounterInstance.EndHandlingCombat();
+                }
+
                 this.EndTurnButton.SetActive(false);
+                this.CombatUXFolder.SetActive(false);
             }
 
-            this.previousCampaignState = newCampaignState;
-            this.previousNonCombatEncounterState = newNonCombatState;
-            this.previousCombatTurnState = newTurnState;
+            if (newCampaignState == CampaignContext.GameplayCampaignState.MakingRouteChoice)
+            {
+                this.PresentNextRouteChoice();
+            }
+            else
+            {
+                this.ClearRouteUX();
+            }
+
+            if (newCampaignState == CampaignContext.GameplayCampaignState.Victory)
+            {
+                GlobalUpdateUX.LogTextEvent?.Invoke($"Victory!! There are no more nodes in this route! Reset game to continue from beginning.", GlobalUpdateUX.LogType.GameEvent);
+            }
         }
 
         public void UpdateUX()
@@ -587,9 +639,47 @@ namespace SFDDCards
 
         public void PresentAwards()
         {
-            this.CombatTurnCounterInstance.EndHandlingCombat();
             List<Card> cardsToAward = CardDatabase.GetRandomCards(this.CentralGameStateControllerInstance.CurrentRunConfiguration.CardsToAwardOnVictory);
             this.ShowRewardsPanel(cardsToAward.ToArray());
+        }
+
+        void PresentNextRouteChoice()
+        {
+            ChoiceNode campaignNode = this.CentralGameStateControllerInstance.CurrentCampaignContext.GetCampaignCurrentNode();
+
+            if (campaignNode == null)
+            {
+                GlobalUpdateUX.LogTextEvent?.Invoke($"The next campaign node is null. Cannot continue with UX.", GlobalUpdateUX.LogType.RuntimeError);
+                return;
+            }
+
+            this.ChoiceUXFolder.SetActive(true);
+            this.ChoiceSelectorUX.RepresentNode(campaignNode);
+        }
+
+        void ClearRouteUX()
+        {
+            this.ChoiceUXFolder.SetActive(false);
+        }
+
+        public void NodeIsChosen(ChoiceNodeOption option)
+        {
+            this.CentralGameStateControllerInstance.CurrentCampaignContext.MakeChoiceNodeDecision(option);
+        }
+
+        public void ProceedToNextRoom()
+        {
+            this.CentralGameStateControllerInstance.CurrentCampaignContext.SetCampaignState(CampaignContext.GameplayCampaignState.MakingRouteChoice);
+        }
+
+        public void RouteChosen(RouteImport chosenRoute)
+        {
+            this.CentralGameStateControllerInstance.RouteChosen(chosenRoute);
+        }
+
+        public void ShowCampaignChooser()
+        {
+            this.CampaignChooserUXInstance.ShowChooser();
         }
     }
 }

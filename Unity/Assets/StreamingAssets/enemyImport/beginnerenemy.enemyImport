@@ -1,0 +1,30 @@
+{
+	"Id": "beginnerenemy",
+	"Name": "Beginner",
+	"MaximumHealth": 2,
+	"Attacks":
+	[
+		{
+			"AttackScript": "[SETTARGET: SELF][DAMAGE: 1]"
+		},
+		{
+			"AttackScript": "[SETTARGET: SELF][HEAL: 1]"
+		},
+		{
+			"AttackScript": "[SETTARGET: FOE][DAMAGE: 1]"
+		},
+		{
+			"AttackScript": "[SETTARGET: FOE][DAMAGE: 2]"
+		},
+		{
+			"AttackScript": "[SETTARGET: FOE][DAMAGE: 3]"
+		},
+		{
+			"AttackScript": "[SETTARGET: FOE][DAMAGE: 5]"
+		},
+	],
+	"Tags":
+	[
+		"FirstFight"
+	]
+}

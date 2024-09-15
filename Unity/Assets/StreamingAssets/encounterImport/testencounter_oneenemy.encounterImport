@@ -1,8 +1,13 @@
 {
 	"Id": "testencounter_oneenemy",
-	"Name": "Test Encounter With One Enemy",
+	"Name": "One Enemy",
+	"Description": "Fight against one tougher enemy.",
 	"EnemyIds":
 	[
-		"basictestenemy"
+		"tougherenemy"
+	],
+	"EncounterTags":
+	[
+		"FirstFight"
 	]
 }

@@ -11,6 +11,8 @@ namespace SFDDCards
         public string EffectText;
         public Sprite Sprite;
 
+        public HashSet<string> Tags;
+
         public List<IScriptingToken> AttackTokens { get; set; }
 
         public Card Clone()
@@ -21,8 +23,14 @@ namespace SFDDCards
                 Name = this.Name,
                 Sprite = this.Sprite,
                 EffectText = this.EffectText,
-                AttackTokens = new List<IScriptingToken>(AttackTokens)
+                AttackTokens = new List<IScriptingToken>(AttackTokens),
+                Tags = this.Tags
             };
+        }
+
+        public bool MeetsAllTags(HashSet<string> tags)
+        {
+            return this.Tags.Overlaps(tags);
         }
     }
 }

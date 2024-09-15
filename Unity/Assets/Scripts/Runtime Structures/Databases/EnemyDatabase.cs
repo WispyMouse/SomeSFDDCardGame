@@ -3,6 +3,7 @@ namespace SFDDCards
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Text.RegularExpressions;
     using UnityEngine;
 
     public static class EnemyDatabase
@@ -22,28 +23,67 @@ namespace SFDDCards
             EnemyData.Add(lowerId, importData.DeriveEnemyModel());
         }
 
-        public static EnemyModel GetModel(string id)
+        public static EnemyModel GetModel(string id, RandomDecider<EnemyModel> decider = null)
         {
-            string lowerId = id.ToLower();
-
-            if (!EnemyData.TryGetValue(lowerId, out EnemyModel foundModel))
+            if (decider == null)
             {
-                Debug.LogError($"EnemyData dictionary lookup does not contain id {lowerId}");
+                decider = new RandomDecider<EnemyModel>();
             }
 
-            return foundModel;
-        }
+            string lowerId = id.ToLower();
 
-        public static EnemyModel GetRandomModel()
-        {
-            List<string> modelIds = new List<string>(EnemyData.Keys);
-            int randomIndex = UnityEngine.Random.Range(0, modelIds.Count);
-            return GetModel(modelIds[randomIndex]);
+            // If there are brackets, this might be a set of tag criteria.
+            Match tagMatches = Regex.Match(id, @"\[([^]]+)\]");
+            if (tagMatches.Success)
+            {
+                HashSet<string> tags = new HashSet<string>();
+                foreach (Capture curCapture in tagMatches.Groups[1].Captures)
+                {
+                    tags.Add(curCapture.Value.ToLower());
+                }
+
+                if (!TryGetEnemyWithAllTags(decider, tags, out EnemyModel model))
+                {
+                    return null;
+                }
+
+                return model;
+            }
+            else
+            {
+                if (!EnemyData.TryGetValue(lowerId, out EnemyModel foundModel))
+                {
+                    Debug.LogError($"EnemyData dictionary lookup does not contain id {lowerId}");
+                }
+                return foundModel;
+            }
         }
 
         public static void ClearDatabase()
         {
             EnemyData.Clear();
+        }
+
+        public static bool TryGetEnemyWithAllTags(RandomDecider<EnemyModel> decider, HashSet<string> tags, out EnemyModel enemy)
+        {
+            List<EnemyModel> candidates = new List<EnemyModel>();
+
+            foreach (EnemyModel model in EnemyData.Values)
+            {
+                if (model.MeetsAllTags(tags))
+                {
+                    candidates.Add(model);
+                }
+            }
+
+            if (candidates.Count == 0)
+            {
+                enemy = null;
+                return false;
+            }
+
+            enemy = decider.ChooseRandomly(candidates);
+            return true;
         }
     }
 }

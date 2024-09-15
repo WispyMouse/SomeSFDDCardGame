@@ -11,6 +11,7 @@ namespace SFDDCards
         public string Id;
         public string Name;
         public int MaximumHealth;
+        public HashSet<string> Tags = new HashSet<string>();
 
         public List<EnemyAttackImport> Attacks;
 
@@ -20,6 +21,13 @@ namespace SFDDCards
             newEnemy.Id = this.Id.ToLower();
             newEnemy.Name = this.Name;
             newEnemy.MaximumHealth = this.MaximumHealth;
+
+            HashSet<string> lowerCaseTags = new HashSet<string>();
+            foreach (string tag in this.Tags)
+            {
+                lowerCaseTags.Add(tag.ToLower());
+            }
+            newEnemy.Tags = lowerCaseTags;
 
             foreach (EnemyAttackImport attack in this.Attacks)
             {

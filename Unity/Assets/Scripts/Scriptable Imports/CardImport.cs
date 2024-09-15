@@ -12,6 +12,7 @@ namespace SFDDCards
         public string Id;
         public string Name;
         public string EffectScript;
+        public HashSet<string> Tags = new HashSet<string>();
 
         public Card DeriveCard()
         {
@@ -21,6 +22,14 @@ namespace SFDDCards
             card.Name = Name;
             card.AttackTokens = ScriptingTokens.ScriptingTokenDatabase.GetAllTokens(this.EffectScript);
             card.EffectText = ScriptTokenEvaluator.DescribeCardText(card);
+
+            HashSet<string> lowerCaseTags = new HashSet<string>();
+            foreach (string tag in this.Tags)
+            {
+                lowerCaseTags.Add(tag.ToLower());
+            }
+
+            card.Tags = lowerCaseTags;
 
             return card;
         }

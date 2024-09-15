@@ -1,0 +1,41 @@
+{
+	"RouteName": "Standard Route",
+	"RouteNodes": [
+		{
+			"NodeName": "Starting Line",
+			"Options": [
+				{
+					"ChoiceNodeKind": "[FirstFight]"
+				},
+				{
+					"ChoiceNodeKind": "[FirstFight]"
+				},
+				{
+					"ChoiceNodeKind": "[FirstFight]"
+				}
+			]
+		},
+		{
+			"NodeName": "Shopping Line",
+			"Options": [
+				{
+					"ChoiceNodeKind": "shopencounter"
+				}
+			]
+		},
+		{
+			"NodeName": "Finishing Line",
+			"Options": [
+				{
+					"ChoiceNodeKind": "[FirstFight]"
+				},
+				{
+					"ChoiceNodeKind": "[FirstFight]"
+				},
+				{
+					"ChoiceNodeKind": "[FirstFight]"
+				}
+			]
+		}
+	]
+}
