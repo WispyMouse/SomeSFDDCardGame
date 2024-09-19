@@ -1,5 +1,6 @@
 namespace SFDDCards
 {
+    using SFDDCards.ImportModels;
     using System;
     using System.Collections;
     using System.Collections.Generic;
@@ -20,7 +21,7 @@ namespace SFDDCards
                 return;
             }
 
-            EnemyData.Add(lowerId, importData.DeriveEnemyModel());
+            EnemyData.Add(lowerId, new EnemyModel(importData));
         }
 
         public static EnemyModel GetModel(string id, RandomDecider<EnemyModel> decider = null)

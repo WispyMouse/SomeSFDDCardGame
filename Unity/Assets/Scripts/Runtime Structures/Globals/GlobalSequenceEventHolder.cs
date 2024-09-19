@@ -26,7 +26,7 @@ namespace SFDDCards
             }
         }
 
-        public static void ApplyNextSequenceWithAnimationHandler(CombatTurnController controller)
+        public static void ApplyNextSequenceWithAnimationHandler(ICombatTurnController controller)
         {
             if (StackedSequenceEvents.Count == 0)
             {
@@ -68,7 +68,7 @@ namespace SFDDCards
         {
             if (eventToPush == null)
             {
-                Debug.LogError($"{nameof(CombatTurnController)} ({nameof(PushSequenceToTop)}): Null event tried to push to top.");
+                Debug.LogError($"{nameof(GlobalSequenceEventHolder)} ({nameof(PushSequenceToTop)}): Null event tried to push to top.");
             }
 
             StackedSequenceEvents.Insert(0, eventToPush);

@@ -9,6 +9,7 @@ namespace SFDDCards.Tests.EditMode
     using UnityEngine;
     using ScriptingTokens;
     using ScriptingTokens.EvaluatableValues;
+    using SFDDCards.ImportModels;
 
     public class VariableScriptingTokenTests : EditModeTestBase
     {
@@ -31,7 +32,7 @@ namespace SFDDCards.Tests.EditMode
             };
 
             // Derive the card to look at its tokens
-            Card derivedCard = import.DeriveCard();
+            Card derivedCard = new Card(import);
             Assert.AreEqual(1, derivedCard.AttackTokens.Count, $"Card should have one attack tokens.");
             Assert.IsTrue(derivedCard.AttackTokens[0] is LogIntScriptingToken, $"Attack token should be of type {typeof(LogIntScriptingToken).Name}.");
 
@@ -65,7 +66,7 @@ namespace SFDDCards.Tests.EditMode
             };
 
             // Derive the card to look at its tokens
-            Card selfCountDerivedCard = selfCountStackCard.DeriveCard();
+            Card selfCountDerivedCard = new Card(selfCountStackCard);
             Assert.AreEqual(2, selfCountDerivedCard.AttackTokens.Count, $"Card should have one attack tokens.");
             Assert.IsTrue(selfCountDerivedCard.AttackTokens[1] is LogIntScriptingToken, $"Attack token should be of type {typeof(LogIntScriptingToken).Name}.");
 

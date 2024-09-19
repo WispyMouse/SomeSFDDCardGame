@@ -1,9 +1,6 @@
-namespace SFDDCards
+namespace SFDDCards.ImportModels
 {
     using System;
-    using System.Collections;
-    using System.Collections.Generic;
-    using UnityEngine;
 
     [Serializable]
     public class ElementImport

@@ -1,4 +1,4 @@
-namespace SFDDCards
+namespace SFDDCards.UX
 {
     using System;
     using System.Collections;
@@ -152,6 +152,11 @@ namespace SFDDCards
                 || (newCampaignState == CampaignContext.GameplayCampaignState.NonCombatEncounter && newNonCombatState == CampaignContext.NonCombatEncounterStatus.AllowedToLeave))
             {
                 this.GoNextRoomButton.SetActive(true);
+
+                if (wasPreviousCampaignState == CampaignContext.GameplayCampaignState.InCombat)
+                {
+                    this.PresentAwards();
+                }
             }
             else
             {
@@ -220,6 +225,7 @@ namespace SFDDCards
         public void UpdateUX()
         {
             this.CheckAndActIfGameCampaignNavigationStateChanged();
+            this.RemoveDefeatedEntities();
             this.SetElementValueLabel();
             this.UpdateEnemyUX();
             this.UpdatePlayerLabelValues();
@@ -629,6 +635,27 @@ namespace SFDDCards
         public void ShowCampaignChooser()
         {
             this.CampaignChooserUXInstance.ShowChooser();
+        }
+
+        private void RemoveDefeatedEntities()
+        {
+            if (this.CentralGameStateControllerInstance?.CurrentCampaignContext?.CurrentCombatContext == null)
+            {
+                foreach (Enemy key in new List<Enemy>(this.spawnedEnemiesLookup.Keys))
+                {
+                    this.RemoveEnemy(key);
+                }
+
+                return;
+            }
+
+            foreach (Enemy curEnemy in new List<Enemy>(this.spawnedEnemiesLookup.Keys))
+            {
+                if (!this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.Enemies.Contains(curEnemy))
+                {
+                    this.RemoveEnemy(curEnemy);
+                }
+            }
         }
     }
 }

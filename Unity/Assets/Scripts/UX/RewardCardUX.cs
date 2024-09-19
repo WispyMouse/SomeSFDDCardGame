@@ -1,4 +1,4 @@
-namespace SFDDCards
+namespace SFDDCards.UX
 {
     using System;
     using System.Collections;

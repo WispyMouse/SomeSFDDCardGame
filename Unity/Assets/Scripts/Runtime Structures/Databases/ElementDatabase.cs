@@ -1,5 +1,6 @@
 namespace SFDDCards
 {
+    using SFDDCards.ImportModels;
     using System;
     using System.Collections;
     using System.Collections.Generic;

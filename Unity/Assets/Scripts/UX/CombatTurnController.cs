@@ -1,4 +1,4 @@
-namespace SFDDCards
+namespace SFDDCards.UX
 {
     using System;
     using System.Collections;
@@ -8,7 +8,7 @@ namespace SFDDCards
     using UnityEngine;
 
 
-    public class CombatTurnController : MonoBehaviour
+    public class CombatTurnController : MonoBehaviour, ICombatTurnController
     {
         private static CombatTurnController Instance { get; set; }
 

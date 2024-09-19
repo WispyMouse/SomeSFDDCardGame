@@ -1,5 +1,6 @@
-namespace SFDDCards
+namespace SFDDCards.UX
 {
+    using SFDDCards.ImportModels;
     using System;
     using System.Collections;
     using System.Collections.Generic;
@@ -273,7 +274,7 @@ namespace SFDDCards
 
         public void RouteChosen(RouteImport route)
         {
-            this.CurrentCampaignContext = new CampaignContext(this.CurrentRunConfiguration, this.UXController);
+            this.CurrentCampaignContext = new CampaignContext(this.CurrentRunConfiguration);
             this.CurrentCampaignContext.SetRoute(this.CurrentRunConfiguration, route);
 
             this.UXController.PlacePlayerCharacter();

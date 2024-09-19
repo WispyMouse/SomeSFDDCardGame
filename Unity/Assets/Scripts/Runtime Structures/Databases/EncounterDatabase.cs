@@ -1,5 +1,6 @@
 namespace SFDDCards
 {
+    using SFDDCards.ImportModels;
     using System;
     using System.Collections;
     using System.Collections.Generic;
@@ -12,7 +13,7 @@ namespace SFDDCards
 
         public static void AddEncounter(EncounterImport toAdd)
         {
-            EncounterData.Add(toAdd.Id, toAdd.DeriveEncounter());
+            EncounterData.Add(toAdd.Id, new EncounterModel(toAdd));
         }
 
         public static bool TryGetEncounterWithArguments(RandomDecider<EncounterModel> decider, string kind, List<string> arguments, out EvaluatedEncounter encounter)

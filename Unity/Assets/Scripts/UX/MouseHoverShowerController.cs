@@ -1,13 +1,17 @@
-namespace SFDDCards
+namespace SFDDCards.UX
 {
     using System;
     using System.Collections;
     using System.Collections.Generic;
     using UnityEngine;
+    using UnityEngine.Events;
     using UnityEngine.EventSystems;
 
     public class MouseHoverShowerController : MonoBehaviour
     {
+        public static UnityEvent<IMouseHoverListener> MouseStartHoveredEvent = new UnityEvent<IMouseHoverListener>();
+        public static UnityEvent<IMouseHoverListener> MouseEndHoveredEvent = new UnityEvent<IMouseHoverListener>();
+
         public IMouseHoverListener CurrentListener;
 
         [SerializeReference]
@@ -18,16 +22,24 @@ namespace SFDDCards
             this.DismissCurrentHover();
         }
 
+        private void Update()
+        {
+            if (this.CurrentListener == null)
+            {
+                this.DismissCurrentHover();
+            }
+        }
+
         private void OnEnable()
         {
-            GlobalUpdateUX.MouseStartHoveredEvent.AddListener(this.HandleShowingHover);
-            GlobalUpdateUX.MouseEndHoveredEvent.AddListener(this.HandleEndHover);
+            MouseStartHoveredEvent.AddListener(this.HandleShowingHover);
+            MouseEndHoveredEvent.AddListener(this.HandleEndHover);
         }
 
         private void OnDisable()
         {
-            GlobalUpdateUX.MouseStartHoveredEvent.RemoveListener(this.HandleShowingHover);
-            GlobalUpdateUX.MouseEndHoveredEvent.RemoveListener(this.HandleEndHover);
+            MouseStartHoveredEvent.RemoveListener(this.HandleShowingHover);
+            MouseEndHoveredEvent.RemoveListener(this.HandleEndHover);
         }
 
         public void HandleShowingHover(IMouseHoverListener listener)
