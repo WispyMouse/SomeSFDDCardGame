@@ -1,5 +1,6 @@
 namespace SFDDCards
 {
+    using SFDDCards.ImportModels;
     using SFDDCards.ScriptingTokens;
     using System.Collections;
     using System.Collections.Generic;
@@ -15,30 +16,25 @@ namespace SFDDCards
 
         public List<IScriptingToken> AttackTokens { get; set; } = new List<IScriptingToken>();
 
-        public Card Clone()
+        public Card(CardImport basedOn)
         {
-            return new Card()
-            {
-                Id = this.Id,
-                Name = this.Name,
-                Sprite = this.Sprite,
-                AttackTokens = new List<IScriptingToken>(AttackTokens),
-                Tags = this.Tags,
-                BaseElementGain = this.BaseElementGain
-            };
-        }
+            this.Id = basedOn.Id.ToLower();
+            this.Name = basedOn.Name;
+            this.AttackTokens = ScriptingTokens.ScriptingTokenDatabase.GetAllTokens(basedOn.EffectScript);
 
-        public bool MeetsAllTags(HashSet<string> tags)
-        {
-            foreach (string tag in tags)
+            HashSet<string> lowerCaseTags = new HashSet<string>();
+            foreach (string tag in basedOn.Tags)
             {
-                if (!this.Tags.Contains(tag))
-                {
-                    return false;
-                }
+                lowerCaseTags.Add(tag.ToLower());
             }
 
-            return true;
+            foreach (ResourceGainImport gain in basedOn.ElementGain)
+            {
+                this.BaseElementGain.Add(ElementDatabase.GetElement(gain.Element), gain.Gain);
+            }
+
+            this.Tags = lowerCaseTags;
+            this.Sprite = basedOn.Sprite;
         }
 
         public string GetDescription()

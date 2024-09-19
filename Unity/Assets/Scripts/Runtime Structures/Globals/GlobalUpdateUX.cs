@@ -5,45 +5,46 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
-public static class GlobalUpdateUX
+namespace SFDDCards
 {
-    public enum LogType
+    public static class GlobalUpdateUX
     {
-        Info,
-        GameEvent,
-        RuntimeError,
-        UserError
-    }
-
-    public static UnityEvent UpdateUXEvent = new UnityEvent();
-    public static UnityEvent<string, LogType> LogTextEvent = new UnityEvent<string, LogType>();
-    public static UnityEvent<IMouseHoverListener> MouseStartHoveredEvent = new UnityEvent<IMouseHoverListener>();
-    public static UnityEvent<IMouseHoverListener> MouseEndHoveredEvent = new UnityEvent<IMouseHoverListener>();
-
-    static GlobalUpdateUX()
-    {
-        LogTextEvent.AddListener(LogText);
-    }
-
-    private static void LogText(string toLog, LogType type)
-    {
-        if (string.IsNullOrEmpty(toLog))
+        public enum LogType
         {
-            return;
+            Info,
+            GameEvent,
+            RuntimeError,
+            UserError
         }
 
-        toLog = toLog.Trim();
+        public static UnityEvent UpdateUXEvent = new UnityEvent();
+        public static UnityEvent<string, LogType> LogTextEvent = new UnityEvent<string, LogType>();
 
-        switch (type)
+        static GlobalUpdateUX()
         {
-            case LogType.Info:
-            case LogType.GameEvent:
-            case LogType.UserError:
-                Debug.Log(toLog);
-                break;
-            case LogType.RuntimeError:
-                Debug.LogError(toLog);
-                break;
+            LogTextEvent.AddListener(LogText);
+        }
+
+        private static void LogText(string toLog, LogType type)
+        {
+            if (string.IsNullOrEmpty(toLog))
+            {
+                return;
+            }
+
+            toLog = toLog.Trim();
+
+            switch (type)
+            {
+                case LogType.Info:
+                case LogType.GameEvent:
+                case LogType.UserError:
+                    Debug.Log(toLog);
+                    break;
+                case LogType.RuntimeError:
+                    Debug.LogError(toLog);
+                    break;
+            }
         }
     }
 }

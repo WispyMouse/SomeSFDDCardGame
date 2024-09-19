@@ -34,16 +34,13 @@ namespace SFDDCards
         public GameplayCampaignState CurrentGameplayCampaignState { get; private set; } = GameplayCampaignState.NotStarted;
         public NonCombatEncounterStatus CurrentNonCombatEncounterStatus { get; private set; } = NonCombatEncounterStatus.NotInNonCombatEncounter;
 
-        private readonly GameplayUXController UXController = null;
-
-        public CampaignContext(RunConfiguration runConfig, GameplayUXController uxController)
+        public CampaignContext(RunConfiguration runConfig)
         {
-            this.UXController = uxController;
             this.CampaignPlayer = new Player(runConfig.StartingMaximumHealth);
 
             foreach (string startingCard in runConfig.StartingDeck)
             {
-                this.CampaignDeck.AddCardToDeck(CardDatabase.GetModel(startingCard).Clone());
+                this.CampaignDeck.AddCardToDeck(CardDatabase.GetModel(startingCard));
             }
         }
 
@@ -68,7 +65,7 @@ namespace SFDDCards
                 return;
             }
 
-            this.CurrentCombatContext = new CombatContext(this, basedOn, this.UXController);
+            this.CurrentCombatContext = new CombatContext(this, basedOn);
             this.SetCampaignState(GameplayCampaignState.InCombat);
         }
 
@@ -85,7 +82,6 @@ namespace SFDDCards
             if (toState == GameplayCampaignState.ClearedRoom && this.CurrentEncounter != null && this.CurrentCombatContext.Enemies.Count == 0)
             {
                 this.LeaveCurrentCombat();
-                UXController?.PresentAwards();
             }
 
             if (toState == GameplayCampaignState.MakingRouteChoice)
@@ -111,6 +107,7 @@ namespace SFDDCards
             chosen.WasSelected = true;
             this.CurrentEncounter = chosen.WillEncounter;
             this.StartNextRoomFromEncounter(chosen.WillEncounter);
+            GlobalUpdateUX.UpdateUXEvent?.Invoke();
         }
 
         public ChoiceNode GetCampaignCurrentNode()

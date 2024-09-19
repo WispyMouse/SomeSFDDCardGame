@@ -1,5 +1,6 @@
 namespace SFDDCards.Tests.EditMode
 {
+    using SFDDCards.ImportModels;
     using SFDDCards.ScriptingTokens.EvaluatableValues;
     using System;
     using System.Collections;
@@ -22,7 +23,7 @@ namespace SFDDCards.Tests.EditMode
 
             EnemyDatabase.AddEnemyToDatabase(punchingBag);
 
-            EncounterModel toEncounter = new EncounterModel();
+            EncounterModel toEncounter = new EncounterModel(new EncounterImport());
 
             toEncounter.Id = nameof(GetEncounterWithPunchingBags) + numberOfPunchingBags.ToString() + amountOfHealth.ToString();
 
@@ -41,7 +42,7 @@ namespace SFDDCards.Tests.EditMode
             // Empty out the starting deck, so tests have a guaranteed hand of cards
             blankConfiguration.StartingDeck = new List<string>();
 
-            CampaignContext newContext = new CampaignContext(blankConfiguration, null);
+            CampaignContext newContext = new CampaignContext(blankConfiguration);
             return newContext;
         }
 

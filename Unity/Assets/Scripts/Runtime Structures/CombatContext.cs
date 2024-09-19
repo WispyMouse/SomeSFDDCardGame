@@ -23,13 +23,11 @@ namespace SFDDCards
         public readonly EncounterModel BasedOnEncounter;
         public readonly List<Enemy> Enemies = new List<Enemy>();
 
-        private readonly GameplayUXController UXController = null;
         private readonly Dictionary<string, List<ReactionWindowSubscription>> WindowsToReactors = new Dictionary<string, List<ReactionWindowSubscription>>();
         private readonly Dictionary<IReactionWindowReactor, HashSet<ReactionWindowSubscription>> ReactorsToSubscriptions = new Dictionary<IReactionWindowReactor, HashSet<ReactionWindowSubscription>>();
 
-        public CombatContext(CampaignContext fromCampaign, EvaluatedEncounter basedOnEncounter, GameplayUXController uxController)
+        public CombatContext(CampaignContext fromCampaign, EvaluatedEncounter basedOnEncounter)
         {
-            this.UXController = uxController;
             this.CombatPlayer = fromCampaign.CampaignPlayer;
 
             this.FromCampaign = fromCampaign;
@@ -148,12 +146,10 @@ namespace SFDDCards
             if (!anyPassingRequirements)
             {
                 GlobalUpdateUX.LogTextEvent.Invoke($"Unable to play card {toPlay.Name}. No requirements for any of the card's effects have been met.", GlobalUpdateUX.LogType.GameEvent);
-                UXController?.CancelAllSelections();
                 return;
             }
 
             GlobalUpdateUX.LogTextEvent.Invoke($"Playing card {toPlay.Name} on {toPlayOn.Name}", GlobalUpdateUX.LogType.GameEvent);
-            UXController?.CancelAllSelections();
             this.PlayerCombatDeck.CardsCurrentlyInHand.Remove(toPlay);
 
             GlobalSequenceEventHolder.PushSequenceToTop(new GameplaySequenceEvent(
@@ -164,9 +160,7 @@ namespace SFDDCards
                 delta.ApplyDelta(this.FromCampaign);
                 this.CheckAllStateEffectsAndKnockouts();
             },
-            () => UXController?.AnimateCardPlay(
-                toPlay,
-                toPlayOn)
+            null
             ));
         }
 
@@ -265,7 +259,7 @@ namespace SFDDCards
                 return;
             }
 
-            this.UXController?.UpdateUX();
+            GlobalUpdateUX.UpdateUXEvent?.Invoke();
         }
 
         public void CheckAndApplyReactionWindow(ReactionWindowContext context)
@@ -360,7 +354,6 @@ namespace SFDDCards
             GlobalSequenceEventHolder.PushSequenceToTop(new GameplaySequenceEvent(
                 () =>
                 {
-                    this.UXController?.RemoveEnemy(toRemove);
                     this.Enemies.Remove(toRemove);
 
                     foreach (AppliedStatusEffect effect in toRemove.AppliedStatusEffects)

@@ -1,6 +1,7 @@
 namespace SFDDCards.Tests.EditMode
 {
     using NUnit.Framework;
+    using SFDDCards.ImportModels;
     using System;
     using System.Collections;
     using System.Collections.Generic;
@@ -38,7 +39,7 @@ namespace SFDDCards.Tests.EditMode
 
             for (int ii = 0; ii < TimesToRunTest; ii++)
             {
-                combatContext.PlayerCombatDeck.CardsCurrentlyInDeck.Add(import.DeriveCard());
+                combatContext.PlayerCombatDeck.CardsCurrentlyInDeck.Add(new Card(import));
             }
 
             combatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.PlayerTurn);

@@ -1,5 +1,6 @@
 namespace SFDDCards
 {
+    using SFDDCards.ImportModels;
     using System;
     using System.Collections;
     using System.Collections.Generic;
@@ -32,7 +33,7 @@ namespace SFDDCards
             }
 
             List<Card> cards = new List<Card>();
-            RandomDecider<Card> cardDecider = new DoNotRepeatRandomDecider<Card>();
+            RandomDecider<CardImport> cardDecider = new DoNotRepeatRandomDecider<CardImport>();
             foreach (string argList in this.BasedOn.Arguments)
             {
                 string[] splitList = argList.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);

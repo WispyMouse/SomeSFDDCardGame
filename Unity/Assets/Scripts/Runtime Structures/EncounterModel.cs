@@ -1,5 +1,6 @@
 namespace SFDDCards
 {
+    using SFDDCards.ImportModels;
     using System;
     using System.Collections;
     using System.Collections.Generic;
@@ -17,6 +18,30 @@ namespace SFDDCards
 
         public bool IsShopEncounter;
         public List<string> Arguments { get; set; } = new List<string>();
+
+
+        public EncounterModel(EncounterImport basedOn)
+        {
+            HashSet<string> lowerCaseTags = new HashSet<string>();
+            foreach (string tag in basedOn.Tags)
+            {
+                lowerCaseTags.Add(tag.ToLower());
+            }
+
+            List<string> lowerCaseEnemyIds = new List<string>();
+            foreach (string enemyId in basedOn.EnemyIds)
+            {
+                lowerCaseEnemyIds.Add(enemyId.ToLower());
+            }
+
+            this.Id = basedOn.Id.ToLower();
+            this.Name = basedOn.Name;
+            this.EncounterTags = lowerCaseTags;
+            this.Description = basedOn.Description;
+            this.EnemiesInEncounterById = lowerCaseEnemyIds;
+            this.IsShopEncounter = basedOn.IsShopEncounter;
+            this.Arguments = basedOn.Arguments;
+        }
 
         public List<EnemyModel> GetEnemyModels()
         {

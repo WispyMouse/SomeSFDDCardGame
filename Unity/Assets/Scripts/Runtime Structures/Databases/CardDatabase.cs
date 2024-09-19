@@ -1,5 +1,6 @@
 namespace SFDDCards
 {
+    using SFDDCards.ImportModels;
     using SFDDCards.ScriptingTokens;
     using System;
     using System.Collections;
@@ -9,7 +10,7 @@ namespace SFDDCards
 
     public static class CardDatabase
     {
-        public static Dictionary<string, Card> CardData { get; private set; } = new Dictionary<string, Card>();
+        public static Dictionary<string, CardImport> CardData { get; private set; } = new Dictionary<string, CardImport>();
 
         public static void AddCardToDatabase(CardImport importData, Sprite cardArt)
         {
@@ -21,17 +22,15 @@ namespace SFDDCards
                 return;
             }
 
-            Card newCard = importData.DeriveCard();
-
-            CardData.Add(lowerId, newCard);
-            newCard.Sprite = cardArt;
+            CardData.Add(lowerId, importData);
+            importData.Sprite = cardArt;
         }
 
-        public static Card GetModel(string id, RandomDecider<Card> decider = null)
+        public static Card GetModel(string id, RandomDecider<CardImport> decider = null)
         {
             if (decider == null)
             {
-                decider = new RandomDecider<Card>();
+                decider = new RandomDecider<CardImport>();
             }
 
             // If there are brackets, this might be a set of tag criteria.
@@ -53,12 +52,12 @@ namespace SFDDCards
             }
             else
             {
-                if (!CardData.TryGetValue(id, out Card foundModel))
+                if (!CardData.TryGetValue(id, out CardImport foundModel))
                 {
                     Debug.LogError($"CardData dictionary lookup does not contain id {id}");
                 }
 
-                return foundModel;
+                return new Card(foundModel);
             }
         }
 
@@ -79,11 +78,11 @@ namespace SFDDCards
             return toAward;
         }
 
-        public static bool TryGetCardWithAllTags(RandomDecider<Card> decider, HashSet<string> tags, out Card card)
+        public static bool TryGetCardWithAllTags(RandomDecider<CardImport> decider, HashSet<string> tags, out Card card)
         {
-            List<Card> candidates = new List<Card>();
+            List<CardImport> candidates = new List<CardImport>();
 
-            foreach (Card model in CardData.Values)
+            foreach (CardImport model in CardData.Values)
             {
                 if (model.MeetsAllTags(tags))
                 {
@@ -97,7 +96,7 @@ namespace SFDDCards
                 return false;
             }
 
-            card = decider.ChooseRandomly(candidates);
+            card = new Card(decider.ChooseRandomly(candidates));
             return true;
         }
     }

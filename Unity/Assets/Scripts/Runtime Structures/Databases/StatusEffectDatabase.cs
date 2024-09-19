@@ -1,5 +1,6 @@
 namespace SFDDCards
 {
+    using SFDDCards.ImportModels;
     using System;
     using System.Collections;
     using System.Collections.Generic;
@@ -20,7 +21,7 @@ namespace SFDDCards
                 return;
             }
 
-            EffectData.Add(importData.Id.ToLower(), importData.DeriveStatusEffect());
+            EffectData.Add(importData.Id.ToLower(), new StatusEffect(importData));
         }
 
         public static bool TryImportStatusEffectFromFile(string filepath, out StatusEffect output)

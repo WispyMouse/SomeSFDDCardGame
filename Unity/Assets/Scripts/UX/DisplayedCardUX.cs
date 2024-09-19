@@ -1,4 +1,4 @@
-namespace SFDDCards
+namespace SFDDCards.UX
 {
     using System;
     using System.Collections;
@@ -22,12 +22,12 @@ namespace SFDDCards
 
         public virtual void MouseEnterStartHover()
         {
-            GlobalUpdateUX.MouseStartHoveredEvent.Invoke(this);
+            MouseHoverShowerController.MouseStartHoveredEvent.Invoke(this);
         }
 
         public virtual void MouseExitStopHover()
         {
-            GlobalUpdateUX.MouseEndHoveredEvent.Invoke(this);
+            MouseHoverShowerController.MouseEndHoveredEvent.Invoke(this);
         }
 
         public virtual void Clicked()
@@ -60,6 +60,11 @@ namespace SFDDCards
         {
             toShow = this.RenderedCard?.RepresentedCard;
             return toShow != null;
+        }
+
+        private void OnDisable()
+        {
+            MouseHoverShowerController.MouseEndHoveredEvent.Invoke(this);
         }
     }
 }

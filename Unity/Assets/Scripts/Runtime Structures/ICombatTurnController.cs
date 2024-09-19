@@ -1,4 +1,4 @@
-namespace SFDDCards.UX
+namespace SFDDCards
 {
     using System;
     using System.Collections;
@@ -7,9 +7,8 @@ namespace SFDDCards.UX
     using System.Text;
     using UnityEngine;
 
-    public interface IAnimationPuppet
+    public interface ICombatTurnController
     {
-        Transform OwnTransform { get; }
-        bool IsNotDestroyed { get; }
+        public void HandleSequenceEventWithAnimation(GameplaySequenceEvent sequenceEvent);
     }
 }

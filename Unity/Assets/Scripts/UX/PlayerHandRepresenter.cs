@@ -1,4 +1,4 @@
-namespace SFDDCards
+namespace SFDDCards.UX
 {
     using System;
     using System.Collections;
@@ -66,7 +66,7 @@ namespace SFDDCards
 
             float cardsMinusOne = (float)(cardsInHand - 1);
 
-            float modifiedCardFanDistance = Mathf.Min(CardFanDistance * (float)cardsInHand, MaximumCardFanDistance) / cardsMinusOne;
+            float modifiedCardFanDistance = cardsInHand > 1 ? Mathf.Min(CardFanDistance * (float)cardsInHand, MaximumCardFanDistance) / cardsMinusOne : 0;
             float leftStartingPoint = -modifiedCardFanDistance * (this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.PlayerCombatDeck.CardsCurrentlyInHand.Count - 1) / 2f;
             float maxFanAngle = cardsInHand > CountForMaximumFanValue ? FanDegreesMaximum : Mathf.Lerp(0, FanDegreesMaximum, cardsMinusOne / (float)CountForMaximumFanValue);
             float fanAnglePerIndex = cardsInHand > 1 ? maxFanAngle / cardsMinusOne * 2f : 0;
