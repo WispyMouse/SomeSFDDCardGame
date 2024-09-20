@@ -6,6 +6,7 @@ namespace SFDDCards.UX
     using UnityEngine;
     using UnityEngine.Events;
     using UnityEngine.EventSystems;
+    using UnityEngine.UI;
 
     public class MouseHoverShowerController : MonoBehaviour
     {
@@ -90,6 +91,8 @@ namespace SFDDCards.UX
 
         private void PlaceHoverAwayFromScreenEdge()
         {
+            Canvas.ForceUpdateCanvases();
+
             const float MinimumEdgeSpace = 20f;
 
             float minX = MinimumEdgeSpace;
@@ -97,29 +100,37 @@ namespace SFDDCards.UX
             float minY = MinimumEdgeSpace;
             float maxY = Screen.height - MinimumEdgeSpace;
 
-            float left = this.CanvasSpaceHoverUX.OwnTransform.position.x + this.CanvasSpaceHoverUX.OwnTransform.rect.xMin;
-            float right = this.CanvasSpaceHoverUX.OwnTransform.position.x + this.CanvasSpaceHoverUX.OwnTransform.rect.xMax;
-            float top = this.CanvasSpaceHoverUX.OwnTransform.position.y + this.CanvasSpaceHoverUX.OwnTransform.rect.yMax;
-            float bottom = this.CanvasSpaceHoverUX.OwnTransform.position.y + this.CanvasSpaceHoverUX.OwnTransform.rect.yMin;
+            float leftmost = float.MaxValue;
+            float rightmost = float.MinValue;
+            float topmost = float.MinValue;
+            float bottommost = float.MaxValue;
 
-            if (left < minX)
+            foreach (RectTransform curTransform in this.CanvasSpaceHoverUX.GetAllRectTransforms())
             {
-                this.CanvasSpaceHoverUX.OwnTransform.position += Vector3.right * (minX - left);
+                leftmost = Mathf.Min(leftmost, curTransform.rect.xMin + curTransform.position.x);
+                rightmost = Mathf.Max(rightmost, curTransform.rect.xMax + curTransform.position.x);
+                topmost = Mathf.Min(topmost, curTransform.rect.yMax + curTransform.position.y);
+                bottommost = Mathf.Max(bottommost, curTransform.rect.yMin + curTransform.position.y);
             }
 
-            if (right > maxX)
+            if (leftmost < minX)
             {
-                this.CanvasSpaceHoverUX.OwnTransform.position += Vector3.left * (right - maxX);
+                this.CanvasSpaceHoverUX.OwnTransform.position += Vector3.right * (minX - leftmost);
             }
 
-            if (top > maxY)
+            if (rightmost > maxX)
             {
-                this.CanvasSpaceHoverUX.OwnTransform.position += Vector3.down * (top - minY);
+                this.CanvasSpaceHoverUX.OwnTransform.position += Vector3.left * (rightmost - maxX);
             }
 
-            if (bottom < minY)
+            if (topmost > maxY)
             {
-                this.CanvasSpaceHoverUX.OwnTransform.position += Vector3.up * (minY - bottom);
+                this.CanvasSpaceHoverUX.OwnTransform.position += Vector3.down * (topmost - minY);
+            }
+
+            if (bottommost < minY)
+            {
+                this.CanvasSpaceHoverUX.OwnTransform.position += Vector3.up * (minY - bottommost);
             }
         }
     }
