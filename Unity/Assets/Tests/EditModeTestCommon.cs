@@ -24,14 +24,19 @@ namespace SFDDCards.Tests.EditMode
 
             EnemyDatabase.AddEnemyToDatabase(punchingBag);
 
-            EncounterModel toEncounter = new EncounterModel(new EncounterImport());
-
-            toEncounter.Id = nameof(GetEncounterWithPunchingBags) + numberOfPunchingBags.ToString() + amountOfHealth.ToString();
-
+            List<string> idsToEncounter = new List<string>();
             for (int ii = 0; ii < numberOfPunchingBags; ii++)
             {
-                toEncounter.EnemiesInEncounterById.Add(punchingBag.Id);
+                idsToEncounter.Add(punchingBag.Id);
             }
+
+            EncounterModel toEncounter = new EncounterModel(
+                new EncounterImport()
+                {
+                    Id = nameof(GetEncounterWithPunchingBags) + numberOfPunchingBags.ToString() + amountOfHealth.ToString(),
+                    Name = nameof(GetEncounterWithPunchingBags),
+                    EnemyIds = idsToEncounter
+                });
 
             return toEncounter;
         }
