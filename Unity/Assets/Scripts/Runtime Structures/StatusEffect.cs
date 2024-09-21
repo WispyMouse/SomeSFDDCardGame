@@ -49,7 +49,7 @@ namespace SFDDCards
                         attackTokenList);
                     foreach (TokenEvaluatorBuilder builder in tokenEvaluators)
                     {
-                        thisWindowString.Append($"{builder.GetAbstractDelta().DescribeAsEffect()} ");
+                        thisWindowString.Append($"{builder.GetConceptualDelta().DescribeDelta()} ");
                     }
                 }
 

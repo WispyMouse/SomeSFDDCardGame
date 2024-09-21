@@ -54,23 +54,6 @@ namespace SFDDCards
             return stringLog.ToString();
         }
 
-        public string DescribeAsEffect()
-        {
-            StringBuilder stringLog = new StringBuilder();
-
-            foreach (DeltaEntry entry in DeltaEntries)
-            {
-                string description = entry.DescribeAsEffect();
-
-                if (!string.IsNullOrEmpty(description))
-                {
-                    stringLog.AppendLine(description);
-                }
-            }
-
-            return stringLog.ToString().Trim();
-        }
-
         public void EvaluateVariables(CampaignContext campaignContext, ICombatantTarget user, ICombatantTarget target)
         {
             for (int ii = 0; ii < this.DeltaEntries.Count; ii++)

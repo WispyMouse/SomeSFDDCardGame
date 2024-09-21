@@ -37,8 +37,8 @@ namespace SFDDCards.Tests.EditMode
 
         public static List<AssertEffectScriptResultsInTextValueSourceValue> AssertEffectScriptResultsInTextValueSource => new List<AssertEffectScriptResultsInTextValueSourceValue>()
         {
-            new AssertEffectScriptResultsInTextValueSourceValue("[SETTARGET: FOE][DAMAGE: 1]", "4 damage."),
-            new AssertEffectScriptResultsInTextValueSourceValue("[SETTARGET: SELF][HEAL: 1]", "Heal 4.")
+            new AssertEffectScriptResultsInTextValueSourceValue("[SETTARGET: FOE][DAMAGE: 1]", "1 damage."),
+            new AssertEffectScriptResultsInTextValueSourceValue("[SETTARGET: SELF][HEAL: 1]", "Heal 1.")
         };
 
         [Test]

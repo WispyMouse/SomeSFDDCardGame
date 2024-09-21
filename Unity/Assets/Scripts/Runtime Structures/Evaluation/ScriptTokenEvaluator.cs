@@ -105,6 +105,7 @@ namespace SFDDCards
             // When parsing a card, if three abilities sequentially have the same elemental requirements,
             // don't display the redundant requirements, if the requirements are empty.
             string previousRequirements = string.Empty;
+            TokenEvaluatorBuilder previousBulider = null;
 
             foreach (TokenEvaluatorBuilder builder in builders)
             {
@@ -145,14 +146,16 @@ namespace SFDDCards
 
                 previousRequirements = currentRequirements;
 
-                GamestateDelta delta = builder.GetAbstractDelta();
+                ConceptualDelta delta = builder.GetConceptualDelta();
 
-                string deltaText = delta.DescribeAsEffect();
+                string deltaText = delta.DescribeDelta();
 
                 if (!string.IsNullOrEmpty(deltaText))
                 {
                     effectText.AppendLine(deltaText);
                 }
+
+                previousBulider = builder;
             }
 
             return effectText.ToString().Trim();
@@ -165,9 +168,9 @@ namespace SFDDCards
 
             foreach (TokenEvaluatorBuilder builder in builders)
             {
-                GamestateDelta delta = builder.GetAbstractDelta();
+                ConceptualDelta delta = builder.GetConceptualDelta();
 
-                string deltaText = delta.DescribeAsEffect();
+                string deltaText = delta.DescribeDelta();
 
                 if (!string.IsNullOrEmpty(deltaText))
                 {

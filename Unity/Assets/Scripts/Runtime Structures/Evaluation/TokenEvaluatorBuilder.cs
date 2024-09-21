@@ -31,6 +31,8 @@ namespace SFDDCards
         public bool ShouldLaunch = false;
 
         public CombatantTargetEvaluatableValue Target;
+        public CombatantTargetEvaluatableValue OriginalConceptualTarget;
+
         public ICombatantTarget User;
         public ICombatantTarget OriginalTarget;
 
@@ -46,11 +48,13 @@ namespace SFDDCards
         public string LogText;
 
         public List<Action<TokenEvaluatorBuilder>> ActionsToExecute = new List<Action<TokenEvaluatorBuilder>>();
+        public TokenEvaluatorBuilder PreviousTokenBuilder = null;
 
-        public TokenEvaluatorBuilder(ICombatantTarget inUser, ICombatantTarget inOriginalTarget)
+        public TokenEvaluatorBuilder(ICombatantTarget inUser, ICombatantTarget inOriginalTarget, TokenEvaluatorBuilder previousBuilder = null)
         {
             this.User = inUser;
             this.OriginalTarget = inOriginalTarget;
+            this.PreviousTokenBuilder = previousBuilder;
         }
 
         public GamestateDelta GetEffectiveDelta(CampaignContext campaignContext)
@@ -90,20 +94,18 @@ namespace SFDDCards
             return delta;
         }
 
-        public GamestateDelta GetAbstractDelta()
+        public ConceptualDelta GetConceptualDelta()
         {
-            GamestateDelta delta = new GamestateDelta();
+            ConceptualDelta delta = new ConceptualDelta();
 
-            delta.DeltaEntries.Add(new DeltaEntry()
+            delta.DeltaEntries.Add(new ConceptualDeltaEntry(this, this.OriginalConceptualTarget, this.PreviousTokenBuilder?.Target)
             {
                 MadeFromBuilder = this,
-                User = this.User,
-                AbstractTarget = this.Target,
-                AbstractIntensity = this.Intensity,
+                ConceptualTarget = this.Target,
+                ConceptualIntensity = this.Intensity,
                 IntensityKindType = this.IntensityKindType,
                 NumberOfCardsRelationType = this.NumberOfCardsRelationType,
                 ElementResourceChanges = this.ElementResourceChanges,
-                OriginalTarget = this.OriginalTarget,
                 StatusEffect = this.StatusEffect
             });
 

@@ -13,6 +13,11 @@ namespace SFDDCards.ScriptingTokens
         public override void ApplyToken(TokenEvaluatorBuilder tokenBuilder)
         {
             tokenBuilder.Target = this.Target;
+
+            if (tokenBuilder.OriginalConceptualTarget == null)
+            {
+                tokenBuilder.OriginalConceptualTarget = this.Target;
+            }
         }
 
         protected override bool TryGetTokenWithArguments(List<string> arguments, out IScriptingToken scriptingToken)

@@ -104,57 +104,6 @@ namespace SFDDCards
             return elementDelta.ToString();
         }
 
-        /// <summary>
-        /// Assuming that the delta has conceptual targets,
-        /// describes the delta as though it were card text.
-        /// </summary>
-        /// <returns>A string description to log.</returns>
-        public string DescribeAsEffect()
-        {
-            StringBuilder compositeDelta = new StringBuilder();
-
-            string describeElementDelta = DescribeElementDelta();
-            if (!string.IsNullOrEmpty(describeElementDelta))
-            {
-                compositeDelta.Append(describeElementDelta);
-            }
-
-            string describeIntensityDelta = DescribeEffect();
-            if (!string.IsNullOrEmpty(describeIntensityDelta))
-            {
-                compositeDelta.Append(describeIntensityDelta);
-            }
-
-            return compositeDelta.ToString();
-        }
-
-
-        public string DescribeEffect()
-        {
-            if (IntensityKindType == TokenEvaluatorBuilder.IntensityKind.Damage)
-            {
-                return DescribeDamageDealtAsEffect(this);
-            }
-            else if (IntensityKindType == TokenEvaluatorBuilder.IntensityKind.Heal)
-            {
-                return $"Heals {DescribeTarget()} for {DescribeIntensity()}";
-            }
-            else if (IntensityKindType == TokenEvaluatorBuilder.IntensityKind.NumberOfCards)
-            {
-                if (NumberOfCardsRelationType == TokenEvaluatorBuilder.NumberOfCardsRelation.Draw)
-                {
-                    return $"Draw {DescribeIntensity()} card(s)";
-                }
-            }
-            else if (IntensityKindType == TokenEvaluatorBuilder.IntensityKind.StatusEffect)
-            {
-                // TODO: This should know if it's gaining or losing stacks
-                return $"Applies/Removes {DescribeIntensity()} stacks of {StatusEffect.Name}";
-            }
-
-            return "I have no idea what this will do.";
-        }
-
         public string DescribeTarget()
         {
             if (AbstractTarget != null)
@@ -199,31 +148,6 @@ namespace SFDDCards
             }
 
             return this.AbstractIntensity.DescribeEvaluation();
-        }
-
-        public static string DescribeDamageDealtAsEffect(DeltaEntry delta)
-        {
-            string intensity = delta.DescribeIntensity();
-
-            // Is this targeting all enemies?
-            if (delta.Target is AllFoesTarget || delta.AbstractTarget is AllFoeTargetEvaluatableValue)
-            {
-                return $"{intensity} damage to all foes.";
-            }
-
-            if (delta.Target == delta.User || delta.AbstractTarget is SelfTargetEvaluatableValue)
-            {
-                return $"{intensity} damage to self.";
-            }
-
-            // If the target of this entry is the original target, we can trim some text off
-            if (delta.IsTargetingOriginalTarget)
-            {
-                return $"{intensity} damage.";
-            }
-
-            GlobalUpdateUX.LogTextEvent.Invoke($"Failed to parse delta as damage effect.", GlobalUpdateUX.LogType.RuntimeError);
-            return String.Empty;
         }
 
         public bool IsTargetingOriginalTarget
