@@ -1,5 +1,7 @@
 namespace SFDDCards
 {
+    using SFDDCards.Evaluation.Actual;
+    using SFDDCards.Evaluation.Conceptual;
     using SFDDCards.ScriptingTokens;
     using SFDDCards.ScriptingTokens.EvaluatableValues;
     using System;

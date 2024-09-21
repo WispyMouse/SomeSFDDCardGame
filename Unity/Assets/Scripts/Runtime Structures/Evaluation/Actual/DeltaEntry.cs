@@ -1,4 +1,4 @@
-namespace SFDDCards
+namespace SFDDCards.Evaluation.Actual
 {
     using SFDDCards.ScriptingTokens.EvaluatableValues;
     using System;

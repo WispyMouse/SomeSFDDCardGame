@@ -3,6 +3,7 @@ namespace SFDDCards.ScriptingTokens
     using SFDDCards.ScriptingTokens.EvaluatableValues;
     using System.Collections.Generic;
     using System.Text.RegularExpressions;
+    using SFDDCards.Evaluation.Actual;
 
     public class HealScriptingToken : BaseScriptingToken
     {

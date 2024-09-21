@@ -1,5 +1,6 @@
 namespace SFDDCards
 {
+    using SFDDCards.Evaluation.Actual;
     using SFDDCards.ImportModels;
     using SFDDCards.ScriptingTokens;
     using System.Collections;

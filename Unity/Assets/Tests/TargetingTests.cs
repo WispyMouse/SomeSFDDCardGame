@@ -8,6 +8,7 @@ namespace SFDDCards.Tests.EditMode
     using System.IO;
     using System.Text;
     using UnityEngine;
+    using SFDDCards.Evaluation.Actual;
 
 
     public class TargetingTests : EditModeTestBase

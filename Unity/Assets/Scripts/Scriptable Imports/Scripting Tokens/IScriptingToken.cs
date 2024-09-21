@@ -5,6 +5,7 @@ namespace SFDDCards.ScriptingTokens
     using System.Collections.Generic;
     using System.Text.RegularExpressions;
     using UnityEngine;
+    using SFDDCards.Evaluation.Actual;
 
     public interface IScriptingToken
     {

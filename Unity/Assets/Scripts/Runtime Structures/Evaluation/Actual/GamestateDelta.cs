@@ -1,4 +1,4 @@
-namespace SFDDCards
+namespace SFDDCards.Evaluation.Actual
 {
     using System;
     using System.Collections;
@@ -6,6 +6,7 @@ namespace SFDDCards
     using System.IO;
     using System.Text;
     using UnityEngine;
+    using SFDDCards.Evaluation.Actual;
 
     public class GamestateDelta
     {

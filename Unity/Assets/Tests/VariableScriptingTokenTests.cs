@@ -10,6 +10,7 @@ namespace SFDDCards.Tests.EditMode
     using ScriptingTokens;
     using ScriptingTokens.EvaluatableValues;
     using SFDDCards.ImportModels;
+    using SFDDCards.Evaluation.Actual;
 
     public class VariableScriptingTokenTests : EditModeTestBase
     {
