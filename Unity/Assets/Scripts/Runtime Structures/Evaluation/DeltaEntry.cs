@@ -133,7 +133,7 @@ namespace SFDDCards
         {
             if (IntensityKindType == TokenEvaluatorBuilder.IntensityKind.Damage)
             {
-                return $"Damages {DescribeTarget()} for {DescribeIntensity()}";
+                return DescribeDamageDealtAsEffect(this);
             }
             else if (IntensityKindType == TokenEvaluatorBuilder.IntensityKind.Heal)
             {
@@ -199,6 +199,44 @@ namespace SFDDCards
             }
 
             return this.AbstractIntensity.DescribeEvaluation();
+        }
+
+        public static string DescribeDamageDealtAsEffect(DeltaEntry delta)
+        {
+            string intensity = delta.DescribeIntensity();
+
+            // Is this targeting all enemies?
+            if (delta.Target is AllFoesTarget || delta.AbstractTarget is AllFoeTargetEvaluatableValue)
+            {
+                return $"{intensity} damage to all foes.";
+            }
+
+            if (delta.Target == delta.User || delta.AbstractTarget is SelfTargetEvaluatableValue)
+            {
+                return $"{intensity} damage to self.";
+            }
+
+            // If the target of this entry is the original target, we can trim some text off
+            if (delta.IsTargetingOriginalTarget)
+            {
+                return $"{intensity} damage.";
+            }
+
+            GlobalUpdateUX.LogTextEvent.Invoke($"Failed to parse delta as damage effect.", GlobalUpdateUX.LogType.RuntimeError);
+            return String.Empty;
+        }
+
+        public bool IsTargetingOriginalTarget
+        {
+            get
+            {
+                if (this.OriginalTarget == null || this.Target == null)
+                {
+                    return false;
+                }
+
+                return this.OriginalTarget == this.Target;
+            }
         }
     }
 }

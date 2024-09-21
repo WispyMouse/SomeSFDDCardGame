@@ -155,7 +155,7 @@ namespace SFDDCards
                 }
             }
 
-            return effectText.ToString();
+            return effectText.ToString().Trim();
         }
 
         public static string DescribeEnemyAttackIntent(EnemyAttack attack)

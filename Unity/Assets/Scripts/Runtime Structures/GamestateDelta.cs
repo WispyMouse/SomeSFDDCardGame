@@ -68,7 +68,7 @@ namespace SFDDCards
                 }
             }
 
-            return stringLog.ToString();
+            return stringLog.ToString().Trim();
         }
 
         public void EvaluateVariables(CampaignContext campaignContext, ICombatantTarget user, ICombatantTarget target)
