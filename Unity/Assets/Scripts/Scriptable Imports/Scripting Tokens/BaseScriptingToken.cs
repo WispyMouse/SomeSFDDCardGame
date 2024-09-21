@@ -1,6 +1,7 @@
 namespace SFDDCards.ScriptingTokens
 {
     using SFDDCards.Evaluation.Actual;
+    using SFDDCards.Evaluation.Conceptual;
     using SFDDCards.ScriptingTokens.EvaluatableValues;
     using System.Collections.Generic;
     using System.Text;
@@ -13,7 +14,7 @@ namespace SFDDCards.ScriptingTokens
 
         public abstract string ScriptingTokenIdentifier { get; }
 
-        public abstract void ApplyToken(TokenEvaluatorBuilder tokenBuilder);
+        public abstract void ApplyToken(ConceptualTokenEvaluatorBuilder tokenBuilder);
 
         public bool GetTokenIfMatch(string tokenString, out IScriptingToken match)
         {

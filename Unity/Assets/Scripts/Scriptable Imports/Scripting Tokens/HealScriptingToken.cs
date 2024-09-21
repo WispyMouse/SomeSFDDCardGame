@@ -4,6 +4,7 @@ namespace SFDDCards.ScriptingTokens
     using System.Collections.Generic;
     using System.Text.RegularExpressions;
     using SFDDCards.Evaluation.Actual;
+    using SFDDCards.Evaluation.Conceptual;
 
     public class HealScriptingToken : BaseScriptingToken
     {
@@ -11,11 +12,10 @@ namespace SFDDCards.ScriptingTokens
 
         public override string ScriptingTokenIdentifier { get; } = "HEAL";
 
-        public override void ApplyToken(TokenEvaluatorBuilder tokenBuilder)
+        public override void ApplyToken(ConceptualTokenEvaluatorBuilder tokenBuilder)
         {
             tokenBuilder.IntensityKindType = TokenEvaluatorBuilder.IntensityKind.Heal;
             tokenBuilder.Intensity = HealingAmount;
-            tokenBuilder.ShouldLaunch = true;
         }
 
         public override bool RequiresTarget()

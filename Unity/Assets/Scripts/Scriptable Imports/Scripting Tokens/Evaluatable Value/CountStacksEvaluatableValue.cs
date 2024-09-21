@@ -16,18 +16,13 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
 
         public bool TryEvaluateValue(CampaignContext campaignContext, TokenEvaluatorBuilder currentBuilder, out int evaluatedValue)
         {
-            if (this.CountOn == "self" && currentBuilder.User != null)
-            {
-                evaluatedValue = currentBuilder.User.CountStacks(this.StacksToCount);
-            }
-
-            if (currentBuilder.Target == null || !currentBuilder.Target.TryEvaluateValue(campaignContext, currentBuilder, out ICombatantTarget target))
+            if (currentBuilder.Target == null)
             {
                 evaluatedValue = 0;
                 return false;
             }
 
-            evaluatedValue = target.CountStacks(this.StacksToCount);
+            evaluatedValue = currentBuilder.Target.CountStacks(this.StacksToCount);
             return true;
         }
 

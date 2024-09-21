@@ -27,88 +27,65 @@ namespace SFDDCards.Evaluation.Actual
             Draw = 1
         }
 
+        public CampaignContext Campaign;
+
         public List<IScriptingToken> AppliedTokens = new List<IScriptingToken>();
-
-        public bool ShouldLaunch = false;
-
-        public CombatantTargetEvaluatableValue Target;
-        public CombatantTargetEvaluatableValue OriginalConceptualTarget;
 
         public ICombatantTarget User;
         public ICombatantTarget OriginalTarget;
+        public ICombatantTarget Target;
 
-        public IEvaluatableValue<int> Intensity;
-        public IntensityKind IntensityKindType;
-        public NumberOfCardsRelation NumberOfCardsRelationType = NumberOfCardsRelation.None;
+        public int Intensity;
+        public IntensityKind IntensityKindType => this.BasedOnConcept.IntensityKindType;
+        public NumberOfCardsRelation NumberOfCardsRelationType => this.BasedOnConcept.NumberOfCardsRelationType;
 
         public List<ElementResourceChange> ElementResourceChanges = new List<ElementResourceChange>();
-        public Dictionary<Element, IEvaluatableValue<int>> ElementRequirements = new Dictionary<Element, IEvaluatableValue<int>>();
-        public List<RequiresComparisonScriptingToken> RequiresComparisons = new List<RequiresComparisonScriptingToken>();
+        public Dictionary<Element, int> ElementRequirements = new Dictionary<Element, int>();
+        public List<RequiresComparisonScriptingToken> RequiresComparisons => this.BasedOnConcept.RequiresComparisons;
 
-        public StatusEffect StatusEffect;
-        public string LogText;
+        public StatusEffect StatusEffect => this.BasedOnConcept.StatusEffect;
 
-        public List<Action<TokenEvaluatorBuilder>> ActionsToExecute = new List<Action<TokenEvaluatorBuilder>>();
+        public List<Action<DeltaEntry>> ActionsToExecute => this.BasedOnConcept.ActionsToExecute;
         public TokenEvaluatorBuilder PreviousTokenBuilder = null;
+        public ConceptualTokenEvaluatorBuilder BasedOnConcept = null;
 
-        public TokenEvaluatorBuilder(ICombatantTarget inUser, ICombatantTarget inOriginalTarget, TokenEvaluatorBuilder previousBuilder = null)
+        public TokenEvaluatorBuilder(ConceptualTokenEvaluatorBuilder concept, CampaignContext campaignContext, ICombatantTarget user, ICombatantTarget originalTarget, TokenEvaluatorBuilder previousBuilder = null)
         {
-            this.User = inUser;
-            this.OriginalTarget = inOriginalTarget;
+            this.Campaign = campaignContext;
+            this.BasedOnConcept = concept;
             this.PreviousTokenBuilder = previousBuilder;
+
+            this.User = user;
+            this.OriginalTarget = originalTarget;
+
+            if (concept.Target != null && !concept.Target.TryEvaluateValue(campaignContext, this, out this.Target))
+            {
+                GlobalUpdateUX.LogTextEvent.Invoke($"Target cannot be evaluated, cannot resolve effect.", GlobalUpdateUX.LogType.RuntimeError);
+            }
+
+            if (concept.Intensity != null && !concept.Intensity.TryEvaluateValue(campaignContext, this, out this.Intensity))
+            {
+                GlobalUpdateUX.LogTextEvent.Invoke($"Intensity cannot be evaluated, cannot resolve effect.", GlobalUpdateUX.LogType.RuntimeError);
+            }
         }
 
         public GamestateDelta GetEffectiveDelta(CampaignContext campaignContext)
         {
             GamestateDelta delta = new GamestateDelta();
-            int evaluatedIntensity = 0;
-
-            if (this.Intensity != null)
-            {
-                if (!this.Intensity.TryEvaluateValue(campaignContext, this, out evaluatedIntensity))
-                {
-                    GlobalUpdateUX.LogTextEvent?.Invoke($"{nameof(TokenEvaluatorBuilder)} ({nameof(GetEffectiveDelta)}): Failed to evaluate {nameof(this.Intensity)}. Cannot have a delta.", GlobalUpdateUX.LogType.RuntimeError);
-                    return delta;
-                }
-            }
-
-            ICombatantTarget foundTarget = null;
-
-            if (!(this.Target != null && this.Target.TryEvaluateValue(campaignContext, this, out foundTarget)))
-            {
-                GlobalUpdateUX.LogTextEvent?.Invoke($"Failed to evaluate a target for this ability", GlobalUpdateUX.LogType.RuntimeError);
-            }
 
             delta.DeltaEntries.Add(new DeltaEntry()
             {
                 MadeFromBuilder = this,
                 User = this.User,
-                Target = foundTarget,
-                Intensity = evaluatedIntensity,
+                Target = this.Target,
+                Intensity = this.Intensity,
                 IntensityKindType = this.IntensityKindType,
                 NumberOfCardsRelationType = this.NumberOfCardsRelationType,
                 ElementResourceChanges = this.ElementResourceChanges,
                 OriginalTarget = this.OriginalTarget,
-                StatusEffect = this.StatusEffect
+                StatusEffect = this.StatusEffect,
+                ActionsToExecute = this.ActionsToExecute
             }) ;
-
-            return delta;
-        }
-
-        public ConceptualDelta GetConceptualDelta()
-        {
-            ConceptualDelta delta = new ConceptualDelta();
-
-            delta.DeltaEntries.Add(new ConceptualDeltaEntry(this, this.OriginalConceptualTarget, this.PreviousTokenBuilder?.Target)
-            {
-                MadeFromBuilder = this,
-                ConceptualTarget = this.Target,
-                ConceptualIntensity = this.Intensity,
-                IntensityKindType = this.IntensityKindType,
-                NumberOfCardsRelationType = this.NumberOfCardsRelationType,
-                ElementResourceChanges = this.ElementResourceChanges,
-                StatusEffect = this.StatusEffect
-            });
 
             return delta;
         }
@@ -156,61 +133,19 @@ namespace SFDDCards.Evaluation.Actual
         {
             foreach (Element element in this.ElementRequirements.Keys)
             {
-                if (!this.ElementRequirements.TryGetValue(element, out IEvaluatableValue<int> variable))
+                if (!this.ElementRequirements.TryGetValue(element, out int variable))
                 {
-                    GlobalUpdateUX.LogTextEvent?.Invoke($"Could not parse a variable for meeting requirements.", GlobalUpdateUX.LogType.RuntimeError);
+                    GlobalUpdateUX.LogTextEvent?.Invoke($"Element requirements do not contain this element: {element}.", GlobalUpdateUX.LogType.RuntimeError);
                     return false;
                 }
 
-                if (!variable.TryEvaluateValue(combatContext.FromCampaign, this, out int evaluatedValue))
-                {
-                    GlobalUpdateUX.LogTextEvent?.Invoke($"Failed to evaluate value while trying to meet requirements.", GlobalUpdateUX.LogType.RuntimeError);
-                    return false;
-                }
-
-                if (!combatContext.MeetsElementRequirement(element, evaluatedValue))
+                if (!combatContext.MeetsElementRequirement(element, variable))
                 {
                     return false;
                 }
             }
 
             return true;
-        }
-
-        public string DescribeElementRequirements()
-        {
-            if (this.ElementRequirements.Count == 0)
-            {
-                return string.Empty;
-            }
-
-            StringBuilder compositeRequirements = new StringBuilder();
-            compositeRequirements.Append("Requires: ");
-            string startingComma = "";
-            bool nonzeroFound = false;
-
-            foreach (Element element in this.ElementRequirements.Keys)
-            {
-                compositeRequirements.Append($"{startingComma}{this.ElementRequirements[element].DescribeEvaluation()} {element.GetNameOrIcon()}");
-                startingComma = ", ";
-                nonzeroFound = true;
-            }
-
-            if (!nonzeroFound)
-            {
-                return string.Empty;
-            }
-
-            return compositeRequirements.ToString();
-        }
-
-        public static TokenEvaluatorBuilder Continue(TokenEvaluatorBuilder previous)
-        {
-            TokenEvaluatorBuilder builder = new TokenEvaluatorBuilder(previous.User, previous.OriginalTarget);
-
-            builder.Target = previous.Target;
-
-            return builder;
         }
 
         public bool AnyEffectRequiresTarget()

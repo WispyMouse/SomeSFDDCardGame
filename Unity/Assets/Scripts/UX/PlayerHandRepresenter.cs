@@ -86,11 +86,18 @@ namespace SFDDCards.UX
 
                 // And where it should be positioned
                 Vector3 objectOffset = new Vector3(leftStartingPoint, 0, 0) + new Vector3(modifiedCardFanDistance, 0, 0) * ii + backpush + downpush;
-                
+
+                Card forCard = this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.PlayerCombatDeck.CardsCurrentlyInHand[ii];
                 CombatCardUX newCard = Instantiate(this.CardRepresentationPF, this.PlayerHandTransform);
                 newCard.transform.localPosition = objectOffset;
                 newCard.transform.localRotation = Quaternion.Euler(0, 0, -thisCardAngle);
-                newCard.SetFromCard(this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.PlayerCombatDeck.CardsCurrentlyInHand[ii], SelectCurrentCard);
+                newCard.SetFromCard(forCard, SelectCurrentCard);
+
+                // Does the player meet the requirements of at least one of the effects?
+                bool anyPassingRequirements = ScriptTokenEvaluator.MeetsAnyRequirements(
+                    ScriptTokenEvaluator.CalculateConceptualBuildersFromTokenEvaluation(forCard),
+                    this.CentralGameStateControllerInstance.CurrentCampaignContext, this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignPlayer, null);
+                newCard.RequirementsAreMet = anyPassingRequirements;
             }
         }
 

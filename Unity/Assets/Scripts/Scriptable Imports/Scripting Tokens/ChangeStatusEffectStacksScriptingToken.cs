@@ -1,6 +1,7 @@
 namespace SFDDCards.ScriptingTokens
 {
     using SFDDCards.Evaluation.Actual;
+    using SFDDCards.Evaluation.Conceptual;
     using SFDDCards.ScriptingTokens.EvaluatableValues;
     using System.Collections.Generic;
 
@@ -11,12 +12,11 @@ namespace SFDDCards.ScriptingTokens
 
         public override string ScriptingTokenIdentifier { get; } = "CHANGESTATUSEFFECTSTACKS";
 
-        public override void ApplyToken(TokenEvaluatorBuilder tokenBuilder)
+        public override void ApplyToken(ConceptualTokenEvaluatorBuilder tokenBuilder)
         {
             tokenBuilder.IntensityKindType = TokenEvaluatorBuilder.IntensityKind.StatusEffect;
             tokenBuilder.Intensity = AmountOfStacks;
             tokenBuilder.StatusEffect = StatusEffectDatabase.GetModel(this.StatusEffect);
-            tokenBuilder.ShouldLaunch = true;
         }
 
         protected override bool TryGetTokenWithArguments(List<string> arguments, out IScriptingToken scriptingToken)

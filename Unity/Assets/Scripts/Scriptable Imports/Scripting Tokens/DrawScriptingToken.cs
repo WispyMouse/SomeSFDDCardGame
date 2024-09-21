@@ -1,6 +1,7 @@
 namespace SFDDCards.ScriptingTokens
 {
     using SFDDCards.Evaluation.Actual;
+    using SFDDCards.Evaluation.Conceptual;
     using SFDDCards.ScriptingTokens.EvaluatableValues;
     using System.Collections.Generic;
     using System.Text.RegularExpressions;
@@ -11,12 +12,11 @@ namespace SFDDCards.ScriptingTokens
 
         public override string ScriptingTokenIdentifier { get; } = "DRAW";
 
-        public override void ApplyToken(TokenEvaluatorBuilder tokenBuilder)
+        public override void ApplyToken(ConceptualTokenEvaluatorBuilder tokenBuilder)
         {
             tokenBuilder.IntensityKindType = TokenEvaluatorBuilder.IntensityKind.NumberOfCards;
             tokenBuilder.NumberOfCardsRelationType = TokenEvaluatorBuilder.NumberOfCardsRelation.Draw;
             tokenBuilder.Intensity = DrawAmount;
-            tokenBuilder.ShouldLaunch = true;
         }
 
         public override bool RequiresTarget()

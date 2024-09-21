@@ -24,6 +24,7 @@ namespace SFDDCards.Evaluation.Actual
         public List<ElementResourceChange> ElementResourceChanges = new List<ElementResourceChange>();
 
         public StatusEffect StatusEffect;
+        public List<Action<DeltaEntry>> ActionsToExecute = new List<Action<DeltaEntry>>();
 
         /// <summary>
         /// An indicator of who the original target of the ability is.

@@ -26,13 +26,7 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
                 return false;
             }
 
-            if (!currentBuilder.Target.TryEvaluateValue(campaignContext, currentBuilder, out ICombatantTarget target))
-            {
-                evaluatedValue = 0;
-                return false;
-            }
-
-            evaluatedValue = target.GetTotalHealth();
+            evaluatedValue = currentBuilder.Target.GetTotalHealth();
             return true;
         }
 

@@ -22,7 +22,7 @@ namespace SFDDCards.Evaluation.Conceptual
 
         public IEvaluatableValue<int> ConceptualIntensity;
 
-        public TokenEvaluatorBuilder MadeFromBuilder;
+        public ConceptualTokenEvaluatorBuilder MadeFromBuilder;
 
         public TokenEvaluatorBuilder.IntensityKind IntensityKindType = TokenEvaluatorBuilder.IntensityKind.None;
         public TokenEvaluatorBuilder.NumberOfCardsRelation NumberOfCardsRelationType = TokenEvaluatorBuilder.NumberOfCardsRelation.None;
@@ -30,11 +30,12 @@ namespace SFDDCards.Evaluation.Conceptual
 
         public StatusEffect StatusEffect;
         
-        public ConceptualDeltaEntry(TokenEvaluatorBuilder builder, CombatantTargetEvaluatableValue originalConceptualTarget, CombatantTargetEvaluatableValue previousConceptualTarget)
+        public ConceptualDeltaEntry(ConceptualTokenEvaluatorBuilder builder, CombatantTargetEvaluatableValue originalConceptualTarget, CombatantTargetEvaluatableValue previousConceptualTarget)
         {
             this.MadeFromBuilder = builder;
             this.OriginalConceptualTarget = originalConceptualTarget;
             this.PreviousConceptualTarget = previousConceptualTarget;
+            this.ConceptualTarget = previousConceptualTarget != null ? previousConceptualTarget : originalConceptualTarget;
         }
 
         /// <summary>
@@ -96,7 +97,7 @@ namespace SFDDCards.Evaluation.Conceptual
                 return $"Applies/Removes {DescribeIntensity()} stacks of {StatusEffect.Name}";
             }
 
-            return "I have no idea what this will do.";
+            return String.Empty;
         }
 
         public string DescribeIntensity()

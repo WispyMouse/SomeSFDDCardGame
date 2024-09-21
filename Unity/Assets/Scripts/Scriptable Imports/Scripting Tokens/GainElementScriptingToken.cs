@@ -2,6 +2,7 @@ using SFDDCards.ScriptingTokens.EvaluatableValues;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using SFDDCards.Evaluation.Actual;
+using SFDDCards.Evaluation.Conceptual;
 
 namespace SFDDCards.ScriptingTokens
 {
@@ -12,10 +13,9 @@ namespace SFDDCards.ScriptingTokens
 
         public override string ScriptingTokenIdentifier => "GAINELEMENT";
 
-        public override void ApplyToken(TokenEvaluatorBuilder tokenBuilder)
+        public override void ApplyToken(ConceptualTokenEvaluatorBuilder tokenBuilder)
         {
             tokenBuilder.ElementResourceChanges.Add(new ElementResourceChange() { Element = ElementDatabase.GetElement(this.Element), GainOrLoss = this.Amount });
-            tokenBuilder.ShouldLaunch = true;
         }
 
         public override bool IsHarmfulToTarget(ICombatantTarget user, ICombatantTarget target)

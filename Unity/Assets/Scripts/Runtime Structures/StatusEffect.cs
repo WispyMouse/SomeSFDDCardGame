@@ -1,6 +1,7 @@
 namespace SFDDCards
 {
     using SFDDCards.Evaluation.Actual;
+    using SFDDCards.Evaluation.Conceptual;
     using SFDDCards.ImportModels;
     using SFDDCards.ScriptingTokens;
     using System.Collections;
@@ -46,9 +47,8 @@ namespace SFDDCards
 
                 foreach (AttackTokenPile attackTokenList in this.EffectTokens[window])
                 {
-                    List<TokenEvaluatorBuilder> tokenEvaluators = ScriptTokenEvaluator.CalculateEvaluatorBuildersFromTokenEvaluation(
-                        attackTokenList);
-                    foreach (TokenEvaluatorBuilder builder in tokenEvaluators)
+                    List<ConceptualTokenEvaluatorBuilder> tokenEvaluators = ScriptTokenEvaluator.CalculateConceptualBuildersFromTokenEvaluation(attackTokenList);
+                    foreach (ConceptualTokenEvaluatorBuilder builder in tokenEvaluators)
                     {
                         thisWindowString.Append($"{builder.GetConceptualDelta().DescribeDelta()} ");
                     }

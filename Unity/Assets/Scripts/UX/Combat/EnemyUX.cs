@@ -1,5 +1,6 @@
 namespace SFDDCards.UX
 {
+    using SFDDCards.Evaluation.Actual;
     using System;
     using System.Collections;
     using System.Collections.Generic;
@@ -62,7 +63,8 @@ namespace SFDDCards.UX
 
             if (this.RepresentedEnemy.Intent != null)
             {
-                description = ScriptTokenEvaluator.DescribeEnemyAttackIntent(this.RepresentedEnemy.Intent);
+                GamestateDelta delta = ScriptTokenEvaluator.CalculateRealizedDeltaEvaluation(this.RepresentedEnemy.Intent, centralGameStateController.CurrentCampaignContext, this.RepresentedEnemy, centralGameStateController.CurrentCampaignContext.CurrentCombatContext.CombatPlayer);
+                description = delta.DescribeDelta();
             }
 
             if (!string.IsNullOrEmpty(description))

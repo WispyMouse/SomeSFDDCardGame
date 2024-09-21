@@ -6,12 +6,13 @@ namespace SFDDCards.ScriptingTokens
     using System.Text.RegularExpressions;
     using UnityEngine;
     using SFDDCards.Evaluation.Actual;
+    using SFDDCards.Evaluation.Conceptual;
 
     public interface IScriptingToken
     {
         bool GetTokenIfMatch(string tokenString, out IScriptingToken match);
 
-        void ApplyToken(TokenEvaluatorBuilder tokenBuilder);
+        void ApplyToken(ConceptualTokenEvaluatorBuilder tokenBuilder);
         bool IsHarmfulToTarget(ICombatantTarget user, ICombatantTarget target);
         bool RequiresTarget();
     }

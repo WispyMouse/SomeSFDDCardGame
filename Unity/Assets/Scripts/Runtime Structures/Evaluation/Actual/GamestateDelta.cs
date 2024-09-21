@@ -29,7 +29,12 @@ namespace SFDDCards.Evaluation.Actual
                     campaignContext.CurrentCombatContext.ApplyElementResourceChange(entry.MadeFromBuilder, change);
                 }
                 
-                entry.Target.ApplyDelta(campaignContext.CurrentCombatContext, entry);
+                entry.Target?.ApplyDelta(campaignContext.CurrentCombatContext, entry);
+
+                foreach (Action<GamestateDelta> actionToExecute in entry.ActionsToExecute)
+                {
+                    actionToExecute.Invoke(this);
+                }
             }
         }
 
@@ -53,29 +58,6 @@ namespace SFDDCards.Evaluation.Actual
             }
 
             return stringLog.ToString();
-        }
-
-        public void EvaluateVariables(CampaignContext campaignContext, ICombatantTarget user, ICombatantTarget target)
-        {
-            for (int ii = 0; ii < this.DeltaEntries.Count; ii++)
-            {
-                DeltaEntry curEntry = this.DeltaEntries[ii];
-
-                curEntry.OriginalTarget = target;
-                curEntry.User = user;
-                
-                if (curEntry.AbstractTarget != null)
-                {
-                    curEntry.AbstractTarget.TryEvaluateValue(campaignContext, curEntry.MadeFromBuilder, out curEntry.Target);
-                    curEntry.AbstractTarget = null;
-                }
-
-                if (curEntry.AbstractIntensity != null)
-                {
-                    curEntry.AbstractIntensity.TryEvaluateValue(campaignContext, curEntry.MadeFromBuilder, out curEntry.Intensity);
-                    curEntry.AbstractIntensity = null;
-                }
-            }
         }
     }
 }
