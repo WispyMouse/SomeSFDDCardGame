@@ -1,5 +1,7 @@
 namespace SFDDCards.ScriptingTokens.EvaluatableValues
 {
+    using SFDDCards.Evaluation.Actual;
+
     public class SpecificTargetEvaluatableValue : CombatantTargetEvaluatableValue
     {
         public ICombatantTarget Target { get; set; }

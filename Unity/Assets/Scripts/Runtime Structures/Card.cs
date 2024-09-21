@@ -14,13 +14,14 @@ namespace SFDDCards
         public HashSet<string> Tags;
         public Dictionary<Element, int> BaseElementGain { get; set; } = new Dictionary<Element, int>();
 
-        public List<IScriptingToken> AttackTokens { get; set; } = new List<IScriptingToken>();
+        public List<IScriptingToken> AttackTokens => this.AttackTokenPile.AttackTokens;
+        public AttackTokenPile AttackTokenPile { get; set; }
 
         public Card(CardImport basedOn)
         {
             this.Id = basedOn.Id.ToLower();
             this.Name = basedOn.Name;
-            this.AttackTokens = ScriptingTokens.ScriptingTokenDatabase.GetAllTokens(basedOn.EffectScript);
+            this.AttackTokenPile = ScriptingTokens.ScriptingTokenDatabase.GetAllTokens(basedOn.EffectScript);
 
             HashSet<string> lowerCaseTags = new HashSet<string>();
             foreach (string tag in basedOn.Tags)
@@ -37,9 +38,14 @@ namespace SFDDCards
             this.Sprite = basedOn.Sprite;
         }
 
-        public string GetDescription()
+        public EffectDescription GetDescription()
         {
-            return ScriptTokenEvaluator.DescribeCardText(this);
+            return new EffectDescription()
+            {
+                MentionedStatusEffects = ScriptTokenEvaluator.GetMentionedStatusEffects(this),
+                DescriptionText = new List<string>() { ScriptTokenEvaluator.DescribeCardText(this) },
+                DescribingLabel = this.Name
+            };
         }
 
         public int GetElementGain(Element element)

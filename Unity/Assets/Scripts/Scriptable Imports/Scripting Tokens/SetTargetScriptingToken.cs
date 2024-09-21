@@ -1,3 +1,5 @@
+using SFDDCards.Evaluation.Actual;
+using SFDDCards.Evaluation.Conceptual;
 using SFDDCards.ScriptingTokens.EvaluatableValues;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
@@ -10,9 +12,14 @@ namespace SFDDCards.ScriptingTokens
 
         public CombatantTargetEvaluatableValue Target;
 
-        public override void ApplyToken(TokenEvaluatorBuilder tokenBuilder)
+        public override void ApplyToken(ConceptualTokenEvaluatorBuilder tokenBuilder)
         {
             tokenBuilder.Target = this.Target;
+
+            if (tokenBuilder.OriginalTarget == null)
+            {
+                tokenBuilder.OriginalTarget = this.Target;
+            }
         }
 
         protected override bool TryGetTokenWithArguments(List<string> arguments, out IScriptingToken scriptingToken)

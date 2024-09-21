@@ -1,5 +1,7 @@
 namespace SFDDCards.ScriptingTokens.EvaluatableValues
 {
+    using SFDDCards.Evaluation.Actual;
+
     public class FoeTargetEvaluatableValue : CombatantTargetEvaluatableValue
     {
         public override string DescribeEvaluation()

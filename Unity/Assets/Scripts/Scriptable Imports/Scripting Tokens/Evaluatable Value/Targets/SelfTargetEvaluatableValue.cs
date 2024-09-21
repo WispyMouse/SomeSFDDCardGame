@@ -1,15 +1,17 @@
 namespace SFDDCards.ScriptingTokens.EvaluatableValues
 {
-    public class NoTargetEvaluatableValue : CombatantTargetEvaluatableValue
+    using SFDDCards.Evaluation.Actual;
+
+    public class SelfTargetEvaluatableValue : CombatantTargetEvaluatableValue
     {
         public override string DescribeEvaluation()
         {
-            return "No Target";
+            return "Self";
         }
 
         public override bool TryEvaluateValue(CampaignContext campaignContext, TokenEvaluatorBuilder currentBuilder, out ICombatantTarget evaluatedValue)
         {
-            evaluatedValue = null;
+            evaluatedValue = currentBuilder.User;
             return true;
         }
     }

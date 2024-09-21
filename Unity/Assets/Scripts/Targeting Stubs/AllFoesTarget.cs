@@ -1,3 +1,4 @@
+using SFDDCards.Evaluation.Actual;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -59,6 +60,16 @@ namespace SFDDCards
             }
 
             return totalHealth;
+        }
+
+        public bool Equals(ICombatantTarget other)
+        {
+            return other != null && other.GetType() == this.GetType();
+        }
+
+        public int GetRepresentingNumberOfTargets()
+        {
+            return this.AffectedTargets.Count;
         }
     }
 }

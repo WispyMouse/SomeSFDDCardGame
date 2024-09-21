@@ -24,6 +24,8 @@ namespace SFDDCards.UX
                 {
                     StatusEffectUX newUX = Instantiate(this.StatusEffectUXPrefab, this.transform);
                     this.StatusEffectLookup.Add(effect, newUX);
+                    newUX.SetFromEffect(effect);
+                    newUX.SetStacks(effect.Stacks);
                 }
 
                 noLongerApplicableEffects.Remove(effect);

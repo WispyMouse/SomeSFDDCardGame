@@ -1,4 +1,5 @@
 using UnityEngine;
+using SFDDCards.Evaluation.Actual;
 
 namespace SFDDCards
 {
@@ -30,6 +31,16 @@ namespace SFDDCards
         public bool Valid()
         {
             return true;
+        }
+
+        public bool Equals(ICombatantTarget other)
+        {
+            return other != null && other.GetType() == this.GetType();
+        }
+
+        public int GetRepresentingNumberOfTargets()
+        {
+            return 0;
         }
     }
 }

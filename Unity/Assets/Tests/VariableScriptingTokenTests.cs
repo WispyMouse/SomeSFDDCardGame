@@ -10,6 +10,7 @@ namespace SFDDCards.Tests.EditMode
     using ScriptingTokens;
     using ScriptingTokens.EvaluatableValues;
     using SFDDCards.ImportModels;
+    using SFDDCards.Evaluation.Actual;
 
     public class VariableScriptingTokenTests : EditModeTestBase
     {
@@ -120,17 +121,11 @@ namespace SFDDCards.Tests.EditMode
             TestVariableInCombatContext(attackHolderStack, variable, expectedValue, combatContext, combatContext.CombatPlayer, combatContext.Enemies[0], builderIndexContainingToken);
         }
 
-        public void TestVariableInCombatContext(IAttackTokenHolder attackHolderStack, IEvaluatableValue<int> variable, int expectedValue, CombatContext context, ICombatantTarget user, ICombatantTarget target, int builderIndexContainingToken = 0)
+        public void TestVariableInCombatContext(IAttackTokenHolder attackHolderStack, IEvaluatableValue<int> variable, int expectedValue, CombatContext context, ICombatantTarget user, ICombatantTarget target, int deltaIndex = 0)
         {
-            List<TokenEvaluatorBuilder> builders = ScriptTokenEvaluator.CalculateEvaluatorBuildersFromTokenEvaluation(attackHolderStack, user, target);
-            TokenEvaluatorBuilder builder = builders[builderIndexContainingToken];
-
-            if (!variable.TryEvaluateValue(context.FromCampaign, builder, out int evaluatedValue))
-            {
-                Assert.Fail($"Value should be able to evaluate.");
-            }
-
-            Assert.AreEqual(expectedValue, evaluatedValue, $"Value should be as expected after evaluation.");
+            GamestateDelta delta = ScriptTokenEvaluator.CalculateRealizedDeltaEvaluation(attackHolderStack, context.FromCampaign, user, target);
+            Assert.GreaterOrEqual(delta.DeltaEntries.Count, deltaIndex, $"There should be enough delta entries to find the specified delta index. Not enough entries returned on evaluation.");
+            Assert.AreEqual(expectedValue, delta.DeltaEntries[deltaIndex].Intensity, $"Value should be as expected after evaluation.");
         }
     }
 }

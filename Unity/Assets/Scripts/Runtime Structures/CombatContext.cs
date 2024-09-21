@@ -1,5 +1,7 @@
 namespace SFDDCards
 {
+    using SFDDCards.Evaluation.Actual;
+    using SFDDCards.Evaluation.Conceptual;
     using System.Collections;
     using System.Collections.Generic;
     using UnityEngine;
@@ -132,21 +134,13 @@ namespace SFDDCards
             }
 
             // Does the player meet the requirements of at least one of the effects?
-            bool anyPassingRequirements = false;
-            List<TokenEvaluatorBuilder> builders = ScriptTokenEvaluator.CalculateEvaluatorBuildersFromTokenEvaluation(toPlay);
-            foreach (TokenEvaluatorBuilder builder in builders)
-            {
-                if (builder.MeetsElementRequirements(this) && builder.MeetsComparisonRequirements(this))
-                {
-                    anyPassingRequirements = true;
-                    break;
-                }
-            }
+            List<ConceptualTokenEvaluatorBuilder> conceptBuilders = ScriptTokenEvaluator.CalculateConceptualBuildersFromTokenEvaluation(toPlay);
+            bool anyPassingRequirements = ScriptTokenEvaluator.MeetsAnyRequirements(conceptBuilders, this.FromCampaign, this.CombatPlayer, toPlayOn);
 
             if (!anyPassingRequirements)
             {
-                GlobalUpdateUX.LogTextEvent.Invoke($"Unable to play card {toPlay.Name}. No requirements for any of the card's effects have been met.", GlobalUpdateUX.LogType.GameEvent);
-                return;
+                GlobalUpdateUX.LogTextEvent.Invoke($"Playing {toPlay.Name} has not meant the requirements for any of its effects. The card will still be played to gain elements.", GlobalUpdateUX.LogType.GameEvent);
+                // return;
             }
 
             GlobalUpdateUX.LogTextEvent.Invoke($"Playing card {toPlay.Name} on {toPlayOn.Name}", GlobalUpdateUX.LogType.GameEvent);
@@ -155,8 +149,8 @@ namespace SFDDCards
             GlobalSequenceEventHolder.PushSequenceToTop(new GameplaySequenceEvent(
             () =>
             {
-                GamestateDelta delta = ScriptTokenEvaluator.CalculateDifferenceFromTokenEvaluation(this.FromCampaign, this.CombatPlayer, toPlay, toPlayOn);
-                GlobalUpdateUX.LogTextEvent.Invoke(delta.DescribeDelta(), GlobalUpdateUX.LogType.GameEvent);
+                GamestateDelta delta = ScriptTokenEvaluator.CalculateRealizedDeltaEvaluation(toPlay, this.FromCampaign, this.CombatPlayer, toPlayOn);
+                GlobalUpdateUX.LogTextEvent.Invoke(EffectDescriberDatabase.DescribeResolvedEffect(delta), GlobalUpdateUX.LogType.GameEvent);
                 delta.ApplyDelta(this.FromCampaign);
                 this.CheckAllStateEffectsAndKnockouts();
             },
@@ -172,8 +166,8 @@ namespace SFDDCards
                 return;
             }
 
-            GamestateDelta delta = ScriptTokenEvaluator.CalculateDifferenceFromTokenEvaluation(this.FromCampaign, toAct, toAct.Intent, this.CombatPlayer);GlobalUpdateUX.LogTextEvent.Invoke($"The player has run out of health! This run is over.", GlobalUpdateUX.LogType.GameEvent);
-            GlobalUpdateUX.LogTextEvent.Invoke(delta.DescribeDelta(), GlobalUpdateUX.LogType.GameEvent);
+            GamestateDelta delta = ScriptTokenEvaluator.CalculateRealizedDeltaEvaluation(toAct.Intent, this.FromCampaign, toAct, this.CombatPlayer);
+            GlobalUpdateUX.LogTextEvent.Invoke(EffectDescriberDatabase.DescribeResolvedEffect(delta), GlobalUpdateUX.LogType.GameEvent);
             delta.ApplyDelta(this.FromCampaign);
 
             this.CheckAllStateEffectsAndKnockouts();
@@ -181,8 +175,8 @@ namespace SFDDCards
 
         public void StatusEffectHappeningProc(StatusEffectHappening happening)
         {
-            GamestateDelta delta = ScriptTokenEvaluator.CalculateDifferenceFromTokenEvaluation(this.FromCampaign, happening.OwnedStatusEffect.Owner, happening, this.CombatPlayer);
-            GlobalUpdateUX.LogTextEvent.Invoke(delta.DescribeDelta(), GlobalUpdateUX.LogType.GameEvent);
+            GamestateDelta delta = ScriptTokenEvaluator.CalculateRealizedDeltaEvaluation(happening, this.FromCampaign, happening.OwnedStatusEffect.Owner, this.CombatPlayer);
+            GlobalUpdateUX.LogTextEvent.Invoke(EffectDescriberDatabase.DescribeResolvedEffect(delta), GlobalUpdateUX.LogType.GameEvent);
             delta.ApplyDelta(this.FromCampaign);
 
             this.CheckAllStateEffectsAndKnockouts();

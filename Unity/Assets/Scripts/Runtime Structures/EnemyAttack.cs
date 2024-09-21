@@ -10,13 +10,14 @@ namespace SFDDCards
 
     public class EnemyAttack : IAttackTokenHolder
     {
-        public List<IScriptingToken> AttackTokens { get; set; }
+        public List<IScriptingToken> AttackTokens => this.AttackTokenPile.AttackTokens;
+        public AttackTokenPile AttackTokenPile { get; set; }
         public ICombatantTarget PrecalculatedTarget { get; set; }
         public Dictionary<Element, int> BaseElementGain => new Dictionary<Element, int>();
 
         public EnemyAttack(EnemyAttackImport basedOn)
         {
-            this.AttackTokens = ScriptingTokens.ScriptingTokenDatabase.GetAllTokens(basedOn.AttackScript);
+            this.AttackTokenPile = ScriptingTokens.ScriptingTokenDatabase.GetAllTokens(basedOn.AttackScript);
         }
     }
 }

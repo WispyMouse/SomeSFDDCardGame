@@ -1,5 +1,6 @@
 namespace SFDDCards.UX
 {
+    using SFDDCards.Evaluation.Actual;
     using System;
     using System.Collections;
     using System.Collections.Generic;
@@ -285,24 +286,6 @@ namespace SFDDCards.UX
             {
                 this.CurrentSelectedCard.DisableSelectionGlow();
                 this.CurrentSelectedCard = null;
-            }
-
-            // Does the player meet the requirements of at least one of the effects?
-            bool anyPassingRequirements = false;
-            List<TokenEvaluatorBuilder> builders = ScriptTokenEvaluator.CalculateEvaluatorBuildersFromTokenEvaluation(toSelect.RepresentedCard);
-            foreach (TokenEvaluatorBuilder builder in builders)
-            {
-                if (builder.MeetsElementRequirements(this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext) && builder.MeetsComparisonRequirements(this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext))
-                {
-                    anyPassingRequirements = true;
-                    break;
-                }
-            }
-
-            if (!anyPassingRequirements)
-            {
-                GlobalUpdateUX.LogTextEvent.Invoke($"Unable to play card {toSelect.RepresentedCard.Name}. No requirements for any of the card's effects have been met.", GlobalUpdateUX.LogType.GameEvent);
-                return;
             }
 
             this.CurrentSelectedCard = toSelect;

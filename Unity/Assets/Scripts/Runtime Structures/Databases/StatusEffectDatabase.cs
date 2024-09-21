@@ -11,7 +11,7 @@ namespace SFDDCards
     {
         public static Dictionary<string, StatusEffect> EffectData { get; private set; } = new Dictionary<string, StatusEffect>();
 
-        public static void AddStatusEffectToDatabase(StatusEffectImport importData)
+        public static void AddStatusEffectToDatabase(StatusEffectImport importData, Sprite  statusArt = null)
         {
             string lowerId = importData.Id.ToLower();
 
@@ -21,10 +21,10 @@ namespace SFDDCards
                 return;
             }
 
-            EffectData.Add(importData.Id.ToLower(), new StatusEffect(importData));
+            EffectData.Add(importData.Id.ToLower(), new StatusEffect(importData, statusArt));
         }
 
-        public static bool TryImportStatusEffectFromFile(string filepath, out StatusEffect output)
+        public static bool TryImportStatusEffectFromFile(string filepath, out StatusEffect output, Sprite statusArt = null)
         {
             GlobalUpdateUX.LogTextEvent.Invoke($"Loading and parsing {filepath}...", GlobalUpdateUX.LogType.GameEvent);
 
@@ -32,7 +32,22 @@ namespace SFDDCards
             {
                 string fileText = File.ReadAllText(filepath);
                 StatusEffectImport importedStatusEffect = Newtonsoft.Json.JsonConvert.DeserializeObject<StatusEffectImport>(fileText);
-                StatusEffectDatabase.AddStatusEffectToDatabase(importedStatusEffect);
+
+                string artLocation = $"{filepath.ToLower().Replace(".statusimport", ".png")}";
+                Sprite elementArt = null;
+                if (File.Exists(artLocation))
+                {
+                    byte[] imageBytes = File.ReadAllBytes(artLocation);
+                    Texture2D texture = new Texture2D(64, 64);
+                    texture.LoadImage(imageBytes);
+                    elementArt = Sprite.Create(texture, new Rect(0, 0, 64, 64), Vector2.zero);
+                }
+                else
+                {
+                    GlobalUpdateUX.LogTextEvent.Invoke($"Could not find art for {filepath} at expected location of {artLocation}", GlobalUpdateUX.LogType.Info);
+                }
+
+                StatusEffectDatabase.AddStatusEffectToDatabase(importedStatusEffect, statusArt);
                 output = GetModel(importedStatusEffect.Id);
                 return true;
             }

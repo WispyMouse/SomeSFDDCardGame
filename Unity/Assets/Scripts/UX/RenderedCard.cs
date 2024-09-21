@@ -34,7 +34,7 @@ namespace SFDDCards.UX
 
             this.NameText.text = representedCard.Name;
             this.CardImage.sprite = representedCard.Sprite;
-            this.EffectText.text = representedCard.GetDescription();
+            this.EffectText.text = representedCard.GetDescription().BreakDescriptionsIntoString();
 
             foreach (Element curElement in ElementDatabase.ElementData.Values)
             {

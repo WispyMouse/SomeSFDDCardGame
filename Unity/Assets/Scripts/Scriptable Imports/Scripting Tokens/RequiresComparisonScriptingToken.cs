@@ -1,6 +1,8 @@
 using SFDDCards.ScriptingTokens.EvaluatableValues;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using SFDDCards.Evaluation.Actual;
+using SFDDCards.Evaluation.Conceptual;
 
 namespace SFDDCards.ScriptingTokens
 {
@@ -22,7 +24,7 @@ namespace SFDDCards.ScriptingTokens
 
         public override string ScriptingTokenIdentifier => "requirescomparison";
 
-        public override void ApplyToken(TokenEvaluatorBuilder tokenBuilder)
+        public override void ApplyToken(ConceptualTokenEvaluatorBuilder tokenBuilder)
         {
             tokenBuilder.RequiresComparisons.Add(this);
         }

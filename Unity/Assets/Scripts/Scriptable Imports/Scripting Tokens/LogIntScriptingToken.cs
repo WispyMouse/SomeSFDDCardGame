@@ -1,5 +1,7 @@
 namespace SFDDCards.ScriptingTokens
 {
+    using SFDDCards.Evaluation.Actual;
+    using SFDDCards.Evaluation.Conceptual;
     using SFDDCards.ScriptingTokens.EvaluatableValues;
     using System.Collections.Generic;
     using System.Text.RegularExpressions;
@@ -10,13 +12,19 @@ namespace SFDDCards.ScriptingTokens
 
         public override string ScriptingTokenIdentifier { get; } = "LOGINT";
 
-        public override void ApplyToken(TokenEvaluatorBuilder tokenBuilder)
+        public override void ApplyToken(ConceptualTokenEvaluatorBuilder tokenBuilder)
         {
-            tokenBuilder.ActionsToExecute.Add((TokenEvaluatorBuilder currentBuilder) =>
+            tokenBuilder.Intensity = this.ValueToLog;
+            tokenBuilder.ActionsToExecute.Add((DeltaEntry currentDelta) =>
             {
-                if (this.ValueToLog.TryEvaluateValue(null, currentBuilder, out int evaluatedValue))
+                if (this.ValueToLog.TryEvaluateValue(currentDelta?.MadeFromBuilder?.Campaign, currentDelta?.MadeFromBuilder, out int evaluatedValue))
                 {
                     GlobalUpdateUX.LogTextEvent?.Invoke(evaluatedValue.ToString(), GlobalUpdateUX.LogType.Info);
+
+                    if (currentDelta?.MadeFromBuilder != null)
+                    {
+                        currentDelta.MadeFromBuilder.Intensity = evaluatedValue;
+                    }
                 }
             });
         }
