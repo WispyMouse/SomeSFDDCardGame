@@ -42,7 +42,7 @@ namespace SFDDCards.ScriptingTokens
             return false;
         }
 
-        public static List<IScriptingToken> GetAllTokens(string input)
+        public static AttackTokenPile GetAllTokens(string input)
         {
             List<IScriptingToken> tokens = new List<IScriptingToken>();
 
@@ -58,7 +58,7 @@ namespace SFDDCards.ScriptingTokens
                 tokens.Add(token);
             }
 
-            return tokens;
+            return new AttackTokenPile(tokens);
         }
     }
 }

@@ -11,7 +11,7 @@ namespace SFDDCards
     {
         public string Name;
         public string Id;
-        public Dictionary<string, List<List<ScriptingTokens.IScriptingToken>>> EffectTokens = new Dictionary<string, List<List<ScriptingTokens.IScriptingToken>>>();
+        public Dictionary<string, List<AttackTokenPile>> EffectTokens = new Dictionary<string, List<AttackTokenPile>>();
         public Sprite Sprite;
 
         public StatusEffect(StatusEffectImport basedOn, Sprite sprite = null)
@@ -22,9 +22,9 @@ namespace SFDDCards
 
             foreach (EffectOnProcImport import in basedOn.Effects)
             {
-                if (!this.EffectTokens.TryGetValue(import.Window.ToLower(), out List<List<ScriptingTokens.IScriptingToken>> tokens))
+                if (!this.EffectTokens.TryGetValue(import.Window.ToLower(), out List<AttackTokenPile> tokens))
                 {
-                    tokens = new List<List<ScriptingTokens.IScriptingToken>>();
+                    tokens = new List<AttackTokenPile>();
                     this.EffectTokens.Add(import.Window.ToLower(), tokens);
                 }
 
@@ -32,7 +32,7 @@ namespace SFDDCards
             }
         }
 
-        public List<string> DescribeStatusEffect()
+        public EffectDescription DescribeStatusEffect()
         {
             List<string> statusEffects = new List<string>();
 
@@ -43,10 +43,10 @@ namespace SFDDCards
                 string windowDescription = KnownReactionWindows.GetWindowDescriptor(window.ToLower());
                 thisWindowString.Append($"<b>{windowDescription}:</b> ");
 
-                foreach (List<IScriptingToken> attackTokenList in this.EffectTokens[window])
+                foreach (AttackTokenPile attackTokenList in this.EffectTokens[window])
                 {
                     List<TokenEvaluatorBuilder> tokenEvaluators = ScriptTokenEvaluator.CalculateEvaluatorBuildersFromTokenEvaluation(
-                        new AttackTokenPile(attackTokenList));
+                        attackTokenList);
                     foreach (TokenEvaluatorBuilder builder in tokenEvaluators)
                     {
                         thisWindowString.Append($"{builder.GetAbstractDelta().DescribeAsEffect()} ");
@@ -56,7 +56,21 @@ namespace SFDDCards
                 statusEffects.Add(thisWindowString.ToString());
             }
 
-            return statusEffects;
+            HashSet<StatusEffect> mentionedEffects = new HashSet<StatusEffect>();
+            foreach (List<AttackTokenPile> piles in this.EffectTokens.Values)
+            {
+                foreach (AttackTokenPile curPile in piles)
+                {
+                    mentionedEffects.UnionWith(ScriptTokenEvaluator.GetMentionedStatusEffects(curPile));
+                }
+            }
+
+            return new EffectDescription()
+            {
+                MentionedStatusEffects = mentionedEffects,
+                DescriptionText = statusEffects,
+                DescribingLabel = this.Name
+            };
         }
     }
 }

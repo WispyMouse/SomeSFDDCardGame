@@ -3,6 +3,7 @@ namespace SFDDCards.UX
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Text;
     using UnityEngine;
     using UnityEngine.EventSystems;
     using UnityEngine.UI;
@@ -42,7 +43,7 @@ namespace SFDDCards.UX
 
             if (listener.TryGetStatusEffect(out AppliedStatusEffect effectToShow))
             {
-                this.SetPopupPanels(effectToShow.DescribeStatusEffect());
+                this.SetPopupPanels(effectToShow.DescribeStatusEffect(), false);
             }
 
             foreach (Graphic curGraphic in this.GetComponentsInChildren<Graphic>(true))
@@ -67,14 +68,10 @@ namespace SFDDCards.UX
         }
         private void SetPopupPanelsFromCard(Card toShow)
         {
-            List<string> texts = new List<string>();
-
-            texts.Add($"<b>Tags:</b> {string.Join(", ", toShow.Tags)}");
-
-            this.SetPopupPanels(texts);
+            this.SetPopupPanels(toShow.GetDescription(), false);
         }
 
-        private void SetPopupPanels(List<string> text)
+        private void SetPopupPanels(EffectDescription description, bool includeBaseDescription = true)
         {
             for (int ii = this.RightPopupPanelHolderTransform.childCount - 1; ii >= 0; ii--)
             {
@@ -104,10 +101,31 @@ namespace SFDDCards.UX
                 usingLeftHolder = true;
             }
 
-            foreach (string currentText in text)
+            List<EffectDescription> descriptions = new List<EffectDescription>();
+
+            if (includeBaseDescription)
             {
+                descriptions.Add(description);
+            }
+
+            foreach (EffectDescription innerDescription in description.GetInnerDescriptions())
+            {
+                descriptions.Add(innerDescription);
+            }
+
+            foreach (EffectDescription currentDescription in descriptions)
+            {
+                StringBuilder currentDescriptionText = new StringBuilder();
+
+                if (!string.IsNullOrEmpty(currentDescription.DescribingLabel))
+                {
+                    currentDescriptionText.AppendLine($"<b>{currentDescription.DescribingLabel}</b>");
+                }
+
+                currentDescriptionText.Append(currentDescription.BreakDescriptionsIntoString());
+
                 PopupPanel panel = Instantiate(this.PopupPanelPF, holder);
-                panel.SetText(currentText);
+                panel.SetText(currentDescriptionText.ToString());
                 this.ActivePanels.Add(panel);
 
                 if (usingLeftHolder)

@@ -178,6 +178,22 @@ namespace SFDDCards
             return effectText.ToString();
         }
 
+        public static HashSet<StatusEffect> GetMentionedStatusEffects(IAttackTokenHolder holder)
+        {
+            HashSet<StatusEffect> mentionedStatusEffects = new HashSet<StatusEffect>();
+            List<TokenEvaluatorBuilder> builders = CalculateEvaluatorBuildersFromTokenEvaluation(holder);
+
+            foreach (TokenEvaluatorBuilder builder in builders)
+            {
+                if (builder.StatusEffect != null)
+                {
+                    mentionedStatusEffects.Add(builder.StatusEffect);
+                }
+            }
+
+            return mentionedStatusEffects;
+        }
+
         public static List<ICombatantTarget> GetTargetsThatCanBeTargeted(ICombatantTarget user, IAttackTokenHolder effect, List<ICombatantTarget> consideredTargets)
         {
             // Hunt until we find the first targeting token
