@@ -24,17 +24,25 @@ namespace SFDDCards.UX
         [SerializeReference]
         private Transform LeftPopupPanelHolderTransform;
 
+        [SerializeReference]
+        private Transform CardHolderTransform;
+
         private List<PopupPanel> ActivePanels { get; set; } = new List<PopupPanel>();
 
         public void SetFromHoverListener(IMouseHoverListener listener)
         {
-            if (listener.TryGetCard(out Card toShow))
+            if (listener.TryGetCard(out Card cardToShow))
             {
-                this.ShowCard(toShow);
+                this.ShowCard(cardToShow);
             }
             else
             {
                 this.HideCard();
+            }
+
+            if (listener.TryGetStatusEffect(out AppliedStatusEffect effectToShow))
+            {
+                this.SetPopupPanels(effectToShow.DescribeStatusEffect());
             }
 
             foreach (Graphic curGraphic in this.GetComponentsInChildren<Graphic>(true))
@@ -47,6 +55,7 @@ namespace SFDDCards.UX
         {
             this.OverlayCard.gameObject.SetActive(true);
             this.OverlayCard.SetFromCard(toShow);
+            this.CardHolderTransform.gameObject.SetActive(true);
             this.SetPopupPanelsFromCard(toShow);
         }
 
@@ -54,6 +63,7 @@ namespace SFDDCards.UX
         {
             this.OverlayCard.Annihilate();
             this.OverlayCard.gameObject.SetActive(false);
+            this.CardHolderTransform.gameObject.SetActive(false);
         }
         private void SetPopupPanelsFromCard(Card toShow)
         {

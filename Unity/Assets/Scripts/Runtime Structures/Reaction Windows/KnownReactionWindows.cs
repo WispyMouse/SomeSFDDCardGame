@@ -24,5 +24,19 @@ namespace SFDDCards
             Debug.LogError($"{nameof(KnownReactionWindows)} ({nameof(ParseWindow)}): Failed to parse timing window '{window}'.");
             return null;
         }
+
+        public static string GetWindowDescriptor(string window)
+        {
+            switch (window.ToLower())
+            {
+                case OwnerStartsTurn:
+                    return "Start of turn";
+                case OwnerEndsTurn:
+                    return "End of turn";
+            }
+
+            Debug.LogError($"{nameof(KnownReactionWindows)} ({nameof(ParseWindow)}): Failed to describe timing window '{window}'.");
+            return null;
+        }
     }
 }

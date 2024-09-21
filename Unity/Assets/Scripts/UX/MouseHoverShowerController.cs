@@ -109,8 +109,8 @@ namespace SFDDCards.UX
             {
                 leftmost = Mathf.Min(leftmost, curTransform.rect.xMin + curTransform.position.x);
                 rightmost = Mathf.Max(rightmost, curTransform.rect.xMax + curTransform.position.x);
-                topmost = Mathf.Min(topmost, curTransform.rect.yMax + curTransform.position.y);
-                bottommost = Mathf.Max(bottommost, curTransform.rect.yMin + curTransform.position.y);
+                bottommost = Mathf.Min(bottommost, curTransform.rect.yMin + curTransform.position.y);
+                topmost = Mathf.Max(topmost, curTransform.rect.yMax + curTransform.position.y);
             }
 
             if (leftmost < minX)
@@ -125,7 +125,7 @@ namespace SFDDCards.UX
 
             if (topmost > maxY)
             {
-                this.CanvasSpaceHoverUX.OwnTransform.position += Vector3.down * (topmost - minY);
+                this.CanvasSpaceHoverUX.OwnTransform.position += Vector3.down * (topmost - maxY);
             }
 
             if (bottommost < minY)

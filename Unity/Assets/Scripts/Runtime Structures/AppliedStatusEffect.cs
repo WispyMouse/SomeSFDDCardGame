@@ -11,6 +11,8 @@ namespace SFDDCards
         public readonly Combatant Owner;
         public int Stacks { get; set; }
 
+        public Dictionary<Element, int> BaseElementGain => new Dictionary<Element, int>();
+
         public AppliedStatusEffect(Combatant owner, StatusEffect basedOnEffect, int stacks = 0)
         {
             this.Owner = owner;
@@ -43,6 +45,11 @@ namespace SFDDCards
             };
 
             return true;
+        }
+
+        public List<string> DescribeStatusEffect()
+        {
+            return this.BasedOnStatusEffect.DescribeStatusEffect();
         }
     }
 }
