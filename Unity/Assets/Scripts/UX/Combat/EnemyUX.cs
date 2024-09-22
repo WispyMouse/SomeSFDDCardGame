@@ -63,8 +63,12 @@ namespace SFDDCards.UX
 
             if (this.RepresentedEnemy.Intent != null)
             {
-                GamestateDelta delta = ScriptTokenEvaluator.CalculateRealizedDeltaEvaluation(this.RepresentedEnemy.Intent, centralGameStateController.CurrentCampaignContext, this.RepresentedEnemy, centralGameStateController.CurrentCampaignContext.CurrentCombatContext.CombatPlayer);
-                description = delta.DescribeDelta();
+                description = EffectDescriberDatabase.DescribeRealizedEffect(
+                    this.RepresentedEnemy.Intent,
+                    centralGameStateController.CurrentCampaignContext,
+                    this.RepresentedEnemy,
+                    centralGameStateController.CurrentCampaignContext.CurrentCombatContext.CombatPlayer
+                    );
             }
 
             if (!string.IsNullOrEmpty(description))

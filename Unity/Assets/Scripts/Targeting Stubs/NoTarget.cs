@@ -32,5 +32,15 @@ namespace SFDDCards
         {
             return true;
         }
+
+        public bool Equals(ICombatantTarget other)
+        {
+            return other != null && other.GetType() == this.GetType();
+        }
+
+        public int GetRepresentingNumberOfTargets()
+        {
+            return 0;
+        }
     }
 }

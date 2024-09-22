@@ -7,7 +7,7 @@ namespace SFDDCards
     using System.IO;
     using UnityEngine;
 
-    public interface ICombatantTarget
+    public interface ICombatantTarget : IEquatable<ICombatantTarget>
     {
         string Name { get; }
         void ApplyDelta(CombatContext combatContext, DeltaEntry deltaEntry);
@@ -17,5 +17,7 @@ namespace SFDDCards
         bool Valid();
         int CountStacks(string countFor);
         int GetTotalHealth();
+
+        int GetRepresentingNumberOfTargets();
     }
 }

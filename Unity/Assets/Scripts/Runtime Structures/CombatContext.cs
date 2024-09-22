@@ -150,7 +150,7 @@ namespace SFDDCards
             () =>
             {
                 GamestateDelta delta = ScriptTokenEvaluator.CalculateRealizedDeltaEvaluation(toPlay, this.FromCampaign, this.CombatPlayer, toPlayOn);
-                GlobalUpdateUX.LogTextEvent.Invoke(delta.DescribeDelta(), GlobalUpdateUX.LogType.GameEvent);
+                GlobalUpdateUX.LogTextEvent.Invoke(EffectDescriberDatabase.DescribeResolvedEffect(delta), GlobalUpdateUX.LogType.GameEvent);
                 delta.ApplyDelta(this.FromCampaign);
                 this.CheckAllStateEffectsAndKnockouts();
             },
@@ -167,8 +167,7 @@ namespace SFDDCards
             }
 
             GamestateDelta delta = ScriptTokenEvaluator.CalculateRealizedDeltaEvaluation(toAct.Intent, this.FromCampaign, toAct, this.CombatPlayer);
-            GlobalUpdateUX.LogTextEvent.Invoke($"The player has run out of health! This run is over.", GlobalUpdateUX.LogType.GameEvent);
-            GlobalUpdateUX.LogTextEvent.Invoke(delta.DescribeDelta(), GlobalUpdateUX.LogType.GameEvent);
+            GlobalUpdateUX.LogTextEvent.Invoke(EffectDescriberDatabase.DescribeResolvedEffect(delta), GlobalUpdateUX.LogType.GameEvent);
             delta.ApplyDelta(this.FromCampaign);
 
             this.CheckAllStateEffectsAndKnockouts();
@@ -177,7 +176,7 @@ namespace SFDDCards
         public void StatusEffectHappeningProc(StatusEffectHappening happening)
         {
             GamestateDelta delta = ScriptTokenEvaluator.CalculateRealizedDeltaEvaluation(happening, this.FromCampaign, happening.OwnedStatusEffect.Owner, this.CombatPlayer);
-            GlobalUpdateUX.LogTextEvent.Invoke(delta.DescribeDelta(), GlobalUpdateUX.LogType.GameEvent);
+            GlobalUpdateUX.LogTextEvent.Invoke(EffectDescriberDatabase.DescribeResolvedEffect(delta), GlobalUpdateUX.LogType.GameEvent);
             delta.ApplyDelta(this.FromCampaign);
 
             this.CheckAllStateEffectsAndKnockouts();

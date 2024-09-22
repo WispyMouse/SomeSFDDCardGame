@@ -94,5 +94,15 @@ namespace SFDDCards
         {
             return this.CurrentHealth;
         }
+
+        public bool Equals(ICombatantTarget other)
+        {
+            return this == other;
+        }
+
+        public int GetRepresentingNumberOfTargets()
+        {
+            return 1;
+        }
     }
 }

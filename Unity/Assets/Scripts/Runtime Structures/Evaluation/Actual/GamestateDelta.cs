@@ -42,22 +42,5 @@ namespace SFDDCards.Evaluation.Actual
         {
             this.DeltaEntries.AddRange(delta.DeltaEntries);
         }
-
-        public string DescribeDelta()
-        {
-            StringBuilder stringLog = new StringBuilder();
-
-            foreach (DeltaEntry entry in DeltaEntries)
-            {
-                string description = entry.DescribeDelta();
-
-                if (!string.IsNullOrEmpty(description))
-                {
-                    stringLog.AppendLine(description);
-                }
-            }
-
-            return stringLog.ToString();
-        }
     }
 }

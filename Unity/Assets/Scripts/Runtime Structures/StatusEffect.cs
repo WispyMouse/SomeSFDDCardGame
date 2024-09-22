@@ -50,7 +50,7 @@ namespace SFDDCards
                     List<ConceptualTokenEvaluatorBuilder> tokenEvaluators = ScriptTokenEvaluator.CalculateConceptualBuildersFromTokenEvaluation(attackTokenList);
                     foreach (ConceptualTokenEvaluatorBuilder builder in tokenEvaluators)
                     {
-                        thisWindowString.Append($"{builder.GetConceptualDelta().DescribeDelta()} ");
+                        thisWindowString.Append($"{EffectDescriberDatabase.DescribeConceptualEffect(builder.GetConceptualDelta())} ");
                     }
                 }
 

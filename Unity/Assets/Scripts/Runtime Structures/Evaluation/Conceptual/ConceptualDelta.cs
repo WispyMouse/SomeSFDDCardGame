@@ -16,22 +16,5 @@ namespace SFDDCards.Evaluation.Conceptual
     public class ConceptualDelta
     {
         public List<ConceptualDeltaEntry> DeltaEntries { get; set; } = new List<ConceptualDeltaEntry>();
-
-        public string DescribeDelta()
-        {
-            StringBuilder stringLog = new StringBuilder();
-
-            foreach (ConceptualDeltaEntry entry in DeltaEntries)
-            {
-                string description = entry.DescribeEffect();
-
-                if (!string.IsNullOrEmpty(description))
-                {
-                    stringLog.AppendLine(description);
-                }
-            }
-
-            return stringLog.ToString();
-        }
     }
 }

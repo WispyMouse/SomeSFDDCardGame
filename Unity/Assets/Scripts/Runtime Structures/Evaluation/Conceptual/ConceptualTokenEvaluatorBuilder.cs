@@ -28,10 +28,13 @@ namespace SFDDCards.Evaluation.Conceptual
 
         public StatusEffect StatusEffect;
 
+        public ConceptualTokenEvaluatorBuilder PreviousBuilder;
         public List<Action<DeltaEntry>> ActionsToExecute = new List<Action<DeltaEntry>>();
 
         public ConceptualTokenEvaluatorBuilder(ConceptualTokenEvaluatorBuilder previousBuilder = null)
         {
+            this.PreviousBuilder = previousBuilder;
+
             if (previousBuilder != null)
             {
                 this.ElementRequirements = new Dictionary<Element, IEvaluatableValue<int>>(previousBuilder.ElementRequirements);
@@ -99,7 +102,7 @@ namespace SFDDCards.Evaluation.Conceptual
         {
             ConceptualDelta delta = new ConceptualDelta();
 
-            delta.DeltaEntries.Add(new ConceptualDeltaEntry(this, this.OriginalTarget, this.Target)
+            delta.DeltaEntries.Add(new ConceptualDeltaEntry(this, this.OriginalTarget, this.PreviousBuilder?.Target)
             {
                 MadeFromBuilder = this,
                 ConceptualTarget = this.Target,

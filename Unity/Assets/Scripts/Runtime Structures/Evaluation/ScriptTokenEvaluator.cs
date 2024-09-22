@@ -130,7 +130,7 @@ namespace SFDDCards
 
                 ConceptualDelta delta = builder.GetConceptualDelta();
 
-                string deltaText = delta.DescribeDelta();
+                string deltaText = EffectDescriberDatabase.DescribeConceptualEffect(delta);
 
                 if (!string.IsNullOrEmpty(deltaText))
                 {
