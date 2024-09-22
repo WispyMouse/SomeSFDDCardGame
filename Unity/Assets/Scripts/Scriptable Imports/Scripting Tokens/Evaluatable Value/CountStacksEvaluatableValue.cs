@@ -1,5 +1,7 @@
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using SFDDCards.Evaluation.Actual;
+using SFDDCards.Evaluation.Conceptual;
 
 namespace SFDDCards.ScriptingTokens.EvaluatableValues
 {
@@ -28,7 +30,7 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
 
         public string DescribeEvaluation()
         {
-            return $"number of {StacksToCount}";
+            return $"1 x {StacksToCount}";
         }
 
         public static bool TryGetCountStacksEvaluatableValue(string argument, out CountStacksEvaluatableValue output)
