@@ -41,8 +41,12 @@ namespace SFDDCards
                     case TokenEvaluatorBuilder.IntensityKind.NumberOfCards:
                         nextDescriptor = DescribeConceptualDamage(deltaEntry);
                         break;
-                    case TokenEvaluatorBuilder.IntensityKind.StatusEffect:
-                        nextDescriptor = DescribeConceptualStatusEffect(deltaEntry);
+                    case TokenEvaluatorBuilder.IntensityKind.ApplyStatusEffect:
+                        nextDescriptor = DescribeConceptualApplyStatusEffect(deltaEntry);
+                        break;
+
+                    case TokenEvaluatorBuilder.IntensityKind.RemoveStatusEffect:
+                        nextDescriptor = DescribeConceptualRemoveStatusEffect(deltaEntry);
                         break;
                 }
 
@@ -108,8 +112,11 @@ namespace SFDDCards
                 case TokenEvaluatorBuilder.IntensityKind.NumberOfCards:
                     nextDescriptor = DescribeRealizedCards(builder);
                     break;
-                case TokenEvaluatorBuilder.IntensityKind.StatusEffect:
-                    nextDescriptor = DescribeRealizedStatusEffect(builder);
+                case TokenEvaluatorBuilder.IntensityKind.ApplyStatusEffect:
+                    nextDescriptor = DescribeRealizedApplyStatusEffect(builder);
+                    break;
+                case TokenEvaluatorBuilder.IntensityKind.RemoveStatusEffect:
+                    nextDescriptor = DescribeRealizedRemoveStatusEffect(builder);
                     break;
             }
 
@@ -146,8 +153,11 @@ namespace SFDDCards
                     case TokenEvaluatorBuilder.IntensityKind.NumberOfCards:
                         nextDescriptor = DescribeResolvedCards(deltaEntry);
                         break;
-                    case TokenEvaluatorBuilder.IntensityKind.StatusEffect:
-                        nextDescriptor = DescribeResolvedStatusEffect(deltaEntry);
+                    case TokenEvaluatorBuilder.IntensityKind.ApplyStatusEffect:
+                        nextDescriptor = DescribeResolvedApplyStatusEffect(deltaEntry);
+                        break;
+                    case TokenEvaluatorBuilder.IntensityKind.RemoveStatusEffect:
+                        nextDescriptor = DescribeResolvedRemoveStatusEffect(deltaEntry);
                         break;
                 }
 
@@ -361,39 +371,56 @@ namespace SFDDCards
         #endregion
 
         #region Describing Status Effect
-        public static string DescribeConceptualStatusEffect(ConceptualDeltaEntry deltaEntry)
+        public static string DescribeConceptualApplyStatusEffect(ConceptualDeltaEntry deltaEntry)
         {
+            string stackstext = "stack(s)";
+
+            if (deltaEntry.ConceptualIntensity is ConstantEvaluatableValue<int> constant)
+            {
+                if (constant.ConstantValue != 1)
+                {
+                    stackstext = "stacks";
+                }
+                else
+                {
+                    stackstext = "stack";
+                }
+            }
+
             return ComposeDescriptor(
-                $"on {deltaEntry.ConceptualTarget.DescribeEvaluation().ToLower()}",
+                $"to {deltaEntry.ConceptualTarget.DescribeEvaluation().ToLower()}",
                 deltaEntry.ConceptualTarget,
                 deltaEntry.OriginalConceptualTarget,
                 deltaEntry.PreviousConceptualTarget,
                 deltaEntry.ConceptualIntensity,
-                "Apply/Remove",
-                $"stack(s) of {deltaEntry.StatusEffect.Name}",
+                "Apply",
+                $"{stackstext} of {deltaEntry.StatusEffect.Name}",
                 String.Empty,
                 ComposeValueTargetLocation.BetweenMiddleAndSuffix,
-                ComposeValueTargetLocation.BetweenMiddleAndSuffix,
-                (CombatantTargetEvaluatableValue curValue) =>
-                {
-                    return !(curValue is SelfTargetEvaluatableValue);
-                }
+                ComposeValueTargetLocation.BetweenPrefixAndMiddle,
+                null
                 ) ;
         }
 
-        public static string DescribeRealizedStatusEffect(TokenEvaluatorBuilder builder)
+        public static string DescribeRealizedApplyStatusEffect(TokenEvaluatorBuilder builder)
         {
+            string stacktext = "stack";
+            if (builder.Intensity != 1)
+            {
+                stacktext = "stacks";
+            }
+
             return ComposeDescriptor<ICombatantTarget>(
-                $"on {builder.Target.Name}",
+                $"to {builder.Target.Name}",
                 builder.Target,
                 builder.OriginalTarget,
                 builder?.PreviousTokenBuilder?.Target,
                 builder.Intensity.ToString(),
-                "Apply/Remove",
-                $"stack(s) of {builder.StatusEffect.Name}",
+                "Apply",
+                $"{stacktext} of {builder.StatusEffect.Name}",
                 builder.GetIntensityDescriptionIfNotConstant(),
-                ComposeValueTargetLocation.AfterSuffix,
                 ComposeValueTargetLocation.BetweenMiddleAndSuffix,
+                ComposeValueTargetLocation.BetweenPrefixAndMiddle,
                 (ICombatantTarget curValue) =>
                 {
                     return !(builder.Target == builder.OriginalTarget && builder.Target == builder?.PreviousTokenBuilder?.Target
@@ -402,19 +429,105 @@ namespace SFDDCards
                 });
         }
 
-        public static string DescribeResolvedStatusEffect(DeltaEntry delta)
+        public static string DescribeResolvedApplyStatusEffect(DeltaEntry delta)
         {
+            string stacktext = "stack";
+            if (delta.Intensity != 1)
+            {
+                stacktext = "stacks";
+            }
+
             return ComposeDescriptor<ICombatantTarget>(
-                $"on {delta.Target.Name}",
+                $"to {delta.Target.Name}",
                 delta.Target,
                 delta.OriginalTarget,
                 delta.MadeFromBuilder?.PreviousTokenBuilder?.Target,
                 delta.Intensity.ToString(),
-                "Apply/Remove",
-                $"stack(s) of {delta.StatusEffect.Name}",
+                "Apply",
+                $"{stacktext} of {delta.StatusEffect.Name}",
                 String.Empty,
-                ComposeValueTargetLocation.AfterSuffix,
                 ComposeValueTargetLocation.BetweenMiddleAndSuffix,
+                ComposeValueTargetLocation.BetweenPrefixAndMiddle,
+                null);
+        }
+
+        public static string DescribeConceptualRemoveStatusEffect(ConceptualDeltaEntry deltaEntry)
+        {
+            string stackstext = "stack(s)";
+
+            if (deltaEntry.ConceptualIntensity is ConstantEvaluatableValue<int> constant)
+            {
+                if (constant.ConstantValue != 1)
+                {
+                    stackstext = "stacks";
+                }
+                else
+                {
+                    stackstext = "stack";
+                }
+            }
+
+            return ComposeDescriptor(
+                $"from {deltaEntry.ConceptualTarget.DescribeEvaluation().ToLower()}",
+                deltaEntry.ConceptualTarget,
+                deltaEntry.OriginalConceptualTarget,
+                deltaEntry.PreviousConceptualTarget,
+                deltaEntry.ConceptualIntensity,
+                "Remove",
+                $"{stackstext} of {deltaEntry.StatusEffect.Name}",
+                String.Empty,
+                ComposeValueTargetLocation.BetweenMiddleAndSuffix,
+                ComposeValueTargetLocation.BetweenPrefixAndMiddle,
+                null
+                );
+        }
+
+        public static string DescribeRealizedRemoveStatusEffect(TokenEvaluatorBuilder builder)
+        {
+            string stacktext = "stack";
+            if (builder.Intensity != 1)
+            {
+                stacktext = "stacks";
+            }
+
+            return ComposeDescriptor<ICombatantTarget>(
+                $"from {builder.Target.Name}",
+                builder.Target,
+                builder.OriginalTarget,
+                builder?.PreviousTokenBuilder?.Target,
+                builder.Intensity.ToString(),
+                "Remove",
+                $"{stacktext} of {builder.StatusEffect.Name}",
+                builder.GetIntensityDescriptionIfNotConstant(),
+                ComposeValueTargetLocation.BetweenMiddleAndSuffix,
+                ComposeValueTargetLocation.BetweenPrefixAndMiddle,
+                (ICombatantTarget curValue) =>
+                {
+                    return !(builder.Target == builder.OriginalTarget && builder.Target == builder?.PreviousTokenBuilder?.Target
+                    && builder.Target.IsFoeOf(builder.User)
+                    && builder.Target.GetRepresentingNumberOfTargets() == 1);
+                });
+        }
+
+        public static string DescribeResolvedRemoveStatusEffect(DeltaEntry delta)
+        {
+            string stacktext = "stack";
+            if (delta.Intensity != 1)
+            {
+                stacktext = "stacks";
+            }
+
+            return ComposeDescriptor<ICombatantTarget>(
+                $"from {delta.Target.Name}",
+                delta.Target,
+                delta.OriginalTarget,
+                delta.MadeFromBuilder?.PreviousTokenBuilder?.Target,
+                delta.Intensity.ToString(),
+                "Remove",
+                $"{stacktext} of {delta.StatusEffect.Name}",
+                String.Empty,
+                ComposeValueTargetLocation.BetweenMiddleAndSuffix,
+                ComposeValueTargetLocation.BetweenPrefixAndMiddle,
                 null);
         }
         #endregion

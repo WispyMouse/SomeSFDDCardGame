@@ -33,12 +33,12 @@ namespace SFDDCards
                 return;
             }
 
-            if (deltaEntry.IntensityKindType == TokenEvaluatorBuilder.IntensityKind.StatusEffect)
+            if (deltaEntry.IntensityKindType == TokenEvaluatorBuilder.IntensityKind.ApplyStatusEffect)
             {
                 AppliedStatusEffect existingEffect = this.AppliedStatusEffects.Find(x => x.BasedOnStatusEffect == deltaEntry.StatusEffect);
                 if (existingEffect != null)
                 {
-                    existingEffect.Stacks += deltaEntry.Intensity;
+                    existingEffect.Stacks += Mathf.Max(0, deltaEntry.Intensity);
                     if (existingEffect.Stacks <= 0)
                     {
                         combatContext.UnsubscribeReactor(existingEffect);
@@ -50,6 +50,19 @@ namespace SFDDCards
                     AppliedStatusEffect newEffect = new AppliedStatusEffect(this, deltaEntry.StatusEffect, deltaEntry.Intensity);
                     this.AppliedStatusEffects.Add(newEffect);
                     newEffect.SetSubscriptions(combatContext);
+                }
+            }
+            else if (deltaEntry.IntensityKindType == TokenEvaluatorBuilder.IntensityKind.RemoveStatusEffect)
+            {
+                AppliedStatusEffect existingEffect = this.AppliedStatusEffects.Find(x => x.BasedOnStatusEffect == deltaEntry.StatusEffect);
+                if (existingEffect != null)
+                {
+                    existingEffect.Stacks -= Mathf.Min(0, deltaEntry.Intensity);
+                    if (existingEffect.Stacks <= 0)
+                    {
+                        combatContext.UnsubscribeReactor(existingEffect);
+                        AppliedStatusEffects.Remove(existingEffect);
+                    }
                 }
             }
         }

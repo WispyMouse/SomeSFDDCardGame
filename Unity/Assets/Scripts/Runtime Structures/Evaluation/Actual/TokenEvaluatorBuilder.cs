@@ -18,7 +18,8 @@ namespace SFDDCards.Evaluation.Actual
             Damage = 1,
             Heal = 2,
             NumberOfCards = 3,
-            StatusEffect = 4
+            ApplyStatusEffect = 4,
+            RemoveStatusEffect = 5
         }
 
         public enum NumberOfCardsRelation

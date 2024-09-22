@@ -38,9 +38,16 @@ namespace SFDDCards.Tests.EditMode
         public static List<AssertEffectScriptResultsInTextValueSourceValue> AssertEffectScriptResultsInTextValueSource => new List<AssertEffectScriptResultsInTextValueSourceValue>()
         {
             new AssertEffectScriptResultsInTextValueSourceValue("[SETTARGET: FOE][DAMAGE: 1]", "1 damage."),
-            new AssertEffectScriptResultsInTextValueSourceValue("[SETTARGET: SELF][HEAL: 1]", "Heal 1."),
             new AssertEffectScriptResultsInTextValueSourceValue("[SETTARGET: SELF][DAMAGE: 1]", "1 damage to self."),
-            new AssertEffectScriptResultsInTextValueSourceValue("[SETTARGET: FOE][HEAL: 1]", "Heal foe for 1.")
+
+            new AssertEffectScriptResultsInTextValueSourceValue("[SETTARGET: SELF][HEAL: 1]", "Heal 1."),
+            new AssertEffectScriptResultsInTextValueSourceValue("[SETTARGET: FOE][HEAL: 1]", "Heal foe for 1."),
+
+            new AssertEffectScriptResultsInTextValueSourceValue($"[SETTARGET: FOE][APPLYSTATUSEFFECTSTACKS: 1 {nameof(DebugStatus)}]", $"Apply 1 stack of {nameof(DebugStatus)} to foe."),
+            new AssertEffectScriptResultsInTextValueSourceValue($"[SETTARGET: SELF][APPLYSTATUSEFFECTSTACKS: 2 {nameof(DebugStatus)}]", $"Apply 2 stacks of {nameof(DebugStatus)} to self."),
+
+            new AssertEffectScriptResultsInTextValueSourceValue($"[SETTARGET: FOE][REMOVESTATUSEFFECTSTACKS: 1 {nameof(DebugStatus)}]", $"Remove 1 stack of {nameof(DebugStatus)} from foe."),
+            new AssertEffectScriptResultsInTextValueSourceValue($"[SETTARGET: SELF][REMOVESTATUSEFFECTSTACKS: 2 {nameof(DebugStatus)}]", $"Remove 2 stacks of {nameof(DebugStatus)} from self."),
         };
 
         [Test]

@@ -67,7 +67,7 @@ namespace SFDDCards.Tests.EditMode
             toTarget.ApplyDelta(combatContext, new DeltaEntry()
             {
                 Target = toTarget,
-                IntensityKindType = TokenEvaluatorBuilder.IntensityKind.StatusEffect,
+                IntensityKindType = TokenEvaluatorBuilder.IntensityKind.ApplyStatusEffect,
                 Intensity = mod,
                 StatusEffect = StatusEffectDatabase.GetModel(toApply)
             });

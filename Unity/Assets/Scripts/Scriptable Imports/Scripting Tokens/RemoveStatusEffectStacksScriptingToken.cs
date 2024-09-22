@@ -5,16 +5,16 @@ namespace SFDDCards.ScriptingTokens
     using SFDDCards.ScriptingTokens.EvaluatableValues;
     using System.Collections.Generic;
 
-    public class ChangeStatusEffectStacksScriptingToken : BaseScriptingToken
+    public class RemoveStatusEffectStacksScriptingToken : BaseScriptingToken
     {
         public IEvaluatableValue<int> AmountOfStacks { get; private set; }
         public string StatusEffect { get; private set; }
 
-        public override string ScriptingTokenIdentifier { get; } = "CHANGESTATUSEFFECTSTACKS";
+        public override string ScriptingTokenIdentifier { get; } = "REMOVESTATUSEFFECTSTACKS";
 
         public override void ApplyToken(ConceptualTokenEvaluatorBuilder tokenBuilder)
         {
-            tokenBuilder.IntensityKindType = TokenEvaluatorBuilder.IntensityKind.StatusEffect;
+            tokenBuilder.IntensityKindType = TokenEvaluatorBuilder.IntensityKind.RemoveStatusEffect;
             tokenBuilder.Intensity = AmountOfStacks;
             tokenBuilder.StatusEffect = StatusEffectDatabase.GetModel(this.StatusEffect);
         }
@@ -23,7 +23,7 @@ namespace SFDDCards.ScriptingTokens
         {
             scriptingToken = null;
 
-            // [CHANGESTATUSEFFECTSTACKS: 5 POISON] or [CHANGESTATUSEFFECTSTACKS: TARGET_HEALTH POISON] or [CHANGESTATUSEFFECTSTACKS: TARGET_HEALTH + 1 POISON] are valid options
+            // [APPLYSTATUSEFFECTSTACKS: 5 POISON] or [APPLYSTATUSEFFECTSTACKS: TARGET_HEALTH POISON] or [APPLYSTATUSEFFECTSTACKS: TARGET_HEALTH + 1 POISON] are valid options
             // We need to parse the strings for the stack amount and then the status effect
             if (!TryGetIntegerEvaluatableFromStrings(arguments, out IEvaluatableValue<int> output, out List<string> remainingArguments))
             {
@@ -38,7 +38,7 @@ namespace SFDDCards.ScriptingTokens
 
             string remainingArgument = remainingArguments[0];
 
-            scriptingToken = new ChangeStatusEffectStacksScriptingToken()
+            scriptingToken = new RemoveStatusEffectStacksScriptingToken()
             {
                 AmountOfStacks = output,
                 StatusEffect = remainingArgument
@@ -49,8 +49,7 @@ namespace SFDDCards.ScriptingTokens
 
         public override bool IsHarmfulToTarget(ICombatantTarget user, ICombatantTarget target)
         {
-            // Damage is always harmful!
-            return true;
+            return false;
         }
 
         public override bool RequiresTarget()
