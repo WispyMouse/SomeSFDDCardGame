@@ -15,6 +15,8 @@ namespace SFDDCards.UX
 
         Action<DisplayedCardUX> cardSelectedAction { get; set; } = null;
 
+        public virtual bool ShouldShowBase { get; } = true;
+
         public void Awake()
         {
             this.DisableSelectionGlow();

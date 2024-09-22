@@ -23,6 +23,7 @@ namespace SFDDCards.UX
         [SerializeReference]
         public LayoutElement OwnLayoutElement;
 
+        public virtual bool ShouldShowBase { get; } = false;
 
         private Action<RewardArtifactUX> OnClicked {get; set;} 
 

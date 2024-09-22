@@ -10,6 +10,7 @@ namespace SFDDCards
     {
         public const string OwnerStartsTurn = "ownerstartsturn";
         public const string OwnerEndsTurn = "ownerendsturn";
+        public const string Activated = "activated";
 
         public static ReactionWindowSubscription ParseWindow(string window, AppliedStatusEffect appliedEffect)
         {
@@ -19,6 +20,8 @@ namespace SFDDCards
                     return new OwnerStartsTurnReactionWindowSubscription(appliedEffect);
                 case OwnerEndsTurn:
                     return new OwnerEndsTurnReactionWindowSubscription(appliedEffect);
+                case Activated:
+                    return null;
             }
 
             Debug.LogError($"{nameof(KnownReactionWindows)} ({nameof(ParseWindow)}): Failed to parse timing window '{window}'.");
@@ -33,6 +36,8 @@ namespace SFDDCards
                     return "Start of turn";
                 case OwnerEndsTurn:
                     return "End of turn";
+                    case Activated:
+                    return "Activated";
             }
 
             Debug.LogError($"{nameof(KnownReactionWindows)} ({nameof(ParseWindow)}): Failed to describe timing window '{window}'.");

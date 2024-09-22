@@ -15,6 +15,8 @@ namespace SFDDCards.UX
         [SerializeReference]
         public LayoutElement OwnLayoutElement;
 
+        public override bool ShouldShowBase { get; } = false;
+
         public void HideCardAfterBeingPicked()
         {
             this.InnerPanel.SetActive(false);

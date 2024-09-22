@@ -24,7 +24,11 @@ namespace SFDDCards
         {
             foreach (string window in this.BasedOnStatusEffect.EffectTokens.Keys)
             {
-                context.SubscribeToReactionWindow(this, KnownReactionWindows.ParseWindow(window, this));
+                ReactionWindowSubscription subscription = KnownReactionWindows.ParseWindow(window, this);
+                if (subscription != null)
+                {
+                    context.SubscribeToReactionWindow(this, subscription);
+                }
             }
         }
 

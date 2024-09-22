@@ -17,10 +17,20 @@
 			"ProtocolArgument": 1,
 			"RewardIdentities":
 			[
-				{ "IdentityKind": "Artifact", "RewardIdentifier": "[common]" },
-				{ "IdentityKind": "Artifact", "RewardIdentifier": "[common]" },
-				{ "IdentityKind": "Artifact", "RewardIdentifier": "[common]" }
+				{ "IdentityKind": "Artifact", "RewardIdentifier": "[potion][common]" },
+				{ "IdentityKind": "Artifact", "RewardIdentifier": "[potion][common]" },
+				{ "IdentityKind": "Artifact", "RewardIdentifier": "[potion][common]" }
 			]
 		},
+		{
+			"Protocol": "ChooseX",
+			"ProtocolArgument": 1,
+			"RewardIdentities":
+			[
+				{ "IdentityKind": "Artifact", "RewardIdentifier": "[artifact][common]" },
+				{ "IdentityKind": "Artifact", "RewardIdentifier": "[artifact][common]" },
+				{ "IdentityKind": "Artifact", "RewardIdentifier": "[artifact][common]" }
+			]
+		}
 	]
 }

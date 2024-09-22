@@ -1,5 +1,6 @@
 namespace SFDDCards.UX
 {
+    using System;
     using System.Collections;
     using System.Collections.Generic;
     using UnityEngine;
@@ -10,7 +11,7 @@ namespace SFDDCards.UX
 
         private Dictionary<AppliedStatusEffect, StatusEffectUX> StatusEffectLookup { get; set; } = new Dictionary<AppliedStatusEffect, StatusEffectUX>();
 
-        public void SetStatusEffects(List<AppliedStatusEffect> appliedEffects)
+        public void SetStatusEffects(List<AppliedStatusEffect> appliedEffects, Action<AppliedStatusEffect> onClickedEvent = null)
         {
             List<AppliedStatusEffect> noLongerApplicableEffects = new List<AppliedStatusEffect>(this.StatusEffectLookup.Keys);
 
@@ -24,7 +25,7 @@ namespace SFDDCards.UX
                 {
                     StatusEffectUX newUX = Instantiate(this.StatusEffectUXPrefab, this.transform);
                     this.StatusEffectLookup.Add(effect, newUX);
-                    newUX.SetFromEffect(effect);
+                    newUX.SetFromEffect(effect, onClickedEvent);
                     newUX.SetStacks(effect.Stacks);
                 }
 

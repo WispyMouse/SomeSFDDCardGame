@@ -43,7 +43,7 @@ namespace SFDDCards.UX
 
             if (listener.TryGetStatusEffect(out IStatusEffect effectToShow))
             {
-                this.SetPopupPanels(effectToShow.DescribeStatusEffect(), true);
+                this.SetPopupPanels(effectToShow.DescribeStatusEffect(), listener.ShouldShowBase);
             }
 
             foreach (Graphic curGraphic in this.GetComponentsInChildren<Graphic>(true))

@@ -1,0 +1,17 @@
+{
+    "Name": "Healing Potion",
+	"Id": "healingpotion",
+	"Effects":
+	[
+		{
+			"Window": "ACTIVATED",
+			"Script": "[SETTARGET: SELF][HEAL: 10][REMOVESTATUSEFFECTSTACKS: 1 HEALINGPOTION]"
+		}
+	],
+	"Tags":
+	[
+		"potion",
+		"common"
+	],
+	"Persistence": "Campaign"
+}

@@ -403,7 +403,9 @@ namespace SFDDCards.UX
             }
 
             this.LifeValue.text = this.CentralGameStateControllerInstance?.CurrentCampaignContext?.CampaignPlayer.CurrentHealth.ToString();
-            this.PlayerStatusEffectUXHolderInstance.SetStatusEffects(this.CentralGameStateControllerInstance?.CurrentCampaignContext?.CampaignPlayer.AppliedStatusEffects);
+            this.PlayerStatusEffectUXHolderInstance.SetStatusEffects(
+                this.CentralGameStateControllerInstance?.CurrentCampaignContext?.CampaignPlayer.AppliedStatusEffects,
+                this.StatusEffectClicked);
         }
 
         private void SetElementValueLabel()
@@ -637,6 +639,17 @@ namespace SFDDCards.UX
                 if (!this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.Enemies.Contains(curEnemy))
                 {
                     this.RemoveEnemy(curEnemy);
+                }
+            }
+        }
+
+        public void StatusEffectClicked(AppliedStatusEffect representingEffect)
+        {
+            if (representingEffect.BasedOnStatusEffect.EffectTokens.ContainsKey(KnownReactionWindows.Activated))
+            {
+                if (representingEffect.TryGetReactionEvents(this.CentralGameStateControllerInstance.CurrentCampaignContext, new ReactionWindowContext(KnownReactionWindows.Activated, this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignPlayer), out List<GameplaySequenceEvent> events))
+                {
+                    GlobalSequenceEventHolder.PushSequencesToTop(events.ToArray());
                 }
             }
         }
