@@ -9,5 +9,6 @@
 	"Tags":
 	[
 		"SecondBoss"
-	]
+	],
+	"StandardRewardId": "demoreward"
 }

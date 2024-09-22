@@ -1,12 +1,13 @@
 {
 	"Id": "starter_beginascension",
 	"Name": "Begin Ascension",
-	"EffectScript": "[SETTARGET: FOE][DAMAGE: 2][SETTARGET: SELF][CHANGESTATUSEFFECTSTACKS: DELAYEDDRAW 1]",
+	"EffectScript": "[SETTARGET: FOE][DAMAGE: 2][SETTARGET: SELF][APPLYSTATUSEFFECTSTACKS: DELAYEDDRAW 1]",
 	"Tags":
 	[
 		"m1e",
 		"solar","cyber","void",
-		"starter"
+		"starter",
+		"common"
 	],
 	"ElementGain":
 	[

@@ -9,5 +9,6 @@
 	"Tags":
 	[
 		"FirstFight"
-	]
+	],
+	"StandardRewardId": "demoreward"
 }

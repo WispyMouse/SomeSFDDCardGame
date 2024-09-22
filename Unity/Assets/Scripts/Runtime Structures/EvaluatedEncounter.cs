@@ -9,10 +9,29 @@ namespace SFDDCards
     public class EvaluatedEncounter
     {
         public readonly EncounterModel BasedOn;
+        public Reward Rewards;
+        public List<Enemy> Enemies = new List<Enemy>();
 
         public EvaluatedEncounter(EncounterModel basedOn)
         {
             this.BasedOn = basedOn;
+
+            if (basedOn.RewardsModel != null)
+            {
+                this.Rewards = RewardDatabase.SaturateReward(basedOn.RewardsModel);
+            }
+
+            foreach (string enemyId in basedOn.EnemiesInEncounterById)
+            {
+                EnemyModel model = EnemyDatabase.GetModel(enemyId);
+
+                if (model == null)
+                {
+                    GlobalUpdateUX.LogTextEvent.Invoke($"Failed to get enemy based on id. {enemyId}", GlobalUpdateUX.LogType.RuntimeError);
+                }
+
+                this.Enemies.Add(new Enemy(model));
+            }
         }
 
         public string GetName()

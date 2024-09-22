@@ -154,9 +154,10 @@ namespace SFDDCards.UX
             {
                 this.GoNextRoomButton.SetActive(true);
 
-                if (wasPreviousCampaignState == CampaignContext.GameplayCampaignState.InCombat)
+                if (wasPreviousCampaignState == CampaignContext.GameplayCampaignState.InCombat 
+                    && this.CentralGameStateControllerInstance.CurrentCampaignContext.PendingRewards != null)
                 {
-                    this.PresentAwards();
+                    this.PresentAwards(this.CentralGameStateControllerInstance.CurrentCampaignContext.PendingRewards);
                 }
             }
             else
@@ -329,10 +330,10 @@ namespace SFDDCards.UX
             this.StartCoroutine(AnimateEnemyTurnsInternal(continuationAction));
         }
 
-        public void ShowRewardsPanel(params Card[] cardsToReward)
+        public void ShowRewardsPanel(Reward cardsToReward)
         {
             this.RewardsPanelUXInstance.gameObject.SetActive(true);
-            this.RewardsPanelUXInstance.SetRewardCards(cardsToReward);
+            this.RewardsPanelUXInstance.SetReward(cardsToReward);
             this.UpdateUX();
         }
 
@@ -575,10 +576,9 @@ namespace SFDDCards.UX
             this.CombatTurnCounterInstance.EndPlayerTurn();
         }
 
-        public void PresentAwards()
+        public void PresentAwards(Reward toPresent)
         {
-            List<Card> cardsToAward = CardDatabase.GetRandomCards(this.CentralGameStateControllerInstance.CurrentRunConfiguration.CardsToAwardOnVictory);
-            this.ShowRewardsPanel(cardsToAward.ToArray());
+            this.ShowRewardsPanel(toPresent);
         }
 
         void PresentNextRouteChoice()

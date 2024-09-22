@@ -1,0 +1,16 @@
+{
+	"RewardId": "demoreward",
+	"PickRewards":
+	[
+		{
+			"Protocol": "ChooseX",
+			"ProtocolArgument": 1,
+			"RewardIdentities":
+			[
+				{ "IdentityKind": "Card", "RewardIdentifier": "[common]" },
+				{ "IdentityKind": "Card", "RewardIdentifier": "[common]" },
+				{ "IdentityKind": "Card", "RewardIdentifier": "[common]" }
+			]
+		}
+	]
+}

@@ -34,6 +34,8 @@ namespace SFDDCards
         public GameplayCampaignState CurrentGameplayCampaignState { get; private set; } = GameplayCampaignState.NotStarted;
         public NonCombatEncounterStatus CurrentNonCombatEncounterStatus { get; private set; } = NonCombatEncounterStatus.NotInNonCombatEncounter;
 
+        public Reward PendingRewards { get; set; } = null;
+
         public CampaignContext(RunConfiguration runConfig)
         {
             this.CampaignPlayer = new Player(runConfig.StartingMaximumHealth);
@@ -51,6 +53,11 @@ namespace SFDDCards
 
         public void LeaveCurrentCombat()
         {
+            if (this.CurrentCombatContext != null && this.CurrentCombatContext.BasedOnEncounter != null)
+            {
+                this.PendingRewards = this.CurrentCombatContext.Rewards;
+            }
+
             this.CurrentCombatContext = null;
         }
 

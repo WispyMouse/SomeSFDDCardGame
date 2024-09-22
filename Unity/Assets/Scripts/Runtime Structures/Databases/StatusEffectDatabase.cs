@@ -5,6 +5,7 @@ namespace SFDDCards
     using System.Collections;
     using System.Collections.Generic;
     using System.IO;
+    using System.Text.RegularExpressions;
     using UnityEngine;
 
     public static class StatusEffectDatabase
@@ -60,10 +61,33 @@ namespace SFDDCards
             }
         }
 
-        public static StatusEffect GetModel(string id)
+        public static StatusEffect GetModel(string id, RandomDecider<StatusEffect> decider = null)
         {
+            if (decider == null)
+            {
+                decider = new RandomDecider<StatusEffect>();
+            }
+
             string lowerId = id.ToLower();
 
+            // If there are brackets, this might be a set of tag criteria.
+            Match tagMatches = Regex.Match(id, @"(?:\[(?<tag>[^]]+)\])+");
+            if (tagMatches.Success)
+            {
+                HashSet<string> tags = new HashSet<string>();
+                foreach (Capture curCapture in tagMatches.Groups[1].Captures)
+                {
+                    tags.Add(curCapture.Value.ToLower());
+                }
+
+                if (!TryGetStatusEffectWithAllTags(decider, tags, out StatusEffect model))
+                {
+                    return null;
+                }
+
+                return model;
+            }
+            
             if (!EffectData.TryGetValue(lowerId, out StatusEffect foundModel))
             {
                 Debug.LogError($"EffectData dictionary lookup does not contain id {lowerId}");
@@ -75,6 +99,28 @@ namespace SFDDCards
         public static void ClearDatabase()
         {
             EffectData.Clear();
+        }
+
+        public static bool TryGetStatusEffectWithAllTags(RandomDecider<StatusEffect> decider, HashSet<string> tags, out StatusEffect effect)
+        {
+            List<StatusEffect> candidates = new List<StatusEffect>();
+
+            foreach (StatusEffect model in EffectData.Values)
+            {
+                if (model.MeetsAllTags(tags))
+                {
+                    candidates.Add(model);
+                }
+            }
+
+            if (candidates.Count == 0)
+            {
+                effect = null;
+                return false;
+            }
+
+            effect = decider.ChooseRandomly(candidates);
+            return true;
         }
     }
 }

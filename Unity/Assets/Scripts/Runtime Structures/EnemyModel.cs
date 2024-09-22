@@ -21,7 +21,7 @@ namespace SFDDCards
             this.MaximumHealth = basedOn.MaximumHealth;
 
             HashSet<string> lowerCaseTags = new HashSet<string>();
-            foreach (string tag in this.Tags)
+            foreach (string tag in basedOn.Tags)
             {
                 lowerCaseTags.Add(tag.ToLower());
             }

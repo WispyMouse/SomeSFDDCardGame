@@ -11,5 +11,6 @@
 	"Tags":
 	[
 		"EarlyFight"
-	]
+	],
+	"StandardRewardId": "demoreward"
 }

@@ -22,8 +22,9 @@ namespace SFDDCards
         public Player CombatPlayer;
 
         public CampaignContext FromCampaign;
-        public readonly EncounterModel BasedOnEncounter;
+        public readonly EvaluatedEncounter BasedOnEncounter;
         public readonly List<Enemy> Enemies = new List<Enemy>();
+        public Reward Rewards => this.BasedOnEncounter.Rewards;
 
         private readonly Dictionary<string, List<ReactionWindowSubscription>> WindowsToReactors = new Dictionary<string, List<ReactionWindowSubscription>>();
         private readonly Dictionary<IReactionWindowReactor, HashSet<ReactionWindowSubscription>> ReactorsToSubscriptions = new Dictionary<IReactionWindowReactor, HashSet<ReactionWindowSubscription>>();
@@ -33,7 +34,7 @@ namespace SFDDCards
             this.CombatPlayer = fromCampaign.CampaignPlayer;
 
             this.FromCampaign = fromCampaign;
-            this.BasedOnEncounter = basedOnEncounter.BasedOn;
+            this.BasedOnEncounter = basedOnEncounter;
             this.PlayerCombatDeck = new CombatDeck(fromCampaign.CampaignDeck);
             this.PlayerCombatDeck.ShuffleEntireDeck();
 
@@ -184,10 +185,9 @@ namespace SFDDCards
 
         private void InitializeStartingEnemies()
         {
-            foreach (EnemyModel curEnemyModel in this.BasedOnEncounter.GetEnemyModels())
+            foreach (Enemy curEnemy in this.BasedOnEncounter.Enemies)
             {
-                Enemy enemyInstance = new Enemy(curEnemyModel);
-                this.Enemies.Add(enemyInstance);
+                this.Enemies.Add(curEnemy);
             }
         }
 

@@ -16,5 +16,6 @@ namespace SFDDCards.ImportModels
         public string Id;
         public List<EffectOnProcImport> Effects = new List<EffectOnProcImport>();
         public StatusEffectPersistence Persistence = StatusEffectPersistence.Combat;
+        public HashSet<string> Tags = new HashSet<string>();
     }
 }

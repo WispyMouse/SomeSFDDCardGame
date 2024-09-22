@@ -1,0 +1,17 @@
+{
+    "Name": "Solar Authority",
+	"Id": "solarDelayedDraw",
+	"Effects":
+	[
+		{
+			"Window": "OWNERENDSTURN",
+			"Script": "[SETTARGET: SELF][REQUIRESATLEASTELEMENT: 1 SUN][APPLYSTATUSEFFECTSTACKS: 1 DELAYEDDRAW]"
+		}
+	],
+	"Tags":
+	[
+		"artifact",
+		"solar"
+	],
+	"Persistence": "Campaign"
+}

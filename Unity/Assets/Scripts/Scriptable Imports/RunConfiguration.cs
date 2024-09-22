@@ -10,7 +10,6 @@ namespace SFDDCards
     public class RunConfiguration
     {
         public List<string> StartingDeck = new List<string>();
-        public int CardsToAwardOnVictory = 3;
         public int StartingMaximumHealth = 50;
     }
 }

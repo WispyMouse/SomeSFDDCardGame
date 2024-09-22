@@ -17,6 +17,7 @@ namespace SFDDCards
         public Dictionary<string, List<AttackTokenPile>> EffectTokens = new Dictionary<string, List<AttackTokenPile>>();
         public Sprite Sprite;
         public StatusEffectPersistence Persistence = StatusEffectPersistence.Combat;
+        public HashSet<string> Tags = new HashSet<string>();
 
         public StatusEffect(StatusEffectImport basedOn, Sprite sprite = null)
         {
@@ -24,6 +25,7 @@ namespace SFDDCards
             this.Id = basedOn.Id;
             this.Sprite = sprite;
             this.Persistence = basedOn.Persistence;
+            this.Tags = basedOn.Tags;
 
             foreach (EffectOnProcImport import in basedOn.Effects)
             {
@@ -75,6 +77,19 @@ namespace SFDDCards
                 DescriptionText = statusEffects,
                 DescribingLabel = this.Name
             };
+        }
+
+        public bool MeetsAllTags(HashSet<string> tags)
+        {
+            foreach (string tag in tags)
+            {
+                if (!this.Tags.Contains(tag))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }
