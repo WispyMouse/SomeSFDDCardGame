@@ -56,5 +56,10 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
             output = new HealthEvaluatableValue("target");
             return true;
         }
+
+        public string GetScriptingTokenText()
+        {
+            return $"{this.TargetToAssess}HEALTH";
+        }
     }
 }

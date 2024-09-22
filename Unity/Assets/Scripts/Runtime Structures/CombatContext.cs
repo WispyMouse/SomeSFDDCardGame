@@ -133,7 +133,7 @@ namespace SFDDCards
 
             // Does the player meet the requirements of at least one of the effects?
             List<ConceptualTokenEvaluatorBuilder> conceptBuilders = ScriptTokenEvaluator.CalculateConceptualBuildersFromTokenEvaluation(toPlay);
-            bool anyPassingRequirements = ScriptTokenEvaluator.MeetsAnyRequirements(conceptBuilders, this.FromCampaign, this.CombatPlayer, toPlayOn);
+            bool anyPassingRequirements = ScriptTokenEvaluator.MeetsAnyRequirements(conceptBuilders, this.FromCampaign, this.CombatPlayer, this.CombatPlayer, toPlayOn);
 
             if (!anyPassingRequirements)
             {
@@ -147,7 +147,7 @@ namespace SFDDCards
             GlobalSequenceEventHolder.PushSequenceToTop(new GameplaySequenceEvent(
             () =>
             {
-                GamestateDelta delta = ScriptTokenEvaluator.CalculateRealizedDeltaEvaluation(toPlay, this.FromCampaign, this.CombatPlayer, toPlayOn);
+                GamestateDelta delta = ScriptTokenEvaluator.CalculateRealizedDeltaEvaluation(toPlay, this.FromCampaign, this.CombatPlayer, this.CombatPlayer, toPlayOn);
                 GlobalUpdateUX.LogTextEvent.Invoke(EffectDescriberDatabase.DescribeResolvedEffect(delta), GlobalUpdateUX.LogType.GameEvent);
                 delta.ApplyDelta(this.FromCampaign);
                 this.FromCampaign.CheckAllStateEffectsAndKnockouts();
@@ -164,7 +164,7 @@ namespace SFDDCards
                 return;
             }
 
-            GamestateDelta delta = ScriptTokenEvaluator.CalculateRealizedDeltaEvaluation(toAct.Intent, this.FromCampaign, toAct, this.CombatPlayer);
+            GamestateDelta delta = ScriptTokenEvaluator.CalculateRealizedDeltaEvaluation(toAct.Intent, this.FromCampaign, toAct, toAct, this.CombatPlayer);
             GlobalUpdateUX.LogTextEvent.Invoke(EffectDescriberDatabase.DescribeResolvedEffect(delta), GlobalUpdateUX.LogType.GameEvent);
             delta.ApplyDelta(this.FromCampaign);
 

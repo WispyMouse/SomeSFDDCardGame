@@ -21,6 +21,7 @@ namespace SFDDCards.Evaluation.Conceptual
 
         public CombatantTargetEvaluatableValue Target;
         public CombatantTargetEvaluatableValue OriginalTarget;
+        public IEffectOwner Owner;
 
         public IEvaluatableValue<int> Intensity;
         public IntensityKind IntensityKindType;
@@ -40,6 +41,7 @@ namespace SFDDCards.Evaluation.Conceptual
                 this.ElementRequirements = new Dictionary<Element, IEvaluatableValue<int>>(previousBuilder.ElementRequirements);
                 this.OriginalTarget = previousBuilder.OriginalTarget;
                 this.Target = previousBuilder.Target;
+                this.Owner = previousBuilder.Owner;
             }
         }
 

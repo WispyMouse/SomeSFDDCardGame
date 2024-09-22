@@ -5,7 +5,7 @@ namespace SFDDCards
     using System.Collections;
     using System.Collections.Generic;
     using UnityEngine;
-    public class Card : IAttackTokenHolder
+    public class Card : IAttackTokenHolder, IEffectOwner
     {
         public string Id;
         public string Name;
@@ -17,11 +17,12 @@ namespace SFDDCards
         public List<IScriptingToken> AttackTokens => this.AttackTokenPile.AttackTokens;
         public AttackTokenPile AttackTokenPile { get; set; }
 
+        public IEffectOwner Owner => this;
+
         public Card(CardImport basedOn)
         {
             this.Id = basedOn.Id.ToLower();
             this.Name = basedOn.Name;
-            this.AttackTokenPile = ScriptingTokens.ScriptingTokenDatabase.GetAllTokens(basedOn.EffectScript);
 
             HashSet<string> lowerCaseTags = new HashSet<string>();
             foreach (string tag in basedOn.Tags)
@@ -36,6 +37,8 @@ namespace SFDDCards
 
             this.Tags = lowerCaseTags;
             this.Sprite = basedOn.Sprite;
+
+            this.AttackTokenPile = ScriptingTokens.ScriptingTokenDatabase.GetAllTokens(basedOn.EffectScript, this);
         }
 
         public EffectDescription GetDescription()

@@ -41,5 +41,10 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
             output = new CountElementEvaluatableValue(stackId);
             return true;
         }
+
+        public string GetScriptingTokenText()
+        {
+            return $"COUNTELEMENT_{this.ElementToCount}";
+        }
     }
 }

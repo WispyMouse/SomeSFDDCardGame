@@ -16,7 +16,10 @@ namespace SFDDCards
         public static List<ConceptualTokenEvaluatorBuilder> CalculateConceptualBuildersFromTokenEvaluation(IAttackTokenHolder evaluatedAttack)
         {
             List<ConceptualTokenEvaluatorBuilder> builders = new List<ConceptualTokenEvaluatorBuilder>();
-            ConceptualTokenEvaluatorBuilder builder = new ConceptualTokenEvaluatorBuilder();
+            ConceptualTokenEvaluatorBuilder builder = new ConceptualTokenEvaluatorBuilder()
+            {
+                Owner = evaluatedAttack.Owner
+            };
 
             foreach (Element baseElement in evaluatedAttack.BaseElementGain.Keys)
             {
@@ -48,20 +51,20 @@ namespace SFDDCards
             return builders;
         }
 
-        public static GamestateDelta CalculateRealizedDeltaEvaluation(IAttackTokenHolder evaluatedAttack, CampaignContext campaignContext, ICombatantTarget user, ICombatantTarget originalTarget)
+        public static GamestateDelta CalculateRealizedDeltaEvaluation(IAttackTokenHolder evaluatedAttack, CampaignContext campaignContext, IEffectOwner owner, ICombatantTarget user, ICombatantTarget originalTarget)
         {
             List<ConceptualTokenEvaluatorBuilder> concepts = CalculateConceptualBuildersFromTokenEvaluation(evaluatedAttack);
-            return RealizeConceptualBuilders(concepts, campaignContext, user, originalTarget);
+            return RealizeConceptualBuilders(concepts, campaignContext, owner, user, originalTarget);
         }
 
-        public static GamestateDelta RealizeConceptualBuilders(List<ConceptualTokenEvaluatorBuilder> concepts, CampaignContext campaignContext, ICombatantTarget user, ICombatantTarget originalTarget)
+        public static GamestateDelta RealizeConceptualBuilders(List<ConceptualTokenEvaluatorBuilder> concepts, CampaignContext campaignContext, IEffectOwner owner, ICombatantTarget user, ICombatantTarget originalTarget)
         {
             GamestateDelta resultingDelta = new GamestateDelta();
             TokenEvaluatorBuilder previousBuilder = null;
 
             foreach (ConceptualTokenEvaluatorBuilder conceptBuilder in concepts)
             {
-                TokenEvaluatorBuilder realizedBuilder = RealizeConceptualBuilder(conceptBuilder, campaignContext, user, originalTarget, previousBuilder);
+                TokenEvaluatorBuilder realizedBuilder = RealizeConceptualBuilder(conceptBuilder, campaignContext, owner, user, originalTarget, previousBuilder);
                 if (realizedBuilder.MeetsElementRequirements(campaignContext.CurrentCombatContext) && realizedBuilder.MeetsComparisonRequirements(campaignContext.CurrentCombatContext))
                 {
                     resultingDelta.AppendDelta(realizedBuilder.GetEffectiveDelta(campaignContext));
@@ -71,9 +74,9 @@ namespace SFDDCards
             return resultingDelta;
         }
 
-        public static TokenEvaluatorBuilder RealizeConceptualBuilder(ConceptualTokenEvaluatorBuilder concept, CampaignContext campaignContext, ICombatantTarget user, ICombatantTarget originalTarget, TokenEvaluatorBuilder previousBuilder = null)
+        public static TokenEvaluatorBuilder RealizeConceptualBuilder(ConceptualTokenEvaluatorBuilder concept, CampaignContext campaignContext, IEffectOwner owner, ICombatantTarget user, ICombatantTarget originalTarget, TokenEvaluatorBuilder previousBuilder = null)
         {
-            return new TokenEvaluatorBuilder(concept, campaignContext, user, originalTarget, previousBuilder);
+            return new TokenEvaluatorBuilder(concept, campaignContext, owner, user, originalTarget, previousBuilder);
         }
 
         public static string DescribeCardText(Card importingCard)
@@ -143,13 +146,13 @@ namespace SFDDCards
             return effectText.ToString().Trim();
         }
 
-        public static bool MeetsAnyRequirements(List<ConceptualTokenEvaluatorBuilder> concepts, CampaignContext campaign, ICombatantTarget user, ICombatantTarget target)
+        public static bool MeetsAnyRequirements(List<ConceptualTokenEvaluatorBuilder> concepts, CampaignContext campaign, IEffectOwner owner, ICombatantTarget user, ICombatantTarget target)
         {
             TokenEvaluatorBuilder previousBuilder = null;
 
             foreach (ConceptualTokenEvaluatorBuilder builder in concepts)
             {
-                TokenEvaluatorBuilder realizedBuilder = ScriptTokenEvaluator.RealizeConceptualBuilder(builder, campaign, user, target, previousBuilder);
+                TokenEvaluatorBuilder realizedBuilder = ScriptTokenEvaluator.RealizeConceptualBuilder(builder, campaign, owner, user, target, previousBuilder);
                 if (realizedBuilder.MeetsElementRequirements(campaign.CurrentCombatContext) && realizedBuilder.MeetsComparisonRequirements(campaign.CurrentCombatContext))
                 {
                     return true;

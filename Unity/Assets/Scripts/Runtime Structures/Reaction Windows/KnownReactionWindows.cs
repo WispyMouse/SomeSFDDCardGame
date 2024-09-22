@@ -36,8 +36,10 @@ namespace SFDDCards
                     return "Start of turn";
                 case OwnerEndsTurn:
                     return "End of turn";
-                    case Activated:
+                case Activated:
                     return "Activated";
+                case "testwindow":
+                    return "";
             }
 
             Debug.LogError($"{nameof(KnownReactionWindows)} ({nameof(ParseWindow)}): Failed to describe timing window '{window}'.");

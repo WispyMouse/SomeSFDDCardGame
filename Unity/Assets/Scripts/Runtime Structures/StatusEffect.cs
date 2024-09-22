@@ -4,13 +4,14 @@ namespace SFDDCards
     using SFDDCards.Evaluation.Conceptual;
     using SFDDCards.ImportModels;
     using SFDDCards.ScriptingTokens;
+    using System;
     using System.Collections;
     using System.Collections.Generic;
     using System.Text;
     using UnityEngine;
     using static SFDDCards.ImportModels.StatusEffectImport;
 
-    public class StatusEffect : IStatusEffect
+    public class StatusEffect : IStatusEffect, IEffectOwner, IEquatable<StatusEffect>
     {
         public readonly string Name;
         public readonly string Id;
@@ -35,7 +36,7 @@ namespace SFDDCards
                     this.EffectTokens.Add(import.Window.ToLower(), tokens);
                 }
 
-                tokens.Add(ScriptingTokens.ScriptingTokenDatabase.GetAllTokens(import.Script));
+                tokens.Add(ScriptingTokenDatabase.GetAllTokens(import.Script, this));
             }
         }
 
@@ -48,7 +49,11 @@ namespace SFDDCards
                 StringBuilder thisWindowString = new StringBuilder();
 
                 string windowDescription = KnownReactionWindows.GetWindowDescriptor(window.ToLower());
-                thisWindowString.Append($"<b>{windowDescription}:</b> ");
+
+                if (!string.IsNullOrEmpty(windowDescription))
+                {
+                    thisWindowString.Append($"<b>{windowDescription}:</b> ");
+                }
 
                 foreach (AttackTokenPile attackTokenList in this.EffectTokens[window])
                 {
@@ -77,6 +82,21 @@ namespace SFDDCards
                 DescriptionText = statusEffects,
                 DescribingLabel = this.Name
             };
+        }
+
+        public bool Equals(StatusEffect other)
+        {
+            if (other == null)
+            {
+                return false;
+            }
+
+            if (other.Id.Equals(this.Id))
+            {
+                return true;
+            }
+
+            return false;
         }
 
         public bool MeetsAllTags(HashSet<string> tags)

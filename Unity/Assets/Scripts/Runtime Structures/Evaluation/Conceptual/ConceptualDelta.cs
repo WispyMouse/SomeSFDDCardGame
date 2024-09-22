@@ -16,5 +16,6 @@ namespace SFDDCards.Evaluation.Conceptual
     public class ConceptualDelta
     {
         public List<ConceptualDeltaEntry> DeltaEntries { get; set; } = new List<ConceptualDeltaEntry>();
+        public IEffectOwner Owner;
     }
 }

@@ -1,5 +1,6 @@
 namespace SFDDCards.ScriptingTokens
 {
+    using SFDDCards.Evaluation.Conceptual;
     using System.Collections.Generic;
     using System.Text.RegularExpressions;
     using UnityEngine;
@@ -29,37 +30,71 @@ namespace SFDDCards.ScriptingTokens
             new DrainsElementScriptingToken(),
         };
 
-        public static bool TryGetScriptingTokenMatch(string input, out IScriptingToken match)
+        public static List<AliasScriptingToken> AllTokenAliases = new List<AliasScriptingToken>()
         {
-            foreach (IScriptingToken token in AllTokenPrototypes)
+            new RemoveStacksScriptingToken()
+        };
+
+        public static bool TryGetScriptingTokenMatch(string input, IEffectOwner owner, out List<IScriptingToken> matches)
+        {
+            List<string> adjustedInputs = new List<string>() { input };
+
+            bool anythingFound = false;
+            do
             {
-                if (token.GetTokenIfMatch(input, out match))
+                anythingFound = false;
+
+                for  (int ii = 0; ii < adjustedInputs.Count; ii++)
                 {
-                    return true;
+                    foreach (AliasScriptingToken alias in AllTokenAliases)
+                    {
+                        if (alias.GetTokensIfMatch(adjustedInputs[ii], owner, out List<string> result))
+                        {
+                            adjustedInputs.RemoveAt(ii);
+                            for (int jj = result.Count - 1; jj >= 0; jj--)
+                            {
+                                adjustedInputs.Insert(ii, result[jj]);
+                            }
+                            anythingFound = true;
+                            break;
+                        }
+                    }
+                }
+            } while (anythingFound);
+            
+            matches = new List<IScriptingToken>();
+
+            foreach (string adjustedInput in adjustedInputs)
+            {
+                foreach (IScriptingToken token in AllTokenPrototypes)
+                {
+                    if (token.GetTokenIfMatch(adjustedInput, out IScriptingToken match))
+                    {
+                        matches.Add(match);
+                    }
                 }
             }
-
-            match = null;
-            return false;
+            
+            return matches.Count > 0;
         }
 
-        public static AttackTokenPile GetAllTokens(string input)
+        public static AttackTokenPile GetAllTokens(string input, IEffectOwner owner)
         {
             List<IScriptingToken> tokens = new List<IScriptingToken>();
 
             MatchCollection tagMatches = Regex.Matches(input, @"(\[.*?\])");
             foreach (Match curTagMatch in tagMatches)
             {
-                if (!TryGetScriptingTokenMatch(curTagMatch.Value, out IScriptingToken token))
+                if (!TryGetScriptingTokenMatch(curTagMatch.Value, owner, out List<IScriptingToken> newTokens))
                 {
                     Debug.LogError($"Failed to parse token! {curTagMatch.Value}");
                     continue;
                 }
 
-                tokens.Add(token);
+                tokens.AddRange(newTokens);
             }
 
-            return new AttackTokenPile(tokens);
+            return new AttackTokenPile(owner, tokens);
         }
     }
 }

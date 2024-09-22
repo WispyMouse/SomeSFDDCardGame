@@ -21,5 +21,11 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
             evaluatedValue = this.Target;
             return true;
         }
+
+        public override string GetScriptingTokenText()
+        {
+            GlobalUpdateUX.LogTextEvent.Invoke($"This is a specific target token. It should not be parsed back into text. This possibility existing shows that this needs to have a different API for determining tokens.", GlobalUpdateUX.LogType.RuntimeError);
+            return string.Empty;
+        }
     }
 }

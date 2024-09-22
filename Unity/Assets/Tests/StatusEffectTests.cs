@@ -20,7 +20,7 @@ namespace SFDDCards.Tests.EditMode
         [Test]
         public void TestPoisonStatus()
         {
-            string poisonFilePath = Application.streamingAssetsPath + "/statusImport/poison.statusImport";
+            string poisonFilePath = Application.streamingAssetsPath + "/statusImport/status effects/poison.statusImport";
             if (!StatusEffectDatabase.TryImportStatusEffectFromFile(poisonFilePath, out StatusEffect poisonStatus))
             {
                 Assert.Fail($"Expected to find poison at {poisonFilePath}, did not find it there.");

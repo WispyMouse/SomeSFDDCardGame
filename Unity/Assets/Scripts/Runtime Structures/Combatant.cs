@@ -4,13 +4,13 @@ namespace SFDDCards
     using System.Collections;
     using System.Collections.Generic;
     using UnityEngine;
-    public abstract class Combatant : ICombatantTarget, IReactionWindowReactor
+    public abstract class Combatant : ICombatantTarget, IReactionWindowReactor, IEffectOwner
     {
         public abstract string Name { get; }
         public abstract int MaxHealth { get; }
         public int CurrentHealth { get; set; }
         public Transform UXPositionalTransform { get; set; }
-        public List<AppliedStatusEffect> AppliedStatusEffects { get; set; } = new List<AppliedStatusEffect>();
+        public virtual List<AppliedStatusEffect> AppliedStatusEffects { get; set; } = new List<AppliedStatusEffect>();
 
         public void ApplyDelta(CampaignContext campaignContext, CombatContext combatContext, DeltaEntry deltaEntry)
         {
@@ -57,7 +57,7 @@ namespace SFDDCards
                 AppliedStatusEffect existingEffect = this.AppliedStatusEffects.Find(x => x.BasedOnStatusEffect == deltaEntry.StatusEffect);
                 if (existingEffect != null)
                 {
-                    existingEffect.Stacks = Mathf.Min(0, existingEffect.Stacks - deltaEntry.Intensity);
+                    existingEffect.Stacks = Mathf.Max(0, existingEffect.Stacks - deltaEntry.Intensity);
                     if (existingEffect.Stacks <= 0)
                     {
                         campaignContext.UnsubscribeReactor(existingEffect);

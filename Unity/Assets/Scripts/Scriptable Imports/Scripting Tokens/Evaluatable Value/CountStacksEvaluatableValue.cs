@@ -30,7 +30,7 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
 
         public string DescribeEvaluation()
         {
-            return $"1 x {StacksToCount}";
+            return $"1 x {this.StacksToCount}";
         }
 
         public static bool TryGetCountStacksEvaluatableValue(string argument, out CountStacksEvaluatableValue output)
@@ -57,6 +57,16 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
             stackId = regexMatch.Groups[1].Value;
             output = new CountStacksEvaluatableValue(stackId, "target");
             return true;
+        }
+
+        public string GetScriptingTokenText()
+        {
+            if (this.CountOn == "self")
+            {
+                return $"COUNTSTACKSSELF_{this.StacksToCount}";
+            }
+
+            return $"COUNTSTACKS_{this.StacksToCount}";
         }
     }
 }

@@ -18,11 +18,11 @@ namespace SFDDCards
             List<string> descriptionTexts = this.DescriptionText;
             for (int ii = 0; ii < descriptionTexts.Count; ii++)
             {
-                descriptionBuilder.AppendLine($"{leadingNewline}{descriptionTexts[ii]}");
+                descriptionBuilder.AppendLine($"{leadingNewline}{descriptionTexts[ii].Trim()}");
                 leadingNewline = "\n";
             }
 
-            return descriptionBuilder.ToString();
+            return descriptionBuilder.ToString().Trim();
         }
 
         public bool Equals(EffectDescription other)

@@ -32,6 +32,7 @@ namespace SFDDCards.Evaluation.Actual
 
         public List<IScriptingToken> AppliedTokens = new List<IScriptingToken>();
 
+        public IEffectOwner Owner;
         public ICombatantTarget User;
         public ICombatantTarget OriginalTarget;
         public ICombatantTarget Target;
@@ -50,12 +51,12 @@ namespace SFDDCards.Evaluation.Actual
         public TokenEvaluatorBuilder PreviousTokenBuilder = null;
         public ConceptualTokenEvaluatorBuilder BasedOnConcept = null;
 
-        public TokenEvaluatorBuilder(ConceptualTokenEvaluatorBuilder concept, CampaignContext campaignContext, ICombatantTarget user, ICombatantTarget originalTarget, TokenEvaluatorBuilder previousBuilder = null)
+        public TokenEvaluatorBuilder(ConceptualTokenEvaluatorBuilder concept, CampaignContext campaignContext, IEffectOwner owner, ICombatantTarget user, ICombatantTarget originalTarget, TokenEvaluatorBuilder previousBuilder = null)
         {
             this.Campaign = campaignContext;
             this.BasedOnConcept = concept;
             this.PreviousTokenBuilder = previousBuilder;
-
+            this.Owner = owner;
             this.User = user;
             this.OriginalTarget = originalTarget;
 

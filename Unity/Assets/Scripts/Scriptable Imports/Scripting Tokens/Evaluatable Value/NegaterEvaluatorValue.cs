@@ -33,5 +33,10 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
             output = null;
             return false;
         }
+
+        public string GetScriptingTokenText()
+        {
+            return $"-{this.ToNegate.GetScriptingTokenText()}";
+        }
     }
 }

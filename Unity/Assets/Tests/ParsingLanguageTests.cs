@@ -18,12 +18,12 @@ namespace SFDDCards.Tests.EditMode
     /// </summary>
     public class ParsingLanguageTests : EditModeTestBase
     {
-        public struct AssertEffectScriptResultsInTextValueSourceValue
+        public struct AssertEffectScriptResultsValueSourceValue
         {
             public string EffectScript;
             public string ExpectedParsedValue;
 
-            public AssertEffectScriptResultsInTextValueSourceValue(string effectScript, string expectedParsedValue)
+            public AssertEffectScriptResultsValueSourceValue(string effectScript, string expectedParsedValue)
             {
                 this.EffectScript = effectScript;
                 this.ExpectedParsedValue = expectedParsedValue;
@@ -35,31 +35,31 @@ namespace SFDDCards.Tests.EditMode
             }
         }
 
-        public static List<AssertEffectScriptResultsInTextValueSourceValue> AssertEffectScriptResultsInTextValueSource => new List<AssertEffectScriptResultsInTextValueSourceValue>()
+        public static List<AssertEffectScriptResultsValueSourceValue> AssertEffectScriptResultsInTextValueSource => new List<AssertEffectScriptResultsValueSourceValue>()
         {
-            new AssertEffectScriptResultsInTextValueSourceValue("[SETTARGET: FOE][DAMAGE: 1]", "1 damage."),
-            new AssertEffectScriptResultsInTextValueSourceValue("[SETTARGET: SELF][DAMAGE: 1]", "1 damage to self."),
+            new AssertEffectScriptResultsValueSourceValue("[SETTARGET: FOE][DAMAGE: 1]", "1 damage."),
+            new AssertEffectScriptResultsValueSourceValue("[SETTARGET: SELF][DAMAGE: 1]", "1 damage to self."),
 
-            new AssertEffectScriptResultsInTextValueSourceValue("[SETTARGET: SELF][HEAL: 1]", "Heal 1."),
-            new AssertEffectScriptResultsInTextValueSourceValue("[SETTARGET: FOE][HEAL: 1]", "Heal foe for 1."),
+            new AssertEffectScriptResultsValueSourceValue("[SETTARGET: SELF][HEAL: 1]", "Heal 1."),
+            new AssertEffectScriptResultsValueSourceValue("[SETTARGET: FOE][HEAL: 1]", "Heal foe for 1."),
 
-            new AssertEffectScriptResultsInTextValueSourceValue($"[SETTARGET: FOE][APPLYSTATUSEFFECTSTACKS: 1 {nameof(DebugStatus)}]", $"Apply 1 stack of {nameof(DebugStatus)} to foe."),
-            new AssertEffectScriptResultsInTextValueSourceValue($"[SETTARGET: SELF][APPLYSTATUSEFFECTSTACKS: 2 {nameof(DebugStatus)}]", $"Apply 2 stacks of {nameof(DebugStatus)} to self."),
+            new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][APPLYSTATUSEFFECTSTACKS: 1 {nameof(DebugStatus)}]", $"Apply 1 stack of {nameof(DebugStatus)} to foe."),
+            new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: SELF][APPLYSTATUSEFFECTSTACKS: 2 {nameof(DebugStatus)}]", $"Apply 2 stacks of {nameof(DebugStatus)} to self."),
 
-            new AssertEffectScriptResultsInTextValueSourceValue($"[SETTARGET: FOE][REMOVESTATUSEFFECTSTACKS: 1 {nameof(DebugStatus)}]", $"Remove 1 stack of {nameof(DebugStatus)} from foe."),
-            new AssertEffectScriptResultsInTextValueSourceValue($"[SETTARGET: SELF][REMOVESTATUSEFFECTSTACKS: 2 {nameof(DebugStatus)}]", $"Remove 2 stacks of {nameof(DebugStatus)} from self."),
+            new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][REMOVESTATUSEFFECTSTACKS: 1 {nameof(DebugStatus)}]", $"Remove 1 stack of {nameof(DebugStatus)} from foe."),
+            new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: SELF][REMOVESTATUSEFFECTSTACKS: 2 {nameof(DebugStatus)}]", $"Remove 2 stacks of {nameof(DebugStatus)} from self."),
 
 
-            new AssertEffectScriptResultsInTextValueSourceValue($"[SETTARGET: FOE][DAMAGE: COUNTSTACKS_{nameof(DebugStatus)}]", $"1 x {nameof(DebugStatus)} damage."),
+            new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][DAMAGE: COUNTSTACKS_{nameof(DebugStatus)}]", $"1 x {nameof(DebugStatus)} damage."),
         };
 
         [Test]
-        public void AssertEffectScriptResultsInText([ValueSource(nameof(AssertEffectScriptResultsInTextValueSource))] AssertEffectScriptResultsInTextValueSourceValue expectations)
+        public void AssertEffectScriptResultsInTextAsCard([ValueSource(nameof(AssertEffectScriptResultsInTextValueSource))] AssertEffectScriptResultsValueSourceValue expectations)
         {
             CardImport import = new CardImport()
             {
-                Id = nameof(AssertEffectScriptResultsInText),
-                Name = nameof(AssertEffectScriptResultsInText),
+                Id = nameof(AssertEffectScriptResultsInTextAsCard),
+                Name = nameof(AssertEffectScriptResultsInTextAsCard),
                 EffectScript = expectations.EffectScript
             };
 
@@ -69,6 +69,22 @@ namespace SFDDCards.Tests.EditMode
             List<string> descriptionTexts = description.DescriptionText;
             Assert.AreEqual(1, descriptionTexts.Count, "Scripts should only parse in to one description text when validated using this function.");
             Assert.AreEqual(expectations.ExpectedParsedValue, descriptionTexts[0], "Script should parse out to expected value.");
+        }
+
+        public static List<AssertEffectScriptResultsValueSourceValue> AssertEffectScriptResultsInTextAsStatusEffectValueSource => new List<AssertEffectScriptResultsValueSourceValue>()
+        {
+            new AssertEffectScriptResultsValueSourceValue("[REMOVESTACKS: 1]", $"Remove 1 stack."),
+        };
+
+        [Test]
+        public void AssertEffectScriptResultsInTextAsStatusEffect([ValueSource(nameof(AssertEffectScriptResultsInTextAsStatusEffectValueSource))] AssertEffectScriptResultsValueSourceValue expectations)
+        {
+            AttackTokenPile pile = ScriptingTokens.ScriptingTokenDatabase.GetAllTokens(expectations.EffectScript, this.DebugStatus);
+            this.DebugStatus.EffectTokens.Clear();
+            this.DebugStatus.EffectTokens.Add("testwindow", new List<AttackTokenPile>() { pile });
+
+            string resolvedDescription = this.DebugStatus.DescribeStatusEffect().BreakDescriptionsIntoString();
+            Assert.AreEqual(expectations.ExpectedParsedValue, resolvedDescription, "Script should parse out to expected value.");
         }
     }
 }
