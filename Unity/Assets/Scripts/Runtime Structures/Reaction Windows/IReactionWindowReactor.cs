@@ -6,6 +6,6 @@ namespace SFDDCards
 
     public interface IReactionWindowReactor
     {
-        bool TryGetReactionEvents(CombatContext combatContext, ReactionWindowContext reactionContext, out List<GameplaySequenceEvent> events);
+        bool TryGetReactionEvents(CampaignContext campaignContext, ReactionWindowContext reactionContext, out List<GameplaySequenceEvent> events);
     }
 }

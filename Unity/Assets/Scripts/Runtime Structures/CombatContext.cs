@@ -26,9 +26,6 @@ namespace SFDDCards
         public readonly List<Enemy> Enemies = new List<Enemy>();
         public Reward Rewards => this.BasedOnEncounter.Rewards;
 
-        private readonly Dictionary<string, List<ReactionWindowSubscription>> WindowsToReactors = new Dictionary<string, List<ReactionWindowSubscription>>();
-        private readonly Dictionary<IReactionWindowReactor, HashSet<ReactionWindowSubscription>> ReactorsToSubscriptions = new Dictionary<IReactionWindowReactor, HashSet<ReactionWindowSubscription>>();
-
         public CombatContext(CampaignContext fromCampaign, EvaluatedEncounter basedOnEncounter)
         {
             this.CombatPlayer = fromCampaign.CampaignPlayer;
@@ -153,7 +150,7 @@ namespace SFDDCards
                 GamestateDelta delta = ScriptTokenEvaluator.CalculateRealizedDeltaEvaluation(toPlay, this.FromCampaign, this.CombatPlayer, toPlayOn);
                 GlobalUpdateUX.LogTextEvent.Invoke(EffectDescriberDatabase.DescribeResolvedEffect(delta), GlobalUpdateUX.LogType.GameEvent);
                 delta.ApplyDelta(this.FromCampaign);
-                this.CheckAllStateEffectsAndKnockouts();
+                this.FromCampaign.CheckAllStateEffectsAndKnockouts();
             },
             null
             ));
@@ -171,16 +168,7 @@ namespace SFDDCards
             GlobalUpdateUX.LogTextEvent.Invoke(EffectDescriberDatabase.DescribeResolvedEffect(delta), GlobalUpdateUX.LogType.GameEvent);
             delta.ApplyDelta(this.FromCampaign);
 
-            this.CheckAllStateEffectsAndKnockouts();
-        }
-
-        public void StatusEffectHappeningProc(StatusEffectHappening happening)
-        {
-            GamestateDelta delta = ScriptTokenEvaluator.CalculateRealizedDeltaEvaluation(happening, this.FromCampaign, happening.OwnedStatusEffect.Owner, this.CombatPlayer);
-            GlobalUpdateUX.LogTextEvent.Invoke(EffectDescriberDatabase.DescribeResolvedEffect(delta), GlobalUpdateUX.LogType.GameEvent);
-            delta.ApplyDelta(this.FromCampaign);
-
-            this.CheckAllStateEffectsAndKnockouts();
+            this.FromCampaign.CheckAllStateEffectsAndKnockouts();
         }
 
         private void InitializeStartingEnemies()
@@ -229,117 +217,7 @@ namespace SFDDCards
             GlobalUpdateUX.UpdateUXEvent.Invoke();
         }
 
-        public void CheckAllStateEffectsAndKnockouts()
-        {
-            if (this.CombatPlayer.CurrentHealth <= 0)
-            {
-                this.PlayerDefeat();
-                return;
-            }
-
-            List<Enemy> enemies = new List<Enemy>(this.Enemies);
-            foreach (Enemy curEnemy in enemies)
-            {
-                if (curEnemy.ShouldBecomeDefeated && !curEnemy.DefeatHasBeenSignaled)
-                {
-                    this.RemoveEnemy(curEnemy);
-                }
-            }
-
-            if (this.FromCampaign.CurrentNonCombatEncounterStatus == CampaignContext.NonCombatEncounterStatus.NotInNonCombatEncounter && enemies.Count == 0)
-            {
-                GlobalUpdateUX.LogTextEvent.Invoke($"There are no more enemies!", GlobalUpdateUX.LogType.GameEvent);
-                this.FromCampaign.SetCampaignState(CampaignContext.GameplayCampaignState.ClearedRoom);
-                return;
-            }
-
-            GlobalUpdateUX.UpdateUXEvent?.Invoke();
-        }
-
-        public void CheckAndApplyReactionWindow(ReactionWindowContext context)
-        {
-            if (!this.TryGetReactionWindowSequenceEvents(context, out List<GameplaySequenceEvent> eventsThatWouldFollow))
-            {
-                return;
-            }
-
-            GlobalSequenceEventHolder.PushSequencesToTop(eventsThatWouldFollow.ToArray());
-        }
-
-        public bool TryGetReactionWindowSequenceEvents(ReactionWindowContext context, out List<GameplaySequenceEvent> eventsThatWouldFollow)
-        {
-            eventsThatWouldFollow = null;
-
-            if (this.WindowsToReactors.TryGetValue(context.TimingWindowId, out List<ReactionWindowSubscription> reactors))
-            {
-                foreach (ReactionWindowSubscription reactor in reactors)
-                {
-                    if (reactor != null && reactor.ShouldApply(context) && reactor.Reactor.TryGetReactionEvents(this, context, out List<GameplaySequenceEvent> events))
-                    {
-                        if (eventsThatWouldFollow == null)
-                        {
-                            eventsThatWouldFollow = new List<GameplaySequenceEvent>();
-                        }
-
-                        eventsThatWouldFollow.AddRange(events);
-                    }
-                }
-            }
-
-            if (eventsThatWouldFollow == null)
-            {
-                return false;
-            }
-
-            return true;
-        }
-
-        public void SubscribeToReactionWindow(IReactionWindowReactor reactor, ReactionWindowSubscription subscription)
-        {
-            if (!this.WindowsToReactors.TryGetValue(subscription.ReactionWindowId.ToLower(), out List<ReactionWindowSubscription> reactorsList))
-            {
-                reactorsList = new List<ReactionWindowSubscription>();
-                this.WindowsToReactors.Add(subscription.ReactionWindowId.ToLower(), reactorsList);
-            }
-
-            reactorsList.Add(subscription);
-
-            if (!this.ReactorsToSubscriptions.TryGetValue(reactor, out HashSet<ReactionWindowSubscription> subscriptions))
-            {
-                subscriptions = new HashSet<ReactionWindowSubscription>();
-                this.ReactorsToSubscriptions.Add(reactor, subscriptions);
-            }
-
-            subscriptions.Add(subscription);
-        }
-
-        public void UnsubscribeReactor(IReactionWindowReactor reactor)
-        {
-            if (this.ReactorsToSubscriptions.TryGetValue(reactor, out HashSet<ReactionWindowSubscription> reactions))
-            {
-                foreach (ReactionWindowSubscription reactionWindow in reactions)
-                {
-                    this.WindowsToReactors[reactionWindow.ReactionWindowId].Remove(reactionWindow);
-                }
-                this.ReactorsToSubscriptions.Remove(reactor);
-            }
-        }
-
-        private void PlayerDefeat()
-        {
-            foreach (AppliedStatusEffect effect in CombatPlayer.AppliedStatusEffects)
-            {
-                this.UnsubscribeReactor(effect);
-            }
-
-            GlobalUpdateUX.LogTextEvent.Invoke($"The player has run out of health! This run is over.", GlobalUpdateUX.LogType.GameEvent);
-            this.FromCampaign.SetCampaignState(CampaignContext.GameplayCampaignState.Defeat);
-            this.UnsubscribeReactor(this.CombatPlayer);
-
-            GlobalSequenceEventHolder.StopAllSequences();
-        }
-
-        private void RemoveEnemy(Enemy toRemove)
+        public void RemoveEnemy(Enemy toRemove)
         {
             toRemove.DefeatHasBeenSignaled = true;
 
@@ -352,11 +230,11 @@ namespace SFDDCards
 
                     foreach (AppliedStatusEffect effect in toRemove.AppliedStatusEffects)
                     {
-                        this.UnsubscribeReactor(effect);
+                        this.FromCampaign.UnsubscribeReactor(effect);
                     }
 
-                    this.UnsubscribeReactor(toRemove);
-                    this.CheckAllStateEffectsAndKnockouts();
+                    this.FromCampaign.UnsubscribeReactor(toRemove);
+                    this.FromCampaign.CheckAllStateEffectsAndKnockouts();
                 },
                 null));
         }
@@ -365,7 +243,7 @@ namespace SFDDCards
         {
             this.CurrentTurnStatus = TurnStatus.PlayerTurn;
 
-            this.CheckAndApplyReactionWindow(new ReactionWindowContext(KnownReactionWindows.OwnerStartsTurn, this.CombatPlayer));
+            this.FromCampaign.CheckAndApplyReactionWindow(new ReactionWindowContext(KnownReactionWindows.OwnerStartsTurn, this.CombatPlayer));
 
             const int playerhandsize = 5;
             GlobalSequenceEventHolder.PushSequencesToTop(
@@ -379,7 +257,7 @@ namespace SFDDCards
         {
             List<GameplaySequenceEvent> nextEvents = new List<GameplaySequenceEvent>();
 
-            nextEvents.Add(new GameplaySequenceEvent(() => { this.CheckAndApplyReactionWindow(new ReactionWindowContext(KnownReactionWindows.OwnerEndsTurn, this.CombatPlayer)); }));
+            nextEvents.Add(new GameplaySequenceEvent(() => { this.FromCampaign.CheckAndApplyReactionWindow(new ReactionWindowContext(KnownReactionWindows.OwnerEndsTurn, this.CombatPlayer)); }));
             nextEvents.Add(new GameplaySequenceEvent(() => { this.PlayerCombatDeck.DiscardHand(); }));
 
             if (toTurn == TurnStatus.EnemyTurn)
@@ -398,7 +276,7 @@ namespace SFDDCards
 
             foreach (Enemy curEnemy in new List<Enemy>(this.Enemies))
             {
-                if (this.TryGetReactionWindowSequenceEvents(new ReactionWindowContext(KnownReactionWindows.OwnerStartsTurn, curEnemy), out List<GameplaySequenceEvent> windowEvents))
+                if (this.FromCampaign.TryGetReactionWindowSequenceEvents(new ReactionWindowContext(KnownReactionWindows.OwnerStartsTurn, curEnemy), out List<GameplaySequenceEvent> windowEvents))
                 {
                     nextEvents.AddRange(windowEvents);
                 }
@@ -424,7 +302,7 @@ namespace SFDDCards
 
             foreach (Enemy curEnemy in this.Enemies)
             {
-                nextEvents.Add(new GameplaySequenceEvent(() => { this.CheckAndApplyReactionWindow(new ReactionWindowContext(KnownReactionWindows.OwnerEndsTurn, curEnemy)); }));
+                nextEvents.Add(new GameplaySequenceEvent(() => { this.FromCampaign.CheckAndApplyReactionWindow(new ReactionWindowContext(KnownReactionWindows.OwnerEndsTurn, curEnemy)); }));
             }
 
             if (toTurn == TurnStatus.PlayerTurn)

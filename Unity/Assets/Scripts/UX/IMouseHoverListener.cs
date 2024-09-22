@@ -10,6 +10,6 @@ namespace SFDDCards.UX
     {
         public Transform GetTransform();
         public bool TryGetCard(out Card toShow);
-        public bool TryGetStatusEffect(out AppliedStatusEffect toShow);
+        public bool TryGetStatusEffect(out IStatusEffect toShow);
     }
 }

@@ -36,17 +36,17 @@ namespace SFDDCards.Tests.EditMode
             const int numberOfStacksToGivePlayer = 10;
             int player_oneturnofpoison_expectedhealth = combatContext.CombatPlayer.CurrentHealth - numberOfStacksToGivePlayer;
             int player_twoturnofpoison_expectedhealth = combatContext.CombatPlayer.CurrentHealth - numberOfStacksToGivePlayer - (numberOfStacksToGivePlayer - 1);
-            EditModeTestCommon.ApplyStatusEffectStacks(poisonStatus.Id, combatContext, combatContext.CombatPlayer, numberOfStacksToGivePlayer);
+            EditModeTestCommon.ApplyStatusEffectStacks(poisonStatus.Id, campaignContext, combatContext, combatContext.CombatPlayer, numberOfStacksToGivePlayer);
 
             const int numberOfStacksToGiveEnemyOne = 10;
             int enemyone_oneturnofpoison_expectedhealth = combatContext.Enemies[0].CurrentHealth - numberOfStacksToGiveEnemyOne;
             int enemyone_twoturnofpoison_expectedhealth = combatContext.Enemies[0].CurrentHealth - numberOfStacksToGiveEnemyOne - (numberOfStacksToGiveEnemyOne - 1);
-            EditModeTestCommon.ApplyStatusEffectStacks(poisonStatus.Id, combatContext, combatContext.Enemies[0], numberOfStacksToGiveEnemyOne);
+            EditModeTestCommon.ApplyStatusEffectStacks(poisonStatus.Id, campaignContext, combatContext, combatContext.Enemies[0], numberOfStacksToGiveEnemyOne);
 
             const int singleStackOnEnemyTwo = 1;
             int enemytwo_oneturnofpoison_expectedhealth = combatContext.Enemies[1].CurrentHealth - singleStackOnEnemyTwo;
             int enemytwo_twoturnofpoison_expectedhealth = enemytwo_oneturnofpoison_expectedhealth; // Expected that the last stack falls off, so they aren't hurt
-            EditModeTestCommon.ApplyStatusEffectStacks(poisonStatus.Id, combatContext, combatContext.Enemies[1], singleStackOnEnemyTwo);
+            EditModeTestCommon.ApplyStatusEffectStacks(poisonStatus.Id, campaignContext, combatContext, combatContext.Enemies[1], singleStackOnEnemyTwo);
 
             // End the player's turn, making it go to the enemy. The controller will immediately make it the player's turn again.
             combatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.EnemyTurn);

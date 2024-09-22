@@ -87,17 +87,17 @@ namespace SFDDCards.Tests.EditMode
 
             // Give the player stacks of the status
             const int numberOfStacksToGivePlayer = 10;
-            EditModeTestCommon.ApplyStatusEffectStacks(statusImport.Id, combatContext, combatContext.CombatPlayer, numberOfStacksToGivePlayer);
+            EditModeTestCommon.ApplyStatusEffectStacks(statusImport.Id, campaignContext, combatContext, combatContext.CombatPlayer, numberOfStacksToGivePlayer);
             TestVariableInCombatContext(selfCountDerivedCard, selfCountVariable, numberOfStacksToGivePlayer, combatContext, combatContext.CombatPlayer, combatContext.Enemies[0]);
 
             // Give the enemy some stacks of the status, which shouldn't affect the evaluation of the token
             const int numberOfStacksToGiveOpponent = 8;
-            EditModeTestCommon.ApplyStatusEffectStacks(statusImport.Id, combatContext, combatContext.Enemies[0], numberOfStacksToGiveOpponent);
+            EditModeTestCommon.ApplyStatusEffectStacks(statusImport.Id, campaignContext, combatContext, combatContext.Enemies[0], numberOfStacksToGiveOpponent);
             TestVariableInCombatContext(selfCountDerivedCard, selfCountVariable, numberOfStacksToGivePlayer, combatContext, combatContext.CombatPlayer, combatContext.Enemies[0]);
 
             // Give the player some more stacks and make sure that updates
             const int numberOfStacksToGivePlayerNext = 18;
-            EditModeTestCommon.ApplyStatusEffectStacks(statusImport.Id, combatContext, combatContext.CombatPlayer, numberOfStacksToGivePlayerNext);
+            EditModeTestCommon.ApplyStatusEffectStacks(statusImport.Id, campaignContext, combatContext, combatContext.CombatPlayer, numberOfStacksToGivePlayerNext);
             TestVariableInCombatContext(selfCountDerivedCard, selfCountVariable, numberOfStacksToGivePlayer + numberOfStacksToGivePlayerNext, combatContext, combatContext.CombatPlayer, combatContext.Enemies[0]);
 
             // Give the player a different status effect; it shouldn't change the evaluation
@@ -108,7 +108,7 @@ namespace SFDDCards.Tests.EditMode
                 Effects = new List<EffectOnProcImport>()
             };
             StatusEffectDatabase.AddStatusEffectToDatabase(otherStatus);
-            EditModeTestCommon.ApplyStatusEffectStacks(otherStatus.Id, combatContext, combatContext.CombatPlayer, 99);
+            EditModeTestCommon.ApplyStatusEffectStacks(otherStatus.Id, campaignContext, combatContext, combatContext.CombatPlayer, 99);
             TestVariableInCombatContext(selfCountDerivedCard, selfCountVariable, numberOfStacksToGivePlayer + numberOfStacksToGivePlayerNext, combatContext, combatContext.CombatPlayer, combatContext.Enemies[0]);
         }
 

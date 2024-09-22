@@ -52,6 +52,7 @@ namespace SFDDCards.UX
             else if (slotChosen.RewardedEffect != null)
             {
                 this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignPlayer.ApplyDelta(
+                    this.CentralGameStateControllerInstance.CurrentCampaignContext,
                     null,
                     new DeltaEntry()
                     {

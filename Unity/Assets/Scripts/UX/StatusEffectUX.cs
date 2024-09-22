@@ -44,7 +44,7 @@ namespace SFDDCards.UX
             return false;
         }
 
-        public bool TryGetStatusEffect(out AppliedStatusEffect toShow)
+        public bool TryGetStatusEffect(out IStatusEffect toShow)
         {
             toShow = this.RepresentsEffect;
             return true;

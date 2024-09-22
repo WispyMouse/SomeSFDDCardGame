@@ -62,15 +62,17 @@ namespace SFDDCards.Tests.EditMode
             combatContext.PlayerCombatDeck.DealCards(combatContext.PlayerCombatDeck.CardsCurrentlyInDeck.Count);
         }
 
-        public static void ApplyStatusEffectStacks(string toApply, CombatContext combatContext, ICombatantTarget toTarget, int mod)
+        public static void ApplyStatusEffectStacks(string toApply, CampaignContext campaignContext, CombatContext combatContext, ICombatantTarget toTarget, int mod)
         {
-            toTarget.ApplyDelta(combatContext, new DeltaEntry()
-            {
-                Target = toTarget,
-                IntensityKindType = TokenEvaluatorBuilder.IntensityKind.ApplyStatusEffect,
-                Intensity = mod,
-                StatusEffect = StatusEffectDatabase.GetModel(toApply)
-            });
+            toTarget.ApplyDelta(campaignContext,
+                combatContext,
+                new DeltaEntry()
+                {
+                    Target = toTarget,
+                    IntensityKindType = TokenEvaluatorBuilder.IntensityKind.ApplyStatusEffect,
+                    Intensity = mod,
+                    StatusEffect = StatusEffectDatabase.GetModel(toApply)
+                });
 
             GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
         }

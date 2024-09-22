@@ -7,7 +7,7 @@ namespace SFDDCards.UX
     using UnityEngine.EventSystems;
     using UnityEngine.UI;
 
-    public class RewardArtifactUX : MonoBehaviour
+    public class RewardArtifactUX : MonoBehaviour, IMouseHoverListener
     {
         public StatusEffect RepresentedArtifact { get; set; }
 
@@ -40,6 +40,33 @@ namespace SFDDCards.UX
         {
             this.gameObject.SetActive(false);
             this.OnClicked.Invoke(this);
+        }
+
+        public virtual void MouseEnterStartHover()
+        {
+            MouseHoverShowerController.MouseStartHoveredEvent.Invoke(this);
+        }
+
+        public virtual void MouseExitStopHover()
+        {
+            MouseHoverShowerController.MouseEndHoveredEvent.Invoke(this);
+        }
+
+        public Transform GetTransform()
+        {
+            return this.transform;
+        }
+
+        public bool TryGetCard(out Card toShow)
+        {
+            toShow = null;
+            return false;
+        }
+
+        public bool TryGetStatusEffect(out IStatusEffect toShow)
+        {
+            toShow = this.RepresentedArtifact;
+            return true;
         }
     }
 }

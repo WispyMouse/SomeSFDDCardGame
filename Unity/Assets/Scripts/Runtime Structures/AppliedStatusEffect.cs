@@ -5,7 +5,7 @@ namespace SFDDCards
     using System.Collections.Generic;
     using UnityEngine;
 
-    public class AppliedStatusEffect : IReactionWindowReactor
+    public class AppliedStatusEffect : IReactionWindowReactor, IStatusEffect
     {
         public readonly StatusEffect BasedOnStatusEffect;
         public readonly Combatant Owner;
@@ -20,7 +20,7 @@ namespace SFDDCards
             this.Stacks = stacks;
         }
 
-        public void SetSubscriptions(CombatContext context)
+        public void SetSubscriptions(CampaignContext context)
         {
             foreach (string window in this.BasedOnStatusEffect.EffectTokens.Keys)
             {
@@ -28,7 +28,7 @@ namespace SFDDCards
             }
         }
 
-        public bool TryGetReactionEvents(CombatContext combatContext, ReactionWindowContext reactionContext, out List<GameplaySequenceEvent> events)
+        public bool TryGetReactionEvents(CampaignContext campaignContext, ReactionWindowContext reactionContext, out List<GameplaySequenceEvent> events)
         {
             events = null;
 
@@ -41,7 +41,7 @@ namespace SFDDCards
 
             foreach (AttackTokenPile tokenList in tokens)
             {
-                events.Add(new GameplaySequenceEvent(() => combatContext.StatusEffectHappeningProc(new StatusEffectHappening(this, tokenList.AttackTokens)), null));
+                events.Add(new GameplaySequenceEvent(() => campaignContext.StatusEffectHappeningProc(new StatusEffectHappening(this, tokenList.AttackTokens)), null));
             };
 
             return true;

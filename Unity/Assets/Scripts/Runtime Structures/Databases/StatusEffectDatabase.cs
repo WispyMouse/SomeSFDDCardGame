@@ -12,7 +12,7 @@ namespace SFDDCards
     {
         public static Dictionary<string, StatusEffect> EffectData { get; private set; } = new Dictionary<string, StatusEffect>();
 
-        public static void AddStatusEffectToDatabase(StatusEffectImport importData, Sprite  statusArt = null)
+        public static void AddStatusEffectToDatabase(StatusEffectImport importData, Sprite statusArt = null)
         {
             string lowerId = importData.Id.ToLower();
 
@@ -25,7 +25,7 @@ namespace SFDDCards
             EffectData.Add(importData.Id.ToLower(), new StatusEffect(importData, statusArt));
         }
 
-        public static bool TryImportStatusEffectFromFile(string filepath, out StatusEffect output, Sprite statusArt = null)
+        public static bool TryImportStatusEffectFromFile(string filepath, out StatusEffect output)
         {
             GlobalUpdateUX.LogTextEvent.Invoke($"Loading and parsing {filepath}...", GlobalUpdateUX.LogType.GameEvent);
 
@@ -35,13 +35,13 @@ namespace SFDDCards
                 StatusEffectImport importedStatusEffect = Newtonsoft.Json.JsonConvert.DeserializeObject<StatusEffectImport>(fileText);
 
                 string artLocation = $"{filepath.ToLower().Replace(".statusimport", ".png")}";
-                Sprite elementArt = null;
+                Sprite statusArt = null;
                 if (File.Exists(artLocation))
                 {
                     byte[] imageBytes = File.ReadAllBytes(artLocation);
                     Texture2D texture = new Texture2D(64, 64);
                     texture.LoadImage(imageBytes);
-                    elementArt = Sprite.Create(texture, new Rect(0, 0, 64, 64), Vector2.zero);
+                    statusArt = Sprite.Create(texture, new Rect(0, 0, 64, 64), Vector2.zero);
                 }
                 else
                 {

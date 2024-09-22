@@ -10,7 +10,7 @@ namespace SFDDCards
     using UnityEngine;
     using static SFDDCards.ImportModels.StatusEffectImport;
 
-    public class StatusEffect
+    public class StatusEffect : IStatusEffect
     {
         public readonly string Name;
         public readonly string Id;
