@@ -4,13 +4,23 @@
 	[
 		{
 			"Protocol": "ChooseX",
-			"ProtocolArgument": 1,
+			"ProtocolArgument": 2,
 			"RewardIdentities":
 			[
 				{ "IdentityKind": "Card", "RewardIdentifier": "[common]" },
 				{ "IdentityKind": "Card", "RewardIdentifier": "[common]" },
 				{ "IdentityKind": "Card", "RewardIdentifier": "[common]" }
 			]
-		}
+		},
+		{
+			"Protocol": "ChooseX",
+			"ProtocolArgument": 1,
+			"RewardIdentities":
+			[
+				{ "IdentityKind": "Artifact", "RewardIdentifier": "[common]" },
+				{ "IdentityKind": "Artifact", "RewardIdentifier": "[common]" },
+				{ "IdentityKind": "Artifact", "RewardIdentifier": "[common]" }
+			]
+		},
 	]
 }

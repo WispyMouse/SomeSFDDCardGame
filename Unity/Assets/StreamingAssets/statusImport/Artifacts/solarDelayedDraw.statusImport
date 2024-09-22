@@ -5,13 +5,14 @@
 	[
 		{
 			"Window": "OWNERENDSTURN",
-			"Script": "[SETTARGET: SELF][REQUIRESATLEASTELEMENT: 1 SUN][APPLYSTATUSEFFECTSTACKS: 1 DELAYEDDRAW]"
+			"Script": "[SETTARGET: SELF][REQUIRESATLEASTELEMENT: 1 SOLAR][APPLYSTATUSEFFECTSTACKS: 1 DELAYEDDRAW]"
 		}
 	],
 	"Tags":
 	[
 		"artifact",
-		"solar"
+		"solar",
+		"common"
 	],
 	"Persistence": "Campaign"
 }

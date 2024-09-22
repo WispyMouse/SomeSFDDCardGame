@@ -12,12 +12,12 @@ namespace SFDDCards
 
     public class StatusEffect
     {
-        public string Name;
-        public string Id;
-        public Dictionary<string, List<AttackTokenPile>> EffectTokens = new Dictionary<string, List<AttackTokenPile>>();
-        public Sprite Sprite;
-        public StatusEffectPersistence Persistence = StatusEffectPersistence.Combat;
-        public HashSet<string> Tags = new HashSet<string>();
+        public readonly string Name;
+        public readonly string Id;
+        public readonly Dictionary<string, List<AttackTokenPile>> EffectTokens = new Dictionary<string, List<AttackTokenPile>>();
+        public readonly Sprite Sprite;
+        public readonly StatusEffectPersistence Persistence = StatusEffectPersistence.Combat;
+        public readonly HashSet<string> Tags = new HashSet<string>();
 
         public StatusEffect(StatusEffectImport basedOn, Sprite sprite = null)
         {

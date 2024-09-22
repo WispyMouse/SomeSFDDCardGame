@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 5003514588344948290}
   - component: {fileID: 447420161294481121}
   - component: {fileID: 1095498638420768952}
+  - component: {fileID: 3938235194551364500}
   m_Layer: 5
   m_Name: Reward Card UX
   m_TagString: Untagged
@@ -91,6 +92,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   RenderedCard: {fileID: 7993392872517296459}
   InnerPanel: {fileID: 7023053089688134560}
+  OwnLayoutElement: {fileID: 3938235194551364500}
+--- !u!114 &3938235194551364500
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4863503043799272992}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IgnoreLayout: 0
+  m_MinWidth: 180
+  m_MinHeight: 250
+  m_PreferredWidth: -1
+  m_PreferredHeight: -1
+  m_FlexibleWidth: -1
+  m_FlexibleHeight: -1
+  m_LayoutPriority: 1
 --- !u!1001 &7544275733710259800
 PrefabInstance:
   m_ObjectHideFlags: 0

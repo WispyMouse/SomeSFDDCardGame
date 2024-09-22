@@ -1,5 +1,6 @@
 namespace SFDDCards.UX
 {
+    using SFDDCards.Evaluation.Actual;
     using System;
     using System.Collections;
     using System.Collections.Generic;
@@ -47,6 +48,19 @@ namespace SFDDCards.UX
             if (slotChosen.RewardedCard != null)
             {
                 this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignDeck.AddCardToDeck(slotChosen.RewardedCard);
+            }
+            else if (slotChosen.RewardedEffect != null)
+            {
+                this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignPlayer.ApplyDelta(
+                    null,
+                    new DeltaEntry()
+                    {
+                        Target = this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignPlayer,
+                        User = this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignPlayer,
+                        StatusEffect = slotChosen.RewardedEffect,
+                        Intensity = 1,
+                        IntensityKindType = TokenEvaluatorBuilder.IntensityKind.ApplyStatusEffect
+                    });
             }
 
             GlobalUpdateUX.UpdateUXEvent?.Invoke();

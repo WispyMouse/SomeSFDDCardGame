@@ -5,12 +5,15 @@ namespace SFDDCards.UX
     using System.Collections.Generic;
     using UnityEngine;
     using UnityEngine.EventSystems;
-
+    using UnityEngine.UI;
 
     public class RewardCardUX : DisplayedCardUX
     {
         [SerializeField]
         private GameObject InnerPanel;
+
+        [SerializeReference]
+        public LayoutElement OwnLayoutElement;
 
         public void HideCardAfterBeingPicked()
         {

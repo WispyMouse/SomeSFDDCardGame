@@ -27,7 +27,14 @@ namespace SFDDCards
 
         public static Element GetElement(string id)
         {
-            return ElementData[id.ToLower()];
+            if (ElementData.TryGetValue(id.ToLower(), out Element foundElement))
+            {
+                return foundElement;
+            }
+
+            GlobalUpdateUX.LogTextEvent.Invoke($"Failed to parse element {id}.", GlobalUpdateUX.LogType.RuntimeError);
+
+            return null;
         }
     }
 }

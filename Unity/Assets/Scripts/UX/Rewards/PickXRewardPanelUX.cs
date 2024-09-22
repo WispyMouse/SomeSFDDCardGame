@@ -18,6 +18,9 @@ namespace SFDDCards.UX
         private RewardCardUX RewardCardPF;
 
         [SerializeReference]
+        private RewardArtifactUX RewardArtifactPF;
+
+        [SerializeReference]
         private Transform RewardCardHolder;
 
         int PicksRemaining { get; set; } = 0;
@@ -44,6 +47,12 @@ namespace SFDDCards.UX
                     PickSomeRewardSlot pulledOutSlot = slot;
                     RewardCardUX thisCard = Instantiate(this.RewardCardPF, this.RewardCardHolder);
                     thisCard.SetFromCard(slot.RewardedCard, (DisplayedCardUX card) => { this.RewardSlotChosen(pulledOutSlot); });
+                }
+                else if (slot.RewardedEffect != null)
+                {
+                    PickSomeRewardSlot pulledOutSlot = slot;
+                    RewardArtifactUX rewardArtifact = Instantiate(this.RewardArtifactPF, this.RewardCardHolder);
+                    rewardArtifact.SetFromArtifact(slot.RewardedEffect, (RewardArtifactUX artifact) => { this.RewardSlotChosen(pulledOutSlot); });
                 }
             }
         }
