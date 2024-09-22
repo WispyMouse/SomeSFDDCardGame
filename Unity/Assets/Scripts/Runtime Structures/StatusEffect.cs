@@ -8,6 +8,7 @@ namespace SFDDCards
     using System.Collections.Generic;
     using System.Text;
     using UnityEngine;
+    using static SFDDCards.ImportModels.StatusEffectImport;
 
     public class StatusEffect
     {
@@ -15,12 +16,14 @@ namespace SFDDCards
         public string Id;
         public Dictionary<string, List<AttackTokenPile>> EffectTokens = new Dictionary<string, List<AttackTokenPile>>();
         public Sprite Sprite;
+        public StatusEffectPersistence Persistence = StatusEffectPersistence.Combat;
 
         public StatusEffect(StatusEffectImport basedOn, Sprite sprite = null)
         {
             this.Name = basedOn.Name;
             this.Id = basedOn.Id;
             this.Sprite = sprite;
+            this.Persistence = basedOn.Persistence;
 
             foreach (EffectOnProcImport import in basedOn.Effects)
             {

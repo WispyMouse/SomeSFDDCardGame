@@ -119,5 +119,21 @@ namespace SFDDCards
 
             return this.OnRoute.Nodes[this.CampaignRouteNodeIndex];
         }
+
+        public void ClearCombatPersistenceStatuses()
+        {
+            if (this.CampaignPlayer == null)
+            {
+                return;
+            }
+
+            foreach (AppliedStatusEffect effect in new List<AppliedStatusEffect>(this.CampaignPlayer.AppliedStatusEffects))
+            {
+                if (effect.BasedOnStatusEffect.Persistence == ImportModels.StatusEffectImport.StatusEffectPersistence.Combat)
+                {
+                    this.CampaignPlayer.AppliedStatusEffects.Remove(effect);
+                }
+            }
+        }
     }
 }

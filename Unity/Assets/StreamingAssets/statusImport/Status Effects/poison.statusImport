@@ -1,0 +1,11 @@
+{
+    "Name": "Poison",
+	"Id": "poison",
+	"Effects":
+	[
+		{
+			"Window": "OWNERENDSTURN",
+			"Script": "[SETTARGET: SELF][DAMAGE: COUNTSTACKS_POISON][CHANGESTATUSEFFECTSTACKS: -1 POISON]"
+		}
+	]
+}
