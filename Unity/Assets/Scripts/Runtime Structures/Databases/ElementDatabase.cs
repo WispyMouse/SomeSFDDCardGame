@@ -36,5 +36,10 @@ namespace SFDDCards
 
             return null;
         }
+
+        public static void ClearDatabase()
+        {
+            ElementData.Clear();
+        }
     }
 }

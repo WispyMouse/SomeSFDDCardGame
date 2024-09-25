@@ -49,8 +49,10 @@ namespace SFDDCards.Tests.EditMode
             new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][REMOVESTATUSEFFECTSTACKS: 1 {nameof(DebugStatus)}]", $"Remove 1 stack of {nameof(DebugStatus)} from foe."),
             new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: SELF][REMOVESTATUSEFFECTSTACKS: 2 {nameof(DebugStatus)}]", $"Remove 2 stacks of {nameof(DebugStatus)} from self."),
 
-
             new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][DAMAGE: COUNTSTACKS_{nameof(DebugStatus)}]", $"1 x {nameof(DebugStatus)} damage."),
+
+            new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][REQUIRESATLEASTELEMENT: 2 DEBUGELEMENTONEID][DAMAGE: 3]", $"2 {DebugElementOneIconText}DEBUGELEMENTONENAME: 3 damage."),
+            new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][REQUIRESATLEASTELEMENT: 2 DEBUGELEMENTONEID][REQUIRESATLEASTELEMENT: 5 DEBUGELEMENTTWOID][DAMAGE: 5][SETTARGET: SELF][HEAL: 7]", $"2 {DebugElementOneIconText}DEBUGELEMENTONENAME, 5 {DebugElementTwoIconText}DEBUGELEMENTTWONAME: 5 damage. Heal self for 7.")
         };
 
         [Test]

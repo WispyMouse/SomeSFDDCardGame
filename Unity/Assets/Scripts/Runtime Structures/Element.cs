@@ -22,5 +22,15 @@ namespace SFDDCards
 
             return this.Name;
         }
+
+        public string GetNameAndMaybeIcon()
+        {
+            if (this.SpriteIndex.HasValue)
+            {
+                return $"<sprite index={this.SpriteIndex.Value}>{this.Name}";
+            }
+
+            return this.Name;
+        }
     }
 }

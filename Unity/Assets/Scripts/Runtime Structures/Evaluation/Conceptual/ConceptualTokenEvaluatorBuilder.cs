@@ -81,13 +81,12 @@ namespace SFDDCards.Evaluation.Conceptual
             }
 
             StringBuilder compositeRequirements = new StringBuilder();
-            compositeRequirements.Append("Requires: ");
             string startingComma = "";
             bool nonzeroFound = false;
 
             foreach (Element element in this.ElementRequirements.Keys)
             {
-                compositeRequirements.Append($"{startingComma}{this.ElementRequirements[element].DescribeEvaluation()} {element.GetNameOrIcon()}");
+                compositeRequirements.Append($"{startingComma}{this.ElementRequirements[element].DescribeEvaluation()} {element.GetNameAndMaybeIcon()}");
                 startingComma = ", ";
                 nonzeroFound = true;
             }
@@ -97,7 +96,9 @@ namespace SFDDCards.Evaluation.Conceptual
                 return string.Empty;
             }
 
-            return compositeRequirements.ToString();
+            compositeRequirements.Append(":");
+
+            return compositeRequirements.ToString().Trim();
         }
 
         public ConceptualDelta GetConceptualDelta()

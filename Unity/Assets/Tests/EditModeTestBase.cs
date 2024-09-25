@@ -13,6 +13,11 @@ namespace SFDDCards.Tests.EditMode
     public abstract class EditModeTestBase
     {
         protected StatusEffect DebugStatus;
+        protected Element DebugElementOne;
+        protected Element DebugElementTwo;
+
+        protected const string DebugElementOneIconText = "<sprite index=0>";
+        protected const string DebugElementTwoIconText = "<sprite index=1>";
 
         [SetUp]
         public void SetUp()
@@ -25,6 +30,20 @@ namespace SFDDCards.Tests.EditMode
             };
             StatusEffectDatabase.AddStatusEffectToDatabase(debugStatusEffect);
             DebugStatus = StatusEffectDatabase.GetModel(nameof(DebugStatus));
+
+            ElementImport debugOneElementImport = new ElementImport()
+            {
+                Id = $"{nameof(DebugElementOne)}id".ToUpper(),
+                Name = $"{nameof(DebugElementOne)}name".ToUpper()
+            };
+            ElementDatabase.AddElement(debugOneElementImport, null, null, 0);
+
+            ElementImport debugTwoElementImport = new ElementImport()
+            {
+                Id = $"{nameof(DebugElementTwo)}id".ToUpper(),
+                Name = $"{nameof(DebugElementTwo)}name".ToUpper()
+            };
+            ElementDatabase.AddElement(debugTwoElementImport, null, null, 1);
         }
 
         [TearDown]
@@ -32,6 +51,7 @@ namespace SFDDCards.Tests.EditMode
         {
             GlobalSequenceEventHolder.StopAllSequences();
             EnemyDatabase.ClearDatabase();
+            ElementDatabase.ClearDatabase();
             StatusEffectDatabase.ClearDatabase();
         }
     }

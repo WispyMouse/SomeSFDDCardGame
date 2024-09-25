@@ -122,12 +122,12 @@ namespace SFDDCards
                         {
                             // If there are no requirements, but the previous builder had requirements, notate that
                             // Don't do that if this is the first thing, or the previous requirements were also empty
-                            effectText.AppendLine("(no requirements):");
+                            effectText.Append("(no requirements):");
                         }
                     }
                     else if (!string.IsNullOrEmpty(currentRequirements))
                     {
-                        effectText.AppendLine(currentRequirements);
+                        effectText.Append(currentRequirements.Trim());
                     }
                 }
 
@@ -137,7 +137,14 @@ namespace SFDDCards
 
                 if (!string.IsNullOrEmpty(deltaText))
                 {
-                    effectText.AppendLine(deltaText);
+                    string leadingSpace = "";
+
+                    if (effectText.Length > 0)
+                    {
+                        leadingSpace = " ";
+                    }
+
+                    effectText.Append($"{leadingSpace}{deltaText.Trim()}");
                 }
 
                 previousBuilder = builder;
