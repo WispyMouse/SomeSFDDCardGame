@@ -15,11 +15,11 @@ namespace SFDDCards
             this.AffectedTargets = foes;
         }
 
-        public void ApplyDelta(CombatContext combatContext, DeltaEntry deltaEntry)
+        public void ApplyDelta(CampaignContext campaignContext, CombatContext combatContext, DeltaEntry deltaEntry)
         {
             foreach (ICombatantTarget target in new List<ICombatantTarget>(this.AffectedTargets))
             {
-                target.ApplyDelta(combatContext, deltaEntry);
+                target.ApplyDelta(campaignContext, combatContext, deltaEntry);
             }
         }
 

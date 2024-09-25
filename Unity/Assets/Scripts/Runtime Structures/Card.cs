@@ -2,26 +2,39 @@ namespace SFDDCards
 {
     using SFDDCards.ImportModels;
     using SFDDCards.ScriptingTokens;
+    using System;
     using System.Collections;
     using System.Collections.Generic;
     using UnityEngine;
-    public class Card : IAttackTokenHolder
+    public class Card : IAttackTokenHolder, IEffectOwner
     {
+        public enum KnownRarities
+        {
+            Unknown,
+            Starter,
+            Common,
+            Uncommon,
+            Rare
+        }
+
         public string Id;
         public string Name;
         public Sprite Sprite;
 
         public HashSet<string> Tags;
+        public KnownRarities Rarity;
+        
         public Dictionary<Element, int> BaseElementGain { get; set; } = new Dictionary<Element, int>();
 
         public List<IScriptingToken> AttackTokens => this.AttackTokenPile.AttackTokens;
         public AttackTokenPile AttackTokenPile { get; set; }
 
+        public IEffectOwner Owner => this;
+
         public Card(CardImport basedOn)
         {
             this.Id = basedOn.Id.ToLower();
             this.Name = basedOn.Name;
-            this.AttackTokenPile = ScriptingTokens.ScriptingTokenDatabase.GetAllTokens(basedOn.EffectScript);
 
             HashSet<string> lowerCaseTags = new HashSet<string>();
             foreach (string tag in basedOn.Tags)
@@ -36,6 +49,21 @@ namespace SFDDCards
 
             this.Tags = lowerCaseTags;
             this.Sprite = basedOn.Sprite;
+
+            this.AttackTokenPile = ScriptingTokens.ScriptingTokenDatabase.GetAllTokens(basedOn.EffectScript, this);
+
+            foreach (KnownRarities knownRarity in Enum.GetValues(typeof(KnownRarities)))
+            {
+                string enumName = Enum.GetName(typeof(KnownRarities), knownRarity).ToLower();
+                foreach (string tag in this.Tags)
+                {
+                    if (enumName == tag.ToLower())
+                    {
+                        this.Rarity = knownRarity;
+                        break;
+                    }
+                }
+            }
         }
 
         public EffectDescription GetDescription()

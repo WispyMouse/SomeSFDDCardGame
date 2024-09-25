@@ -154,9 +154,10 @@ namespace SFDDCards.UX
             {
                 this.GoNextRoomButton.SetActive(true);
 
-                if (wasPreviousCampaignState == CampaignContext.GameplayCampaignState.InCombat)
+                if (wasPreviousCampaignState == CampaignContext.GameplayCampaignState.InCombat 
+                    && this.CentralGameStateControllerInstance.CurrentCampaignContext.PendingRewards != null)
                 {
-                    this.PresentAwards();
+                    this.PresentAwards(this.CentralGameStateControllerInstance.CurrentCampaignContext.PendingRewards);
                 }
             }
             else
@@ -329,10 +330,10 @@ namespace SFDDCards.UX
             this.StartCoroutine(AnimateEnemyTurnsInternal(continuationAction));
         }
 
-        public void ShowRewardsPanel(params Card[] cardsToReward)
+        public void ShowRewardsPanel(Reward cardsToReward)
         {
             this.RewardsPanelUXInstance.gameObject.SetActive(true);
-            this.RewardsPanelUXInstance.SetRewardCards(cardsToReward);
+            this.RewardsPanelUXInstance.SetReward(cardsToReward);
             this.UpdateUX();
         }
 
@@ -402,7 +403,9 @@ namespace SFDDCards.UX
             }
 
             this.LifeValue.text = this.CentralGameStateControllerInstance?.CurrentCampaignContext?.CampaignPlayer.CurrentHealth.ToString();
-            this.PlayerStatusEffectUXHolderInstance.SetStatusEffects(this.CentralGameStateControllerInstance?.CurrentCampaignContext?.CampaignPlayer.AppliedStatusEffects);
+            this.PlayerStatusEffectUXHolderInstance.SetStatusEffects(
+                this.CentralGameStateControllerInstance?.CurrentCampaignContext?.CampaignPlayer.AppliedStatusEffects,
+                this.StatusEffectClicked);
         }
 
         private void SetElementValueLabel()
@@ -575,10 +578,9 @@ namespace SFDDCards.UX
             this.CombatTurnCounterInstance.EndPlayerTurn();
         }
 
-        public void PresentAwards()
+        public void PresentAwards(Reward toPresent)
         {
-            List<Card> cardsToAward = CardDatabase.GetRandomCards(this.CentralGameStateControllerInstance.CurrentRunConfiguration.CardsToAwardOnVictory);
-            this.ShowRewardsPanel(cardsToAward.ToArray());
+            this.ShowRewardsPanel(toPresent);
         }
 
         void PresentNextRouteChoice()
@@ -637,6 +639,17 @@ namespace SFDDCards.UX
                 if (!this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.Enemies.Contains(curEnemy))
                 {
                     this.RemoveEnemy(curEnemy);
+                }
+            }
+        }
+
+        public void StatusEffectClicked(AppliedStatusEffect representingEffect)
+        {
+            if (representingEffect.BasedOnStatusEffect.EffectTokens.ContainsKey(KnownReactionWindows.Activated))
+            {
+                if (representingEffect.TryGetReactionEvents(this.CentralGameStateControllerInstance.CurrentCampaignContext, new ReactionWindowContext(KnownReactionWindows.Activated, this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignPlayer), out List<GameplaySequenceEvent> events))
+                {
+                    GlobalSequenceEventHolder.PushSequencesToTop(events.ToArray());
                 }
             }
         }

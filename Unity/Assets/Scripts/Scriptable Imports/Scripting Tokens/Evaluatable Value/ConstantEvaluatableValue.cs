@@ -42,5 +42,16 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
             output = null;
             return false;
         }
+
+        public string GetScriptingTokenText()
+        {
+            if (ConstantValue is int intvalue)
+            {
+                return intvalue.ToString();
+            }
+
+            GlobalUpdateUX.LogTextEvent.Invoke($"Asked to re-parse a constant value other than an int.", GlobalUpdateUX.LogType.RuntimeError);
+            return string.Empty;
+        }
     }
 }

@@ -39,7 +39,7 @@ namespace SFDDCards
                         nextDescriptor = DescribeConceptualHeal(deltaEntry);
                         break;
                     case TokenEvaluatorBuilder.IntensityKind.NumberOfCards:
-                        nextDescriptor = DescribeConceptualDamage(deltaEntry);
+                        nextDescriptor = DescribeConceptualCards(deltaEntry);
                         break;
                     case TokenEvaluatorBuilder.IntensityKind.ApplyStatusEffect:
                         nextDescriptor = DescribeConceptualApplyStatusEffect(deltaEntry);
@@ -67,7 +67,7 @@ namespace SFDDCards
         /// This effect is written as thought it hasn't happened yet.
         /// This can be used to show the value of effects, such as Enemy Intents.
         /// </summary>
-        public static string DescribeRealizedEffect(IAttackTokenHolder attackHolder, CampaignContext campaignContext, ICombatantTarget user, ICombatantTarget target)
+        public static string DescribeRealizedEffect(IAttackTokenHolder attackHolder, CampaignContext campaignContext, IEffectOwner owner, ICombatantTarget user, ICombatantTarget target)
         {
             StringBuilder entireEffectText = new StringBuilder();
             string leadingSpace = "";
@@ -75,7 +75,7 @@ namespace SFDDCards
             List<ConceptualTokenEvaluatorBuilder> conceptBuilders = ScriptTokenEvaluator.CalculateConceptualBuildersFromTokenEvaluation(attackHolder);
             foreach (ConceptualTokenEvaluatorBuilder conceptBuilder in conceptBuilders)
             {
-                TokenEvaluatorBuilder realizedBuilder = ScriptTokenEvaluator.RealizeConceptualBuilder(conceptBuilder, campaignContext, user, target);
+                TokenEvaluatorBuilder realizedBuilder = ScriptTokenEvaluator.RealizeConceptualBuilder(conceptBuilder, campaignContext, owner, user, target);
                 string descriptor = DescribeRealizedEffect(realizedBuilder);
 
                 if (!string.IsNullOrEmpty(descriptor))
@@ -387,14 +387,28 @@ namespace SFDDCards
                 }
             }
 
+            // If this stack change is targeting the Owner of this entire effect,
+            // and it's being applied to the target that holds this status,
+            // don't mention the name of the stacks
+            string stacksTextWithMaybeName = $"{stackstext} of {deltaEntry.StatusEffect.Name}";
+            string toTargetText = $"to {deltaEntry.ConceptualTarget.DescribeEvaluation().ToLower()}";
+            if (deltaEntry.MadeFromBuilder.Owner is StatusEffect ownerStatus 
+                && deltaEntry.StatusEffect != null 
+                && deltaEntry.StatusEffect.Equals(ownerStatus)
+                && deltaEntry.ConceptualTarget is SelfTargetEvaluatableValue)
+            {
+                stacksTextWithMaybeName = $"{stackstext}";
+                toTargetText = string.Empty;
+            }
+
             return ComposeDescriptor(
-                $"to {deltaEntry.ConceptualTarget.DescribeEvaluation().ToLower()}",
+                toTargetText,
                 deltaEntry.ConceptualTarget,
                 deltaEntry.OriginalConceptualTarget,
                 deltaEntry.PreviousConceptualTarget,
                 deltaEntry.ConceptualIntensity,
                 "Apply",
-                $"{stackstext} of {deltaEntry.StatusEffect.Name}",
+                stacksTextWithMaybeName,
                 String.Empty,
                 ComposeValueTargetLocation.BetweenMiddleAndSuffix,
                 ComposeValueTargetLocation.BetweenPrefixAndMiddle,
@@ -404,20 +418,34 @@ namespace SFDDCards
 
         public static string DescribeRealizedApplyStatusEffect(TokenEvaluatorBuilder builder)
         {
-            string stacktext = "stack";
+            string stackstext = "stack";
             if (builder.Intensity != 1)
             {
-                stacktext = "stacks";
+                stackstext = "stacks";
+            }
+
+            // If this stack change is targeting the Owner of this entire effect,
+            // and it's being applied to the target that holds this status,
+            // don't mention the name of the stacks
+            string stacksTextWithMaybeName = $"{stackstext} of {builder.StatusEffect.Name}";
+            string toTargetText = $"to {builder.Target.Name}";
+            if (builder.Owner is StatusEffect ownerStatus
+                && builder.StatusEffect != null
+                && builder.StatusEffect.Equals(ownerStatus)
+                && builder.Target == builder.User)
+            {
+                stacksTextWithMaybeName = $"{stackstext}";
+                toTargetText = string.Empty;
             }
 
             return ComposeDescriptor<ICombatantTarget>(
-                $"to {builder.Target.Name}",
+                toTargetText,
                 builder.Target,
                 builder.OriginalTarget,
                 builder?.PreviousTokenBuilder?.Target,
                 builder.Intensity.ToString(),
                 "Apply",
-                $"{stacktext} of {builder.StatusEffect.Name}",
+                stacksTextWithMaybeName,
                 builder.GetIntensityDescriptionIfNotConstant(),
                 ComposeValueTargetLocation.BetweenMiddleAndSuffix,
                 ComposeValueTargetLocation.BetweenPrefixAndMiddle,
@@ -467,14 +495,28 @@ namespace SFDDCards
                 }
             }
 
+            // If this stack change is targeting the Owner of this entire effect,
+            // and it's being applied to the target that holds this status,
+            // don't mention the name of the stacks
+            string stacksTextWithMaybeName = $"{stackstext} of {deltaEntry.StatusEffect.Name}";
+            string toTargetText = $"from {deltaEntry.ConceptualTarget.DescribeEvaluation().ToLower()}";
+            if (deltaEntry.MadeFromBuilder.Owner is StatusEffect ownerStatus
+                && deltaEntry.StatusEffect != null
+                && deltaEntry.StatusEffect.Equals(ownerStatus)
+                && deltaEntry.ConceptualTarget is SelfTargetEvaluatableValue)
+            {
+                stacksTextWithMaybeName = $"{stackstext}";
+                toTargetText = string.Empty;
+            }
+
             return ComposeDescriptor(
-                $"from {deltaEntry.ConceptualTarget.DescribeEvaluation().ToLower()}",
+                toTargetText,
                 deltaEntry.ConceptualTarget,
                 deltaEntry.OriginalConceptualTarget,
                 deltaEntry.PreviousConceptualTarget,
                 deltaEntry.ConceptualIntensity,
                 "Remove",
-                $"{stackstext} of {deltaEntry.StatusEffect.Name}",
+                stacksTextWithMaybeName,
                 String.Empty,
                 ComposeValueTargetLocation.BetweenMiddleAndSuffix,
                 ComposeValueTargetLocation.BetweenPrefixAndMiddle,
@@ -484,20 +526,34 @@ namespace SFDDCards
 
         public static string DescribeRealizedRemoveStatusEffect(TokenEvaluatorBuilder builder)
         {
-            string stacktext = "stack";
+            string stackstext = "stack";
             if (builder.Intensity != 1)
             {
-                stacktext = "stacks";
+                stackstext = "stacks";
+            }
+
+            // If this stack change is targeting the Owner of this entire effect,
+            // and it's being applied to the target that holds this status,
+            // don't mention the name of the stacks
+            string stacksTextWithMaybeName = $"{stackstext} of {builder.StatusEffect.Name}";
+            string toTargetText = $"from {builder.Target.Name}";
+            if (builder.Owner is StatusEffect ownerStatus
+                && builder.StatusEffect != null
+                && builder.StatusEffect.Equals(ownerStatus)
+                && builder.Target == builder.User)
+            {
+                stacksTextWithMaybeName = $"{stackstext}";
+                toTargetText = string.Empty;
             }
 
             return ComposeDescriptor<ICombatantTarget>(
-                $"from {builder.Target.Name}",
+                toTargetText,
                 builder.Target,
                 builder.OriginalTarget,
                 builder?.PreviousTokenBuilder?.Target,
                 builder.Intensity.ToString(),
                 "Remove",
-                $"{stacktext} of {builder.StatusEffect.Name}",
+                stacksTextWithMaybeName,
                 builder.GetIntensityDescriptionIfNotConstant(),
                 ComposeValueTargetLocation.BetweenMiddleAndSuffix,
                 ComposeValueTargetLocation.BetweenPrefixAndMiddle,

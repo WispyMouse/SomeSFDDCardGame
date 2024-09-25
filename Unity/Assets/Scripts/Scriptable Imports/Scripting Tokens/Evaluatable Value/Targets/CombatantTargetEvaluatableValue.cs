@@ -14,6 +14,8 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
             return this == other;
         }
 
+        public abstract string GetScriptingTokenText();
+
         public abstract bool TryEvaluateValue(CampaignContext campaignContext, TokenEvaluatorBuilder currentBuilder, out ICombatantTarget evaluatedValue);
     }
 }

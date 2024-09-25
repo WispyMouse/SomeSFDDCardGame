@@ -11,8 +11,11 @@ namespace SFDDCards.ScriptingTokens
 
         public Dictionary<Element, int> BaseElementGain { get; private set; } = new Dictionary<Element, int>();
 
-        public AttackTokenPile(List<IScriptingToken> attackTokens, Dictionary<Element, int> baseElementGain = null)
+        public IEffectOwner Owner { get; }
+
+        public AttackTokenPile(IEffectOwner owner, List<IScriptingToken> attackTokens, Dictionary<Element, int> baseElementGain = null)
         {
+            this.Owner = owner;
             this.AttackTokens = attackTokens;
             this.BaseElementGain = baseElementGain == null ? new Dictionary<Element, int>() : baseElementGain;
         }

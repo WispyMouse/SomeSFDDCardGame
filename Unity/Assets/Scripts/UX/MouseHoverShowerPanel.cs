@@ -41,9 +41,9 @@ namespace SFDDCards.UX
                 this.HideCard();
             }
 
-            if (listener.TryGetStatusEffect(out AppliedStatusEffect effectToShow))
+            if (listener.TryGetStatusEffect(out IStatusEffect effectToShow))
             {
-                this.SetPopupPanels(effectToShow.DescribeStatusEffect(), false);
+                this.SetPopupPanels(effectToShow.DescribeStatusEffect(), listener.ShouldShowBase);
             }
 
             foreach (Graphic curGraphic in this.GetComponentsInChildren<Graphic>(true))
@@ -110,7 +110,10 @@ namespace SFDDCards.UX
 
             foreach (EffectDescription innerDescription in description.GetInnerDescriptions())
             {
-                descriptions.Add(innerDescription);
+                if (!innerDescription.Equals(description))
+                {
+                    descriptions.Add(innerDescription);
+                }
             }
 
             foreach (EffectDescription currentDescription in descriptions)

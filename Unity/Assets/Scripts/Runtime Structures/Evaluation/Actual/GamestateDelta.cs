@@ -29,7 +29,7 @@ namespace SFDDCards.Evaluation.Actual
                     campaignContext.CurrentCombatContext.ApplyElementResourceChange(entry.MadeFromBuilder, change);
                 }
                 
-                entry.Target?.ApplyDelta(campaignContext.CurrentCombatContext, entry);
+                entry.Target?.ApplyDelta(campaignContext, campaignContext.CurrentCombatContext, entry);
 
                 foreach (Action<GamestateDelta> actionToExecute in entry.ActionsToExecute)
                 {

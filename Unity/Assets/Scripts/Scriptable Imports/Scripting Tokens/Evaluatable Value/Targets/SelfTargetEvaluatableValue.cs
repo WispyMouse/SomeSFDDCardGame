@@ -9,6 +9,11 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
             return "Self";
         }
 
+        public override string GetScriptingTokenText()
+        {
+            return "self";
+        }
+
         public override bool TryEvaluateValue(CampaignContext campaignContext, TokenEvaluatorBuilder currentBuilder, out ICombatantTarget evaluatedValue)
         {
             evaluatedValue = currentBuilder.User;

@@ -9,6 +9,11 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
             return "Original Target";
         }
 
+        public override string GetScriptingTokenText()
+        {
+            return "original";
+        }
+
         public override bool TryEvaluateValue(CampaignContext campaignContext, TokenEvaluatorBuilder currentBuilder, out ICombatantTarget evaluatedValue)
         {
             evaluatedValue = currentBuilder.OriginalTarget;

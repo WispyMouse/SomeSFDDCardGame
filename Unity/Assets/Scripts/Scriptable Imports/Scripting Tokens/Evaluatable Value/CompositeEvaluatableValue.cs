@@ -45,5 +45,15 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
 
             component = this;
         }
+
+        public string GetScriptingTokenText()
+        {
+            StringBuilder scriptingTokenText = new StringBuilder();
+            foreach (IEvaluatableValue<T> component in this.CompositeComponents)
+            {
+                scriptingTokenText.Append(component.GetScriptingTokenText());
+            }
+            return scriptingTokenText.ToString();
+        }
     }
 }

@@ -225,10 +225,27 @@ namespace SFDDCards.UX
 
         IEnumerator LoadRoutes()
         {
-            string routeImportPath = Application.streamingAssetsPath + "/routeImport";
-            string[] routeImportScriptNames = Directory.GetFiles(routeImportPath, "*.routeImport", SearchOption.AllDirectories);
+            string rewardsImportPath = Application.streamingAssetsPath + "/rewardImport";
+            string[] rewardsImportScriptNames = Directory.GetFiles(rewardsImportPath, "*.rewardImport", SearchOption.AllDirectories);
 
-            GlobalUpdateUX.LogTextEvent.Invoke($"Searched {routeImportPath}; Found {routeImportScriptNames.Length} scripts", GlobalUpdateUX.LogType.Info);
+            GlobalUpdateUX.LogTextEvent.Invoke($"Searched {rewardsImportPath}; Found {rewardsImportScriptNames.Length} scripts", GlobalUpdateUX.LogType.Info);
+
+            foreach (string rewardImportScriptName in rewardsImportScriptNames)
+            {
+                GlobalUpdateUX.LogTextEvent.Invoke($"Loading and parsing {rewardImportScriptName}...", GlobalUpdateUX.LogType.Info);
+
+                try
+                {
+                    string fileText = File.ReadAllText(rewardImportScriptName);
+                    RewardImport importedReward = Newtonsoft.Json.JsonConvert.DeserializeObject<RewardImport>(fileText);
+                    RewardDatabase.AddRewardToDatabase(importedReward);
+                }
+                catch (Exception e)
+                {
+                    GlobalUpdateUX.LogTextEvent.Invoke($"Failed to parse! Debug log has exception details.", GlobalUpdateUX.LogType.Info);
+                    Debug.LogException(e);
+                }
+            }
 
             string encounterImportPath = Application.streamingAssetsPath + "/encounterImport";
             string[] encounterImportNames = Directory.GetFiles(encounterImportPath, "*.encounterImport", SearchOption.AllDirectories);
@@ -251,6 +268,11 @@ namespace SFDDCards.UX
                     Debug.LogException(e);
                 }
             }
+
+            string routeImportPath = Application.streamingAssetsPath + "/routeImport";
+            string[] routeImportScriptNames = Directory.GetFiles(routeImportPath, "*.routeImport", SearchOption.AllDirectories);
+
+            GlobalUpdateUX.LogTextEvent.Invoke($"Searched {routeImportPath}; Found {routeImportScriptNames.Length} scripts", GlobalUpdateUX.LogType.Info);
 
             foreach (string routeImportScriptName in routeImportScriptNames)
             {

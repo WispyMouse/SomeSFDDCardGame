@@ -21,6 +21,7 @@ namespace SFDDCards.Evaluation.Conceptual
 
         public CombatantTargetEvaluatableValue Target;
         public CombatantTargetEvaluatableValue OriginalTarget;
+        public IEffectOwner Owner;
 
         public IEvaluatableValue<int> Intensity;
         public IntensityKind IntensityKindType;
@@ -40,6 +41,7 @@ namespace SFDDCards.Evaluation.Conceptual
                 this.ElementRequirements = new Dictionary<Element, IEvaluatableValue<int>>(previousBuilder.ElementRequirements);
                 this.OriginalTarget = previousBuilder.OriginalTarget;
                 this.Target = previousBuilder.Target;
+                this.Owner = previousBuilder.Owner;
             }
         }
 
@@ -79,13 +81,12 @@ namespace SFDDCards.Evaluation.Conceptual
             }
 
             StringBuilder compositeRequirements = new StringBuilder();
-            compositeRequirements.Append("Requires: ");
             string startingComma = "";
             bool nonzeroFound = false;
 
             foreach (Element element in this.ElementRequirements.Keys)
             {
-                compositeRequirements.Append($"{startingComma}{this.ElementRequirements[element].DescribeEvaluation()} {element.GetNameOrIcon()}");
+                compositeRequirements.Append($"{startingComma}{this.ElementRequirements[element].DescribeEvaluation()} {element.GetNameAndMaybeIcon()}");
                 startingComma = ", ";
                 nonzeroFound = true;
             }
@@ -95,7 +96,9 @@ namespace SFDDCards.Evaluation.Conceptual
                 return string.Empty;
             }
 
-            return compositeRequirements.ToString();
+            compositeRequirements.Append(":");
+
+            return compositeRequirements.ToString().Trim();
         }
 
         public ConceptualDelta GetConceptualDelta()

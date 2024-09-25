@@ -1,9 +1,10 @@
 namespace SFDDCards
 {
+    using System;
     using System.Collections.Generic;
     using System.Text;
 
-    public class EffectDescription
+    public class EffectDescription : IEquatable<EffectDescription>
     {
         public string DescribingLabel { get; set; } = string.Empty;
         public List<string> DescriptionText { get; set; } = new List<string>();
@@ -17,11 +18,34 @@ namespace SFDDCards
             List<string> descriptionTexts = this.DescriptionText;
             for (int ii = 0; ii < descriptionTexts.Count; ii++)
             {
-                descriptionBuilder.AppendLine($"{leadingNewline}{descriptionTexts[ii]}");
+                descriptionBuilder.AppendLine($"{leadingNewline}{descriptionTexts[ii].Trim()}");
                 leadingNewline = "\n";
             }
 
-            return descriptionBuilder.ToString();
+            return descriptionBuilder.ToString().Trim();
+        }
+
+        public bool Equals(EffectDescription other)
+        {
+            if (other == null)
+            {
+                return false;
+            }
+
+            if (other.DescriptionText.Count != this.DescriptionText.Count)
+            {
+                return false;
+            }
+
+            for (int ii = 0; ii < other.DescriptionText.Count; ii++)
+            {
+                if (this.DescriptionText[ii] != other.DescriptionText[ii])
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         public List<EffectDescription> GetInnerDescriptions()

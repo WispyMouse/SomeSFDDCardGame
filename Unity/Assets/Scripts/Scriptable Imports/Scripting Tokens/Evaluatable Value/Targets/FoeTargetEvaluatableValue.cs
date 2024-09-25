@@ -9,6 +9,11 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
             return "Foe";
         }
 
+        public override string GetScriptingTokenText()
+        {
+            return "foe";
+        }
+
         public override bool TryEvaluateValue(CampaignContext campaignContext, TokenEvaluatorBuilder currentBuilder, out ICombatantTarget evaluatedValue)
         {
             if (TryGetFoe(campaignContext, currentBuilder, currentBuilder.User, out evaluatedValue))

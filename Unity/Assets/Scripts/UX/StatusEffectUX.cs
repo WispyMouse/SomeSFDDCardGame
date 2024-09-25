@@ -1,5 +1,6 @@
 namespace SFDDCards.UX
 {
+    using System;
     using System.Collections;
     using System.Collections.Generic;
     using UnityEngine;
@@ -15,15 +16,20 @@ namespace SFDDCards.UX
         [SerializeReference]
         private Image Renderer;
 
+        private Action<AppliedStatusEffect> OnStatusEffectPressed;
+
+        public virtual bool ShouldShowBase { get; } = true;
+
         public Transform GetTransform()
         {
             return this.GetComponent<RectTransform>();
         }
 
-        public void SetFromEffect(AppliedStatusEffect toSet)
+        public void SetFromEffect(AppliedStatusEffect toSet, Action<AppliedStatusEffect> onClickEvent = null)
         {
             this.RepresentsEffect = toSet;
             this.Renderer.sprite = toSet.BasedOnStatusEffect.Sprite;
+            this.OnStatusEffectPressed = onClickEvent;
         }
 
         public void SetStacks(int toStack)
@@ -44,7 +50,7 @@ namespace SFDDCards.UX
             return false;
         }
 
-        public bool TryGetStatusEffect(out AppliedStatusEffect toShow)
+        public bool TryGetStatusEffect(out IStatusEffect toShow)
         {
             toShow = this.RepresentsEffect;
             return true;
@@ -63,6 +69,11 @@ namespace SFDDCards.UX
         private void OnDisable()
         {
             MouseHoverShowerController.MouseEndHoveredEvent.Invoke(this);
+        }
+
+        public void Clicked()
+        {
+            this.OnStatusEffectPressed?.Invoke(this.RepresentsEffect);
         }
     }
 }

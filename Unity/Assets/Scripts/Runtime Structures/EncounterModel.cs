@@ -19,6 +19,8 @@ namespace SFDDCards
         public bool IsShopEncounter;
         public List<string> Arguments { get; set; } = new List<string>();
 
+        public RewardImport RewardsModel;
+
 
         public EncounterModel(EncounterImport basedOn)
         {
@@ -41,6 +43,15 @@ namespace SFDDCards
             this.EnemiesInEncounterById = lowerCaseEnemyIds;
             this.IsShopEncounter = basedOn.IsShopEncounter;
             this.Arguments = basedOn.Arguments;
+
+            if (!string.IsNullOrEmpty(basedOn.StandardRewardId) && RewardDatabase.TryGetReward(basedOn.StandardRewardId, out RewardImport model))
+            {
+                this.RewardsModel = model;
+            }
+            else
+            {
+                this.RewardsModel = basedOn.CustomReward;
+            }
         }
 
         public List<EnemyModel> GetEnemyModels()

@@ -8,16 +8,18 @@ namespace SFDDCards
     using UnityEngine;
     using UnityEngine.EventSystems;
 
-    public class EnemyAttack : IAttackTokenHolder
+    public class EnemyAttack : IAttackTokenHolder, IEffectOwner
     {
         public List<IScriptingToken> AttackTokens => this.AttackTokenPile.AttackTokens;
         public AttackTokenPile AttackTokenPile { get; set; }
         public ICombatantTarget PrecalculatedTarget { get; set; }
         public Dictionary<Element, int> BaseElementGain => new Dictionary<Element, int>();
 
+        public IEffectOwner Owner => this;
+
         public EnemyAttack(EnemyAttackImport basedOn)
         {
-            this.AttackTokenPile = ScriptingTokens.ScriptingTokenDatabase.GetAllTokens(basedOn.AttackScript);
+            this.AttackTokenPile = ScriptingTokens.ScriptingTokenDatabase.GetAllTokens(basedOn.AttackScript, this);
         }
     }
 }

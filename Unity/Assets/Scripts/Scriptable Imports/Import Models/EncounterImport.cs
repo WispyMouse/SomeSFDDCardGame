@@ -13,5 +13,8 @@ namespace SFDDCards.ImportModels
         public bool IsShopEncounter;
         public HashSet<string> Tags = new HashSet<string>();
         public List<string> Arguments = new List<string>();
+
+        public RewardImport CustomReward = null;
+        public string StandardRewardId;
     }
 }

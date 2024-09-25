@@ -8,7 +8,7 @@ namespace SFDDCards
         public string Name => "Self";
         public Transform UXPositionalTransform { get; set; }
 
-        public void ApplyDelta(CombatContext combatContext, DeltaEntry deltaEntry)
+        public void ApplyDelta(CampaignContext campaignContext, CombatContext combatContext, DeltaEntry deltaEntry)
         {
             // No-op
         }

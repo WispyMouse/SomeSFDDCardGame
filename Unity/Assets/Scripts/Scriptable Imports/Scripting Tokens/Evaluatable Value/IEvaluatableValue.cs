@@ -7,5 +7,6 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
     {
         bool TryEvaluateValue(CampaignContext campaignContext, TokenEvaluatorBuilder currentEvaluator, out T evaluatedValue);
         string DescribeEvaluation();
+        string GetScriptingTokenText();
     }
 }

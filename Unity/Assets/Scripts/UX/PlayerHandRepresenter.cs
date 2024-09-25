@@ -96,7 +96,10 @@ namespace SFDDCards.UX
                 // Does the player meet the requirements of at least one of the effects?
                 bool anyPassingRequirements = ScriptTokenEvaluator.MeetsAnyRequirements(
                     ScriptTokenEvaluator.CalculateConceptualBuildersFromTokenEvaluation(forCard),
-                    this.CentralGameStateControllerInstance.CurrentCampaignContext, this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignPlayer, null);
+                    this.CentralGameStateControllerInstance.CurrentCampaignContext, 
+                    this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignPlayer,
+                    this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignPlayer,
+                    null);
                 newCard.RequirementsAreMet = anyPassingRequirements;
             }
         }

@@ -15,6 +15,8 @@ namespace SFDDCards.UX
 
         Action<DisplayedCardUX> cardSelectedAction { get; set; } = null;
 
+        public virtual bool ShouldShowBase { get; } = true;
+
         public void Awake()
         {
             this.DisableSelectionGlow();
@@ -67,7 +69,7 @@ namespace SFDDCards.UX
             MouseHoverShowerController.MouseEndHoveredEvent.Invoke(this);
         }
 
-        public bool TryGetStatusEffect(out AppliedStatusEffect toShow)
+        public bool TryGetStatusEffect(out IStatusEffect toShow)
         {
             toShow = null;
             return false;
