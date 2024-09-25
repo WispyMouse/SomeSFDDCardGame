@@ -26,6 +26,9 @@ namespace SFDDCards.UX
         [SerializeReference]
         private Transform ElementResourceIconHolder;
 
+        [SerializeReference]
+        private RarityIndicator MyRarityIndicator;
+
         public void SetFromCard(Card representedCard)
         {
             this.Annihilate();
@@ -41,6 +44,8 @@ namespace SFDDCards.UX
                 ElementResourceIconUX icon = Instantiate(this.ElementResourceIconUXPF, this.ElementResourceIconHolder);
                 icon.SetFromElement(curElement, representedCard.GetElementGain(curElement));
             }
+
+            this.MyRarityIndicator.SetFromRarity(representedCard.Rarity);
         }
 
         public void Annihilate()
