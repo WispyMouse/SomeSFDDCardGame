@@ -67,7 +67,7 @@ namespace SFDDCards
         /// This effect is written as thought it hasn't happened yet.
         /// This can be used to show the value of effects, such as Enemy Intents.
         /// </summary>
-        public static string DescribeRealizedEffect(IAttackTokenHolder attackHolder, CampaignContext campaignContext, IEffectOwner owner, ICombatantTarget user, ICombatantTarget target)
+        public static string DescribeRealizedEffect(IAttackTokenHolder attackHolder, CampaignContext campaignContext, IEffectOwner owner, Combatant user, ICombatantTarget target)
         {
             StringBuilder entireEffectText = new StringBuilder();
             string leadingSpace = "";

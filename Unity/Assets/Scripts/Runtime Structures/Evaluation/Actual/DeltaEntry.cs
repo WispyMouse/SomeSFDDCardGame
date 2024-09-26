@@ -9,7 +9,7 @@ namespace SFDDCards.Evaluation.Actual
     using UnityEngine;
     public class DeltaEntry
     {
-        public ICombatantTarget User;
+        public Combatant User;
 
         public ICombatantTarget Target;
         public CombatantTargetEvaluatableValue AbstractTarget;

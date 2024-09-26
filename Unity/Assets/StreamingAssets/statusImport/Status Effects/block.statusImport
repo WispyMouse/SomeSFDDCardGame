@@ -1,0 +1,11 @@
+{
+    "Name": "Block",
+	"Id": "block",
+	"Effects":
+	[
+		{
+			"Window": "INCOMINGDAMAGE",
+			"Script": "[IFTARGET: ME][DRAINBOTH: INTENSITY BLOCK]"
+		}
+	]
+}

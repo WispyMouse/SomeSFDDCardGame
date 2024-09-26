@@ -19,5 +19,7 @@ namespace SFDDCards
         int GetTotalHealth();
 
         int GetRepresentingNumberOfTargets();
+        bool IncludesTarget(Combatant target);
+        bool OverlapsTarget(Combatant perspective, ICombatantTarget target);
     }
 }

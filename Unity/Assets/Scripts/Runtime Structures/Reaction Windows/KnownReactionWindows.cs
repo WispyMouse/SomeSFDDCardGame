@@ -12,6 +12,9 @@ namespace SFDDCards
         public const string OwnerEndsTurn = "ownerendsturn";
         public const string Activated = "activated";
 
+        public const string IncomingIntensity = "incomingintensity";
+        public const string IncomingDamage = "incomingdamage";
+
         public static ReactionWindowSubscription ParseWindow(string window, AppliedStatusEffect appliedEffect)
         {
             switch (window.ToLower())
@@ -20,6 +23,8 @@ namespace SFDDCards
                     return new OwnerStartsTurnReactionWindowSubscription(appliedEffect);
                 case OwnerEndsTurn:
                     return new OwnerEndsTurnReactionWindowSubscription(appliedEffect);
+                case IncomingDamage:
+                    return new IncomingDamageReactionWindowSubscription(appliedEffect);
                 case Activated:
                     return null;
             }
@@ -38,6 +43,8 @@ namespace SFDDCards
                     return "End of turn";
                 case Activated:
                     return "Activated";
+                case IncomingDamage:
+                    return "Incoming Damage";
                 case "testwindow":
                     return "";
             }

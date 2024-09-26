@@ -121,7 +121,7 @@ namespace SFDDCards.Tests.EditMode
             TestVariableInCombatContext(attackHolderStack, expectedValue, combatContext, owner, combatContext.CombatPlayer, combatContext.Enemies[0], builderIndexContainingToken);
         }
 
-        public void TestVariableInCombatContext(IAttackTokenHolder attackHolderStack, int expectedValue, CombatContext context, IEffectOwner owner, ICombatantTarget user, ICombatantTarget target, int deltaIndex = 0)
+        public void TestVariableInCombatContext(IAttackTokenHolder attackHolderStack, int expectedValue, CombatContext context, IEffectOwner owner, Combatant user, ICombatantTarget target, int deltaIndex = 0)
         {
             GamestateDelta delta = ScriptTokenEvaluator.CalculateRealizedDeltaEvaluation(attackHolderStack, context.FromCampaign, owner, user, target);
             Assert.GreaterOrEqual(delta.DeltaEntries.Count, deltaIndex, $"There should be enough delta entries to find the specified delta index. Not enough entries returned on evaluation.");
