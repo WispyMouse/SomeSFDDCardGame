@@ -1,18 +1,90 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-public class DrainBothScriptingToken : MonoBehaviour
+namespace SFDDCards.ScriptingTokens
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    using SFDDCards.Evaluation.Actual;
+    using SFDDCards.Evaluation.Conceptual;
+    using SFDDCards.ScriptingTokens.EvaluatableValues;
+    using System.Collections.Generic;
 
-    // Update is called once per frame
-    void Update()
+    public class DrainBothScriptingToken : BaseScriptingToken, IRealizedOperationScriptingToken
     {
-        
+        public string ReduceArgumentOne;
+        public string ReduceArgumentTwo;
+
+        public override string ScriptingTokenIdentifier { get; } = "DRAINBOTH";
+
+        public DrainBothScriptingToken(string argumentOne, string argumentTwo)
+        {
+            this.ReduceArgumentOne = argumentOne;
+            this.ReduceArgumentTwo = argumentTwo;
+        }
+
+        public override void ApplyToken(ConceptualTokenEvaluatorBuilder tokenBuilder)
+        {
+            tokenBuilder.RealizedOperationScriptingToken = this;
+        }
+
+        protected override bool TryGetTokenWithArguments(List<string> arguments, out IScriptingToken scriptingToken)
+        {
+            scriptingToken = null;
+
+            if (arguments.Count != 2)
+            {
+                return false;
+            }
+
+            // Always sort Intensity before the other, if that's the case
+            string argumentOne = arguments[0], argumentTwo = arguments[1];
+            if (arguments[1].ToLower() == "intensity")
+            {
+                argumentOne = arguments[1];
+                argumentTwo = arguments[0];
+            }
+
+            scriptingToken = new DrainBothScriptingToken(argumentOne, argumentTwo);
+
+            return true;
+        }
+
+        public override bool IsHarmfulToTarget(ICombatantTarget user, ICombatantTarget target)
+        {
+            return false;
+        }
+
+        public override bool RequiresTarget()
+        {
+            return false;
+        }
+
+        public string DescribeOperationAsEffect(ConceptualDeltaEntry delta)
+        {
+            if (delta.IntensityKindType == TokenEvaluatorBuilder.IntensityKind.Damage && this.ReduceArgumentOne.ToLower() == "intensity")
+            {
+                return $"Damage first subtracts from {this.ReduceArgumentTwo} before subtracting from health.";
+            }
+            
+            return $"Reduce {this.ReduceArgumentOne} by {this.ReduceArgumentTwo}.";
+        }
+
+        public void ApplyToDelta(DeltaEntry toApplyTo, out List<DeltaEntry> stackedDeltas)
+        {
+            int argumentOneValue = toApplyTo.GetArgumentValue(this.ReduceArgumentOne);
+            int argumentTwoValue = toApplyTo.GetArgumentValue(this.ReduceArgumentTwo);
+
+            int argumentOneFinalValue = argumentOneValue > argumentTwoValue ? argumentOneValue - argumentTwoValue : 0;
+            int argumentTwoFinalValue = argumentTwoValue > argumentOneValue ? argumentTwoValue - argumentOneValue : 0;
+
+            DeltaEntry pushDeltaOne = toApplyTo.SetArgumentValue(ReduceArgumentTwo, argumentTwoFinalValue);
+            DeltaEntry pushDeltaTwo = toApplyTo.SetArgumentValue(ReduceArgumentTwo, argumentTwoFinalValue);
+
+            stackedDeltas = new List<DeltaEntry>();
+            if (pushDeltaOne != null)
+            {
+                stackedDeltas.Add(pushDeltaOne);
+            }
+            if (pushDeltaTwo != null)
+            {
+                stackedDeltas.Add(pushDeltaTwo);
+            }
+        }
     }
 }

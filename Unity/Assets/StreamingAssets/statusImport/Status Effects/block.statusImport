@@ -5,7 +5,7 @@
 	[
 		{
 			"Window": "INCOMINGDAMAGE",
-			"Script": "[IFTARGET: ME][DRAINBOTH: INTENSITY BLOCK]"
+			"Script": "[IFTARGET: SELF][DRAINBOTH: INTENSITY BLOCK]"
 		}
 	]
 }

@@ -41,7 +41,7 @@ namespace SFDDCards
 
                 // If this is the last index in the builders, launch it now.
                 // Launch it if there is any value for Intensity, as well; everything that applies intensity implies separate action
-                if (builder.Intensity != null || scriptIndex == finalIndex)
+                if (builder.Intensity != null || scriptIndex == finalIndex || builder.RealizedOperationScriptingToken != null)
                 {
                     builders.Add(builder);
                     builder = new ConceptualTokenEvaluatorBuilder(builder);

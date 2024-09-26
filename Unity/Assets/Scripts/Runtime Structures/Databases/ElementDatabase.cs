@@ -25,6 +25,11 @@ namespace SFDDCards
             ElementData.Add(toAdd.Id.ToLower(), newElement);
         }
 
+        public static bool TryGetElement(string id, out Element foundElement)
+        {
+            return ElementData.TryGetValue(id, out foundElement);
+        }
+
         public static Element GetElement(string id)
         {
             if (ElementData.TryGetValue(id.ToLower(), out Element foundElement))

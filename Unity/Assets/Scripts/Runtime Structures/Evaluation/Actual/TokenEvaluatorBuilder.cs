@@ -19,7 +19,8 @@ namespace SFDDCards.Evaluation.Actual
             Heal = 2,
             NumberOfCards = 3,
             ApplyStatusEffect = 4,
-            RemoveStatusEffect = 5
+            RemoveStatusEffect = 5,
+            SetStatusEffect = 6
         }
 
         public enum NumberOfCardsRelation
@@ -74,20 +75,21 @@ namespace SFDDCards.Evaluation.Actual
         public GamestateDelta GetEffectiveDelta(CampaignContext campaignContext)
         {
             GamestateDelta delta = new GamestateDelta();
+            DeltaEntry deltaEntry = new DeltaEntry(this);
 
-            delta.DeltaEntries.Add(new DeltaEntry()
+            if (this.BasedOnConcept.RealizedOperationScriptingToken != null)
             {
-                MadeFromBuilder = this,
-                User = this.User,
-                Target = this.Target,
-                Intensity = this.Intensity,
-                IntensityKindType = this.IntensityKindType,
-                NumberOfCardsRelationType = this.NumberOfCardsRelationType,
-                ElementResourceChanges = this.ElementResourceChanges,
-                OriginalTarget = this.OriginalTarget,
-                StatusEffect = this.StatusEffect,
-                ActionsToExecute = this.ActionsToExecute
-            }) ;
+                this.BasedOnConcept.RealizedOperationScriptingToken.ApplyToDelta(deltaEntry, out List<DeltaEntry> stackedDeltas);
+                if (stackedDeltas != null)
+                {
+                    foreach (DeltaEntry stackedEntry in stackedDeltas)
+                    {
+                        delta.DeltaEntries.Add(stackedEntry);
+                    }
+                }
+            }
+
+            delta.DeltaEntries.Add(deltaEntry);
 
             return delta;
         }

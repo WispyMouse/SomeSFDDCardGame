@@ -14,7 +14,7 @@ namespace SFDDCards
 
     public static class EffectDescriberDatabase
     {
-        #region Describe Entier Effects
+        #region Describe Entire Effects
         /// <summary>
         /// Using a <see cref="conceptualDelta"/>, describe an effect.
         /// This effect is conceptual; it hasn't happened / isn't happening.
@@ -26,9 +26,21 @@ namespace SFDDCards
             StringBuilder entireEffectText = new StringBuilder();
             string leadingSpace = "";
 
+            // If all element changes are gains/modifies, and we haven't yet printed out an ability text,
+            // don't include that element.
+            // Include it if there's any other kind of operation happening on the elements.
+            bool ignoreElement = true;
+
             foreach (ConceptualDeltaEntry deltaEntry in conceptualDelta.DeltaEntries)
             {
                 string nextDescriptor = string.Empty;
+
+                nextDescriptor += DescribeElementChange(deltaEntry, ignoreElement);
+
+                if (deltaEntry.MadeFromBuilder.RealizedOperationScriptingToken != null)
+                {
+                    nextDescriptor = deltaEntry.MadeFromBuilder.RealizedOperationScriptingToken.DescribeOperationAsEffect(deltaEntry);
+                }
 
                 switch (deltaEntry.IntensityKindType)
                 {
@@ -44,9 +56,11 @@ namespace SFDDCards
                     case TokenEvaluatorBuilder.IntensityKind.ApplyStatusEffect:
                         nextDescriptor = DescribeConceptualApplyStatusEffect(deltaEntry);
                         break;
-
                     case TokenEvaluatorBuilder.IntensityKind.RemoveStatusEffect:
                         nextDescriptor = DescribeConceptualRemoveStatusEffect(deltaEntry);
+                        break;
+                    case TokenEvaluatorBuilder.IntensityKind.SetStatusEffect:
+                        nextDescriptor = DescribeConceptualSetStatusEffect(deltaEntry);
                         break;
                 }
 
@@ -55,6 +69,8 @@ namespace SFDDCards
                     entireEffectText.Append($"{leadingSpace}{nextDescriptor}");
                     leadingSpace = " ";
                 }
+
+                ignoreElement = false;
             }
 
             return entireEffectText.ToString();
@@ -118,6 +134,9 @@ namespace SFDDCards
                 case TokenEvaluatorBuilder.IntensityKind.RemoveStatusEffect:
                     nextDescriptor = DescribeRealizedRemoveStatusEffect(builder);
                     break;
+                case TokenEvaluatorBuilder.IntensityKind.SetStatusEffect:
+                    nextDescriptor = DescribeRealizedSetStatusEffect(builder);
+                    break;
             }
 
             if (!string.IsNullOrEmpty(nextDescriptor))
@@ -169,6 +188,11 @@ namespace SFDDCards
             }
 
             return entireEffectText.ToString();
+        }
+
+        public static string DescribeDrainEffect(string argumentOne, string argumentTwo)
+        {
+            return $"{argumentOne} will apply to {argumentTwo} before Health.";
         }
         #endregion
 
@@ -586,6 +610,90 @@ namespace SFDDCards
                 ComposeValueTargetLocation.BetweenPrefixAndMiddle,
                 null);
         }
+
+        public static string DescribeConceptualSetStatusEffect(ConceptualDeltaEntry deltaEntry)
+        {
+            string stackstext = "stack(s)";
+
+            if (deltaEntry.ConceptualIntensity is ConstantEvaluatableValue<int> constant)
+            {
+                if (constant.ConstantValue != 1)
+                {
+                    stackstext = "stacks";
+                }
+                else
+                {
+                    stackstext = "stack";
+                }
+            }
+
+            // If this stack change is targeting the Owner of this entire effect,
+            // and it's being applied to the target that holds this status,
+            // don't mention the name of the stacks
+            string stacksTextWithMaybeName = $"Set {deltaEntry.StatusEffect.Name} to";
+            string toTargetText = $"on {deltaEntry.ConceptualTarget.DescribeEvaluation().ToLower()}";
+            if (deltaEntry.MadeFromBuilder.Owner is StatusEffect ownerStatus
+                && deltaEntry.StatusEffect != null
+                && deltaEntry.StatusEffect.Equals(ownerStatus)
+                && deltaEntry.ConceptualTarget is SelfTargetEvaluatableValue)
+            {
+                toTargetText = string.Empty;
+            }
+
+            return ComposeDescriptor(
+                toTargetText,
+                deltaEntry.ConceptualTarget,
+                deltaEntry.OriginalConceptualTarget,
+                deltaEntry.PreviousConceptualTarget,
+                deltaEntry.ConceptualIntensity,
+                stacksTextWithMaybeName,
+                $"{stackstext}",
+                String.Empty,
+                ComposeValueTargetLocation.BetweenMiddleAndSuffix,
+                ComposeValueTargetLocation.BetweenPrefixAndMiddle,
+                null
+                );
+        }
+
+        public static string DescribeRealizedSetStatusEffect(TokenEvaluatorBuilder builder)
+        {
+            string stackstext = "stack";
+            if (builder.Intensity != 1)
+            {
+                stackstext = "stacks";
+            }
+
+            // If this stack change is targeting the Owner of this entire effect,
+            // and it's being applied to the target that holds this status,
+            // don't mention the name of the stacks
+            string stacksTextWithMaybeName = $"Set {builder.StatusEffect.Name} to";
+            string toTargetText = $"on {builder.Target.Name}";
+            if (builder.Owner is StatusEffect ownerStatus
+                && builder.StatusEffect != null
+                && builder.StatusEffect.Equals(ownerStatus)
+                && builder.Target.Equals(builder.Owner))
+            {
+                toTargetText = string.Empty;
+            }
+
+            return ComposeDescriptor<ICombatantTarget>(
+                toTargetText,
+                builder.Target,
+                builder.OriginalTarget,
+                builder?.PreviousTokenBuilder?.Target,
+                builder.Intensity.ToString(),
+                stacksTextWithMaybeName,
+                $"{stackstext}",
+                builder.GetIntensityDescriptionIfNotConstant(),
+                ComposeValueTargetLocation.BetweenMiddleAndSuffix,
+                ComposeValueTargetLocation.BetweenPrefixAndMiddle,
+                (ICombatantTarget curValue) =>
+                {
+                    return !(builder.Target == builder.OriginalTarget && builder.Target == builder?.PreviousTokenBuilder?.Target
+                    && builder.Target.IsFoeOf(builder.User)
+                    && builder.Target.GetRepresentingNumberOfTargets() == 1);
+                });
+        }
         #endregion
 
         #region General Descriptor Handlers
@@ -756,6 +864,53 @@ namespace SFDDCards
 
             return builtString;
         }
+        #endregion
+
+        #region Describing Elements
+
+        public static string DescribeElementChange(ConceptualDeltaEntry delta, bool ignoreElementFlag)
+        {
+            StringBuilder changeText = new StringBuilder();
+            string leadingcomma = "";
+
+            foreach (ElementResourceChange change in delta.ElementResourceChanges)
+            {
+                if (change.SetValue != null)
+                {
+                    changeText.Append($"{leadingcomma}Set {change.Element.GetNameAndMaybeIcon()} to {change.SetValue.DescribeEvaluation()}");
+                    leadingcomma = ", ";
+                }
+                else if (change.GainOrLoss != null)
+                {
+                    if (change.GainOrLoss is ConstantEvaluatableValue<int> constant)
+                    {
+                        if (constant.ConstantValue > 0 && !ignoreElementFlag)
+                        {
+                            changeText.Append($"{leadingcomma}Gain {constant.ConstantValue.ToString()} {change.Element.GetNameAndMaybeIcon()}");
+                            leadingcomma = ", ";
+                        }
+                        else if (constant.ConstantValue < 0)
+                        {
+                            changeText.Append($"{leadingcomma}Lose {constant.ConstantValue.ToString()} {change.Element.GetNameAndMaybeIcon()}");
+                            leadingcomma = ", ";
+                        }
+                    }
+                    else
+                    {
+                        changeText.Append($"{leadingcomma}Modify {change.Element.GetNameAndMaybeIcon()} by {change.SetValue.DescribeEvaluation()}");
+                        leadingcomma = ", ";
+                    }
+                }
+            }
+
+            if (changeText.Length > 0)
+            {
+                changeText.Append(".");
+            }
+
+            return changeText.ToString();
+        }
+
         #endregion
     }
 }

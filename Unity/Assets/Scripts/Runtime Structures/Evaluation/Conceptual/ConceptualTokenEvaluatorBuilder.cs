@@ -31,6 +31,7 @@ namespace SFDDCards.Evaluation.Conceptual
 
         public ConceptualTokenEvaluatorBuilder PreviousBuilder;
         public List<Action<DeltaEntry>> ActionsToExecute = new List<Action<DeltaEntry>>();
+        public IRealizedOperationScriptingToken RealizedOperationScriptingToken = null;
 
         public ConceptualTokenEvaluatorBuilder(ConceptualTokenEvaluatorBuilder previousBuilder = null)
         {

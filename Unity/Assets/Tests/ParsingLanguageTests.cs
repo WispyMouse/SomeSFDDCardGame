@@ -49,6 +49,12 @@ namespace SFDDCards.Tests.EditMode
             new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][REMOVESTATUSEFFECTSTACKS: 1 {nameof(DebugStatus)}]", $"Remove 1 stack of {nameof(DebugStatus)} from foe."),
             new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: SELF][REMOVESTATUSEFFECTSTACKS: 2 {nameof(DebugStatus)}]", $"Remove 2 stacks of {nameof(DebugStatus)} from self."),
 
+            new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][SETSTATUSEFFECTSTACKS: 1 {nameof(DebugStatus)}]", $"Set {nameof(DebugStatus)} to 1 stack on foe."),
+            new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: SELF][SETSTATUSEFFECTSTACKS: 2 {nameof(DebugStatus)}]", $"Set {nameof(DebugStatus)} to 2 stacks on self."),
+
+            new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][SETELEMENT: 1 DEBUGELEMENTONEID]", $"Set {DebugElementOneIconText}DEBUGELEMENTONENAME to 1."),
+            new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: SELF][SETELEMENT: 0 DEBUGELEMENTONEID]", $"Set {DebugElementOneIconText}DEBUGELEMENTONENAME to 0."),
+
             new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][DAMAGE: COUNTSTACKS_{nameof(DebugStatus)}]", $"1 x {nameof(DebugStatus)} damage."),
 
             new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][REQUIRESATLEASTELEMENT: 2 DEBUGELEMENTONEID][DAMAGE: 3]", $"2 {DebugElementOneIconText}DEBUGELEMENTONENAME: 3 damage."),
