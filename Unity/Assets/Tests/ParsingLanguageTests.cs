@@ -22,11 +22,13 @@ namespace SFDDCards.Tests.EditMode
         {
             public string EffectScript;
             public string ExpectedParsedValue;
+            public string ReactionWindow;
 
-            public AssertEffectScriptResultsValueSourceValue(string effectScript, string expectedParsedValue)
+            public AssertEffectScriptResultsValueSourceValue(string effectScript, string expectedParsedValue, string reactionWindow = "testwindow")
             {
                 this.EffectScript = effectScript;
                 this.ExpectedParsedValue = expectedParsedValue;
+                this.ReactionWindow = reactionWindow;
             }
 
             public override string ToString()
@@ -82,6 +84,7 @@ namespace SFDDCards.Tests.EditMode
         public static List<AssertEffectScriptResultsValueSourceValue> AssertEffectScriptResultsInTextAsStatusEffectValueSource => new List<AssertEffectScriptResultsValueSourceValue>()
         {
             new AssertEffectScriptResultsValueSourceValue("[REMOVESTACKS: 1]", $"Remove 1 stack."),
+            new AssertEffectScriptResultsValueSourceValue("[IFTARGET: SELF][DRAINBOTH: INTENSITY DEBUGSTATUS]", $"<b>Incoming Damage:</b> Damage first subtracts from DEBUGSTATUS before subtracting from health.", KnownReactionWindows.IncomingDamage)
         };
 
         [Test]
@@ -89,7 +92,7 @@ namespace SFDDCards.Tests.EditMode
         {
             AttackTokenPile pile = ScriptingTokens.ScriptingTokenDatabase.GetAllTokens(expectations.EffectScript, this.DebugStatus);
             this.DebugStatus.EffectTokens.Clear();
-            this.DebugStatus.EffectTokens.Add("testwindow", new List<AttackTokenPile>() { pile });
+            this.DebugStatus.EffectTokens.Add(expectations.ReactionWindow, new List<AttackTokenPile>() { pile });
 
             string resolvedDescription = this.DebugStatus.DescribeStatusEffect().BreakDescriptionsIntoString();
             Assert.AreEqual(expectations.ExpectedParsedValue, resolvedDescription, "Script should parse out to expected value.");

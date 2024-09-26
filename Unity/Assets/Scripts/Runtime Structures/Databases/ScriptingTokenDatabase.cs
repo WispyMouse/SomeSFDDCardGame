@@ -17,11 +17,13 @@ namespace SFDDCards.ScriptingTokens
             new ApplyStatusEffectStacksScriptingToken(),
             new RemoveStatusEffectStacksScriptingToken(),
             new SetStatusEffectStacksScriptingToken(),
+            new DrainBothScriptingToken(),
 
             // Meta Token
             new ResetScriptingToken(),
             new LogIntScriptingToken(),
             new RequiresComparisonScriptingToken(),
+            new IfTargetScriptingToken(),
 
             // Targeting Token
             new SetTargetScriptingToken(),

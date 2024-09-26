@@ -21,7 +21,7 @@ namespace SFDDCards
         /// This is used to describe Cards and Effects when they aren't happening.
         /// As it is conceptual, none of the numbers have resolved yet.
         /// </summary>
-        public static string DescribeConceptualEffect(ConceptualDelta conceptualDelta)
+        public static string DescribeConceptualEffect(ConceptualDelta conceptualDelta, string reactionWindow = "")
         {
             StringBuilder entireEffectText = new StringBuilder();
             string leadingSpace = "";
@@ -39,7 +39,7 @@ namespace SFDDCards
 
                 if (deltaEntry.MadeFromBuilder.RealizedOperationScriptingToken != null)
                 {
-                    nextDescriptor = deltaEntry.MadeFromBuilder.RealizedOperationScriptingToken.DescribeOperationAsEffect(deltaEntry);
+                    nextDescriptor = deltaEntry.MadeFromBuilder.RealizedOperationScriptingToken.DescribeOperationAsEffect(deltaEntry, reactionWindow);
                 }
 
                 switch (deltaEntry.IntensityKindType)

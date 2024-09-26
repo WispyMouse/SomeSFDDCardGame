@@ -13,7 +13,7 @@ namespace SFDDCards.Evaluation.Conceptual
 
     public interface IRealizedOperationScriptingToken
     {
-        public string DescribeOperationAsEffect(ConceptualDeltaEntry delta);
+        public string DescribeOperationAsEffect(ConceptualDeltaEntry delta, string reactionWindowId);
         public void ApplyToDelta(DeltaEntry toApplyTo, out List<DeltaEntry> stackedDeltas);
     }
 }

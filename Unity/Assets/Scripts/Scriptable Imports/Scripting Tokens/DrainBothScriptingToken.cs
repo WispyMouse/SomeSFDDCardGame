@@ -12,12 +12,6 @@ namespace SFDDCards.ScriptingTokens
 
         public override string ScriptingTokenIdentifier { get; } = "DRAINBOTH";
 
-        public DrainBothScriptingToken(string argumentOne, string argumentTwo)
-        {
-            this.ReduceArgumentOne = argumentOne;
-            this.ReduceArgumentTwo = argumentTwo;
-        }
-
         public override void ApplyToken(ConceptualTokenEvaluatorBuilder tokenBuilder)
         {
             tokenBuilder.RealizedOperationScriptingToken = this;
@@ -40,7 +34,11 @@ namespace SFDDCards.ScriptingTokens
                 argumentTwo = arguments[0];
             }
 
-            scriptingToken = new DrainBothScriptingToken(argumentOne, argumentTwo);
+            scriptingToken = new DrainBothScriptingToken()
+            {
+                ReduceArgumentOne = argumentOne,
+                ReduceArgumentTwo = argumentTwo
+            };
 
             return true;
         }
@@ -55,9 +53,9 @@ namespace SFDDCards.ScriptingTokens
             return false;
         }
 
-        public string DescribeOperationAsEffect(ConceptualDeltaEntry delta)
+        public string DescribeOperationAsEffect(ConceptualDeltaEntry delta, string reactionWindowId)
         {
-            if (delta.IntensityKindType == TokenEvaluatorBuilder.IntensityKind.Damage && this.ReduceArgumentOne.ToLower() == "intensity")
+            if (this.ReduceArgumentOne.ToLower() == "intensity" && reactionWindowId == KnownReactionWindows.IncomingDamage)
             {
                 return $"Damage first subtracts from {this.ReduceArgumentTwo} before subtracting from health.";
             }
