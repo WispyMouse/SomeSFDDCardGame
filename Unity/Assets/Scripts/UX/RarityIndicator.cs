@@ -23,6 +23,9 @@ namespace SFDDCards.UX
         [SerializeReference]
         private Sprite RareRarityIcon;
 
+        [SerializeReference]
+        private Sprite GeneratedRarityIcon;
+
 
         public void SetFromRarity(Card.KnownRarities rarity)
         {
@@ -46,6 +49,10 @@ namespace SFDDCards.UX
                 case Card.KnownRarities.Rare:
                     this.IconShower.gameObject.SetActive(true);
                     this.IconShower.sprite = this.RareRarityIcon;
+                    break;
+                case Card.KnownRarities.Generated:
+                    this.IconShower.gameObject.SetActive(true);
+                    this.IconShower.sprite = this.GeneratedRarityIcon;
                     break;
             }
         }

@@ -1,4 +1,5 @@
 using SFDDCards;
+using SFDDCards.Evaluation.Actual;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -19,6 +20,9 @@ namespace SFDDCards
 
         public static UnityEvent UpdateUXEvent = new UnityEvent();
         public static UnityEvent<string, LogType> LogTextEvent = new UnityEvent<string, LogType>();
+
+        public static UnityEvent<DeltaEntry, PlayerChoice, Action> PlayerMustMakeChoice = new UnityEvent<DeltaEntry, PlayerChoice, Action>();
+        public static bool PendingPlayerChoice = false;
 
         static GlobalUpdateUX()
         {

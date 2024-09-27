@@ -69,5 +69,10 @@ namespace SFDDCards.UX
             toShow = this.RepresentedArtifact;
             return true;
         }
+
+        public void UnHoverOnDisable()
+        {
+            MouseHoverShowerController.MouseEndHoveredEvent.Invoke(this);
+        }
     }
 }

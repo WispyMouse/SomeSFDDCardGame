@@ -7,10 +7,11 @@ namespace SFDDCards
     public class CombatDeck
     {
         public readonly Deck BasedOnDeck;
-        
+
         /// <summary>
         /// Cards currently in the deck.
         /// This is an ordered list, with the card at the 0th index being the top of the deck.
+        /// If a player would draw from an empty deck, they first shuffle their discard into their deck.
         /// </summary>
         public List<Card> CardsCurrentlyInDeck { get; private set; } = new List<Card>();
 
@@ -21,8 +22,15 @@ namespace SFDDCards
 
         /// <summary>
         /// A list of cards that are in the player's discard.
+        /// If a player would draw from an empty deck, they first shuffle their discard into their deck.
         /// </summary>
-        public HashSet<Card> CardsCurrentlyInDiscard { get; private set; } = new HashSet<Card>();
+        public List<Card> CardsCurrentlyInDiscard { get; private set; } = new List<Card>();
+
+        /// <summary>
+        /// A list of cards that are in the player's exile.
+        /// These cards are usually inaccessible. They do not get shuffled in like the discard.
+        /// </summary>
+        public List<Card> CardsCurrentlyInExile { get; private set; } = new List<Card>();
 
         public CombatDeck(Deck fromDeck)
         {
@@ -38,6 +46,7 @@ namespace SFDDCards
             this.CardsCurrentlyInDeck = new List<Card>(this.BasedOnDeck.AllCardsInDeck).ShuffleList();
             this.CardsCurrentlyInDiscard.Clear();
             this.CardsCurrentlyInHand.Clear();
+            this.CardsCurrentlyInExile.Clear();
 
             GlobalUpdateUX.UpdateUXEvent.Invoke();
         }
@@ -67,8 +76,7 @@ namespace SFDDCards
                 if (this.CardsCurrentlyInDeck.Count > 0)
                 {
                     Card nextCard = this.CardsCurrentlyInDeck[0];
-                    this.CardsCurrentlyInDeck.RemoveAt(0);
-                    this.CardsCurrentlyInHand.Add(nextCard);
+                    this.MoveCardToZone(nextCard, this.CardsCurrentlyInHand);
                 }
             }
 
@@ -86,14 +94,32 @@ namespace SFDDCards
 
         public void DiscardHand()
         {
-            foreach (Card curCard in this.CardsCurrentlyInHand)
+            for (int ii = this.CardsCurrentlyInHand.Count; ii > 0; ii--)
             {
-                this.CardsCurrentlyInDiscard.Add(curCard);
+                this.MoveCardToZone(this.CardsCurrentlyInHand[ii], this.CardsCurrentlyInDiscard);
             }
 
-            this.CardsCurrentlyInHand.Clear();
-
             GlobalUpdateUX.UpdateUXEvent.Invoke();
+        }
+
+        public void MoveCardToZone(Card card, List<Card> toMoveTo)
+        {
+            this.CardsCurrentlyInDeck.Remove(card);
+            this.CardsCurrentlyInDiscard.Remove(card);
+            this.CardsCurrentlyInHand.Remove(card);
+            this.CardsCurrentlyInExile.Remove(card);
+
+            toMoveTo.Add(card);
+        }
+
+        public void MoveCardToZoneIfNotInAnyZonesCurrently(Card card, List<Card> toMoveTo)
+        {
+            if (this.CardsCurrentlyInDiscard.Contains(card) || this.CardsCurrentlyInHand.Contains(card) || this.CardsCurrentlyInExile.Contains(card) || this.CardsCurrentlyInDeck.Contains(card))
+            {
+                return;
+            }
+
+            toMoveTo.Add(card);
         }
     }
 }

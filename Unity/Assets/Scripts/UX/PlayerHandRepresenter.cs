@@ -20,6 +20,8 @@ namespace SFDDCards.UX
         [SerializeReference]
         private Transform PlayerHandTransform;
 
+        private Dictionary<Card, CombatCardUX> CardsToRepresentations = new Dictionary<Card, CombatCardUX>();
+
         private void OnEnable()
         {
             GlobalUpdateUX.UpdateUXEvent.AddListener(RepresentPlayerHand);
@@ -39,11 +41,6 @@ namespace SFDDCards.UX
 
             const float MaximumDownwardsness = .6f;
 
-            for (int ii = this.PlayerHandTransform.childCount - 1; ii >= 0; ii--)
-            {
-                Destroy(this.PlayerHandTransform.GetChild(ii).gameObject);
-            }
-
             if (this.CentralGameStateControllerInstance?.CurrentCampaignContext == null)
             {
                 return;
@@ -53,6 +50,15 @@ namespace SFDDCards.UX
             {
                 this.Annihilate();
                 return;
+            }
+
+            // Delete cards that are in this representer, but not in the hand
+            foreach (Card key in new List<Card>(this.CardsToRepresentations.Keys))
+            {
+                if (this.CardsToRepresentations[key].gameObject.activeInHierarchy && !this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.PlayerCombatDeck.CardsCurrentlyInHand.Contains(key))
+                {
+                    this.CardsToRepresentations[key].gameObject.SetActive(false);
+                }
             }
 
             // Identify the angle to fan things out
@@ -82,20 +88,17 @@ namespace SFDDCards.UX
                 float thisCardAngle = leftStartingPointAngle + ii * fanAnglePerIndex;
 
                 // Push the cards that are rotated down so they look more like a fan
-                Vector3 downpush = Vector3.down * Mathf.InverseLerp(0, Mathf.Sin(FanDegreesMaximum), Mathf.Sin(Mathf.Abs(thisCardAngle))) * MaximumDownwardsness;
+                Vector3 downpush = Vector3.down * Mathf.InverseLerp(0, Mathf.Sin(Mathf.Deg2Rad * FanDegreesMaximum), Mathf.Sin(Mathf.Deg2Rad * Mathf.Abs(thisCardAngle))) * MaximumDownwardsness;
 
                 // And where it should be positioned
                 Vector3 objectOffset = new Vector3(leftStartingPoint, 0, 0) + new Vector3(modifiedCardFanDistance, 0, 0) * ii + backpush + downpush;
 
-                Card forCard = this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.PlayerCombatDeck.CardsCurrentlyInHand[ii];
-                CombatCardUX newCard = Instantiate(this.CardRepresentationPF, this.PlayerHandTransform);
-                newCard.transform.localPosition = objectOffset;
-                newCard.transform.localRotation = Quaternion.Euler(0, 0, -thisCardAngle);
-                newCard.SetFromCard(forCard, SelectCurrentCard);
+                CombatCardUX newCard = GetUX(this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.PlayerCombatDeck.CardsCurrentlyInHand[ii]);
+                newCard.SetTargetPosition(newCard.transform.parent.position + objectOffset, -thisCardAngle);
 
                 // Does the player meet the requirements of at least one of the effects?
                 bool anyPassingRequirements = ScriptTokenEvaluator.MeetsAnyRequirements(
-                    ScriptTokenEvaluator.CalculateConceptualBuildersFromTokenEvaluation(forCard),
+                    ScriptTokenEvaluator.CalculateConceptualBuildersFromTokenEvaluation(newCard.RepresentedCard),
                     this.CentralGameStateControllerInstance.CurrentCampaignContext, 
                     this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignPlayer,
                     this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignPlayer,
@@ -106,15 +109,42 @@ namespace SFDDCards.UX
 
         public void Annihilate()
         {
-            for (int ii = this.PlayerHandTransform.childCount - 1; ii >= 0; ii--)
+            foreach (CombatCardUX ux in new List<CombatCardUX>(this.CardsToRepresentations.Values))
             {
-                Destroy(this.PlayerHandTransform.GetChild(ii).gameObject);
+                Destroy(ux.gameObject);
             }
+
+            this.CardsToRepresentations.Clear();
         }
 
         public void SelectCurrentCard(DisplayedCardUX selectedCard)
         {
             this.UXController.SelectCurrentCard(selectedCard);
+        }
+
+        public CombatCardUX GetUX(Card forCard)
+        {
+            bool wasNotVisibleOrJustCreated = false;
+
+            if (!this.CardsToRepresentations.TryGetValue(forCard, out CombatCardUX representingCard))
+            {
+                representingCard = Instantiate(this.CardRepresentationPF, this.PlayerHandTransform);
+                representingCard.SetFromCard(forCard, SelectCurrentCard);
+                this.CardsToRepresentations.Add(forCard, representingCard);
+                wasNotVisibleOrJustCreated = true;
+            }
+            else if (!this.CardsToRepresentations[forCard].isActiveAndEnabled)
+            {
+                representingCard.gameObject.SetActive(true);
+                wasNotVisibleOrJustCreated = true;
+            }
+
+            if (wasNotVisibleOrJustCreated)
+            {
+                representingCard.SnapToPosition(this.PlayerHandTransform.position);
+            }
+
+            return representingCard;
         }
     }
 }

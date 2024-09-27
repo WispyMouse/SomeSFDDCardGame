@@ -57,7 +57,7 @@ namespace SFDDCards.ScriptingTokens
         {
             if (this.ReduceArgumentOne.ToLower() == "intensity" && reactionWindowId == KnownReactionWindows.IncomingDamage)
             {
-                return $"Damage first subtracts from {this.ReduceArgumentTwo} before subtracting from health.";
+                return $"Damage first subtracts from {this.ReduceArgumentTwo} before subtracting from health";
             }
             
             return $"Reduce {this.ReduceArgumentOne} by {this.ReduceArgumentTwo}.";

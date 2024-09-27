@@ -24,9 +24,16 @@ namespace SFDDCards.ScriptingTokens
             new LogIntScriptingToken(),
             new RequiresComparisonScriptingToken(),
             new IfTargetScriptingToken(),
+            new MoveCardToZoneScriptingToken(),
+            new GenerateCardScriptingToken(),
+            new CopyAndAddToCampaignDeckScriptingToken(),
 
             // Targeting Token
             new SetTargetScriptingToken(),
+            new CardBrowserSelectorScriptingToken(),
+            new ChooseCardScriptingToken(),
+            new CardTargetScriptingToken(),
+            new ChooseRandomlyScriptingToken(),
 
             // Element Token
             new GainElementScriptingToken(),

@@ -50,9 +50,12 @@ namespace SFDDCards.Tests.EditMode
         public void TearDown()
         {
             GlobalSequenceEventHolder.StopAllSequences();
+            CardDatabase.ClearDatabase();
             EnemyDatabase.ClearDatabase();
             ElementDatabase.ClearDatabase();
             StatusEffectDatabase.ClearDatabase();
+            GlobalUpdateUX.PlayerMustMakeChoice.RemoveAllListeners();
+            GlobalUpdateUX.PendingPlayerChoice = false;
         }
     }
 }

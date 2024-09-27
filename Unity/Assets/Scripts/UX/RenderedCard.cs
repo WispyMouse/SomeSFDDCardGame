@@ -29,6 +29,8 @@ namespace SFDDCards.UX
         [SerializeReference]
         private RarityIndicator MyRarityIndicator;
 
+        public Action<RenderedCard> OnClickAction { get; set; } = null;
+
         public void SetFromCard(Card representedCard)
         {
             this.Annihilate();
@@ -58,6 +60,11 @@ namespace SFDDCards.UX
             {
                 Destroy(this.ElementResourceIconHolder.GetChild(ii).gameObject);
             }
+        }
+
+        public void Clicked()
+        {
+            this.OnClickAction?.Invoke(this);
         }
     }
 }

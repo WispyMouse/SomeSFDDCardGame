@@ -60,7 +60,12 @@ namespace SFDDCards.Tests.EditMode
             new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][DAMAGE: COUNTSTACKS_{nameof(DebugStatus)}]", $"1 x {nameof(DebugStatus)} damage."),
 
             new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][REQUIRESATLEASTELEMENT: 2 DEBUGELEMENTONEID][DAMAGE: 3]", $"2 {DebugElementOneIconText}DEBUGELEMENTONENAME: 3 damage."),
-            new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][REQUIRESATLEASTELEMENT: 2 DEBUGELEMENTONEID][REQUIRESATLEASTELEMENT: 5 DEBUGELEMENTTWOID][DAMAGE: 5][SETTARGET: SELF][HEAL: 7]", $"2 {DebugElementOneIconText}DEBUGELEMENTONENAME, 5 {DebugElementTwoIconText}DEBUGELEMENTTWONAME: 5 damage. Heal self for 7.")
+            new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][REQUIRESATLEASTELEMENT: 2 DEBUGELEMENTONEID][REQUIRESATLEASTELEMENT: 5 DEBUGELEMENTTWOID][DAMAGE: 5][SETTARGET: SELF][HEAL: 7]", $"2 {DebugElementOneIconText}DEBUGELEMENTONENAME, 5 {DebugElementTwoIconText}DEBUGELEMENTTWONAME: 5 damage. Heal self for 7."),
+
+            new AssertEffectScriptResultsValueSourceValue($"[DRAW: 1][CARDTARGET: HAND][CHOOSECARDS: 1][MOVECARDTOZONE: DISCARD]", "Draw 1 card. Discard 1 card."),
+            new AssertEffectScriptResultsValueSourceValue($"[DRAW: 2][CARDTARGET: HAND][CHOOSECARDS: 2][MOVECARDTOZONE: DISCARD]", "Draw 2 cards. Discard 2 cards."),
+
+            new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][DAMAGE: 1][MOVECARDTOZONE: EXILE]", "1 damage. Exile this card.")
         };
 
         [Test]

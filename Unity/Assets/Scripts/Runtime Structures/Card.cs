@@ -14,7 +14,8 @@ namespace SFDDCards
             Starter,
             Common,
             Uncommon,
-            Rare
+            Rare,
+            Generated
         }
 
         public string Id;

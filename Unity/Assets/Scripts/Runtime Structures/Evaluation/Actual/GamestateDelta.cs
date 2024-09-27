@@ -31,6 +31,21 @@ namespace SFDDCards.Evaluation.Actual
 
             DeltaEntry curEntry = DeltaEntries[index];
 
+            // If there is an interactive choice to make, kick that over to the global choice handler
+            // When the choice is resolved, continue applying the delta
+            // Choices mark when they've been chosen, so this will continue from where it currently is next
+            if (curEntry.ChoiceToMake != null && !curEntry.ChoiceToMake.ResultIsChosen)
+            {
+                // Attempt to resolve the choice without the player's input, depending on how the choice kind resolves itself
+                if (!curEntry.ChoiceToMake.TryFinalizeWithoutPlayerInput(curEntry))
+                {
+                    GlobalUpdateUX.PendingPlayerChoice = true;
+                    GlobalUpdateUX.PlayerMustMakeChoice.Invoke(curEntry, curEntry.ChoiceToMake, () => this.ContinueApplyingDelta(campaignContext, index));
+                    return;
+                }
+            }
+            GlobalUpdateUX.PendingPlayerChoice = false;
+
             if (curEntry.RealizedOperationScriptingToken != null)
             {
                 curEntry.RealizedOperationScriptingToken.ApplyToDelta(curEntry, curEntry?.MadeFromBuilder?.BasedOnConcept?.CreatedFromContext, out List<DeltaEntry> stackedDeltas);
@@ -39,6 +54,7 @@ namespace SFDDCards.Evaluation.Actual
                     DeltaEntries.InsertRange(index, stackedDeltas);
                 }
                 curEntry.RealizedOperationScriptingToken = null;
+
                 this.ContinueApplyingDelta(campaignContext, index);
                 return;
             }

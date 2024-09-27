@@ -14,6 +14,8 @@ namespace SFDDCards
 
     public static class EffectDescriberDatabase
     {
+        public enum IsPlural { DontKnow, Yes, No };
+
         #region Describe Entire Effects
         /// <summary>
         /// Using a <see cref="conceptualDelta"/>, describe an effect.
@@ -35,38 +37,46 @@ namespace SFDDCards
             {
                 string nextDescriptor = string.Empty;
 
-                nextDescriptor += DescribeElementChange(deltaEntry, ignoreElement);
+                string elementChange = DescribeElementChange(deltaEntry, ignoreElement);
+                if (!string.IsNullOrEmpty(elementChange))
+                {
+                    if (entireEffectText.Length > 0)
+                    {
+                        nextDescriptor += "\n";
+                    }
+                    nextDescriptor += elementChange;
+                }
 
                 if (deltaEntry.MadeFromBuilder.RealizedOperationScriptingToken != null)
                 {
-                    nextDescriptor = deltaEntry.MadeFromBuilder.RealizedOperationScriptingToken.DescribeOperationAsEffect(deltaEntry, reactionWindow);
+                    nextDescriptor += deltaEntry.MadeFromBuilder.RealizedOperationScriptingToken.DescribeOperationAsEffect(deltaEntry, reactionWindow);
                 }
 
                 switch (deltaEntry.IntensityKindType)
                 {
                     case TokenEvaluatorBuilder.IntensityKind.Damage:
-                        nextDescriptor = DescribeConceptualDamage(deltaEntry);
+                        nextDescriptor += DescribeConceptualDamage(deltaEntry);
                         break;
                     case TokenEvaluatorBuilder.IntensityKind.Heal:
-                        nextDescriptor = DescribeConceptualHeal(deltaEntry);
+                        nextDescriptor += DescribeConceptualHeal(deltaEntry);
                         break;
                     case TokenEvaluatorBuilder.IntensityKind.NumberOfCards:
-                        nextDescriptor = DescribeConceptualCards(deltaEntry);
+                        nextDescriptor += DescribeConceptualCards(deltaEntry);
                         break;
                     case TokenEvaluatorBuilder.IntensityKind.ApplyStatusEffect:
-                        nextDescriptor = DescribeConceptualApplyStatusEffect(deltaEntry);
+                        nextDescriptor += DescribeConceptualApplyStatusEffect(deltaEntry);
                         break;
                     case TokenEvaluatorBuilder.IntensityKind.RemoveStatusEffect:
-                        nextDescriptor = DescribeConceptualRemoveStatusEffect(deltaEntry);
+                        nextDescriptor += DescribeConceptualRemoveStatusEffect(deltaEntry);
                         break;
                     case TokenEvaluatorBuilder.IntensityKind.SetStatusEffect:
-                        nextDescriptor = DescribeConceptualSetStatusEffect(deltaEntry);
+                        nextDescriptor += DescribeConceptualSetStatusEffect(deltaEntry);
                         break;
                 }
 
                 if (!string.IsNullOrEmpty(nextDescriptor))
                 {
-                    entireEffectText.Append($"{leadingSpace}{nextDescriptor}");
+                    entireEffectText.Append($"{leadingSpace}{nextDescriptor.Trim('.')}.");
                     leadingSpace = " ";
                 }
 
@@ -326,10 +336,10 @@ namespace SFDDCards
                             null,
                             deltaEntry.ConceptualIntensity,
                             "Draw ",
-                            "card(s)",
+                            ExtractSingularOrPlural(deltaEntry.ConceptualIntensity, "card"),
                             String.Empty,
                             ComposeValueTargetLocation.BetweenMiddleAndSuffix,
-                            ComposeValueTargetLocation.BetweenMiddleAndSuffix,
+                            ComposeValueTargetLocation.BetweenPrefixAndMiddle,
                             null
                             );
                     }
@@ -353,10 +363,10 @@ namespace SFDDCards
                             null,
                             builder.Intensity,
                             "Draw ",
-                            "card(s)",
+                            ExtractSingularOrPlural(builder.Intensity, "card"),
                             builder.GetIntensityDescriptionIfNotConstant(),
                             ComposeValueTargetLocation.BetweenMiddleAndSuffix,
-                            ComposeValueTargetLocation.BetweenMiddleAndSuffix,
+                            ComposeValueTargetLocation.BetweenPrefixAndMiddle,
                             null
                             );
                     }
@@ -380,10 +390,10 @@ namespace SFDDCards
                             null,
                             delta.Intensity,
                             "Draw ",
-                            "card(s)",
+                            ExtractSingularOrPlural(delta.Intensity, "card"),
                             String.Empty,
                             ComposeValueTargetLocation.BetweenMiddleAndSuffix,
-                            ComposeValueTargetLocation.BetweenMiddleAndSuffix,
+                            ComposeValueTargetLocation.BetweenPrefixAndMiddle,
                             null
                             );
                     }
@@ -397,19 +407,7 @@ namespace SFDDCards
         #region Describing Status Effect
         public static string DescribeConceptualApplyStatusEffect(ConceptualDeltaEntry deltaEntry)
         {
-            string stackstext = "stack(s)";
-
-            if (deltaEntry.ConceptualIntensity is ConstantEvaluatableValue<int> constant)
-            {
-                if (constant.ConstantValue != 1)
-                {
-                    stackstext = "stacks";
-                }
-                else
-                {
-                    stackstext = "stack";
-                }
-            }
+            string stackstext = ExtractSingularOrPlural(deltaEntry.ConceptualIntensity, "stack");
 
             // If this stack change is targeting the Owner of this entire effect,
             // and it's being applied to the target that holds this status,
@@ -442,11 +440,7 @@ namespace SFDDCards
 
         public static string DescribeRealizedApplyStatusEffect(TokenEvaluatorBuilder builder)
         {
-            string stackstext = "stack";
-            if (builder.Intensity != 1)
-            {
-                stackstext = "stacks";
-            }
+            string stackstext = ExtractSingularOrPlural(builder.Intensity, "stack");
 
             // If this stack change is targeting the Owner of this entire effect,
             // and it's being applied to the target that holds this status,
@@ -483,11 +477,7 @@ namespace SFDDCards
 
         public static string DescribeResolvedApplyStatusEffect(DeltaEntry delta)
         {
-            string stacktext = "stack";
-            if (delta.Intensity != 1)
-            {
-                stacktext = "stacks";
-            }
+            string stackstext = ExtractSingularOrPlural(delta.Intensity, "stack");
 
             return ComposeDescriptor<ICombatantTarget>(
                 $"to {delta.Target.Name}",
@@ -496,7 +486,7 @@ namespace SFDDCards
                 delta.MadeFromBuilder?.PreviousTokenBuilder?.Target,
                 delta.Intensity.ToString(),
                 "Apply",
-                $"{stacktext} of {delta.StatusEffect.Name}",
+                $"{stackstext} of {delta.StatusEffect.Name}",
                 String.Empty,
                 ComposeValueTargetLocation.BetweenMiddleAndSuffix,
                 ComposeValueTargetLocation.BetweenPrefixAndMiddle,
@@ -505,19 +495,7 @@ namespace SFDDCards
 
         public static string DescribeConceptualRemoveStatusEffect(ConceptualDeltaEntry deltaEntry)
         {
-            string stackstext = "stack(s)";
-
-            if (deltaEntry.ConceptualIntensity is ConstantEvaluatableValue<int> constant)
-            {
-                if (constant.ConstantValue != 1)
-                {
-                    stackstext = "stacks";
-                }
-                else
-                {
-                    stackstext = "stack";
-                }
-            }
+            string stackstext = ExtractSingularOrPlural(deltaEntry.ConceptualIntensity, "stack");
 
             // If this stack change is targeting the Owner of this entire effect,
             // and it's being applied to the target that holds this status,
@@ -550,11 +528,7 @@ namespace SFDDCards
 
         public static string DescribeRealizedRemoveStatusEffect(TokenEvaluatorBuilder builder)
         {
-            string stackstext = "stack";
-            if (builder.Intensity != 1)
-            {
-                stackstext = "stacks";
-            }
+            string stackstext = ExtractSingularOrPlural(builder.Intensity, "stack");
 
             // If this stack change is targeting the Owner of this entire effect,
             // and it's being applied to the target that holds this status,
@@ -591,11 +565,7 @@ namespace SFDDCards
 
         public static string DescribeResolvedRemoveStatusEffect(DeltaEntry delta)
         {
-            string stacktext = "stack";
-            if (delta.Intensity != 1)
-            {
-                stacktext = "stacks";
-            }
+            string stackstext = ExtractSingularOrPlural(delta.Intensity, "stack");
 
             return ComposeDescriptor<ICombatantTarget>(
                 $"from {delta.Target.Name}",
@@ -604,7 +574,7 @@ namespace SFDDCards
                 delta.MadeFromBuilder?.PreviousTokenBuilder?.Target,
                 delta.Intensity.ToString(),
                 "Remove",
-                $"{stacktext} of {delta.StatusEffect.Name}",
+                $"{stackstext} of {delta.StatusEffect.Name}",
                 String.Empty,
                 ComposeValueTargetLocation.BetweenMiddleAndSuffix,
                 ComposeValueTargetLocation.BetweenPrefixAndMiddle,
@@ -613,19 +583,7 @@ namespace SFDDCards
 
         public static string DescribeConceptualSetStatusEffect(ConceptualDeltaEntry deltaEntry)
         {
-            string stackstext = "stack(s)";
-
-            if (deltaEntry.ConceptualIntensity is ConstantEvaluatableValue<int> constant)
-            {
-                if (constant.ConstantValue != 1)
-                {
-                    stackstext = "stacks";
-                }
-                else
-                {
-                    stackstext = "stack";
-                }
-            }
+            string stackstext = ExtractSingularOrPlural(deltaEntry.ConceptualIntensity, "stack");
 
             // If this stack change is targeting the Owner of this entire effect,
             // and it's being applied to the target that holds this status,
@@ -657,11 +615,7 @@ namespace SFDDCards
 
         public static string DescribeRealizedSetStatusEffect(TokenEvaluatorBuilder builder)
         {
-            string stackstext = "stack";
-            if (builder.Intensity != 1)
-            {
-                stackstext = "stacks";
-            }
+            string stackstext = ExtractSingularOrPlural(builder.Intensity, "stack");
 
             // If this stack change is targeting the Owner of this entire effect,
             // and it's being applied to the target that holds this status,
@@ -693,6 +647,66 @@ namespace SFDDCards
                     && builder.Target.IsFoeOf(builder.User)
                     && builder.Target.GetRepresentingNumberOfTargets() == 1);
                 });
+        }
+
+        public static string ExtractSingularOrPlural(IEvaluatableValue<int> evaluatable, string root)
+        {
+            return ExtractSingularOrPlural(evaluatable, root, $"{root}s", $"{root}(s)");
+        }
+
+        public static string ExtractSingularOrPlural(int toUtilize, string root)
+        {
+            return ExtractSingularOrPlural(toUtilize, root, $"{root}s", $"{root}(s)");
+        }
+
+        public static string ExtractSingularOrPlural(IEvaluatableValue<int> evaluatable, string single, string plural, string dontknow)
+        {
+            switch (DeterminePlurality(evaluatable))
+            {
+                case IsPlural.Yes:
+                    return plural;
+                case IsPlural.No:
+                    return single;
+                default:
+                case IsPlural.DontKnow:
+                    return dontknow;
+            }
+        }
+
+        public static string ExtractSingularOrPlural(int toUse, string single, string plural, string dontknow)
+        {
+            switch (DeterminePlurality(toUse))
+            {
+                case IsPlural.Yes:
+                    return plural;
+                case IsPlural.No:
+                    return single;
+                default:
+                case IsPlural.DontKnow:
+                    return dontknow;
+            }
+        }
+
+        public static IsPlural DeterminePlurality(int toDetermine)
+        {
+            if (toDetermine == 1)
+            {
+                return IsPlural.No;
+            }
+            else
+            {
+                return IsPlural.Yes;
+            }
+        }
+
+        public static IsPlural DeterminePlurality(IEvaluatableValue<int> evaluatable)
+        {
+            if (evaluatable is ConstantEvaluatableValue<int> constant)
+            {
+                return DeterminePlurality(constant.ConstantValue);
+            }
+
+            return IsPlural.DontKnow;
         }
         #endregion
 
@@ -875,9 +889,11 @@ namespace SFDDCards
 
             foreach (ElementResourceChange change in delta.ElementResourceChanges)
             {
+                StringBuilder nextText = new StringBuilder();
+
                 if (change.SetValue != null)
                 {
-                    changeText.Append($"{leadingcomma}Set {change.Element.GetNameAndMaybeIcon()} to {change.SetValue.DescribeEvaluation()}");
+                    nextText.Append($"{leadingcomma}Set {change.Element.GetNameAndMaybeIcon()} to {change.SetValue.DescribeEvaluation()}");
                     leadingcomma = ", ";
                 }
                 else if (change.GainOrLoss != null)
@@ -886,26 +902,30 @@ namespace SFDDCards
                     {
                         if (constant.ConstantValue > 0 && !ignoreElementFlag)
                         {
-                            changeText.Append($"{leadingcomma}Gain {constant.ConstantValue.ToString()} {change.Element.GetNameAndMaybeIcon()}");
+                            nextText.Append($"{leadingcomma}Gain {constant.ConstantValue.ToString()} {change.Element.GetNameAndMaybeIcon()}");
                             leadingcomma = ", ";
                         }
                         else if (constant.ConstantValue < 0)
                         {
-                            changeText.Append($"{leadingcomma}Lose {constant.ConstantValue.ToString()} {change.Element.GetNameAndMaybeIcon()}");
+                            nextText.Append($"{leadingcomma}Lose {constant.ConstantValue.ToString()} {change.Element.GetNameAndMaybeIcon()}");
                             leadingcomma = ", ";
                         }
                     }
                     else
                     {
-                        changeText.Append($"{leadingcomma}Modify {change.Element.GetNameAndMaybeIcon()} by {change.SetValue.DescribeEvaluation()}");
+                        nextText.Append($"{leadingcomma}Modify {change.Element.GetNameAndMaybeIcon()} by {change.SetValue.DescribeEvaluation()}");
                         leadingcomma = ", ";
                     }
                 }
-            }
 
-            if (changeText.Length > 0)
-            {
-                changeText.Append(".");
+                string builderResult = nextText.ToString().Trim('.');
+
+                // If this had any text, it should always end in a period
+                if (builderResult.Length > 0)
+                {
+                    builderResult += ".";
+                    changeText.Append(builderResult);
+                }
             }
 
             return changeText.ToString();

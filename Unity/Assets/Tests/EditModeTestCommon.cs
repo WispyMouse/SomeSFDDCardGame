@@ -75,5 +75,22 @@ namespace SFDDCards.Tests.EditMode
 
             GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
         }
+
+        public static void AddBlankCardsToPlayerDeck(CombatDeck deck, int numberOfCards)
+        {
+            for (int ii = 0; ii < numberOfCards; ii++)
+            {
+                Guid cardId = Guid.NewGuid();
+                CardImport import = new CardImport()
+                {
+                    Id = cardId.ToString(),
+                    Name = cardId.ToString(),
+                    EffectScript = ""
+                };
+
+                Card derivedCard = new Card(import);
+                deck.CardsCurrentlyInDeck.Add(derivedCard);
+            }
+        }
     }
 }
