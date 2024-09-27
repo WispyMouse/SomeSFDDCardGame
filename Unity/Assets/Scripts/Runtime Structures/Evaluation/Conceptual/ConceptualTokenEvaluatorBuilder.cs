@@ -34,6 +34,9 @@ namespace SFDDCards.Evaluation.Conceptual
         public IRealizedOperationScriptingToken RealizedOperationScriptingToken = null;
         public ReactionWindowContext? CreatedFromContext;
 
+        public CardsEvaluatableValue RelevantCards = null;
+        public PlayerChoice ChoiceToMake = null;
+
         public ConceptualTokenEvaluatorBuilder(ConceptualTokenEvaluatorBuilder previousBuilder = null)
         {
             this.PreviousBuilder = previousBuilder;
@@ -45,6 +48,7 @@ namespace SFDDCards.Evaluation.Conceptual
                 this.Target = previousBuilder.Target;
                 this.Owner = previousBuilder.Owner;
                 this.CreatedFromContext = previousBuilder.CreatedFromContext;
+                this.RelevantCards = previousBuilder.RelevantCards;
             }
         }
 
@@ -125,6 +129,19 @@ namespace SFDDCards.Evaluation.Conceptual
             });
 
             return delta;
+        }
+
+        public bool ShouldLaunch
+        {
+            get
+            {
+                return
+                    (this.Intensity != null && this.IntensityKindType != IntensityKind.None)
+                    || (this.RealizedOperationScriptingToken != null)
+                    || (this.ChoiceToMake != null)
+                    || (this.ActionsToExecute.Count > 0)
+                    || (this.ElementResourceChanges.Count > 0);
+            }
         }
     }
 }

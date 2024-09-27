@@ -21,6 +21,11 @@ namespace SFDDCards
                 Owner = evaluatedAttack.Owner
             };
 
+            if (evaluatedAttack.Owner is Card card)
+            {
+                builder.RelevantCards = new SelfCardEvaluatableValue(card);
+            }
+
             foreach (Element baseElement in evaluatedAttack.BaseElementGain.Keys)
             {
                 builder.ElementResourceChanges.Add(new ElementResourceChange() { Element = baseElement, GainOrLoss = new ConstantEvaluatableValue<int>(evaluatedAttack.BaseElementGain[baseElement]) });
@@ -41,7 +46,7 @@ namespace SFDDCards
 
                 // If this is the last index in the builders, launch it now.
                 // Launch it if there is any value for Intensity, as well; everything that applies intensity implies separate action
-                if (builder.Intensity != null || scriptIndex == finalIndex || builder.RealizedOperationScriptingToken != null)
+                if (builder.ShouldLaunch || scriptIndex == finalIndex)
                 {
                     builders.Add(builder);
                     builder = new ConceptualTokenEvaluatorBuilder(builder);
@@ -69,6 +74,7 @@ namespace SFDDCards
                 {
                     resultingDelta.AppendDelta(realizedBuilder.GetEffectiveDelta(campaignContext));
                 }
+                previousBuilder = realizedBuilder;
             }
 
             return resultingDelta;
@@ -140,6 +146,10 @@ namespace SFDDCards
                     }
                     else if (!string.IsNullOrEmpty(currentRequirements))
                     {
+                        if (previousBuilder != null)
+                        {
+                            effectText.AppendLine();
+                        }
                         effectText.Append(currentRequirements.Trim());
                     }
                 }

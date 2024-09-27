@@ -33,8 +33,10 @@ namespace SFDDCards
                 decider = new RandomDecider<CardImport>();
             }
 
+            string lowerId = id.ToString();
+
             // If there are brackets, this might be a set of tag criteria.
-            Match tagMatches = Regex.Match(id, @"(?:\[(?<tag>[^]]+)\])+");
+            Match tagMatches = Regex.Match(lowerId, @"(?:\[(?<tag>[^]]+)\])+");
             if (tagMatches.Success)
             {
                 HashSet<string> tags = new HashSet<string>();
@@ -52,9 +54,9 @@ namespace SFDDCards
             }
             else
             {
-                if (!CardData.TryGetValue(id, out CardImport foundModel))
+                if (!CardData.TryGetValue(lowerId, out CardImport foundModel))
                 {
-                    Debug.LogError($"CardData dictionary lookup does not contain id {id}");
+                    Debug.LogError($"CardData dictionary lookup does not contain id {lowerId}");
                 }
 
                 return new Card(foundModel);
@@ -98,6 +100,23 @@ namespace SFDDCards
 
             card = new Card(decider.ChooseRandomly(candidates));
             return true;
+        }
+
+        public static Card[] GetOneOfEachCard()
+        {
+            List<Card> cards = new List<Card>();
+
+            foreach (string id in CardData.Keys)
+            {
+                cards.Add(GetModel(id));
+            }
+
+            return cards.ToArray();
+        }
+
+        public static void ClearDatabase()
+        {
+            CardData.Clear();
         }
     }
 }

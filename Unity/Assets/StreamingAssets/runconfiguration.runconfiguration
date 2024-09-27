@@ -1,17 +1,34 @@
 {
 	"StartingDeck": [
-		"starter_mortalstruggle",
-		"starter_mortalstruggle",
-		"starter_mortalstruggle",
-		
-		"starter_beginascension",
-		"starter_beginascension",
-		"starter_beginascension",
-		"starter_beginascension",
-		
-		"starter_block",
-		"starter_block",
-		"starter_block"
+		"common_burnarecord",
+		"common_burnarecord",
+		"common_burnarecord",
+		"common_burnarecord",
+		"common_burnarecord",
+		"common_burnarecord",
+		"common_burnarecord",
+		"common_burnarecord",
+		"common_burnarecord",
+		"common_burnarecord",
+		"common_burnarecord",
+		"common_burnarecord",
+		"common_burnarecord",
+		"common_burnarecord",
+		"common_burnarecord",
+		"common_burnarecord",
+		"common_burnarecord",
+		"common_burnarecord",
+		"common_burnarecord",
+		"common_burnarecord",
+		"common_burnarecord",
+		"common_burnarecord",
+		"common_burnarecord",
+		"common_burnarecord",
+		"common_burnarecord",
+		"common_burnarecord",
+		"common_burnarecord",
+		"common_burnarecord",
+		"common_burnarecord"
 	],
 	"StartingMaximumHealth": 50
 }

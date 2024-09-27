@@ -18,6 +18,7 @@ namespace SFDDCards.Evaluation.Actual
         public int Intensity;
 
         public TokenEvaluatorBuilder MadeFromBuilder;
+        public PlayerChoice ChoiceToMake => this?.MadeFromBuilder?.PlayerChoiceToMake;
 
         public TokenEvaluatorBuilder.IntensityKind IntensityKindType = TokenEvaluatorBuilder.IntensityKind.None;
         public TokenEvaluatorBuilder.NumberOfCardsRelation NumberOfCardsRelationType = TokenEvaluatorBuilder.NumberOfCardsRelation.None;
@@ -26,6 +27,8 @@ namespace SFDDCards.Evaluation.Actual
         public StatusEffect StatusEffect;
         public List<Action<DeltaEntry>> ActionsToExecute = new List<Action<DeltaEntry>>();
         public IRealizedOperationScriptingToken RealizedOperationScriptingToken = null;
+
+        public CardsEvaluatableValue RelevantCards = null;
 
         public readonly CampaignContext FromCampaign;
 
@@ -63,12 +66,15 @@ namespace SFDDCards.Evaluation.Actual
             this.StatusEffect = builder.StatusEffect;
             this.ActionsToExecute = builder.ActionsToExecute;
             this.RealizedOperationScriptingToken = builder.BasedOnConcept.RealizedOperationScriptingToken;
+            this.RelevantCards = builder.RelevantCardsEvaluatable;
+            this.NumberOfCardsRelationType = builder.NumberOfCardsRelationType;
         }
 
         public DeltaEntry(DeltaEntry spunFrom) : this(spunFrom.MadeFromBuilder)
         {
             this.User = spunFrom.User;
             this.Target = spunFrom.Target;
+            this.RelevantCards = spunFrom.RelevantCards;
         }
 
         public bool IsTargetingOriginalTarget

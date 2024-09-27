@@ -68,12 +68,17 @@ namespace SFDDCards.UX
 
         private void OnDisable()
         {
-            MouseHoverShowerController.MouseEndHoveredEvent.Invoke(this);
+            this.UnHoverOnDisable();
         }
 
         public void Clicked()
         {
             this.OnStatusEffectPressed?.Invoke(this.RepresentsEffect);
+        }
+
+        public void UnHoverOnDisable()
+        {
+            MouseHoverShowerController.MouseEndHoveredEvent.Invoke(this);
         }
     }
 }

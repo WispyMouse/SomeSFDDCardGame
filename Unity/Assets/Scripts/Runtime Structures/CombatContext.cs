@@ -174,6 +174,8 @@ namespace SFDDCards
             }
 
             GlobalUpdateUX.LogTextEvent.Invoke($"Playing card {toPlay.Name} on {toPlayOn.Name}", GlobalUpdateUX.LogType.GameEvent);
+
+            // The card is not in any zone, temporarily. It will later be moved to discard.
             this.PlayerCombatDeck.CardsCurrentlyInHand.Remove(toPlay);
 
             GlobalSequenceEventHolder.PushSequenceToTop(new GameplaySequenceEvent(
@@ -183,6 +185,7 @@ namespace SFDDCards
                 GlobalUpdateUX.LogTextEvent.Invoke(EffectDescriberDatabase.DescribeResolvedEffect(delta), GlobalUpdateUX.LogType.GameEvent);
                 delta.ApplyDelta(this.FromCampaign);
                 this.FromCampaign.CheckAllStateEffectsAndKnockouts();
+                this.PlayerCombatDeck.MoveCardToZoneIfNotInAnyZonesCurrently(toPlay, this.PlayerCombatDeck.CardsCurrentlyInDiscard);
             },
             null
             ));

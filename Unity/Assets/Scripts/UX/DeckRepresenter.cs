@@ -18,6 +18,8 @@ namespace SFDDCards.UX
         private TMPro.TMP_Text CardsInDeckValue;
         [SerializeReference]
         private TMPro.TMP_Text CardsInDiscardValue;
+        [SerializeReference]
+        private TMPro.TMP_Text CardsInExileValue;
 
         private void OnEnable()
         {
@@ -33,6 +35,10 @@ namespace SFDDCards.UX
         {
             if (this.CentralGameStateControllerInstance.CurrentCampaignContext == null)
             {
+                this.CardsInDeckValue.text = "0";
+                this.CardsInDiscardValue.text = "0";
+                this.CardsInExileValue.text = "0";
+
                 return;
             }
 
@@ -40,11 +46,13 @@ namespace SFDDCards.UX
             {
                 this.CardsInDeckValue.text = this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignDeck.AllCardsInDeck.Count.ToString();
                 this.CardsInDiscardValue.text = "0";
+                this.CardsInExileValue.text = "0";
                 return;
             }
 
             this.CardsInDeckValue.text = this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.PlayerCombatDeck.CardsCurrentlyInDeck.Count.ToString();
             this.CardsInDiscardValue.text = this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.PlayerCombatDeck.CardsCurrentlyInDiscard.Count.ToString();
+            this.CardsInExileValue.text = this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.PlayerCombatDeck.CardsCurrentlyInExile.Count.ToString();
         }
     }
 }

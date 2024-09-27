@@ -52,6 +52,9 @@ namespace SFDDCards.Evaluation.Actual
         public TokenEvaluatorBuilder PreviousTokenBuilder = null;
         public ConceptualTokenEvaluatorBuilder BasedOnConcept = null;
 
+        public PlayerChoice PlayerChoiceToMake => this.BasedOnConcept?.ChoiceToMake;
+        public CardsEvaluatableValue RelevantCardsEvaluatable;
+
         public TokenEvaluatorBuilder(ConceptualTokenEvaluatorBuilder concept, CampaignContext campaignContext, IEffectOwner owner, Combatant user, ICombatantTarget originalTarget, TokenEvaluatorBuilder previousBuilder = null)
         {
             this.Campaign = campaignContext;
@@ -60,6 +63,7 @@ namespace SFDDCards.Evaluation.Actual
             this.Owner = owner;
             this.User = user;
             this.OriginalTarget = originalTarget;
+            this.ElementResourceChanges = concept.ElementResourceChanges;
 
             if (concept.Target != null)
             {
@@ -76,6 +80,15 @@ namespace SFDDCards.Evaluation.Actual
             if (concept.Intensity != null && !concept.Intensity.TryEvaluateValue(campaignContext, this, out this.Intensity))
             {
                 GlobalUpdateUX.LogTextEvent.Invoke($"Intensity cannot be evaluated, cannot resolve effect.", GlobalUpdateUX.LogType.RuntimeError);
+            }
+
+            if (this.BasedOnConcept?.RelevantCards != null)
+            {
+                this.RelevantCardsEvaluatable = this.BasedOnConcept?.RelevantCards;
+            }
+            else if (this.PreviousTokenBuilder != null && this.PreviousTokenBuilder.RelevantCardsEvaluatable != null)
+            {
+                this.RelevantCardsEvaluatable = this.PreviousTokenBuilder.RelevantCardsEvaluatable;
             }
         }
 

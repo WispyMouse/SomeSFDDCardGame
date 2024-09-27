@@ -44,6 +44,7 @@ namespace SFDDCards.UX
             this.UXController.Annihilate();
             this.CurrentCampaignContext = null;
             this.UXController.ShowCampaignChooser();
+            GlobalUpdateUX.UpdateUXEvent.Invoke();
         }
 
         IEnumerator BootupSequence()

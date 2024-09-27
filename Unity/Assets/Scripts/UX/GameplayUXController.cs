@@ -20,6 +20,8 @@ namespace SFDDCards.UX
         private CombatTurnController CombatTurnCounterInstance;
         [SerializeReference]
         private CampaignChooserUX CampaignChooserUXInstance;
+        [SerializeReference]
+        private CardBrowser CardBrowserUXInstance;
 
         [SerializeReference]
         private RewardsPanelUX RewardsPanelUXInstance;
@@ -66,6 +68,9 @@ namespace SFDDCards.UX
         private TargetableIndicator NoTargetsIndicator;
         [SerializeReference]
         private TargetableIndicator AllFoeTargetsIndicator;
+
+        [SerializeReference]
+        private GameObject AllCardsBrowserButton;
 
         [SerializeReference]
         private TMPro.TMP_Text Log;
@@ -226,6 +231,15 @@ namespace SFDDCards.UX
 
         public void UpdateUX()
         {
+            if (this.CardBrowserUXInstance.gameObject.activeInHierarchy)
+            {
+                this.AllCardsBrowserButton.SetActive(false);
+            }
+            else
+            {
+                this.AllCardsBrowserButton.SetActive(true);
+            }
+
             this.CheckAndActIfGameCampaignNavigationStateChanged();
             this.RemoveDefeatedEntities();
             this.SetElementValueLabel();
@@ -322,6 +336,8 @@ namespace SFDDCards.UX
             this.CurrentSelectedCard?.DisableSelectionGlow();
             this.CurrentSelectedCard = null;
 
+            this.CardBrowserUXInstance.Close();
+
             ClearAllTargetableIndicators();
         }
 
@@ -399,6 +415,9 @@ namespace SFDDCards.UX
         {
             if (this.CentralGameStateControllerInstance?.CurrentCampaignContext?.CampaignPlayer == null)
             {
+                this.LifeValue.text = "0";
+                this.PlayerStatusEffectUXHolderInstance.Annihilate();
+
                 return;
             }
 
@@ -563,6 +582,8 @@ namespace SFDDCards.UX
 
         public void EndTurn()
         {
+            this.CancelAllSelections();
+
             if (GlobalSequenceEventHolder.StackedSequenceEvents.Count > 0)
             {
                 GlobalUpdateUX.LogTextEvent.Invoke($"Animations and events are happening, can't end turn yet.", GlobalUpdateUX.LogType.GameEvent);
@@ -580,11 +601,14 @@ namespace SFDDCards.UX
 
         public void PresentAwards(Reward toPresent)
         {
+            this.CancelAllSelections();
             this.ShowRewardsPanel(toPresent);
         }
 
         void PresentNextRouteChoice()
         {
+            this.CancelAllSelections();
+
             ChoiceNode campaignNode = this.CentralGameStateControllerInstance.CurrentCampaignContext.GetCampaignCurrentNode();
 
             if (campaignNode == null)
@@ -599,21 +623,25 @@ namespace SFDDCards.UX
 
         void ClearRouteUX()
         {
+            this.CancelAllSelections();
             this.ChoiceUXFolder.SetActive(false);
         }
 
         public void NodeIsChosen(ChoiceNodeOption option)
         {
+            this.CancelAllSelections();
             this.CentralGameStateControllerInstance.CurrentCampaignContext.MakeChoiceNodeDecision(option);
         }
 
         public void ProceedToNextRoom()
         {
+            this.CancelAllSelections();
             this.CentralGameStateControllerInstance.CurrentCampaignContext.SetCampaignState(CampaignContext.GameplayCampaignState.MakingRouteChoice);
         }
 
         public void RouteChosen(RouteImport chosenRoute)
         {
+            this.CancelAllSelections();
             this.CentralGameStateControllerInstance.RouteChosen(chosenRoute);
         }
 
@@ -652,6 +680,86 @@ namespace SFDDCards.UX
                     GlobalSequenceEventHolder.PushSequencesToTop(events.ToArray());
                 }
             }
+        }
+
+        public void OpenAllCardsBrowser()
+        {
+            if (this.CardBrowserUXInstance.gameObject.activeInHierarchy)
+            {
+                GlobalUpdateUX.LogTextEvent.Invoke($"The card browser is already open. Perhaps you need to respond to an event.", GlobalUpdateUX.LogType.UserError);
+                return;
+            }
+
+            this.CardBrowserUXInstance.gameObject.SetActive(true);
+            this.CardBrowserUXInstance.SetLabelText("Now Viewing: All Cards");
+            this.CardBrowserUXInstance.SetFromCards(CardDatabase.GetOneOfEachCard());
+            GlobalUpdateUX.UpdateUXEvent.Invoke();
+        }
+
+        public void OpenDiscardCardsBrowser()
+        {
+            if (this.CardBrowserUXInstance.gameObject.activeInHierarchy)
+            {
+                GlobalUpdateUX.LogTextEvent.Invoke($"The card browser is already open. Perhaps you need to respond to an event.", GlobalUpdateUX.LogType.UserError);
+                return;
+            }
+
+            if (this.CentralGameStateControllerInstance?.CurrentCampaignContext?.CurrentCombatContext == null)
+            {
+                return;
+            }
+
+            this.CardBrowserUXInstance.gameObject.SetActive(true);
+            this.CardBrowserUXInstance.SetLabelText("Now Viewing: Cards in Discard");
+            this.CardBrowserUXInstance.SetFromCards(this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.PlayerCombatDeck.CardsCurrentlyInDiscard);
+        }
+
+        public void OpenDeckCardsBrowser()
+        {
+            if (this.CardBrowserUXInstance.gameObject.activeInHierarchy)
+            {
+                GlobalUpdateUX.LogTextEvent.Invoke($"The card browser is already open. Perhaps you need to respond to an event.", GlobalUpdateUX.LogType.UserError);
+                return;
+            }
+
+            if (this.CentralGameStateControllerInstance?.CurrentCampaignContext == null)
+            {
+                return;
+            }
+
+            List<Card> cardsInDeck = new List<Card>(this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignDeck.AllCardsInDeck);
+
+            if (this.CentralGameStateControllerInstance?.CurrentCampaignContext?.CurrentCombatContext != null)
+            {
+                cardsInDeck = new List<Card>(this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.PlayerCombatDeck.CardsCurrentlyInDeck);
+            }
+
+            cardsInDeck.Sort((Card a, Card b) => a.Name.CompareTo(b.Name));
+
+            this.CardBrowserUXInstance.gameObject.SetActive(true);
+            this.CardBrowserUXInstance.SetLabelText("Now Viewing: Cards in Deck");
+            this.CardBrowserUXInstance.SetFromCards(cardsInDeck);
+        }
+
+        public void OpenExileCardsBrowser()
+        {
+            if (this.CardBrowserUXInstance.gameObject.activeInHierarchy)
+            {
+                GlobalUpdateUX.LogTextEvent.Invoke($"The card browser is already open. Perhaps you need to respond to an event.", GlobalUpdateUX.LogType.UserError);
+                return;
+            }
+
+            if (this.CentralGameStateControllerInstance?.CurrentCampaignContext?.CurrentCombatContext == null)
+            {
+                return;
+            }
+
+            List<Card> cardsInExile = new List<Card>(this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.PlayerCombatDeck.CardsCurrentlyInExile);
+            cardsInExile.Sort((Card a, Card b) => a.Name.CompareTo(b.Name));
+
+            this.CardBrowserUXInstance.gameObject.SetActive(true);
+            this.CardBrowserUXInstance.SetLabelText("Now Viewing: Cards in Exile");
+            this.CardBrowserUXInstance.SetFromCards(cardsInExile);
         }
     }
 }
