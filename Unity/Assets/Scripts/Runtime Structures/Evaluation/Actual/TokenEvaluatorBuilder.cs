@@ -61,9 +61,16 @@ namespace SFDDCards.Evaluation.Actual
             this.User = user;
             this.OriginalTarget = originalTarget;
 
-            if (concept.Target != null && !concept.Target.TryEvaluateValue(campaignContext, this, out this.Target))
+            if (concept.Target != null)
             {
-                GlobalUpdateUX.LogTextEvent.Invoke($"Target cannot be evaluated, cannot resolve effect.", GlobalUpdateUX.LogType.RuntimeError);
+                if (!concept.Target.TryEvaluateValue(campaignContext, this, out this.Target))
+                {
+                    GlobalUpdateUX.LogTextEvent.Invoke($"Target cannot be evaluated, cannot resolve effect.", GlobalUpdateUX.LogType.RuntimeError);
+                }
+            }
+            else
+            {
+                this.Target = this.User;
             }
 
             if (concept.Intensity != null && !concept.Intensity.TryEvaluateValue(campaignContext, this, out this.Intensity))
@@ -76,19 +83,6 @@ namespace SFDDCards.Evaluation.Actual
         {
             GamestateDelta delta = new GamestateDelta();
             DeltaEntry deltaEntry = new DeltaEntry(this);
-
-            if (this.BasedOnConcept.RealizedOperationScriptingToken != null)
-            {
-                this.BasedOnConcept.RealizedOperationScriptingToken.ApplyToDelta(deltaEntry, out List<DeltaEntry> stackedDeltas);
-                if (stackedDeltas != null)
-                {
-                    foreach (DeltaEntry stackedEntry in stackedDeltas)
-                    {
-                        delta.DeltaEntries.Add(stackedEntry);
-                    }
-                }
-            }
-
             delta.DeltaEntries.Add(deltaEntry);
 
             return delta;

@@ -27,6 +27,8 @@ namespace SFDDCards.Evaluation.Actual
         public List<Action<DeltaEntry>> ActionsToExecute = new List<Action<DeltaEntry>>();
         public IRealizedOperationScriptingToken RealizedOperationScriptingToken = null;
 
+        public readonly CampaignContext FromCampaign;
+
         /// <summary>
         /// An indicator of who the original target of the ability is.
         /// If an ability has a 'FoeTarget' as its original target, then it's a targetable card.
@@ -34,17 +36,26 @@ namespace SFDDCards.Evaluation.Actual
         /// </summary>
         public ICombatantTarget OriginalTarget;
 
-        public DeltaEntry()
+        public DeltaEntry(CampaignContext fromCampaign, Combatant user, ICombatantTarget target)
         {
+            this.FromCampaign = fromCampaign;
+            this.User = user;
+            this.Target = target;
 
+            this.MadeFromBuilder = new TokenEvaluatorBuilder(new ConceptualTokenEvaluatorBuilder(),
+                fromCampaign,
+                user,
+                user,
+                target);
         }
 
         public DeltaEntry(TokenEvaluatorBuilder builder)
         {
-            this.MadeFromBuilder = builder;
+            this.FromCampaign = builder.Campaign;
             this.User = builder.User;
             this.Target = builder.Target;
 
+            this.MadeFromBuilder = builder;
             this.Intensity = builder.Intensity;
             this.IntensityKindType = builder.IntensityKindType;
             this.ElementResourceChanges = builder.ElementResourceChanges;
@@ -54,9 +65,8 @@ namespace SFDDCards.Evaluation.Actual
             this.RealizedOperationScriptingToken = builder.BasedOnConcept.RealizedOperationScriptingToken;
         }
 
-        public DeltaEntry(DeltaEntry spunFrom)
+        public DeltaEntry(DeltaEntry spunFrom) : this(spunFrom.MadeFromBuilder)
         {
-            this.MadeFromBuilder = spunFrom.MadeFromBuilder;
             this.User = spunFrom.User;
             this.Target = spunFrom.Target;
         }
@@ -82,7 +92,7 @@ namespace SFDDCards.Evaluation.Actual
             }
 
             int evaluatedValue = 0;
-            if (!BaseScriptingToken.TryGetIntegerEvaluatableFromStrings(new List<string>() { argument }, out IEvaluatableValue<int> output, out _) || !output.TryEvaluateValue(this.MadeFromBuilder.Campaign, this.MadeFromBuilder, out evaluatedValue))
+            if (!(BaseScriptingToken.TryGetIntegerEvaluatableFromStrings(new List<string>() { argument }, out IEvaluatableValue<int> output, out _, allowNameMatch: true) && output.TryEvaluateValue(this.FromCampaign, this.MadeFromBuilder, out evaluatedValue)))
             {
                 GlobalUpdateUX.LogTextEvent.Invoke($"Failed to parse argument {argument}.", GlobalUpdateUX.LogType.RuntimeError);
             }
@@ -92,7 +102,7 @@ namespace SFDDCards.Evaluation.Actual
 
         public DeltaEntry SetArgumentValue(string argument, int newValue)
         {
-            if (argument == "intensity")
+            if (argument.ToLower() == "intensity")
             {
                 this.Intensity = newValue;
                 return null;

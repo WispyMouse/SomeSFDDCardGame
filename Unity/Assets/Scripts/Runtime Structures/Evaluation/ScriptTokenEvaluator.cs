@@ -13,10 +13,10 @@ namespace SFDDCards
 
     public static class ScriptTokenEvaluator
     {
-        public static List<ConceptualTokenEvaluatorBuilder> CalculateConceptualBuildersFromTokenEvaluation(IAttackTokenHolder evaluatedAttack)
+        public static List<ConceptualTokenEvaluatorBuilder> CalculateConceptualBuildersFromTokenEvaluation(IAttackTokenHolder evaluatedAttack, ReactionWindowContext? context = null)
         {
             List<ConceptualTokenEvaluatorBuilder> builders = new List<ConceptualTokenEvaluatorBuilder>();
-            ConceptualTokenEvaluatorBuilder builder = new ConceptualTokenEvaluatorBuilder()
+            ConceptualTokenEvaluatorBuilder builder = new ConceptualTokenEvaluatorBuilder(context)
             {
                 Owner = evaluatedAttack.Owner
             };
@@ -51,9 +51,9 @@ namespace SFDDCards
             return builders;
         }
 
-        public static GamestateDelta CalculateRealizedDeltaEvaluation(IAttackTokenHolder evaluatedAttack, CampaignContext campaignContext, IEffectOwner owner, Combatant user, ICombatantTarget originalTarget)
+        public static GamestateDelta CalculateRealizedDeltaEvaluation(IAttackTokenHolder evaluatedAttack, CampaignContext campaignContext, IEffectOwner owner, Combatant user, ICombatantTarget originalTarget, ReactionWindowContext? context = null)
         {
-            List<ConceptualTokenEvaluatorBuilder> concepts = CalculateConceptualBuildersFromTokenEvaluation(evaluatedAttack);
+            List<ConceptualTokenEvaluatorBuilder> concepts = CalculateConceptualBuildersFromTokenEvaluation(evaluatedAttack, context);
             return RealizeConceptualBuilders(concepts, campaignContext, owner, user, originalTarget);
         }
 
@@ -77,6 +77,19 @@ namespace SFDDCards
         public static TokenEvaluatorBuilder RealizeConceptualBuilder(ConceptualTokenEvaluatorBuilder concept, CampaignContext campaignContext, IEffectOwner owner, Combatant user, ICombatantTarget originalTarget, TokenEvaluatorBuilder previousBuilder = null)
         {
             return new TokenEvaluatorBuilder(concept, campaignContext, owner, user, originalTarget, previousBuilder);
+        }
+
+        public static GamestateDelta GetDeltaFromTokens(string attackTokens, CampaignContext context, Combatant user, ICombatantTarget target)
+        {
+            IAttackTokenHolder pile = ScriptingTokenDatabase.GetAllTokens(attackTokens, user);
+            GamestateDelta delta = CalculateRealizedDeltaEvaluation(
+                    pile,
+                    context,
+                    user,
+                    user,
+                    target);
+
+            return delta;
         }
 
         public static string DescribeCardText(Card importingCard)

@@ -50,7 +50,7 @@ namespace SFDDCards.ScriptingTokens
 
         public override bool RequiresTarget()
         {
-            return false;
+            return true;
         }
 
         public bool MeetsRequirement(TokenEvaluatorBuilder builder, CampaignContext context)
@@ -60,6 +60,12 @@ namespace SFDDCards.ScriptingTokens
                 return false;
             }
 
-            return builder.Target.OverlapsTarget(builder.User, targetEvaluated) || targetEvaluated.OverlapsTarget(builder.User, builder.Target);        }
+            if (builder.User.OverlapsTarget(builder.User, targetEvaluated))
+            {
+                return true;
+            }
+
+            return false;
+        }
     }
 }

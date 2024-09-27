@@ -63,22 +63,29 @@ namespace SFDDCards.ScriptingTokens
             return $"Reduce {this.ReduceArgumentOne} by {this.ReduceArgumentTwo}.";
         }
 
-        public void ApplyToDelta(DeltaEntry toApplyTo, out List<DeltaEntry> stackedDeltas)
+        public void ApplyToDelta(DeltaEntry applyingDuringEntry, ReactionWindowContext? context, out List<DeltaEntry> stackedDeltas)
         {
-            int argumentOneValue = toApplyTo.GetArgumentValue(this.ReduceArgumentOne);
-            int argumentTwoValue = toApplyTo.GetArgumentValue(this.ReduceArgumentTwo);
+            if (!context.HasValue)
+            {
+                GlobalUpdateUX.LogTextEvent.Invoke($"Attempted to apply a reaction realized token without a context.", GlobalUpdateUX.LogType.RuntimeError);
+            }
+
+            int argumentOneValue = context.Value.ResultingDelta.GetArgumentValue(this.ReduceArgumentOne);
+            int argumentTwoValue = context.Value.ResultingDelta.GetArgumentValue(this.ReduceArgumentTwo);
 
             int argumentOneFinalValue = argumentOneValue > argumentTwoValue ? argumentOneValue - argumentTwoValue : 0;
             int argumentTwoFinalValue = argumentTwoValue > argumentOneValue ? argumentTwoValue - argumentOneValue : 0;
 
-            DeltaEntry pushDeltaOne = toApplyTo.SetArgumentValue(ReduceArgumentTwo, argumentTwoFinalValue);
-            DeltaEntry pushDeltaTwo = toApplyTo.SetArgumentValue(ReduceArgumentTwo, argumentTwoFinalValue);
+            DeltaEntry pushDeltaOne = context.Value.ResultingDelta.SetArgumentValue(ReduceArgumentOne, argumentOneFinalValue);
+            DeltaEntry pushDeltaTwo = context.Value.ResultingDelta.SetArgumentValue(ReduceArgumentTwo, argumentTwoFinalValue);
 
             stackedDeltas = new List<DeltaEntry>();
+
             if (pushDeltaOne != null)
             {
                 stackedDeltas.Add(pushDeltaOne);
             }
+
             if (pushDeltaTwo != null)
             {
                 stackedDeltas.Add(pushDeltaTwo);

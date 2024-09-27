@@ -32,18 +32,25 @@ namespace SFDDCards.Evaluation.Conceptual
         public ConceptualTokenEvaluatorBuilder PreviousBuilder;
         public List<Action<DeltaEntry>> ActionsToExecute = new List<Action<DeltaEntry>>();
         public IRealizedOperationScriptingToken RealizedOperationScriptingToken = null;
+        public ReactionWindowContext? CreatedFromContext;
 
         public ConceptualTokenEvaluatorBuilder(ConceptualTokenEvaluatorBuilder previousBuilder = null)
         {
             this.PreviousBuilder = previousBuilder;
 
-            if (previousBuilder != null)
+            if (PreviousBuilder != null)
             {
                 this.ElementRequirements = new Dictionary<Element, IEvaluatableValue<int>>(previousBuilder.ElementRequirements);
                 this.OriginalTarget = previousBuilder.OriginalTarget;
                 this.Target = previousBuilder.Target;
                 this.Owner = previousBuilder.Owner;
+                this.CreatedFromContext = previousBuilder.CreatedFromContext;
             }
+        }
+
+        public ConceptualTokenEvaluatorBuilder(ReactionWindowContext? context, ConceptualTokenEvaluatorBuilder previousBuilder = null) : this(previousBuilder)
+        {
+            this.CreatedFromContext = context;
         }
 
         public bool HasSameElementRequirement(ConceptualTokenEvaluatorBuilder previous)

@@ -125,7 +125,7 @@ namespace SFDDCards
 
         public static bool TryGetStatusEffectById(string id, out StatusEffect effect)
         {
-            return EffectData.TryGetValue(id, out effect);
+            return EffectData.TryGetValue(id.ToLower(), out effect);
         }
     }
 }

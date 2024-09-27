@@ -1,6 +1,7 @@
 namespace SFDDCards.UX
 {
     using SFDDCards.Evaluation.Actual;
+    using SFDDCards.ScriptingTokens;
     using System;
     using System.Collections;
     using System.Collections.Generic;
@@ -51,20 +52,20 @@ namespace SFDDCards.UX
             }
             else if (slotChosen.RewardedEffect != null)
             {
-                this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignPlayer.ApplyDelta(
-                    this.CentralGameStateControllerInstance.CurrentCampaignContext,
-                    null,
-                    new DeltaEntry()
-                    {
-                        Target = this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignPlayer,
-                        User = this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignPlayer,
-                        StatusEffect = slotChosen.RewardedEffect,
-                        Intensity = 1,
-                        IntensityKindType = TokenEvaluatorBuilder.IntensityKind.ApplyStatusEffect
-                    });
-            }
+                GlobalSequenceEventHolder.PushSequenceToTop(new GameplaySequenceEvent(() =>
+                {
+                    this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignPlayer.ApplyDelta(
+                       this.CentralGameStateControllerInstance.CurrentCampaignContext,
+                       null,
+                       ScriptTokenEvaluator.GetDeltaFromTokens($"[SETTARGET:SELF][APPLYSTATUSEFFECTSTACKS: 1 {slotChosen.RewardedEffect.Id}]",
+                       this.CentralGameStateControllerInstance.CurrentCampaignContext,
+                       this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignPlayer,
+                       this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignPlayer)
+                       .DeltaEntries[0]);
 
-            GlobalUpdateUX.UpdateUXEvent?.Invoke();
+                    GlobalUpdateUX.UpdateUXEvent?.Invoke();
+                }));
+            }
         }
 
         public void ClosePanel(PickXRewardPanelUX toClose)
