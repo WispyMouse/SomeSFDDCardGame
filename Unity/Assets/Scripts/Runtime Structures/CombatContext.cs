@@ -200,6 +200,8 @@ namespace SFDDCards
             GlobalUpdateUX.LogTextEvent.Invoke(EffectDescriberDatabase.DescribeResolvedEffect(delta), GlobalUpdateUX.LogType.GameEvent);
             delta.ApplyDelta(this.FromCampaign);
 
+            toAct.Intent = null;
+
             this.FromCampaign.CheckAllStateEffectsAndKnockouts();
         }
 
@@ -323,7 +325,7 @@ namespace SFDDCards
                     }));
             }
             
-            nextEvents.Add(new GameplaySequenceEvent(() => this.EndEnemyTurn(TurnStatus.PlayerTurn)));
+            nextEvents.Add(new GameplaySequenceEvent(() => this.EndCurrentTurnAndChangeTurn(TurnStatus.PlayerTurn)));
 
             GlobalSequenceEventHolder.PushSequencesToTop(nextEvents.ToArray());
         }
