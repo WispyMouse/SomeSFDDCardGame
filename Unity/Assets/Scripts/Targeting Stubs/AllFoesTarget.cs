@@ -71,5 +71,23 @@ namespace SFDDCards
         {
             return this.AffectedTargets.Count;
         }
+
+        public bool IncludesTarget(Combatant target)
+        {
+            return this.AffectedTargets.Exists(x => x.Equals(target));
+        }
+
+        public bool OverlapsTarget(Combatant perspective, ICombatantTarget target)
+        {
+            foreach (ICombatantTarget affectedTarget in this.AffectedTargets)
+            {
+                if (!affectedTarget.OverlapsTarget(perspective, target))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
     }
 }

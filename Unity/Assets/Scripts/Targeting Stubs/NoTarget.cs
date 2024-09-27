@@ -42,5 +42,15 @@ namespace SFDDCards
         {
             return 0;
         }
+
+        public bool IncludesTarget(Combatant target)
+        {
+            return false;
+        }
+
+        public bool OverlapsTarget(Combatant perspective, ICombatantTarget target)
+        {
+            return this.Equals(target);
+        }
     }
 }

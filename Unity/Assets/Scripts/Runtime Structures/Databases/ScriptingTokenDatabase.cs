@@ -13,13 +13,17 @@ namespace SFDDCards.ScriptingTokens
             new DamageScriptingToken(),
             new DrawScriptingToken(),
             new HealScriptingToken(),
+
             new ApplyStatusEffectStacksScriptingToken(),
             new RemoveStatusEffectStacksScriptingToken(),
+            new SetStatusEffectStacksScriptingToken(),
+            new DrainBothScriptingToken(),
 
             // Meta Token
             new ResetScriptingToken(),
             new LogIntScriptingToken(),
             new RequiresComparisonScriptingToken(),
+            new IfTargetScriptingToken(),
 
             // Targeting Token
             new SetTargetScriptingToken(),
@@ -28,6 +32,7 @@ namespace SFDDCards.ScriptingTokens
             new GainElementScriptingToken(),
             new RequiresAtLeastElementScriptingToken(),
             new DrainsElementScriptingToken(),
+            new SetElementScriptingToken()
         };
 
         public static List<AliasScriptingToken> AllTokenAliases = new List<AliasScriptingToken>()

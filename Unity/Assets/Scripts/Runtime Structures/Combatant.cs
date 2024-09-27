@@ -65,6 +65,25 @@ namespace SFDDCards
                     }
                 }
             }
+            else if (deltaEntry.IntensityKindType == TokenEvaluatorBuilder.IntensityKind.SetStatusEffect)
+            {
+                AppliedStatusEffect existingEffect = this.AppliedStatusEffects.Find(x => x.BasedOnStatusEffect == deltaEntry.StatusEffect);
+                if (existingEffect != null)
+                {
+                    existingEffect.Stacks = deltaEntry.Intensity;
+                    if (existingEffect.Stacks <= 0)
+                    {
+                        campaignContext.UnsubscribeReactor(existingEffect);
+                        AppliedStatusEffects.Remove(existingEffect);
+                    }
+                }
+                else if (deltaEntry.Intensity > 0)
+                {
+                    AppliedStatusEffect newEffect = new AppliedStatusEffect(this, deltaEntry.StatusEffect, deltaEntry.Intensity);
+                    this.AppliedStatusEffects.Add(newEffect);
+                    newEffect.SetSubscriptions(campaignContext);
+                }
+            }
 
             GlobalUpdateUX.UpdateUXEvent.Invoke();
         }
@@ -118,6 +137,16 @@ namespace SFDDCards
         public int GetRepresentingNumberOfTargets()
         {
             return 1;
+        }
+
+        public bool IncludesTarget(Combatant target)
+        {
+            return this.Equals(target);
+        }
+
+        public bool OverlapsTarget(Combatant perspective, ICombatantTarget target)
+        {
+            return this.Equals(target);
         }
     }
 }

@@ -18,6 +18,12 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
 
         public bool TryEvaluateValue(CampaignContext campaignContext, TokenEvaluatorBuilder currentBuilder, out int evaluatedValue)
         {
+            if (CountOn.ToLower() == "self")
+            {
+                evaluatedValue = currentBuilder.User.CountStacks(this.StacksToCount);
+                return true;
+            }
+
             if (currentBuilder.Target == null)
             {
                 evaluatedValue = 0;
@@ -33,7 +39,7 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
             return $"1 x {this.StacksToCount}";
         }
 
-        public static bool TryGetCountStacksEvaluatableValue(string argument, out CountStacksEvaluatableValue output)
+        public static bool TryGetCountStacksEvaluatableValue(string argument, out CountStacksEvaluatableValue output, bool allowNameMatch)
         {
             // Check to see if this is counting self
             Match regexMatch = Regex.Match(argument, @"COUNTSTACKSSELF_(\w+)");
@@ -48,15 +54,21 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
 
             regexMatch = Regex.Match(argument, @"COUNTSTACKS_(\w+)");
 
-            if (!regexMatch.Success)
+            if (regexMatch.Success)
             {
-                output = null;
-                return false;
+                stackId = regexMatch.Groups[1].Value;
+                output = new CountStacksEvaluatableValue(stackId, "target");
+                return true;
             }
 
-            stackId = regexMatch.Groups[1].Value;
-            output = new CountStacksEvaluatableValue(stackId, "target");
-            return true;
+            if (allowNameMatch && StatusEffectDatabase.TryGetStatusEffectById(argument, out StatusEffect statusEffect))
+            {
+                output = new CountStacksEvaluatableValue(argument, "target");
+                return true;
+            }
+
+            output = null;
+            return false;
         }
 
         public string GetScriptingTokenText()

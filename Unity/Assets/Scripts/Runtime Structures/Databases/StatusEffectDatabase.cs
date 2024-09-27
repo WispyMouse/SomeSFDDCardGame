@@ -122,5 +122,10 @@ namespace SFDDCards
             effect = decider.ChooseRandomly(candidates);
             return true;
         }
+
+        public static bool TryGetStatusEffectById(string id, out StatusEffect effect)
+        {
+            return EffectData.TryGetValue(id.ToLower(), out effect);
+        }
     }
 }

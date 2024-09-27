@@ -27,19 +27,25 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
             return $"amount of {ElementToCount}";
         }
 
-        public static bool TryGetCountElementalEvaluatableValue(string argument, out CountElementEvaluatableValue output)
+        public static bool TryGetCountElementalEvaluatableValue(string argument, out CountElementEvaluatableValue output, bool allowNameMatch)
         {
             Match regexMatch = Regex.Match(argument, @"COUNTELEMENT_(\w+)");
 
-            if (!regexMatch.Success)
+            if (regexMatch.Success)
             {
-                output = null;
-                return false;
+                string stackId = regexMatch.Groups[1].Value;
+                output = new CountElementEvaluatableValue(stackId);
+                return true;
             }
 
-            string stackId = regexMatch.Groups[1].Value;
-            output = new CountElementEvaluatableValue(stackId);
-            return true;
+            if (allowNameMatch && ElementDatabase.TryGetElement(argument, out Element elementOutput))
+            {
+                output = new CountElementEvaluatableValue(elementOutput.Id);
+                return true;
+            }
+
+            output = null;
+            return false;
         }
 
         public string GetScriptingTokenText()

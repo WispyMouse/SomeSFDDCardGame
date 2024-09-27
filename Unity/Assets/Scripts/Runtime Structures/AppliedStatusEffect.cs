@@ -45,7 +45,7 @@ namespace SFDDCards
 
             foreach (AttackTokenPile tokenList in tokens)
             {
-                events.Add(new GameplaySequenceEvent(() => campaignContext.StatusEffectHappeningProc(new StatusEffectHappening(this, tokenList.AttackTokens)), null));
+                events.Add(new GameplaySequenceEvent(() => campaignContext.StatusEffectHappeningProc(new StatusEffectHappening(this, reactionContext, tokenList.AttackTokens)), null));
             };
 
             return true;

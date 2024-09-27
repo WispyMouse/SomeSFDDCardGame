@@ -3,14 +3,15 @@
 		"starter_mortalstruggle",
 		"starter_mortalstruggle",
 		"starter_mortalstruggle",
-		"starter_mortalstruggle",
-		"starter_mortalstruggle",
 		
 		"starter_beginascension",
 		"starter_beginascension",
 		"starter_beginascension",
 		"starter_beginascension",
-		"starter_beginascension",
+		
+		"starter_block",
+		"starter_block",
+		"starter_block"
 	],
 	"StartingMaximumHealth": 50
 }

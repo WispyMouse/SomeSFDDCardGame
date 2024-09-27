@@ -9,7 +9,7 @@ namespace SFDDCards.Tests.EditMode
     using System.Text;
     using UnityEngine;
     using SFDDCards.Evaluation.Actual;
-
+    using SFDDCards.ScriptingTokens.EvaluatableValues;
 
     public class TargetingTests : EditModeTestBase
     {

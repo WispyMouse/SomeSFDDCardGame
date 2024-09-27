@@ -6,7 +6,7 @@ using SFDDCards.Evaluation.Conceptual;
 
 namespace SFDDCards.ScriptingTokens
 {
-    public class RequiresComparisonScriptingToken : BaseScriptingToken
+    public class RequiresComparisonScriptingToken : BaseScriptingToken, IRequirement
     {
         public enum Comparison
         {
@@ -26,7 +26,7 @@ namespace SFDDCards.ScriptingTokens
 
         public override void ApplyToken(ConceptualTokenEvaluatorBuilder tokenBuilder)
         {
-            tokenBuilder.RequiresComparisons.Add(this);
+            tokenBuilder.Requirements.Add(this);
         }
 
         public override bool RequiresTarget()
@@ -108,6 +108,35 @@ namespace SFDDCards.ScriptingTokens
                 default:
                     return Comparison.NotAComparison;
             }
+        }
+
+        public bool MeetsRequirement(TokenEvaluatorBuilder builder, CampaignContext context)
+        {
+            if (!this.Left.TryEvaluateValue(context, builder, out int leftValue))
+            {
+                return false;
+            }
+
+            if (!this.Right.TryEvaluateValue(context, builder, out int rightValue))
+            {
+                return false;
+            }
+
+            switch (this.ComparisonType)
+            {
+                case RequiresComparisonScriptingToken.Comparison.LessThan:
+                    return leftValue < rightValue;
+                case RequiresComparisonScriptingToken.Comparison.LessThanOrEqual:
+                    return leftValue <= rightValue;
+                case RequiresComparisonScriptingToken.Comparison.EqualTo:
+                    return leftValue == rightValue;
+                case RequiresComparisonScriptingToken.Comparison.GreaterThan:
+                    return leftValue > rightValue;
+                case RequiresComparisonScriptingToken.Comparison.GreaterThanOrEqual:
+                    return leftValue >= rightValue;
+            }
+
+            return false;
         }
     }
 }

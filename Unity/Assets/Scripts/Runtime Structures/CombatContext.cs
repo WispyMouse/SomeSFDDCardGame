@@ -62,30 +62,62 @@ namespace SFDDCards
 
         public void ApplyElementResourceChange(TokenEvaluatorBuilder fromBuilder, ElementResourceChange toChange)
         {
-            if (!toChange.GainOrLoss.TryEvaluateValue(this.FromCampaign, fromBuilder, out int evaluatedValue))
+            if (toChange.GainOrLoss != null)
             {
-                GlobalUpdateUX.LogTextEvent?.Invoke($"Failed to parse evaluatable value for applying resource change.", GlobalUpdateUX.LogType.RuntimeError);
-                return;
-            }
-
-            if (this.ElementResourceCounts.TryGetValue(toChange.Element, out int currentAmount))
-            {
-                int newAmount = Mathf.Max(0, currentAmount + evaluatedValue);
-
-                if (newAmount > 0)
+                if (!toChange.GainOrLoss.TryEvaluateValue(this.FromCampaign, fromBuilder, out int evaluatedValue))
                 {
-                    this.ElementResourceCounts[toChange.Element] = newAmount;
+                    GlobalUpdateUX.LogTextEvent?.Invoke($"Failed to parse evaluatable value for applying resource change.", GlobalUpdateUX.LogType.RuntimeError);
+                    return;
+                }
+
+                if (this.ElementResourceCounts.TryGetValue(toChange.Element, out int currentAmount))
+                {
+                    int newAmount = Mathf.Max(0, currentAmount + evaluatedValue);
+
+                    if (newAmount > 0)
+                    {
+                        this.ElementResourceCounts[toChange.Element] = newAmount;
+                    }
+                    else
+                    {
+                        this.ElementResourceCounts.Remove(toChange.Element);
+                    }
                 }
                 else
                 {
-                    this.ElementResourceCounts.Remove(toChange.Element);
+                    if (evaluatedValue > 0)
+                    {
+                        this.ElementResourceCounts.Add(toChange.Element, evaluatedValue);
+                    }
                 }
             }
-            else
+            else if (toChange.SetValue != null)
             {
-                if (evaluatedValue > 0)
+                if (!toChange.SetValue.TryEvaluateValue(this.FromCampaign, fromBuilder, out int evaluatedValue))
                 {
-                    this.ElementResourceCounts.Add(toChange.Element, evaluatedValue);
+                    GlobalUpdateUX.LogTextEvent?.Invoke($"Failed to parse evaluatable value for applying resource change.", GlobalUpdateUX.LogType.RuntimeError);
+                    return;
+                }
+
+                if (this.ElementResourceCounts.ContainsKey(toChange.Element))
+                {
+                    int newAmount = Mathf.Max(0, evaluatedValue);
+
+                    if (newAmount > 0)
+                    {
+                        this.ElementResourceCounts[toChange.Element] = newAmount;
+                    }
+                    else
+                    {
+                        this.ElementResourceCounts.Remove(toChange.Element);
+                    }
+                }
+                else
+                {
+                    if (evaluatedValue > 0)
+                    {
+                        this.ElementResourceCounts.Add(toChange.Element, evaluatedValue);
+                    }
                 }
             }
 
@@ -167,6 +199,8 @@ namespace SFDDCards
             GamestateDelta delta = ScriptTokenEvaluator.CalculateRealizedDeltaEvaluation(toAct.Intent, this.FromCampaign, toAct, toAct, this.CombatPlayer);
             GlobalUpdateUX.LogTextEvent.Invoke(EffectDescriberDatabase.DescribeResolvedEffect(delta), GlobalUpdateUX.LogType.GameEvent);
             delta.ApplyDelta(this.FromCampaign);
+
+            toAct.Intent = null;
 
             this.FromCampaign.CheckAllStateEffectsAndKnockouts();
         }
@@ -291,7 +325,7 @@ namespace SFDDCards
                     }));
             }
             
-            nextEvents.Add(new GameplaySequenceEvent(() => this.EndEnemyTurn(TurnStatus.PlayerTurn)));
+            nextEvents.Add(new GameplaySequenceEvent(() => this.EndCurrentTurnAndChangeTurn(TurnStatus.PlayerTurn)));
 
             GlobalSequenceEventHolder.PushSequencesToTop(nextEvents.ToArray());
         }

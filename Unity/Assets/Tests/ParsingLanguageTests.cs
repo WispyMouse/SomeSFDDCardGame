@@ -22,11 +22,13 @@ namespace SFDDCards.Tests.EditMode
         {
             public string EffectScript;
             public string ExpectedParsedValue;
+            public string ReactionWindow;
 
-            public AssertEffectScriptResultsValueSourceValue(string effectScript, string expectedParsedValue)
+            public AssertEffectScriptResultsValueSourceValue(string effectScript, string expectedParsedValue, string reactionWindow = "testwindow")
             {
                 this.EffectScript = effectScript;
                 this.ExpectedParsedValue = expectedParsedValue;
+                this.ReactionWindow = reactionWindow;
             }
 
             public override string ToString()
@@ -48,6 +50,12 @@ namespace SFDDCards.Tests.EditMode
 
             new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][REMOVESTATUSEFFECTSTACKS: 1 {nameof(DebugStatus)}]", $"Remove 1 stack of {nameof(DebugStatus)} from foe."),
             new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: SELF][REMOVESTATUSEFFECTSTACKS: 2 {nameof(DebugStatus)}]", $"Remove 2 stacks of {nameof(DebugStatus)} from self."),
+
+            new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][SETSTATUSEFFECTSTACKS: 1 {nameof(DebugStatus)}]", $"Set {nameof(DebugStatus)} to 1 stack on foe."),
+            new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: SELF][SETSTATUSEFFECTSTACKS: 2 {nameof(DebugStatus)}]", $"Set {nameof(DebugStatus)} to 2 stacks on self."),
+
+            new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][SETELEMENT: 1 DEBUGELEMENTONEID]", $"Set {DebugElementOneIconText}DEBUGELEMENTONENAME to 1."),
+            new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: SELF][SETELEMENT: 0 DEBUGELEMENTONEID]", $"Set {DebugElementOneIconText}DEBUGELEMENTONENAME to 0."),
 
             new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][DAMAGE: COUNTSTACKS_{nameof(DebugStatus)}]", $"1 x {nameof(DebugStatus)} damage."),
 
@@ -76,6 +84,7 @@ namespace SFDDCards.Tests.EditMode
         public static List<AssertEffectScriptResultsValueSourceValue> AssertEffectScriptResultsInTextAsStatusEffectValueSource => new List<AssertEffectScriptResultsValueSourceValue>()
         {
             new AssertEffectScriptResultsValueSourceValue("[REMOVESTACKS: 1]", $"Remove 1 stack."),
+            new AssertEffectScriptResultsValueSourceValue("[IFTARGET: SELF][DRAINBOTH: INTENSITY DEBUGSTATUS]", $"<b>Incoming Damage:</b> Damage first subtracts from DEBUGSTATUS before subtracting from health.", KnownReactionWindows.IncomingDamage)
         };
 
         [Test]
@@ -83,7 +92,7 @@ namespace SFDDCards.Tests.EditMode
         {
             AttackTokenPile pile = ScriptingTokens.ScriptingTokenDatabase.GetAllTokens(expectations.EffectScript, this.DebugStatus);
             this.DebugStatus.EffectTokens.Clear();
-            this.DebugStatus.EffectTokens.Add("testwindow", new List<AttackTokenPile>() { pile });
+            this.DebugStatus.EffectTokens.Add(expectations.ReactionWindow, new List<AttackTokenPile>() { pile });
 
             string resolvedDescription = this.DebugStatus.DescribeStatusEffect().BreakDescriptionsIntoString();
             Assert.AreEqual(expectations.ExpectedParsedValue, resolvedDescription, "Script should parse out to expected value.");

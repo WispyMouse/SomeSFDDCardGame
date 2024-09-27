@@ -19,7 +19,8 @@ namespace SFDDCards.Evaluation.Actual
             Heal = 2,
             NumberOfCards = 3,
             ApplyStatusEffect = 4,
-            RemoveStatusEffect = 5
+            RemoveStatusEffect = 5,
+            SetStatusEffect = 6
         }
 
         public enum NumberOfCardsRelation
@@ -33,7 +34,7 @@ namespace SFDDCards.Evaluation.Actual
         public List<IScriptingToken> AppliedTokens = new List<IScriptingToken>();
 
         public IEffectOwner Owner;
-        public ICombatantTarget User;
+        public Combatant User;
         public ICombatantTarget OriginalTarget;
         public ICombatantTarget Target;
 
@@ -43,7 +44,7 @@ namespace SFDDCards.Evaluation.Actual
 
         public List<ElementResourceChange> ElementResourceChanges = new List<ElementResourceChange>();
         public Dictionary<Element, int> ElementRequirements = new Dictionary<Element, int>();
-        public List<RequiresComparisonScriptingToken> RequiresComparisons => this.BasedOnConcept.RequiresComparisons;
+        public List<IRequirement> Requirements => this.BasedOnConcept.Requirements;
 
         public StatusEffect StatusEffect => this.BasedOnConcept.StatusEffect;
 
@@ -51,7 +52,7 @@ namespace SFDDCards.Evaluation.Actual
         public TokenEvaluatorBuilder PreviousTokenBuilder = null;
         public ConceptualTokenEvaluatorBuilder BasedOnConcept = null;
 
-        public TokenEvaluatorBuilder(ConceptualTokenEvaluatorBuilder concept, CampaignContext campaignContext, IEffectOwner owner, ICombatantTarget user, ICombatantTarget originalTarget, TokenEvaluatorBuilder previousBuilder = null)
+        public TokenEvaluatorBuilder(ConceptualTokenEvaluatorBuilder concept, CampaignContext campaignContext, IEffectOwner owner, Combatant user, ICombatantTarget originalTarget, TokenEvaluatorBuilder previousBuilder = null)
         {
             this.Campaign = campaignContext;
             this.BasedOnConcept = concept;
@@ -60,9 +61,16 @@ namespace SFDDCards.Evaluation.Actual
             this.User = user;
             this.OriginalTarget = originalTarget;
 
-            if (concept.Target != null && !concept.Target.TryEvaluateValue(campaignContext, this, out this.Target))
+            if (concept.Target != null)
             {
-                GlobalUpdateUX.LogTextEvent.Invoke($"Target cannot be evaluated, cannot resolve effect.", GlobalUpdateUX.LogType.RuntimeError);
+                if (!concept.Target.TryEvaluateValue(campaignContext, this, out this.Target))
+                {
+                    GlobalUpdateUX.LogTextEvent.Invoke($"Target cannot be evaluated, cannot resolve effect.", GlobalUpdateUX.LogType.RuntimeError);
+                }
+            }
+            else
+            {
+                this.Target = this.User;
             }
 
             if (concept.Intensity != null && !concept.Intensity.TryEvaluateValue(campaignContext, this, out this.Intensity))
@@ -74,57 +82,19 @@ namespace SFDDCards.Evaluation.Actual
         public GamestateDelta GetEffectiveDelta(CampaignContext campaignContext)
         {
             GamestateDelta delta = new GamestateDelta();
-
-            delta.DeltaEntries.Add(new DeltaEntry()
-            {
-                MadeFromBuilder = this,
-                User = this.User,
-                Target = this.Target,
-                Intensity = this.Intensity,
-                IntensityKindType = this.IntensityKindType,
-                NumberOfCardsRelationType = this.NumberOfCardsRelationType,
-                ElementResourceChanges = this.ElementResourceChanges,
-                OriginalTarget = this.OriginalTarget,
-                StatusEffect = this.StatusEffect,
-                ActionsToExecute = this.ActionsToExecute
-            }) ;
+            DeltaEntry deltaEntry = new DeltaEntry(this);
+            delta.DeltaEntries.Add(deltaEntry);
 
             return delta;
         }
 
-        public bool MeetsComparisonRequirements(CombatContext combatContext)
+        public bool MeetsRequirements(CombatContext combatContext)
         {
-            foreach (RequiresComparisonScriptingToken comparison in this.RequiresComparisons)
+            foreach (IRequirement requirement in this.Requirements)
             {
-                if (!comparison.Left.TryEvaluateValue(combatContext.FromCampaign, this, out int leftValue))
+                if (!requirement.MeetsRequirement(this, combatContext.FromCampaign))
                 {
                     return false;
-                }
-
-                if (!comparison.Right.TryEvaluateValue(combatContext.FromCampaign, this, out int rightValue))
-                {
-                    return false;
-                }
-
-                bool evaluationResult = false;
-
-                switch (comparison.ComparisonType)
-                {
-                    case RequiresComparisonScriptingToken.Comparison.LessThan:
-                        evaluationResult = leftValue < rightValue;
-                        break;
-                    case RequiresComparisonScriptingToken.Comparison.LessThanOrEqual:
-                        evaluationResult = leftValue <= rightValue;
-                        break;
-                    case RequiresComparisonScriptingToken.Comparison.EqualTo:
-                        evaluationResult = leftValue == rightValue;
-                        break;
-                    case RequiresComparisonScriptingToken.Comparison.GreaterThan:
-                        evaluationResult = leftValue > rightValue;
-                        break;
-                    case RequiresComparisonScriptingToken.Comparison.GreaterThanOrEqual:
-                        evaluationResult = leftValue >= rightValue;
-                        break;
                 }
             }
 

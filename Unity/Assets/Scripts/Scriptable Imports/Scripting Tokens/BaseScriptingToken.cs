@@ -66,7 +66,7 @@ namespace SFDDCards.ScriptingTokens
             return true;
         }
 
-        public static bool TryGetIntegerEvaluatableFromStrings(List<string> arguments, out IEvaluatableValue<int> output, out List<string> remainingStrings)
+        public static bool TryGetIntegerEvaluatableFromStrings(List<string> arguments, out IEvaluatableValue<int> output, out List<string> remainingStrings, bool allowNameMatch  = false)
         {
             remainingStrings = new List<string>();
             CompositeEvaluatableValue<int> compositeEvaluatable = new CompositeEvaluatableValue<int>();
@@ -81,12 +81,12 @@ namespace SFDDCards.ScriptingTokens
                     compositeEvaluatable.CompositeComponents.Add(outputCEVI);
                     continue;
                 }
-                else if (CountStacksEvaluatableValue.TryGetCountStacksEvaluatableValue(currentArgument, out CountStacksEvaluatableValue outputCSEV))
+                else if (CountStacksEvaluatableValue.TryGetCountStacksEvaluatableValue(currentArgument, out CountStacksEvaluatableValue outputCSEV, allowNameMatch))
                 {
                     compositeEvaluatable.CompositeComponents.Add(outputCSEV);
                     continue;
                 }
-                else if (CountElementEvaluatableValue.TryGetCountElementalEvaluatableValue(currentArgument, out CountElementEvaluatableValue outputCEEV))
+                else if (CountElementEvaluatableValue.TryGetCountElementalEvaluatableValue(currentArgument, out CountElementEvaluatableValue outputCEEV, allowNameMatch))
                 {
                     compositeEvaluatable.CompositeComponents.Add(outputCEEV);
                     continue;

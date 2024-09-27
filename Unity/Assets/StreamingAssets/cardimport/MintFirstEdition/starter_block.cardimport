@@ -1,0 +1,27 @@
+{
+	"Id": "starter_block",
+	"Name": "Block!",
+	"EffectScript": "[SETTARGET: SELF][APPLYSTATUSEFFECTSTACKS: 3 BLOCK][REQUIRESATLEASTELEMENT: 2 SOLAR][APPLYSTATUSEFFECTSTACKS: 2 BLOCK]",
+	"Tags":
+	[
+		"m1e",
+		"solar","force","bio",
+		"starter",
+		"common"
+	],
+	"ElementGain":
+	[
+		{	
+			"Element": "solar",
+			"Gain": 1
+		},
+		{
+			"Element": "force",
+			"Gain": 1
+		},
+		{
+			"Element": "bio",
+			"Gain": 1
+		}
+	]
+}
