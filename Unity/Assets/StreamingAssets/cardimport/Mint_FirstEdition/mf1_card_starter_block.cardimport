@@ -1,7 +1,7 @@
 {
 	"Id": "mf1_card_starter_block",
 	"Name": "Block!",
-	"EffectScript": "[SETTARGET: SELF][APPLYSTATUSEFFECTSTACKS: 3 BLOCK]",
+	"EffectScript": "[SETTARGET: SELF][APPLYSTATUSEFFECTSTACKS: 3 statuseffect_essential_block]",
 	"Tags":
 	[
 		"mf1",

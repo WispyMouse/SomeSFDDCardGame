@@ -8,6 +8,7 @@ namespace SFDDCards.Tests.EditMode
     using System.Collections.Generic;
     using System.IO;
     using System.Text;
+    using System.Threading.Tasks;
     using UnityEngine;
 
 
@@ -19,10 +20,10 @@ namespace SFDDCards.Tests.EditMode
         /// This test validates the behaviour.
         /// </summary>
         [Test]
-        public async void TestBlock()
+        public void TestBlock()
         {
-            StatusEffectDatabase.AddStatusEffectToDatabase(await ImportHelper.ImportImportableFileAsync<StatusEffectImport>(Application.streamingAssetsPath + "/statusImport/status effects/block.statusImport"));
-            StatusEffect blockStatus = StatusEffectDatabase.GetModel("block");
+            StatusEffectDatabase.AddStatusEffectToDatabase(ImportHelper.ImportImportableFile<StatusEffectImport>(Application.streamingAssetsPath + "/statusImport/status effects/statuseffect_essential_block.statusImport"));
+            StatusEffect blockStatus = StatusEffectDatabase.GetModel("statuseffect_essential_block");
 
             EncounterModel testEncounter = EditModeTestCommon.GetEncounterWithPunchingBags(2, 100);
             CampaignContext campaignContext = EditModeTestCommon.GetBlankCampaignContext();

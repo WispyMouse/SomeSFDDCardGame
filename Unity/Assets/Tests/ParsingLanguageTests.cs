@@ -81,19 +81,7 @@ namespace SFDDCards.Tests.EditMode
         [Test]
         public void AssertEffectScriptResultsInTextAsCard([ValueSource(nameof(AssertEffectScriptResultsInTextValueSource))] AssertEffectScriptResultsValueSourceValue expectations)
         {
-            CardImport import = new CardImport()
-            {
-                Id = nameof(AssertEffectScriptResultsInTextAsCard),
-                Name = nameof(AssertEffectScriptResultsInTextAsCard),
-                EffectScript = expectations.EffectScript
-            };
-
-            Card derivedCard = new Card(import);
-            EffectDescription description = derivedCard.GetDescription();
-
-            List<string> descriptionTexts = description.DescriptionText;
-            Assert.AreEqual(1, descriptionTexts.Count, "Scripts should only parse in to one description text when validated using this function.");
-            Assert.AreEqual(expectations.ExpectedParsedValue, descriptionTexts[0], "Script should parse out to expected value.");
+            EditModeTestCommon.AssertCardParsing(expectations.EffectScript, expectations.ExpectedParsedValue);
         }
 
         public static List<AssertEffectScriptResultsValueSourceValue> AssertEffectScriptResultsInTextAsStatusEffectValueSource => new List<AssertEffectScriptResultsValueSourceValue>()
@@ -105,12 +93,7 @@ namespace SFDDCards.Tests.EditMode
         [Test]
         public void AssertEffectScriptResultsInTextAsStatusEffect([ValueSource(nameof(AssertEffectScriptResultsInTextAsStatusEffectValueSource))] AssertEffectScriptResultsValueSourceValue expectations)
         {
-            AttackTokenPile pile = ScriptingTokens.ScriptingTokenDatabase.GetAllTokens(expectations.EffectScript, this.DebugStatus);
-            this.DebugStatus.EffectTokens.Clear();
-            this.DebugStatus.EffectTokens.Add(expectations.ReactionWindow, new List<AttackTokenPile>() { pile });
-
-            string resolvedDescription = this.DebugStatus.DescribeStatusEffect().BreakDescriptionsIntoString();
-            Assert.AreEqual(expectations.ExpectedParsedValue, resolvedDescription, "Script should parse out to expected value.");
+            EditModeTestCommon.AssertStatusEffectParsing(expectations.EffectScript, expectations.ExpectedParsedValue, expectations.ReactionWindow, this.DebugStatus);
         }
     }
 }

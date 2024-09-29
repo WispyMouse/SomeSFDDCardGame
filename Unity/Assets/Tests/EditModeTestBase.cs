@@ -8,7 +8,7 @@ namespace SFDDCards.Tests.EditMode
     using System.IO;
     using System.Text;
     using UnityEngine;
-
+    using UnityEngine.TestTools;
 
     public abstract class EditModeTestBase
     {
@@ -22,6 +22,8 @@ namespace SFDDCards.Tests.EditMode
         [SetUp]
         public void SetUp()
         {
+            LogAssert.ignoreFailingMessages = false;
+
             StatusEffectImport debugStatusEffect = new StatusEffectImport()
             {
                 Id = nameof(DebugStatus),

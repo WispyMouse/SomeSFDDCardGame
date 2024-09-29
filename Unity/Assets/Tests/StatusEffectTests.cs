@@ -19,10 +19,10 @@ namespace SFDDCards.Tests.EditMode
         /// The test observes that poison proc'd appropriately and has the desired effects.
         /// </summary>
         [Test]
-        public async void TestPoisonStatus()
+        public void TestPoisonStatus()
         {
-            StatusEffectDatabase.AddStatusEffectToDatabase(await ImportHelper.ImportImportableFileAsync<StatusEffectImport>(Application.streamingAssetsPath + "/statusImport/status effects/poison.statusImport"));
-            StatusEffect poisonStatus = StatusEffectDatabase.GetModel("poison");
+            StatusEffectDatabase.AddStatusEffectToDatabase(ImportHelper.ImportImportableFile<StatusEffectImport>(Application.streamingAssetsPath + "/statusImport/status effects/mf1_statuseffect_poison.statusImport"));
+            StatusEffect poisonStatus = StatusEffectDatabase.GetModel("mf1_statuseffect_poison");
 
             EncounterModel testEncounter = EditModeTestCommon.GetEncounterWithPunchingBags(2, 100);
             CampaignContext campaignContext = EditModeTestCommon.GetBlankCampaignContext();

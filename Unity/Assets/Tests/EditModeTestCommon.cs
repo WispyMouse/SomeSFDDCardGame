@@ -1,7 +1,9 @@
 namespace SFDDCards.Tests.EditMode
 {
+    using NUnit.Framework;
     using SFDDCards.Evaluation.Actual;
     using SFDDCards.ImportModels;
+    using SFDDCards.ScriptingTokens;
     using SFDDCards.ScriptingTokens.EvaluatableValues;
     using System;
     using System.Collections;
@@ -21,14 +23,16 @@ namespace SFDDCards.Tests.EditMode
         public struct ParseFromFileTestData
         {
             public string Id;
-            public string ExpectedParse;
+            public string ExpectedParsedValue;
             public ParseKind ParseKind;
+            public string ReactionWindow;
 
-            public ParseFromFileTestData(string id, string expectedParse, ParseKind parseKind)
+            public ParseFromFileTestData(string id, string expectedParse, ParseKind parseKind, string reactionWindow = "")
             {
                 this.Id = id;
-                this.ExpectedParse = expectedParse;
+                this.ExpectedParsedValue = expectedParse;
                 this.ParseKind = parseKind;
+                this.ReactionWindow = reactionWindow;
             }
 
             public string FindFileLocation()
@@ -53,6 +57,18 @@ namespace SFDDCards.Tests.EditMode
                     default:
                         return "";
                 }
+            }
+        }
+
+        public class DependentFile
+        {
+            public string Id;
+            public ParseKind ParseKind;
+
+            public DependentFile(string id, ParseKind parseKind)
+            {
+                this.Id = id;
+                this.ParseKind = parseKind;
             }
         }
 
@@ -131,6 +147,42 @@ namespace SFDDCards.Tests.EditMode
                 Card derivedCard = new Card(import);
                 deck.CardsCurrentlyInDeck.Add(derivedCard);
             }
+        }
+
+        public static void AssertCardParsing(string attackTokens, string expectedEvaluation)
+        {
+            CardImport import = new CardImport()
+            {
+                Id = nameof(AssertCardParsing),
+                Name = nameof(AssertCardParsing),
+                EffectScript = attackTokens
+            };
+
+            Card derivedCard = new Card(import);
+            AssertCardParsing(derivedCard, expectedEvaluation);
+        }
+
+        public static void AssertCardParsing(Card card, string expectedEvaluation)
+        {
+            EffectDescription description = card.GetDescription();
+
+            List<string> descriptionTexts = description.DescriptionText;
+            Assert.AreEqual(1, descriptionTexts.Count, "Scripts should only parse in to one description text when validated using this function.");
+            Assert.AreEqual(expectedEvaluation, descriptionTexts[0], "Script should parse out to expected value.");
+        }
+
+        public static void AssertStatusEffectParsing(string attackTokens, string expectedEvaluation, string window, StatusEffect effectOwner)
+        {
+            AttackTokenPile pile = ScriptingTokens.ScriptingTokenDatabase.GetAllTokens(attackTokens, effectOwner);
+            effectOwner.EffectTokens.Clear();
+            effectOwner.EffectTokens.Add(window, new List<AttackTokenPile>() { pile });
+            AssertStatusEffectParsing(effectOwner, expectedEvaluation);
+        }
+
+        public static void AssertStatusEffectParsing(StatusEffect statusEffect, string expectedEvaluation)
+        {
+            string resolvedDescription = statusEffect.DescribeStatusEffect().BreakDescriptionsIntoString();
+            Assert.AreEqual(expectedEvaluation, resolvedDescription, "Script should parse out to expected value.");
         }
     }
 }

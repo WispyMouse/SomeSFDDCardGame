@@ -5,6 +5,7 @@ namespace SFDDCards
     using System.Collections;
     using System.Collections.Generic;
     using System.IO;
+    using System.Threading;
     using System.Threading.Tasks;
     using UnityEngine;
 
@@ -46,6 +47,13 @@ namespace SFDDCards
             return importedFiles;
         }
 
+        public static List<T> ImportImportableFiles<T>(string rootFolder, string fileExtension) where T : IImportable
+        {
+            Task<List<T>> waitOnTask = Task<List<T>>.Run(() => ImportImportableFilesAsync<T>(rootFolder, fileExtension));
+            waitOnTask.Wait();
+            return waitOnTask.Result;
+        }
+
         public static async Task<T> ImportImportableFileAsync<T>(string filePath) where T : IImportable
         {
             try
@@ -59,6 +67,13 @@ namespace SFDDCards
             {
                 throw;
             }
+        }
+
+        public static T ImportImportableFile<T>(string filePath) where T : IImportable
+        {
+            Task<T> waitOnTask = Task<T>.Run(() => ImportImportableFileAsync<T>(filePath));
+            waitOnTask.Wait();
+            return waitOnTask.Result;
         }
 
         public static async Task<T> GetFileAsync<T>(string filePath)
@@ -103,13 +118,26 @@ namespace SFDDCards
             }
         }
 
+        public static T GetFile<T>(string filePath)
+        {
+            Task<T> waitOnTask = Task<T>.Run(() => GetFileAsync<T>(filePath));
+            waitOnTask.Wait();
+            return waitOnTask.Result;
+        }
+
+        public static object GetFile(string filePath, Type toType)
+        {
+            Task<object> waitOnTask = Task<object>.Run(() => GetFileAsync(filePath, toType));
+            waitOnTask.Wait();
+            return waitOnTask.Result;
+        }
+
         public static async Task<byte[]> ReadAllBytesAsync(string filePath)
         {
             if (!File.Exists(filePath))
             {
                 throw new FileNotFoundException(filePath);
             }
-
 
             using StreamReader reader = new StreamReader(filePath);
             string fileText = await reader.ReadToEndAsync();

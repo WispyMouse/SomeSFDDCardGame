@@ -5,7 +5,7 @@
 	[
 		{
 			"Window": "OWNERENDSTURN",
-			"Script": "[SETTARGET: SELF][DAMAGE: COUNTSTACKS_POISON][REMOVESTACKS: 1]"
+			"Script": "[SETTARGET: SELF][DAMAGE: COUNTSTACKS_mf1_statuseffect_poison][REMOVESTACKS: 1]"
 		}
 	]
 }

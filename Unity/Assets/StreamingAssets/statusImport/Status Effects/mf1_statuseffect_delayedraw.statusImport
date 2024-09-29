@@ -5,7 +5,7 @@
 	[
 		{
 			"Window": "OWNERSTARTSTURN",
-			"Script": "[SETTARGET: SELF][DRAW: COUNTSTACKS_mf1_statuseffect_delayedraw][SETSTATUSEFFECSTACKS: 0 mf1_statuseffect_delayedraw]"
+			"Script": "[SETTARGET: SELF][DRAW: COUNTSTACKS_mf1_statuseffect_delayedraw][SETSTATUSEFFECTSTACKS: 0 mf1_statuseffect_delayedraw]"
 		}
 	]
 }
