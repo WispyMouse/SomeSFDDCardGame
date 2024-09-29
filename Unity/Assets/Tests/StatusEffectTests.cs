@@ -21,8 +21,8 @@ namespace SFDDCards.Tests.EditMode
         [Test]
         public void TestPoisonStatus()
         {
-            StatusEffectDatabase.AddStatusEffectToDatabase(ImportHelper.ImportImportableFile<StatusEffectImport>(Application.streamingAssetsPath + "/statusImport/status effects/mf1_statuseffect_poison.statusImport"));
-            StatusEffect poisonStatus = StatusEffectDatabase.GetModel("mf1_statuseffect_poison");
+            StatusEffectDatabase.AddStatusEffectToDatabase(ImportHelper.ImportImportableFile<StatusEffectImport>(Application.streamingAssetsPath + "/sets/mb1/statuseffect/mb1_statuseffect_poison.statusImport"));
+            StatusEffect poisonStatus = StatusEffectDatabase.GetModel("mb1_statuseffect_poison");
 
             EncounterModel testEncounter = EditModeTestCommon.GetEncounterWithPunchingBags(2, 100);
             CampaignContext campaignContext = EditModeTestCommon.GetBlankCampaignContext();

@@ -15,41 +15,44 @@ namespace SFDDCards.Tests.EditMode
 
     public class Test_Set_MF1_Parsing
     {
-        public static string RootPath => $"{Application.streamingAssetsPath}/cardImport/mint_firstedition/";
+        public static string RootPath => $"{Application.streamingAssetsPath}/sets/mb1/";
 
         public static DependentFile[] DependentFiles = new DependentFile[]
         {
-
+            new DependentFile($"{Application.streamingAssetsPath}/sets/fundamentals/element/void", ParseKind.Element),
+            new DependentFile($"{Application.streamingAssetsPath}/sets/fundamentals/element/solar", ParseKind.Element),
+            new DependentFile($"{Application.streamingAssetsPath}/sets/fundamentals/element/force", ParseKind.Element),
+            new DependentFile($"{Application.streamingAssetsPath}/sets/fundamentals/element/cyber", ParseKind.Element),
+            new DependentFile($"{Application.streamingAssetsPath}/sets/fundamentals/element/bio", ParseKind.Element)
         };
 
         public static ParseFromFileTestData[] ParsingTests = new ParseFromFileTestData[]
         {
-            new ParseFromFileTestData("mf1_card_starter_strike", "", ParseKind.Card),
-            new ParseFromFileTestData("mf1_card_starter_block", "", ParseKind.Card),
-            new ParseFromFileTestData("mf1_card_starter_resonate", "", ParseKind.Card),
+            new ParseFromFileTestData("mb1_card_starter_strike", "", ParseKind.Card),
+            new ParseFromFileTestData("mb1_card_starter_block", "", ParseKind.Card),
+            new ParseFromFileTestData("mb1_card_starter_resonate", "", ParseKind.Card),
 
-            new ParseFromFileTestData("mf1_card_common_burnarecord", "", ParseKind.Card),
-            new ParseFromFileTestData("mf1_card_common_fueldbypassion", "", ParseKind.Card),
-            new ParseFromFileTestData("mf1_card_common_glitch", "", ParseKind.Card),
-            new ParseFromFileTestData("mf1_card_common_laserblast", "", ParseKind.Card),
-            new ParseFromFileTestData("mf1_card_common_radiantstrike", "", ParseKind.Card),
-            new ParseFromFileTestData("mf1_card_common_sneeze", "", ParseKind.Card),
-            new ParseFromFileTestData("mf1_card_common_tuckandroll", "", ParseKind.Card),
-            new ParseFromFileTestData("mf1_card_common_voiddrink", "", ParseKind.Card),
+            new ParseFromFileTestData("mb1_card_common_burnarecord", "", ParseKind.Card),
+            new ParseFromFileTestData("mb1_card_common_fueldbypassion", "", ParseKind.Card),
+            new ParseFromFileTestData("mb1_card_common_glitch", "", ParseKind.Card),
+            new ParseFromFileTestData("mb1_card_common_laserblast", "", ParseKind.Card),
+            new ParseFromFileTestData("mb1_card_common_radiantstrike", "", ParseKind.Card),
+            new ParseFromFileTestData("mb1_card_common_sneeze", "", ParseKind.Card),
+            new ParseFromFileTestData("mb1_card_common_tuckandroll", "", ParseKind.Card),
+            new ParseFromFileTestData("mb1_card_common_voiddrink", "", ParseKind.Card),
 
-            new ParseFromFileTestData("mf1_card_uncommon_devotiontoacause", "", ParseKind.Card),
-            new ParseFromFileTestData("mf1_card_uncommon_tomorrowstar", "", ParseKind.Card),
+            new ParseFromFileTestData("mb1_card_uncommon_devotiontoacause", "", ParseKind.Card),
+            new ParseFromFileTestData("mb1_card_uncommon_tomorrowstar", "", ParseKind.Card),
 
-            new ParseFromFileTestData("mf1_card_rare_finaldawn", "", ParseKind.Card),
-            new ParseFromFileTestData("mf1_card_rare_giantlaserfromspace", "", ParseKind.Card),
+            new ParseFromFileTestData("mb1_card_rare_finaldawn", "", ParseKind.Card),
+            new ParseFromFileTestData("mb1_card_rare_giantlaserfromspace", "", ParseKind.Card),
 
-            new ParseFromFileTestData("mf1_card_generated_loot", "", ParseKind.Card),
+            new ParseFromFileTestData("mb1_card_generated_loot", "", ParseKind.Card),
 
-            new ParseFromFileTestData("mf1_statuseffect_tomorrowstar", "", ParseKind.StatusEffect),
-            new ParseFromFileTestData("mf1_statuseffect_regen", "", ParseKind.StatusEffect),
-            new ParseFromFileTestData("mf1_statuseffect_poison", "", ParseKind.StatusEffect),
-            new ParseFromFileTestData("mf1_statuseffect_lasercalibratingaim", "", ParseKind.StatusEffect),
-            new ParseFromFileTestData("essential_block", "", ParseKind.StatusEffect)
+            new ParseFromFileTestData("mb1_statuseffect_tomorrowstar", "", ParseKind.StatusEffect),
+            new ParseFromFileTestData("mb1_statuseffect_regen", "", ParseKind.StatusEffect),
+            new ParseFromFileTestData("mb1_statuseffect_poison", "", ParseKind.StatusEffect),
+            new ParseFromFileTestData("mb1_statuseffect_lasercalibratingaim", "", ParseKind.StatusEffect)
         };
 
         [OneTimeSetUp]
@@ -61,7 +64,7 @@ namespace SFDDCards.Tests.EditMode
 
             foreach (DependentFile dependentFile in DependentFiles)
             {
-                if (alreadyImportedFiles.Contains(dependentFile.Id))
+                if (alreadyImportedFiles.Contains(dependentFile.TypelessFilepath))
                 {
                     continue;
                 }
@@ -69,14 +72,17 @@ namespace SFDDCards.Tests.EditMode
                 switch (dependentFile.ParseKind)
                 {
                     case ParseKind.Card:
-                        CardDatabase.AddCardToDatabase(ImportHelper.GetFile<CardImport>(RootPath + dependentFile.Id + ".cardimport"));
+                        CardDatabase.AddCardToDatabase(ImportHelper.GetFile<CardImport>(dependentFile.TypelessFilepath + ".cardimport"));
                         break;
                     case ParseKind.StatusEffect:
-                        StatusEffectDatabase.AddStatusEffectToDatabase(ImportHelper.GetFile<StatusEffectImport>(RootPath + dependentFile.Id + ".statusimport"));
+                        StatusEffectDatabase.AddStatusEffectToDatabase(ImportHelper.GetFile<StatusEffectImport>(dependentFile.TypelessFilepath + ".statusimport"));
+                        break;
+                    case ParseKind.Element:
+                        ElementDatabase.AddElement(ImportHelper.GetFile<ElementImport>(dependentFile.TypelessFilepath + ".elementimport"));
                         break;
                 }
 
-                alreadyImportedFiles.Add(dependentFile.Id);
+                alreadyImportedFiles.Add(dependentFile.TypelessFilepath);
             }
 
             foreach (ParseFromFileTestData parseTestCandidate in ParsingTests)
@@ -89,10 +95,10 @@ namespace SFDDCards.Tests.EditMode
                 switch (parseTestCandidate.ParseKind)
                 {
                     case ParseKind.Card:
-                        CardDatabase.AddCardToDatabase(ImportHelper.GetFile<CardImport>(RootPath + parseTestCandidate.Id + ".cardimport"));
+                        CardDatabase.AddCardToDatabase(ImportHelper.GetFile<CardImport>(RootPath + "card/" + parseTestCandidate.Id + ".cardimport"));
                         break;
                     case ParseKind.StatusEffect:
-                        StatusEffectDatabase.AddStatusEffectToDatabase(ImportHelper.GetFile<StatusEffectImport>(RootPath + parseTestCandidate.Id + ".statusimport"));
+                        StatusEffectDatabase.AddStatusEffectToDatabase(ImportHelper.GetFile<StatusEffectImport>(RootPath + "statuseffect/" + parseTestCandidate.Id + ".statusimport"));
                         break;
                 }
 
@@ -104,6 +110,7 @@ namespace SFDDCards.Tests.EditMode
         public void OneTimeTearDown()
         {
             CardDatabase.ClearDatabase();
+            ElementDatabase.ClearDatabase();
             StatusEffectDatabase.ClearDatabase();
         }
 

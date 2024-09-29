@@ -17,7 +17,8 @@ namespace SFDDCards.Tests.EditMode
         public enum ParseKind
         {
             Card,
-            StatusEffect
+            StatusEffect,
+            Element
         }
 
         public struct ParseFromFileTestData
@@ -62,12 +63,12 @@ namespace SFDDCards.Tests.EditMode
 
         public class DependentFile
         {
-            public string Id;
+            public string TypelessFilepath;
             public ParseKind ParseKind;
 
             public DependentFile(string id, ParseKind parseKind)
             {
-                this.Id = id;
+                this.TypelessFilepath = id;
                 this.ParseKind = parseKind;
             }
         }
