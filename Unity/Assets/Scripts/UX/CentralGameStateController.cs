@@ -174,7 +174,7 @@ namespace SFDDCards.UX
                 }
                 catch (Exception e)
                 {
-                    GlobalUpdateUX.LogTextEvent.Invoke($"Failed to parse! Debug log has exception details.", GlobalUpdateUX.LogType.RuntimeError);
+                    GlobalUpdateUX.LogTextEvent.Invoke($"Failed to parse! File is {cardImportScriptName}. Debug log has exception details.", GlobalUpdateUX.LogType.RuntimeError);
                     Debug.LogException(e);
                 }
             }
@@ -216,7 +216,7 @@ namespace SFDDCards.UX
                 }
                 catch (Exception e)
                 {
-                    GlobalUpdateUX.LogTextEvent.Invoke($"Failed to parse! Debug log has exception details.", GlobalUpdateUX.LogType.Info);
+                    GlobalUpdateUX.LogTextEvent.Invoke($"Failed to parse! File is {enemyImportScriptName}. Debug log has exception details.", GlobalUpdateUX.LogType.Info);
                     Debug.LogException(e);
                 }
             }
@@ -243,7 +243,7 @@ namespace SFDDCards.UX
                 }
                 catch (Exception e)
                 {
-                    GlobalUpdateUX.LogTextEvent.Invoke($"Failed to parse! Debug log has exception details.", GlobalUpdateUX.LogType.Info);
+                    GlobalUpdateUX.LogTextEvent.Invoke($"Failed to parse! File is {rewardImportScriptName}. Debug log has exception details.", GlobalUpdateUX.LogType.Info);
                     Debug.LogException(e);
                 }
             }
@@ -265,7 +265,7 @@ namespace SFDDCards.UX
                 }
                 catch (Exception e)
                 {
-                    GlobalUpdateUX.LogTextEvent.Invoke($"Failed to parse! Debug log has exception details.", GlobalUpdateUX.LogType.Info);
+                    GlobalUpdateUX.LogTextEvent.Invoke($"Failed to parse! File is {encounterImportScriptNames}. Debug log has exception details.", GlobalUpdateUX.LogType.Info);
                     Debug.LogException(e);
                 }
             }
@@ -287,7 +287,7 @@ namespace SFDDCards.UX
                 }
                 catch (Exception e)
                 {
-                    GlobalUpdateUX.LogTextEvent.Invoke($"Failed to parse! Debug log has exception details.", GlobalUpdateUX.LogType.Info);
+                    GlobalUpdateUX.LogTextEvent.Invoke($"Failed to parse! File is {routeImportScriptName}. Debug log has exception details.", GlobalUpdateUX.LogType.Info);
                     Debug.LogException(e);
                 }
             }

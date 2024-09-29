@@ -1,0 +1,22 @@
+{
+	"Id": "mf1_card_uncommon_tomorrowstar",
+	"Name": "Tomorrow Star",
+	"EffectScript": "[SETTARGET: SELF][APPLYSTATUSEFFECTSTACKS: COUNTELEMENT_SOLAR+COUNTELEMENT_VOID][SETTARGET: SELF][APPLYSTATUSEFFECTSTACKS: 2 mf1_statuseffect_tomorrowstar]",
+	"Tags":
+	[
+		"mf1",
+		"void","SOLAR",
+		"uncommon"
+	],
+	"ElementGain":
+	[
+		{
+			"Element": "void",
+			"Gain": 2
+		},
+		{
+			"Element": "solar",
+			"Gain": 2
+		}
+	]
+}

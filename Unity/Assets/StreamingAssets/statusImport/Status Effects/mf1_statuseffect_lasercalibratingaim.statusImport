@@ -1,0 +1,11 @@
+{
+    "Name": "Laser Calibrating Aim",
+	"Id": "mf1_statuseffect_lasercalibratingaim",
+	"Effects":
+	[
+		{
+			"Window": "OWNERSTARTSTURN",
+			"Script": "[REMOVESTATUSEFFECTSTACKS: 1 mf1_statuseffect_lasercalibratingaim][REQUIRESCOMPARISON: COUNTSTACKS_mf1_statuseffect_lasercalibratingaim = 0][SETTARGET: SELF][DAMAGE: 40]"
+		}
+	]
+}

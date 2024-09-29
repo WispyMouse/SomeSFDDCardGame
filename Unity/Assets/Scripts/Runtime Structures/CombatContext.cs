@@ -278,6 +278,7 @@ namespace SFDDCards
 
         private void PlayerStartTurn()
         {
+            this.ElementResourceCounts.Clear();
             this.CurrentTurnStatus = TurnStatus.PlayerTurn;
 
             this.FromCampaign.CheckAndApplyReactionWindow(new ReactionWindowContext(KnownReactionWindows.OwnerStartsTurn, this.CombatPlayer));

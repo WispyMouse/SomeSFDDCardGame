@@ -1,0 +1,26 @@
+{
+	"Id": "mf1_card_rare_giantlaserfromspace",
+	"Name": "Giant Laser From Space",
+	"EffectScript": "[SETTARGET: FOE][SETSTATUSEFFECTSTACKS: 2 mf1_statuseffect_lasercalibratingaim]",
+	"Tags":
+	[
+		"mf1",
+		"void","solar","cyber",
+		"rare"
+	],
+	"ElementGain":
+	[
+		{
+			"Element": "solar",
+			"Gain": 1
+		},
+		{
+			"Element": "cyber",
+			"Gain": 1
+		},
+		{
+			"Element": "void",
+			"Gain": 2
+		}
+	]
+}

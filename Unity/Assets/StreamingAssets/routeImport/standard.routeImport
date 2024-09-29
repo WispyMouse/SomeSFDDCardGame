@@ -1,7 +1,19 @@
 {
 	"RouteName": "Standard Route",	
 	"StartingDeck": [
+		"mf1_card_starter_resonate",
+		"mf1_card_starter_resonate",
 		
+		"mf1_card_starter_block",
+		"mf1_card_starter_block",
+		"mf1_card_starter_block",
+		
+		"mf1_card_starter_strike",
+		"mf1_card_starter_strike",
+		"mf1_card_starter_strike",
+		
+		"[common]",
+		"[common]"
 	],
 	"StartingMaximumHealth": 50,	
 	"RouteNodes": [

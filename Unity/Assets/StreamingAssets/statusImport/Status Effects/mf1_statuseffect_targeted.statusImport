@@ -1,0 +1,15 @@
+{
+    "Name": "Targeted",
+	"Id": "mf1_statuseffect_targeted",
+	"Effects":
+	[
+		{
+			"Window": "OWNERSTARTSTURN",
+			"Script": "[SETSTATUSEFFECTSTACKS: mf1_statuseffect_targeted 0]"
+		},
+		{
+			"Window": "INCOMINGDAMAGE",
+			"Script": "[SETTARGET: SELF][DAMAGE: COUNTSTACKS_mf1_statuseffect_targeted][SETSTATUSEFFECTSTACKS: mf1_statuseffect_targeted 0]"
+		}
+	]
+}

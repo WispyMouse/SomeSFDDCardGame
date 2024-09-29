@@ -1,0 +1,26 @@
+{
+	"Id": "mf1_card_starter_block",
+	"Name": "Block!",
+	"EffectScript": "[SETTARGET: SELF][APPLYSTATUSEFFECTSTACKS: 3 BLOCK]",
+	"Tags":
+	[
+		"mf1",
+		"cyber","force","bio",
+		"starter"
+	],
+	"ElementGain":
+	[
+		{	
+			"Element": "cyber",
+			"Gain": 1
+		},
+		{
+			"Element": "force",
+			"Gain": 1
+		},
+		{
+			"Element": "bio",
+			"Gain": 1
+		}
+	]
+}
