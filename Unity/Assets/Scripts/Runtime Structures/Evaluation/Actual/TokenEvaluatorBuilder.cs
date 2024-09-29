@@ -133,19 +133,6 @@ namespace SFDDCards.Evaluation.Actual
             return true;
         }
 
-        public bool AnyEffectRequiresTarget()
-        {
-            for (int ii = 0; ii < this.AppliedTokens.Count; ii++)
-            {
-                if (this.AppliedTokens[ii].RequiresTarget())
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
         public string GetIntensityDescriptionIfNotConstant()
         {
             if (this.BasedOnConcept == null)

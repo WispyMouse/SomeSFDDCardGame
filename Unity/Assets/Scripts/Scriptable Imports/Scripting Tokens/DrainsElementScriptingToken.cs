@@ -28,17 +28,7 @@ namespace SFDDCards.ScriptingTokens
 
             tokenBuilder.ElementResourceChanges.Add(new ElementResourceChange() { Element = ElementDatabase.GetElement(this.Element), GainOrLoss = new NegatorEvaluatorValue(this.Amount) });
         }
-
-        public override bool IsHarmfulToTarget(ICombatantTarget user, ICombatantTarget target)
-        {
-            return false;
-        }
-
-        public override bool RequiresTarget()
-        {
-            return false;
-        }
-
+        
         protected override bool TryGetTokenWithArguments(List<string> arguments, out IScriptingToken scriptingToken)
         {
             scriptingToken = null;

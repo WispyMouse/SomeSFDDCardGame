@@ -65,7 +65,17 @@ namespace SFDDCards.Tests.EditMode
             new AssertEffectScriptResultsValueSourceValue($"[DRAW: 1][CARDTARGET: HAND][CHOOSECARDS: 1][MOVECARDTOZONE: DISCARD]", "Draw 1 card. Discard 1 card."),
             new AssertEffectScriptResultsValueSourceValue($"[DRAW: 2][CARDTARGET: HAND][CHOOSECARDS: 2][MOVECARDTOZONE: DISCARD]", "Draw 2 cards. Discard 2 cards."),
 
-            new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][DAMAGE: 1][MOVECARDTOZONE: EXILE]", "1 damage. Exile this card.")
+            new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][DAMAGE: 1][MOVECARDTOZONE: EXILE]", "1 damage. Exile this card."),
+
+            new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][DAMAGE: 1+1]", "2 damage."),
+            new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][DAMAGE: 2*3]", "6 damage."),
+            new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][DAMAGE: 9/3]", "3 damage."),
+            new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][DAMAGE: 4-3]", "1 damage."),
+
+            new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][DAMAGE: 1+COUNTELEMENT_DEBUGELEMENTONEID]", "1 + amount of DEBUGELEMENTONEID damage."),
+            new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][DAMAGE: 2*COUNTELEMENT_DEBUGELEMENTONEID]", "2 * amount of DEBUGELEMENTONEID damage."),
+            new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][DAMAGE: 3/COUNTELEMENT_DEBUGELEMENTONEID]", "3 / amount of DEBUGELEMENTONEID damage."),
+            new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][DAMAGE: 4-COUNTELEMENT_DEBUGELEMENTONEID]", "4 - amount of DEBUGELEMENTONEID damage."),
         };
 
         [Test]

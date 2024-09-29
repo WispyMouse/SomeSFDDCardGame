@@ -23,7 +23,7 @@ namespace SFDDCards.Tests.EditMode
         [Repeat(10)]
         public void ConstantValue_EvaluatesAsConstant()
         {
-            int randomConstant = UnityEngine.Random.Range(-99999, 999999);
+            int randomConstant = UnityEngine.Random.Range(-999999, 999999);
 
             CardImport import = new CardImport()
             {

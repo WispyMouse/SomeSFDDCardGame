@@ -15,11 +15,6 @@ namespace SFDDCards.ScriptingTokens
             tokenBuilder.RelevantCards = this.Cards;
         }
 
-        public override bool RequiresTarget()
-        {
-            return false;
-        }
-
         protected override bool TryGetTokenWithArguments(List<string> arguments, out IScriptingToken scriptingToken)
         {
             scriptingToken = null;

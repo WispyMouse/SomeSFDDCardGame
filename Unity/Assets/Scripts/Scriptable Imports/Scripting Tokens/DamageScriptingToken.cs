@@ -35,16 +35,5 @@ namespace SFDDCards.ScriptingTokens
 
             return true;
         }
-
-        public override bool IsHarmfulToTarget(ICombatantTarget user, ICombatantTarget target)
-        {
-            // Damage is always harmful!
-            return true;
-        }
-
-        public override bool RequiresTarget()
-        {
-            return true;
-        }
     }
 }
