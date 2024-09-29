@@ -26,14 +26,12 @@ namespace SFDDCards.Tests.EditMode
             public string Id;
             public string ExpectedParsedValue;
             public ParseKind ParseKind;
-            public string ReactionWindow;
 
-            public ParseFromFileTestData(string id, string expectedParse, ParseKind parseKind, string reactionWindow = "")
+            public ParseFromFileTestData(string id, string expectedParse, ParseKind parseKind)
             {
                 this.Id = id;
                 this.ExpectedParsedValue = expectedParse;
                 this.ParseKind = parseKind;
-                this.ReactionWindow = reactionWindow;
             }
 
             public string FindFileLocation()
@@ -58,6 +56,11 @@ namespace SFDDCards.Tests.EditMode
                     default:
                         return "";
                 }
+            }
+
+            public override string ToString()
+            {
+                return this.ExpectedParsedValue;
             }
         }
 

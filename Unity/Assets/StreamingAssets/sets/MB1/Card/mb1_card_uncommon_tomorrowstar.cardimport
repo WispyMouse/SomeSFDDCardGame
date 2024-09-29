@@ -1,7 +1,7 @@
 {
 	"Id": "mb1_card_uncommon_tomorrowstar",
 	"Name": "Tomorrow Star",
-	"EffectScript": "[SETTARGET: SELF][APPLYSTATUSEFFECTSTACKS: COUNTELEMENT_SOLAR+COUNTELEMENT_VOID][SETTARGET: SELF][APPLYSTATUSEFFECTSTACKS: 2 mb1_statuseffect_tomorrowstar]",
+	"EffectScript": "[SETTARGET: SELF][APPLYSTATUSEFFECTSTACKS: 2 mb1_statuseffect_tomorrowstar]",
 	"Tags":
 	[
 		"mf1",
