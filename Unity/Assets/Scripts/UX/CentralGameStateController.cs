@@ -297,12 +297,11 @@ namespace SFDDCards.UX
 
         public void RouteChosen(RouteImport route)
         {
-            this.CurrentCampaignContext = new CampaignContext(this.CurrentRunConfiguration);
-            this.CurrentCampaignContext.SetRoute(this.CurrentRunConfiguration, route);
+            this.CurrentCampaignContext = new CampaignContext(new CampaignRoute(this.CurrentRunConfiguration, route));
 
             this.UXController.PlacePlayerCharacter();
 
-            this.CurrentCampaignContext.SetCampaignState(CampaignContext.GameplayCampaignState.ClearedRoom);
+            this.CurrentCampaignContext.SetCampaignState(CampaignContext.GameplayCampaignState.MakingRouteChoice);
 
             GlobalUpdateUX.UpdateUXEvent?.Invoke();
         }

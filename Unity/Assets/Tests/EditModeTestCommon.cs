@@ -44,11 +44,7 @@ namespace SFDDCards.Tests.EditMode
         public static CampaignContext GetBlankCampaignContext()
         {
             RunConfiguration blankConfiguration = GetDefaultRunConfiguration();
-
-            // Empty out the starting deck, so tests have a guaranteed hand of cards
-            blankConfiguration.StartingDeck = new List<string>();
-
-            CampaignContext newContext = new CampaignContext(blankConfiguration);
+            CampaignContext newContext = new CampaignContext(new CampaignRoute(new RunConfiguration(), new RouteImport()));
             return newContext;
         }
 

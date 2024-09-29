@@ -1,5 +1,9 @@
 {
-	"RouteName": "Standard Route",
+	"RouteName": "Standard Route",	
+	"StartingDeck": [
+		
+	],
+	"StartingMaximumHealth": 50,	
 	"RouteNodes": [
 		{
 			"NodeName": "Starting Line",

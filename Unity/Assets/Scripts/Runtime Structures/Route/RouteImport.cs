@@ -9,5 +9,8 @@ namespace SFDDCards
     {
         public string RouteName { get; set; }
         public List<ChoiceNodeImport> RouteNodes { get; set; }
+
+        public List<string> StartingDeck = new List<string>();
+        public int StartingMaximumHealth = 50;
     }
 }

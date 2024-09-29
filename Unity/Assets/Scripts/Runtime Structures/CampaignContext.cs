@@ -40,14 +40,16 @@ namespace SFDDCards
 
         public Reward PendingRewards { get; set; } = null;
 
-        public CampaignContext(RunConfiguration runConfig)
+        public CampaignContext(CampaignRoute onRoute)
         {
-            this.CampaignPlayer = new Player(runConfig.StartingMaximumHealth);
+            this.CampaignPlayer = new Player(onRoute.BasedOn.StartingMaximumHealth);
 
-            foreach (string startingCard in runConfig.StartingDeck)
+            foreach (string startingCard in onRoute.BasedOn.StartingDeck)
             {
                 this.CampaignDeck.AddCardToDeck(CardDatabase.GetModel(startingCard));
             }
+
+            this.OnRoute = onRoute;
         }
 
         public void AddCardToDeck(Card toAdd)
@@ -106,11 +108,6 @@ namespace SFDDCards
             }
 
             GlobalUpdateUX.UpdateUXEvent?.Invoke();
-        }
-
-        public void SetRoute(RunConfiguration configuration, RouteImport routeToStart)
-        {
-            this.OnRoute = new CampaignRoute(configuration, routeToStart);
         }
 
         public void MakeChoiceNodeDecision(ChoiceNodeOption chosen)
