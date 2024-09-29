@@ -48,11 +48,6 @@ namespace SFDDCards.ScriptingTokens
             return false;
         }
 
-        public override bool RequiresTarget()
-        {
-            return true;
-        }
-
         public bool MeetsRequirement(TokenEvaluatorBuilder builder, CampaignContext context)
         {
             if (!this.Target.TryEvaluateValue(context, builder, out ICombatantTarget targetEvaluated))

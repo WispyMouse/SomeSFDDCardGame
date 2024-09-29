@@ -25,7 +25,7 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
 
         public static bool TryGetConstantEvaluatableValue(string argument, out ConstantEvaluatableValue<int> output)
         {
-            if (Regex.IsMatch(argument, @"\-?\d+"))
+            if (Regex.IsMatch(argument, @"^\-?\d+$"))
             {
                 if (int.TryParse(argument, out int result))
                 {

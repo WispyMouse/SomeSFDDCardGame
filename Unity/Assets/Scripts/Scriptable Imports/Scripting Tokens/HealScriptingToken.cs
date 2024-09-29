@@ -18,11 +18,6 @@ namespace SFDDCards.ScriptingTokens
             tokenBuilder.Intensity = HealingAmount;
         }
 
-        public override bool RequiresTarget()
-        {
-            return true;
-        }
-
         protected override bool TryGetTokenWithArguments(List<string> arguments, out IScriptingToken scriptingToken)
         {
             scriptingToken = null;

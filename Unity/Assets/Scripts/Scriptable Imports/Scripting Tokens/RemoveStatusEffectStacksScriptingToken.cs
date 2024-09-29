@@ -46,15 +46,5 @@ namespace SFDDCards.ScriptingTokens
 
             return true;
         }
-
-        public override bool IsHarmfulToTarget(ICombatantTarget user, ICombatantTarget target)
-        {
-            return false;
-        }
-
-        public override bool RequiresTarget()
-        {
-            return true;
-        }
     }
 }

@@ -13,7 +13,5 @@ namespace SFDDCards.ScriptingTokens
         bool GetTokenIfMatch(string tokenString, out IScriptingToken match);
 
         void ApplyToken(ConceptualTokenEvaluatorBuilder tokenBuilder);
-        bool IsHarmfulToTarget(ICombatantTarget user, ICombatantTarget target);
-        bool RequiresTarget();
     }
 }

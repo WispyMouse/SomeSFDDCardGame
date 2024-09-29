@@ -29,11 +29,6 @@ namespace SFDDCards.ScriptingTokens
             });
         }
 
-        public override bool RequiresTarget()
-        {
-            return false;
-        }
-
         protected override bool TryGetTokenWithArguments(List<string> arguments, out IScriptingToken scriptingToken)
         {
             scriptingToken = null;

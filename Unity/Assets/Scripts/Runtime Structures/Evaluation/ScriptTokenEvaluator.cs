@@ -251,18 +251,6 @@ namespace SFDDCards
                 }
             }
 
-            // If no explicit tokens have been defend,
-            // then go through each ability until we hit something with a target implied
-            for (int ii = 0; ii < effect.AttackTokens.Count; ii++)
-            {
-                IScriptingToken currentToken = effect.AttackTokens[ii];
-
-                if (currentToken.IsHarmfulToTarget(user, target) && user.IsFoeOf(target) && !(target is AllFoesTarget))
-                {
-                    return true;
-                }
-            }
-
             // If there's still no hits, then no this can't effect target
             return false;
         }

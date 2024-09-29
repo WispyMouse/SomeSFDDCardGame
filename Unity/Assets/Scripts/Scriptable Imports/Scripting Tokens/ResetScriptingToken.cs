@@ -20,11 +20,6 @@ namespace SFDDCards.ScriptingTokens
             tokenBuilder.ElementResourceChanges.Clear();
         }
 
-        public override bool RequiresTarget()
-        {
-            return false;
-        }
-
         protected override bool TryGetTokenWithArguments(List<string> arguments, out IScriptingToken scriptingToken)
         {
             scriptingToken = new ResetScriptingToken();

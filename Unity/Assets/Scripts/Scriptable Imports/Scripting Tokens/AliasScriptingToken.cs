@@ -10,7 +10,6 @@ namespace SFDDCards.ScriptingTokens
     public abstract class AliasScriptingToken
     {
         const string ScriptingTokenStarter = "[";
-        const string ArgumentSeparatorFromIdentifier = ":";
 
         public abstract string ScriptingTokenIdentifier { get; }
 

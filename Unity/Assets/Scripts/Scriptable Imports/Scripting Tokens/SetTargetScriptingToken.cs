@@ -52,10 +52,5 @@ namespace SFDDCards.ScriptingTokens
 
             return false;
         }
-
-        public override bool RequiresTarget()
-        {
-            return false;
-        }
     }
 }

@@ -14,7 +14,12 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
 
         public bool TryEvaluateValue(CampaignContext campaignContext, TokenEvaluatorBuilder currentBuilder, out int evaluatedValue)
         {
-            if (!campaignContext.CurrentCombatContext.ElementResourceCounts.TryGetValue(ElementDatabase.GetElement(this.ElementToCount), out evaluatedValue))
+            if (campaignContext?.CurrentCombatContext == null)
+            {
+                evaluatedValue = 0;
+                return true;
+            }
+            else if (!campaignContext.CurrentCombatContext.ElementResourceCounts.TryGetValue(ElementDatabase.GetElement(this.ElementToCount), out evaluatedValue))
             {
                 evaluatedValue = 0;
             }
