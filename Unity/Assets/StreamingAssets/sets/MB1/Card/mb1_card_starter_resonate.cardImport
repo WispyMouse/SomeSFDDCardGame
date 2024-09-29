@@ -1,0 +1,34 @@
+{
+	"Id": "mb1_card_starter_resonate",
+	"Name": "Resonate",
+	"EffectScript": "[CARDTARGET: SELF][MOVECARDTOZONE: EXILE][REQUIRESCOMPARISON: COUNTELEMENT_CYBER+COUNTELEMENT_VOID+COUNTELEMENT_SOLAR+COUNTELEMENT_FORCE > 10][DRAW: 1]",
+	"Tags":
+	[
+		"mf1",
+		"cyber","void","bio","solar","force",
+		"starter"
+	],
+	"ElementGain":
+	[
+		{
+			"Element": "solar",
+			"Gain": 1
+		},
+		{
+			"Element": "bio",
+			"Gain": 1
+		},
+		{
+			"Element": "cyber",
+			"Gain": 1
+		},
+		{
+			"Element": "void",
+			"Gain": 1
+		},
+		{
+			"Element": "force",
+			"Gain": 1
+		},
+	]
+}

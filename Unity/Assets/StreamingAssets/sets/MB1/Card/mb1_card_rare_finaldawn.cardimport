@@ -1,0 +1,22 @@
+{
+	"Id": "mb1_card_rare_finaldawn",
+	"Name": "Final Dawn",
+	"EffectScript": "[SETTARGET: ALLFOES][REQUIRESCOMPARISON: COUNTELEMENT_VOID+COUNTELEMENT_SOLAR > 15][DAMAGE: 40][[SETSTATUSEFFECTSTACKS: VOID 0][SETSTATUSEFFECTSTACKS: SOLAR 0]",
+	"Tags":
+	[
+		"mf1",
+		"void","SOLAR",
+		"rare"
+	],
+	"ElementGain":
+	[
+		{
+			"Element": "void",
+			"Gain": 2
+		},
+		{
+			"Element": "solar",
+			"Gain": 2
+		}
+	]
+}

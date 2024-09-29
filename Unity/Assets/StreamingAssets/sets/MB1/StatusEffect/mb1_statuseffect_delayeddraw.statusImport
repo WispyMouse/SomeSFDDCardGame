@@ -1,0 +1,11 @@
+{
+    "Name": "Delayed Draw",
+	"Id": "mb1_statuseffect_delayedraw",
+	"Effects":
+	[
+		{
+			"Window": "OWNERSTARTSTURN",
+			"Script": "[SETTARGET: SELF][DRAW: COUNTSTACKS_mb1_statuseffect_delayedraw][SETSTATUSEFFECTSTACKS: 0 mb1_statuseffect_delayedraw]"
+		}
+	]
+}

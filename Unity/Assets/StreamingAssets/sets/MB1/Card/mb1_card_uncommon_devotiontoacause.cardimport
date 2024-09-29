@@ -1,0 +1,22 @@
+{
+	"Id": "mb1_card_uncommon_devotiontoacause",
+	"Name": "Devotion to a Cause",
+	"EffectScript": "[REQUIRESATLEASTELEMENT: 5 SOLAR][DRAW: 3][CARDBROWSER: HAND][CHOOSECARDS: 1][MOVECARDTOZONE: EXILE]",
+	"Tags":
+	[
+		"mf1",
+		"solar","cyber",
+		"rare"
+	],
+	"ElementGain":
+	[
+		{
+			"Element": "solar",
+			"Gain": 2
+		},
+		{
+			"Element": "cyber",
+			"Gain": 1
+		}
+	]
+}

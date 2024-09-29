@@ -1,0 +1,26 @@
+{
+	"Id": "mb1_card_common_sneeze",
+	"Name": "Sneeze",
+	"EffectScript": "[SETTARGET: ALLFOES][DAMAGE: COUNTELEMENT_FORCE][APPLYSTATUSEFFECTSTACKS: COUNTELEMENT_BIO mb1_statuseffect_poison]",
+	"Tags":
+	[
+		"mf1",
+		"bio","force","void",
+		"common"
+	],
+	"ElementGain":
+	[
+		{
+			"Element": "force",
+			"Gain": 1
+		},
+		{
+			"Element": "bio",
+			"Gain": 1
+		},
+		{
+			"Element": "void",
+			"Gain": 1
+		}
+	]
+}

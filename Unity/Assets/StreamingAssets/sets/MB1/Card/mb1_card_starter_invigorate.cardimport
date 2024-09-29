@@ -1,0 +1,22 @@
+{
+	"Id": "mb1_card_common_invigorate",
+	"Name": "Invigorate",
+	"EffectScript": "[SETTARGET: SELF][APPLYSTATUSEFFECTSTACKS: 1 mb1_statuseffect_bioheal]",
+	"Tags":
+	[
+		"mf1",
+		"bio","solar",
+		"common"
+	],
+	"ElementGain":
+	[
+		{
+			"Element": "solar",
+			"Gain": 1
+		},
+		{
+			"Element": "bio",
+			"Gain": 2
+		}
+	]
+}
