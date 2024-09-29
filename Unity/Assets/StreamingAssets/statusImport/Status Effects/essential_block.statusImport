@@ -1,0 +1,11 @@
+{
+    "Name": "Block",
+	"Id": "statuseffect_essential_block",
+	"Effects":
+	[
+		{
+			"Window": "INCOMINGDAMAGE",
+			"Script": "[IFTARGET: SELF][DRAINBOTH: INTENSITY statuseffect_essential_block]"
+		}
+	]
+}

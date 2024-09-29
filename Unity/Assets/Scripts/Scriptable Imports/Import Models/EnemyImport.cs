@@ -4,9 +4,8 @@ namespace SFDDCards.ImportModels
     using System.Collections.Generic;
 
     [Serializable]
-    public class EnemyImport
+    public class EnemyImport : Importable
     {
-        public string Id;
         public string Name;
         public int MaximumHealth;
         public HashSet<string> Tags = new HashSet<string>();

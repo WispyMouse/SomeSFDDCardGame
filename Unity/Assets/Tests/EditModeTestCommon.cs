@@ -12,6 +12,50 @@ namespace SFDDCards.Tests.EditMode
 
     public static class EditModeTestCommon
     {
+        public enum ParseKind
+        {
+            Card,
+            StatusEffect
+        }
+
+        public struct ParseFromFileTestData
+        {
+            public string Id;
+            public string ExpectedParse;
+            public ParseKind ParseKind;
+
+            public ParseFromFileTestData(string id, string expectedParse, ParseKind parseKind)
+            {
+                this.Id = id;
+                this.ExpectedParse = expectedParse;
+                this.ParseKind = parseKind;
+            }
+
+            public string FindFileLocation()
+            {
+                string fileName = $"{Id}.{GetImportForType()}";
+                string[] files = Directory.GetFiles(Application.streamingAssetsPath, fileName, SearchOption.AllDirectories);
+                if (files.Length != 1)
+                {
+                    throw new FileNotFoundException($"Could not find file {fileName}");
+                }
+                return files[0];
+            }
+
+            public string GetImportForType()
+            {
+                switch (ParseKind)
+                {
+                    case ParseKind.Card:
+                        return ".cardImport";
+                    case ParseKind.StatusEffect:
+                        return ".statusImport";
+                    default:
+                        return "";
+                }
+            }
+        }
+
         public static EncounterModel GetEncounterWithPunchingBags(int numberOfPunchingBags, int amountOfHealth)
         {
             EnemyImport punchingBag = new EnemyImport()

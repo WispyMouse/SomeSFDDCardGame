@@ -6,6 +6,7 @@ namespace SFDDCards.UX
     using System.Collections.Generic;
     using System.IO;
     using System.Text;
+    using System.Threading.Tasks;
     using UnityEngine;
 
     public class CentralGameStateController : MonoBehaviour
@@ -49,250 +50,30 @@ namespace SFDDCards.UX
 
         IEnumerator BootupSequence()
         {
-            yield return LoadConfiguration();
-            yield return LoadElements();
-            yield return LoadStatusEffects();
-            yield return LoadCards();
-            yield return LoadEnemyScripts();
-            yield return LoadRoutes();
+            yield return ImportHelper.YieldForTask(ImportHelper.ImportImportableFilesIntoDatabaseAsync<ElementImport>(Application.streamingAssetsPath, "elementImport", ElementDatabase.AddElement));
+            foreach (Element element in ElementDatabase.ElementData.Values)
+            {
+                if (element.Sprite != null)
+                {
+                    int spriteIndex = this.TextMeshProSpriteControllerInstance.AddSprite(element.Sprite);
+                    element.SpriteIndex = spriteIndex;
+                }
+            }
+
+            yield return ImportHelper.YieldForTask(ImportHelper.ImportImportableFilesIntoDatabaseAsync<CardImport>(Application.streamingAssetsPath, "cardImport", CardDatabase.AddCardToDatabase));
+            yield return ImportHelper.YieldForTask(ImportHelper.ImportImportableFilesIntoDatabaseAsync<StatusEffectImport>(Application.streamingAssetsPath, "statusImport", StatusEffectDatabase.AddStatusEffectToDatabase));
+            yield return ImportHelper.YieldForTask(ImportHelper.ImportImportableFilesIntoDatabaseAsync<EnemyImport>(Application.streamingAssetsPath, "enemyImport", EnemyDatabase.AddEnemyToDatabase));
+
+            yield return ImportHelper.YieldForTask(ImportHelper.ImportImportableFilesIntoDatabaseAsync<RewardImport>(Application.streamingAssetsPath, "rewardImport", RewardDatabase.AddRewardToDatabase));
+            yield return ImportHelper.YieldForTask(ImportHelper.ImportImportableFilesIntoDatabaseAsync<EncounterImport>(Application.streamingAssetsPath, "encounterImport", EncounterDatabase.AddEncounter));
+            yield return ImportHelper.YieldForTask(ImportHelper.ImportImportableFilesIntoDatabaseAsync<RouteImport>(Application.streamingAssetsPath, "routeImport", RouteDatabase.AddRouteToDatabase));
+
+            Task<RunConfiguration> fileTask  = ImportHelper.GetFileAsync<RunConfiguration>(Application.streamingAssetsPath + "/runconfiguration.runconfiguration");
+            yield return ImportHelper.YieldForTask(fileTask);
+            CurrentRunConfiguration = fileTask.Result;
+
+
             this.SetupAndStartNewGame();
-        }
-
-        IEnumerator LoadConfiguration()
-        {
-            string configImportPath = Application.streamingAssetsPath;
-            string fileText = File.ReadAllText(configImportPath + "/runconfiguration.runconfiguration");
-            CurrentRunConfiguration = Newtonsoft.Json.JsonConvert.DeserializeObject<RunConfiguration>(fileText);
-            yield return null;
-        }
-
-        IEnumerator LoadElements()
-        {
-            string elementImportPath = Application.streamingAssetsPath + "/elementImport";
-            string[] elementImportScriptNames = Directory.GetFiles(elementImportPath, "*.elementimport", SearchOption.AllDirectories);
-
-            GlobalUpdateUX.LogTextEvent.Invoke($"Searched {elementImportPath}; Found {elementImportScriptNames.Length} scripts", GlobalUpdateUX.LogType.Info);
-
-            foreach (string elementImportScriptName in elementImportScriptNames)
-            {
-                GlobalUpdateUX.LogTextEvent.Invoke($"Loading and parsing {elementImportScriptName}...", GlobalUpdateUX.LogType.Info);
-
-                try
-                {
-                    string fileText = File.ReadAllText(elementImportScriptName);
-                    ElementImport importedElement = Newtonsoft.Json.JsonConvert.DeserializeObject<ElementImport>(fileText);
-
-                    if (importedElement == null)
-                    {
-                        GlobalUpdateUX.LogTextEvent.Invoke($"Failed to parse json at {elementImportScriptName}.", GlobalUpdateUX.LogType.RuntimeError);
-                        continue;
-                    }
-
-                    string artLocation = $"{elementImportScriptName.ToLower().Replace(".elementimport", ".png")}";
-                    Sprite elementArt = null;
-                    if (File.Exists(artLocation))
-                    {
-                        byte[] imageBytes = File.ReadAllBytes(artLocation);
-                        Texture2D texture = new Texture2D(64, 64);
-                        texture.LoadImage(imageBytes);
-                        elementArt = Sprite.Create(texture, new Rect(0, 0, 64, 64), Vector2.zero);
-                    }
-                    else
-                    {
-                        GlobalUpdateUX.LogTextEvent.Invoke($"Could not find art for {elementImportScriptName} at expected location of {artLocation}", GlobalUpdateUX.LogType.Info);
-                    }
-
-                    int? spriteIndex = null;
-                    if (elementArt != null)
-                    {
-                        spriteIndex = this.TextMeshProSpriteControllerInstance.AddSprite(elementArt);
-                    }
-
-                    string greyscaleArtLocation = $"{elementImportScriptName.ToLower().Replace(".elementimport", ".greyscale.png")}";
-                    Sprite greyscaleArt = null;
-                    if (File.Exists(greyscaleArtLocation))
-                    {
-                        byte[] imageBytes = File.ReadAllBytes(greyscaleArtLocation);
-                        Texture2D texture = new Texture2D(64, 64);
-                        texture.LoadImage(imageBytes);
-                        greyscaleArt = Sprite.Create(texture, new Rect(0, 0, 64, 64), Vector2.zero);
-                    }
-                    else
-                    {
-                        GlobalUpdateUX.LogTextEvent.Invoke($"Could not find art for {greyscaleArtLocation} at expected location of {artLocation}", GlobalUpdateUX.LogType.Info);
-                    }
-
-                    ElementDatabase.AddElement(importedElement, elementArt, greyscaleArt, spriteIndex);
-                }
-                catch (Exception e)
-                {
-                    GlobalUpdateUX.LogTextEvent.Invoke($"Failed to parse! Debug log has exception details.", GlobalUpdateUX.LogType.RuntimeError);
-                    Debug.LogException(e);
-                }
-            }
-
-            yield return null;
-        }
-
-        IEnumerator LoadCards()
-        {
-            string cardImportPath = Application.streamingAssetsPath + "/cardImport";
-            string[] cardImportScriptNames = Directory.GetFiles(cardImportPath, "*.cardimport", SearchOption.AllDirectories);
-
-            GlobalUpdateUX.LogTextEvent.Invoke($"Searched {cardImportPath}; Found {cardImportScriptNames.Length} scripts", GlobalUpdateUX.LogType.GameEvent);
-
-            foreach (string cardImportScriptName in cardImportScriptNames)
-            {
-                GlobalUpdateUX.LogTextEvent.Invoke($"Loading and parsing {cardImportScriptName}...", GlobalUpdateUX.LogType.GameEvent);
-
-                try
-                {
-                    string fileText = File.ReadAllText(cardImportScriptName);
-                    CardImport importedCard = Newtonsoft.Json.JsonConvert.DeserializeObject<CardImport>(fileText);
-
-                    if (importedCard == null)
-                    {
-                        GlobalUpdateUX.LogTextEvent.Invoke($"Failed to parse json at {cardImportScriptName}.", GlobalUpdateUX.LogType.RuntimeError);
-                        continue;
-                    }
-
-                    string artLocation = $"{cardImportScriptName.ToLower().Replace(".cardimport", ".png")}";
-                    Sprite cardArt = null;
-                    if (File.Exists(artLocation))
-                    {
-                        byte[] imageBytes = File.ReadAllBytes(artLocation);
-                        Texture2D texture = new Texture2D(144, 80);
-                        texture.LoadImage(imageBytes);
-                        cardArt = Sprite.Create(texture, new Rect(0, 0, 144, 80), Vector2.zero);
-                    }
-                    else
-                    {
-                        GlobalUpdateUX.LogTextEvent.Invoke($"Could not find art for {cardImportScriptName} at expected location of {artLocation}", GlobalUpdateUX.LogType.Info);
-                    }
-
-                    CardDatabase.AddCardToDatabase(importedCard, cardArt);
-                }
-                catch (Exception e)
-                {
-                    GlobalUpdateUX.LogTextEvent.Invoke($"Failed to parse! File is {cardImportScriptName}. Debug log has exception details.", GlobalUpdateUX.LogType.RuntimeError);
-                    Debug.LogException(e);
-                }
-            }
-
-            yield return null;
-        }
-
-        IEnumerator LoadStatusEffects()
-        {
-            string statusEffectImportPath = Application.streamingAssetsPath + "/statusImport";
-            string[] statusEffectImportScriptNames = Directory.GetFiles(statusEffectImportPath, "*.statusImport", SearchOption.AllDirectories);
-
-            GlobalUpdateUX.LogTextEvent.Invoke($"Searched {statusEffectImportPath}; Found {statusEffectImportScriptNames.Length} scripts", GlobalUpdateUX.LogType.GameEvent);
-
-            foreach (string statusEffectImportScriptName in statusEffectImportScriptNames)
-            {
-                StatusEffectDatabase.TryImportStatusEffectFromFile(statusEffectImportScriptName, out _);
-            }
-
-            yield return new WaitForEndOfFrame();
-        }
-
-        IEnumerator LoadEnemyScripts()
-        {
-            string enemyImportPath = Application.streamingAssetsPath + "/enemyImport";
-            string[] enemyImportScriptNames = Directory.GetFiles(enemyImportPath, "*.enemyimport", SearchOption.AllDirectories);
-
-            GlobalUpdateUX.LogTextEvent.Invoke($"Searched {enemyImportPath}; Found {enemyImportScriptNames.Length} scripts", GlobalUpdateUX.LogType.Info);
-
-            foreach (string enemyImportScriptName in enemyImportScriptNames)
-            {
-                GlobalUpdateUX.LogTextEvent.Invoke($"Loading and parsing {enemyImportScriptName}...", GlobalUpdateUX.LogType.Info);
-
-                try
-                {
-                    string fileText = File.ReadAllText(enemyImportScriptName);
-                    EnemyImport importedEnemy = Newtonsoft.Json.JsonConvert.DeserializeObject<EnemyImport>(fileText);
-                    EnemyDatabase.AddEnemyToDatabase(importedEnemy);
-                }
-                catch (Exception e)
-                {
-                    GlobalUpdateUX.LogTextEvent.Invoke($"Failed to parse! File is {enemyImportScriptName}. Debug log has exception details.", GlobalUpdateUX.LogType.Info);
-                    Debug.LogException(e);
-                }
-            }
-
-            yield return new WaitForEndOfFrame();
-        }
-
-        IEnumerator LoadRoutes()
-        {
-            string rewardsImportPath = Application.streamingAssetsPath + "/rewardImport";
-            string[] rewardsImportScriptNames = Directory.GetFiles(rewardsImportPath, "*.rewardImport", SearchOption.AllDirectories);
-
-            GlobalUpdateUX.LogTextEvent.Invoke($"Searched {rewardsImportPath}; Found {rewardsImportScriptNames.Length} scripts", GlobalUpdateUX.LogType.Info);
-
-            foreach (string rewardImportScriptName in rewardsImportScriptNames)
-            {
-                GlobalUpdateUX.LogTextEvent.Invoke($"Loading and parsing {rewardImportScriptName}...", GlobalUpdateUX.LogType.Info);
-
-                try
-                {
-                    string fileText = File.ReadAllText(rewardImportScriptName);
-                    RewardImport importedReward = Newtonsoft.Json.JsonConvert.DeserializeObject<RewardImport>(fileText);
-                    RewardDatabase.AddRewardToDatabase(importedReward);
-                }
-                catch (Exception e)
-                {
-                    GlobalUpdateUX.LogTextEvent.Invoke($"Failed to parse! File is {rewardImportScriptName}. Debug log has exception details.", GlobalUpdateUX.LogType.Info);
-                    Debug.LogException(e);
-                }
-            }
-
-            string encounterImportPath = Application.streamingAssetsPath + "/encounterImport";
-            string[] encounterImportNames = Directory.GetFiles(encounterImportPath, "*.encounterImport", SearchOption.AllDirectories);
-
-            GlobalUpdateUX.LogTextEvent.Invoke($"Searched {encounterImportPath}; Found {encounterImportNames.Length} scripts", GlobalUpdateUX.LogType.Info);
-
-            foreach (string encounterImportScriptNames in encounterImportNames)
-            {
-                GlobalUpdateUX.LogTextEvent.Invoke($"Loading and parsing {encounterImportScriptNames}...", GlobalUpdateUX.LogType.Info);
-
-                try
-                {
-                    string fileText = File.ReadAllText(encounterImportScriptNames);
-                    EncounterImport importedEncounter = Newtonsoft.Json.JsonConvert.DeserializeObject<EncounterImport>(fileText);
-                    EncounterDatabase.AddEncounter(importedEncounter);
-                }
-                catch (Exception e)
-                {
-                    GlobalUpdateUX.LogTextEvent.Invoke($"Failed to parse! File is {encounterImportScriptNames}. Debug log has exception details.", GlobalUpdateUX.LogType.Info);
-                    Debug.LogException(e);
-                }
-            }
-
-            string routeImportPath = Application.streamingAssetsPath + "/routeImport";
-            string[] routeImportScriptNames = Directory.GetFiles(routeImportPath, "*.routeImport", SearchOption.AllDirectories);
-
-            GlobalUpdateUX.LogTextEvent.Invoke($"Searched {routeImportPath}; Found {routeImportScriptNames.Length} scripts", GlobalUpdateUX.LogType.Info);
-
-            foreach (string routeImportScriptName in routeImportScriptNames)
-            {
-                GlobalUpdateUX.LogTextEvent.Invoke($"Loading and parsing {routeImportScriptName}...", GlobalUpdateUX.LogType.Info);
-
-                try
-                {
-                    string fileText = File.ReadAllText(routeImportScriptName);
-                    RouteImport importedRoute = Newtonsoft.Json.JsonConvert.DeserializeObject<RouteImport>(fileText);
-                    RouteDatabase.AddRouteToDatabase(importedRoute);
-                }
-                catch (Exception e)
-                {
-                    GlobalUpdateUX.LogTextEvent.Invoke($"Failed to parse! File is {routeImportScriptName}. Debug log has exception details.", GlobalUpdateUX.LogType.Info);
-                    Debug.LogException(e);
-                }
-            }
-
-            yield return new WaitForEndOfFrame();
         }
 
         public void RouteChosen(RouteImport route)

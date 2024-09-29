@@ -2,6 +2,7 @@ namespace SFDDCards.Tests.EditMode
 {
     using NUnit.Framework;
     using SFDDCards.Evaluation.Actual;
+    using SFDDCards.ImportModels;
     using System;
     using System.Collections;
     using System.Collections.Generic;
@@ -18,13 +19,10 @@ namespace SFDDCards.Tests.EditMode
         /// This test validates the behaviour.
         /// </summary>
         [Test]
-        public void TestBlock()
+        public async void TestBlock()
         {
-            string blockFilePath = Application.streamingAssetsPath + "/statusImport/status effects/block.statusImport";
-            if (!StatusEffectDatabase.TryImportStatusEffectFromFile(blockFilePath, out StatusEffect blockStatus))
-            {
-                Assert.Fail($"Expected to find block at {blockFilePath}, did not find it there.");
-            }
+            StatusEffectDatabase.AddStatusEffectToDatabase(await ImportHelper.ImportImportableFileAsync<StatusEffectImport>(Application.streamingAssetsPath + "/statusImport/status effects/block.statusImport"));
+            StatusEffect blockStatus = StatusEffectDatabase.GetModel("block");
 
             EncounterModel testEncounter = EditModeTestCommon.GetEncounterWithPunchingBags(2, 100);
             CampaignContext campaignContext = EditModeTestCommon.GetBlankCampaignContext();

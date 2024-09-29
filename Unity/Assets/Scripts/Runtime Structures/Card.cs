@@ -49,7 +49,7 @@ namespace SFDDCards
             }
 
             this.Tags = lowerCaseTags;
-            this.Sprite = basedOn.Sprite;
+            this.Sprite = basedOn.CardArt;
 
             this.AttackTokenPile = ScriptingTokens.ScriptingTokenDatabase.GetAllTokens(basedOn.EffectScript, this);
 

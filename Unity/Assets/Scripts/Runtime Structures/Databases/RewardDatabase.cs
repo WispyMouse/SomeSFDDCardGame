@@ -11,7 +11,7 @@ namespace SFDDCards
 
         public static void AddRewardToDatabase(RewardImport toAdd)
         {
-            RewardModels.Add(toAdd.RewardId, toAdd);
+            RewardModels.Add(toAdd.Id, toAdd);
         }
 
         public static bool TryGetReward(string rewardId, out RewardImport model)

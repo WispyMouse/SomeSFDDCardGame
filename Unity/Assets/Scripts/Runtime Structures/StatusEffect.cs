@@ -20,11 +20,11 @@ namespace SFDDCards
         public readonly StatusEffectPersistence Persistence = StatusEffectPersistence.Combat;
         public readonly HashSet<string> Tags = new HashSet<string>();
 
-        public StatusEffect(StatusEffectImport basedOn, Sprite sprite = null)
+        public StatusEffect(StatusEffectImport basedOn)
         {
             this.Name = basedOn.Name;
             this.Id = basedOn.Id;
-            this.Sprite = sprite;
+            this.Sprite = basedOn.StatusEffectArt;
             this.Persistence = basedOn.Persistence;
             this.Tags = basedOn.Tags;
 

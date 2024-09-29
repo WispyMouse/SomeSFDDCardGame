@@ -1,6 +1,7 @@
 namespace SFDDCards.Tests.EditMode
 {
     using NUnit.Framework;
+    using SFDDCards.ImportModels;
     using System;
     using System.Collections;
     using System.Collections.Generic;
@@ -18,13 +19,10 @@ namespace SFDDCards.Tests.EditMode
         /// The test observes that poison proc'd appropriately and has the desired effects.
         /// </summary>
         [Test]
-        public void TestPoisonStatus()
+        public async void TestPoisonStatus()
         {
-            string poisonFilePath = Application.streamingAssetsPath + "/statusImport/status effects/poison.statusImport";
-            if (!StatusEffectDatabase.TryImportStatusEffectFromFile(poisonFilePath, out StatusEffect poisonStatus))
-            {
-                Assert.Fail($"Expected to find poison at {poisonFilePath}, did not find it there.");
-            }
+            StatusEffectDatabase.AddStatusEffectToDatabase(await ImportHelper.ImportImportableFileAsync<StatusEffectImport>(Application.streamingAssetsPath + "/statusImport/status effects/poison.statusImport"));
+            StatusEffect poisonStatus = StatusEffectDatabase.GetModel("poison");
 
             EncounterModel testEncounter = EditModeTestCommon.GetEncounterWithPunchingBags(2, 100);
             CampaignContext campaignContext = EditModeTestCommon.GetBlankCampaignContext();
