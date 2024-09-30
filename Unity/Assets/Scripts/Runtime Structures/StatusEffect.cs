@@ -60,11 +60,11 @@ namespace SFDDCards
                     List<ConceptualTokenEvaluatorBuilder> tokenEvaluators = ScriptTokenEvaluator.CalculateConceptualBuildersFromTokenEvaluation(attackTokenList);
                     foreach (ConceptualTokenEvaluatorBuilder builder in tokenEvaluators)
                     {
-                        thisWindowString.Append($"{EffectDescriberDatabase.DescribeConceptualEffect(builder.GetConceptualDelta(), window.ToLower())} ");
+                        thisWindowString.Append($"{EffectDescriberDatabase.DescribeConceptualEffect(builder.GetConceptualDelta(), window.ToLower())}  ");
                     }
                 }
 
-                statusEffects.Add(thisWindowString.ToString());
+                statusEffects.Add(thisWindowString.ToString().Trim());
             }
 
             HashSet<StatusEffect> mentionedEffects = new HashSet<StatusEffect>();
