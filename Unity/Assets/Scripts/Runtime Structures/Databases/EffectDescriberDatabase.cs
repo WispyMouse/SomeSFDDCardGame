@@ -55,7 +55,7 @@ namespace SFDDCards
                     leadingSpace = " ";
                 }
 
-                if (deltaEntry.MadeFromBuilder.RealizedOperationScriptingToken != null)
+                if (deltaEntry.MadeFromBuilder.RealizedOperationScriptingToken != null && !deltaEntry.MadeFromBuilder.RealizedOperationScriptingToken.SkipDescribingMe)
                 {
                     string realizedOperation = deltaEntry.MadeFromBuilder.RealizedOperationScriptingToken.DescribeOperationAsEffect(deltaEntry, reactionWindow);
                     if (!string.IsNullOrEmpty(realizedOperation))

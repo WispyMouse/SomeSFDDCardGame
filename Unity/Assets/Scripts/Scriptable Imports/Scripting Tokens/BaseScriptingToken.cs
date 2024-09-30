@@ -12,6 +12,8 @@ namespace SFDDCards.ScriptingTokens
         const string ScriptingTokenStarter = "[";
         const string ArgumentSeparatorFromIdentifier = ":";
 
+        public bool SkipDescribingMe { get; protected set; } = false;
+
         public abstract string ScriptingTokenIdentifier { get; }
 
         public abstract void ApplyToken(ConceptualTokenEvaluatorBuilder tokenBuilder);

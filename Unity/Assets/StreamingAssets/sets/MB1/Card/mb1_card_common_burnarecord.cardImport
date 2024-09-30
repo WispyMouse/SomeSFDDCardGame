@@ -1,5 +1,5 @@
 {
-	"Id": "mb1_card_uncommon_burnarecord",
+	"Id": "mb1_card_common_burnarecord",
 	"Name": "Burn A Record",
 	"EffectScript": "[GENERATECARD: mb1_card_generated_loot COUNTELEMENT_CYBER][MOVECARDTOZONE: HAND][CARDTARGET: SELF][MOVECARDTOZONE: EXILE]",
 	"Tags":

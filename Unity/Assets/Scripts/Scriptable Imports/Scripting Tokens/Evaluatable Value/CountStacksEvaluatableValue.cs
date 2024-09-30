@@ -36,7 +36,7 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
 
         public string DescribeEvaluation()
         {
-            return $"1 x {this.StacksToCount}";
+            return this.DescribeEvaluation(this);
         }
 
         public static bool TryGetCountStacksEvaluatableValue(string argument, out CountStacksEvaluatableValue output, bool allowNameMatch)
@@ -79,6 +79,16 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
             }
 
             return $"COUNTSTACKS_{this.StacksToCount}";
+        }
+
+        public string DescribeEvaluation(IEvaluatableValue<int> topValue)
+        {
+            if (topValue == this)
+            {
+                return $"1 x {StatusEffectDatabase.GetModel(this.StacksToCount).Name}";
+            }
+
+            return $"{StatusEffectDatabase.GetModel(this.StacksToCount).Name}";
         }
     }
 }

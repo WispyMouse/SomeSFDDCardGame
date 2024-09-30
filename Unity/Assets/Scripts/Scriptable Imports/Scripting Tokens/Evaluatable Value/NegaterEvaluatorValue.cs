@@ -38,5 +38,10 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
         {
             return $"-{this.ToNegate.GetScriptingTokenText()}";
         }
+
+        public string DescribeEvaluation(IEvaluatableValue<int> topValue)
+        {
+            return this.DescribeEvaluation();
+        }
     }
 }

@@ -42,5 +42,10 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
 
             return null;
         }
+
+        public string DescribeEvaluation(IEvaluatableValue<List<Card>> topValue)
+        {
+            return this.DescribeEvaluation();
+        }
     }
 }

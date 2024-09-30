@@ -70,5 +70,10 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
         {
             return $"{this.TargetToAssess}HEALTH";
         }
+
+        public string DescribeEvaluation(IEvaluatableValue<int> topValue)
+        {
+            return this.DescribeEvaluation();
+        }
     }
 }

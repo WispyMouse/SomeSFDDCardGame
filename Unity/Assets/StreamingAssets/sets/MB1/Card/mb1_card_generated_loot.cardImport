@@ -1,5 +1,5 @@
 {
-	"Id": "generated_loot",
+	"Id": "mb1_card_generated_loot",
 	"Name": "Loot",
 	"EffectScript": "[DRAW: 1][CARDBROWSER: HAND][CHOOSECARDS: 1][MOVECARDTOZONE: DISCARD][CARDTARGET: SELF][MOVECARDTOZONE: EXILE]",
 	"Tags":

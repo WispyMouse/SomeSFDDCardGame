@@ -29,7 +29,7 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
 
         public string DescribeEvaluation()
         {
-            return ElementDatabase.GetElement(this.ElementToCount).Name;
+            return this.DescribeEvaluation(this);
         }
 
         public static bool TryGetCountElementalEvaluatableValue(string argument, out CountElementEvaluatableValue output, bool allowNameMatch)
@@ -56,6 +56,16 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
         public string GetScriptingTokenText()
         {
             return $"COUNTELEMENT_{this.ElementToCount}";
+        }
+
+        public string DescribeEvaluation(IEvaluatableValue<int> topValue)
+        {
+            if (topValue == this)
+            {
+                return $"1 x {ElementDatabase.GetElement(this.ElementToCount).Name}";
+            }
+
+            return $"{ElementDatabase.GetElement(this.ElementToCount).Name}";
         }
     }
 }

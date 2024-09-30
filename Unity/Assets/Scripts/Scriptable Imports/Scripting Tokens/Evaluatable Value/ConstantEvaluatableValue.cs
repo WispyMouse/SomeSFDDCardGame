@@ -53,5 +53,10 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
             GlobalUpdateUX.LogTextEvent.Invoke($"Asked to re-parse a constant value other than an int.", GlobalUpdateUX.LogType.RuntimeError);
             return string.Empty;
         }
+
+        public string DescribeEvaluation(IEvaluatableValue<T> topValue)
+        {
+            return this.DescribeEvaluation();
+        }
     }
 }

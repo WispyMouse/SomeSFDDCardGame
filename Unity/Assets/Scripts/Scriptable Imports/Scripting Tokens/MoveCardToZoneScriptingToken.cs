@@ -19,6 +19,31 @@ namespace SFDDCards.ScriptingTokens
             }
 
             tokenBuilder.RealizedOperationScriptingToken = this;
+
+            ConceptualTokenEvaluatorBuilder previous = tokenBuilder.PreviousBuilder;
+            do
+            {
+                if (previous.RelevantCards == tokenBuilder.RelevantCards)
+                {
+                    if (previous.RealizedOperationScriptingToken is GenerateCardScriptingToken generateCards)
+                    {
+                        if (!string.IsNullOrEmpty(generateCards.LaterRealizedDestinationZone))
+                        {
+                            break;
+                        }
+
+                        generateCards.LaterRealizedDestinationZone = this.Zone;
+                        this.SkipDescribingMe = true;
+                        break;
+                    }
+                }
+                else
+                {
+                    break;
+                }
+
+                previous = previous.PreviousBuilder;
+            } while (previous != null);
         }
 
         protected override bool TryGetTokenWithArguments(List<string> arguments, out IScriptingToken scriptingToken)

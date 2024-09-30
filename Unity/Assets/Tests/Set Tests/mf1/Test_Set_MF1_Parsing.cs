@@ -34,7 +34,7 @@ namespace SFDDCards.Tests.EditMode
             new ParseFromFileTestData("mb1_card_starter_block", "Gain 3 Block.", ParseKind.Card),
             new ParseFromFileTestData("mb1_card_starter_resonate", "Exile this card. If Cyber + Void + Solar + Bio + Force > 10: Draw a card.", ParseKind.Card),
 
-            new ParseFromFileTestData("mb1_card_common_burnarecord", "Create 1 x Cyber copies of Loot in hand.", ParseKind.Card),
+            new ParseFromFileTestData("mb1_card_common_burnarecord", "Create 1 x Cyber Loot in hand. Exile this card.", ParseKind.Card),
             new ParseFromFileTestData("mb1_card_common_fueldbypassion", "Exile the top card of the deck. Draw 2 cards.", ParseKind.Card),
             new ParseFromFileTestData("mb1_card_common_glitch", "2 damage to all foes. If Cyber < 3: Exile this card. Else: Reduce Cyber by 3. Return this card to hand.", ParseKind.Card),
             new ParseFromFileTestData("mb1_card_common_invigorate", "Gain 1 Bio Heal.", ParseKind.Card),
