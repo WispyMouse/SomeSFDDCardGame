@@ -29,7 +29,7 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
 
         public string DescribeEvaluation()
         {
-            return $"amount of {ElementToCount}";
+            return ElementDatabase.GetElement(this.ElementToCount).Name;
         }
 
         public static bool TryGetCountElementalEvaluatableValue(string argument, out CountElementEvaluatableValue output, bool allowNameMatch)

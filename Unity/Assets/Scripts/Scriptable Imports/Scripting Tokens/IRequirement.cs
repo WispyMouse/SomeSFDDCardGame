@@ -14,5 +14,6 @@ namespace SFDDCards.Evaluation.Conceptual
     public interface IRequirement
     {
         public bool MeetsRequirement(TokenEvaluatorBuilder builder, CampaignContext context);
+        public string DescribeRequirement();
     }
 }

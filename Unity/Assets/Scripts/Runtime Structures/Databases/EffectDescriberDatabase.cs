@@ -37,14 +37,25 @@ namespace SFDDCards
             {
                 string nextDescriptor = string.Empty;
 
+                string requirement = DescribeRequirement(deltaEntry);
+                if (!string.IsNullOrEmpty(requirement))
+                {
+                    nextDescriptor += requirement;
+                }
+
                 string elementChange = DescribeElementChange(deltaEntry, ignoreElement);
                 if (!string.IsNullOrEmpty(elementChange))
                 {
+                    if (!string.IsNullOrEmpty(nextDescriptor))
+                    {
+                        nextDescriptor += " ";
+                    }
+
                     if (entireEffectText.Length > 0)
                     {
                         nextDescriptor += "\n";
                     }
-                    nextDescriptor += elementChange;
+                    nextDescriptor += leadingSpace + elementChange;
                 }
 
                 if (deltaEntry.MadeFromBuilder.RealizedOperationScriptingToken != null)
@@ -583,6 +594,11 @@ namespace SFDDCards
 
         public static string DescribeConceptualSetStatusEffect(ConceptualDeltaEntry deltaEntry)
         {
+            if (deltaEntry.ConceptualTarget is SelfTargetEvaluatableValue && deltaEntry.ConceptualIntensity is ConstantEvaluatableValue<int> constant && constant.ConstantValue == 0)
+            {
+                return $"Clear {deltaEntry.StatusEffect.Name}.";
+            }
+
             string stackstext = ExtractSingularOrPlural(deltaEntry.ConceptualIntensity, "stack");
 
             // If this stack change is targeting the Owner of this entire effect,
@@ -615,6 +631,11 @@ namespace SFDDCards
 
         public static string DescribeRealizedSetStatusEffect(TokenEvaluatorBuilder builder)
         {
+            if (builder.Intensity == 0)
+            {
+                return $"Clear {builder.StatusEffect.Name}.";
+            }
+
             string stackstext = ExtractSingularOrPlural(builder.Intensity, "stack");
 
             // If this stack change is targeting the Owner of this entire effect,
@@ -893,7 +914,15 @@ namespace SFDDCards
 
                 if (change.SetValue != null)
                 {
-                    nextText.Append($"{leadingcomma}Set {change.Element.GetNameAndMaybeIcon()} to {change.SetValue.DescribeEvaluation()}");
+                    if (change.SetValue is ConstantEvaluatableValue<int> constant && constant.ConstantValue == 0)
+                    {
+                        nextText.Append($"{leadingcomma}Clear {change.Element.GetNameAndMaybeIcon()}");
+                    }
+                    else
+                    {
+                        nextText.Append($"{leadingcomma}Set {change.Element.GetNameAndMaybeIcon()} to {change.SetValue.DescribeEvaluation()}");
+                    }
+
                     leadingcomma = ", ";
                 }
                 else if (change.GainOrLoss != null)
@@ -929,6 +958,49 @@ namespace SFDDCards
             }
 
             return changeText.ToString();
+        }
+
+        public static string DescribeRequirement(ConceptualDeltaEntry delta)
+        {
+            StringBuilder resultBuilder = new StringBuilder();
+
+            string leadingComma = "";
+            string startingLine = "If ";
+
+            if (delta.MadeFromBuilder.ElementRequirements.Count > 0)
+            {
+                foreach (Element req in delta.MadeFromBuilder.ElementRequirements.Keys)
+                {
+                    string thisRequirementText = delta.MadeFromBuilder.ElementRequirements[req].DescribeEvaluation();
+                    if (!string.IsNullOrEmpty(thisRequirementText))
+                    {
+                        resultBuilder.Append($"{startingLine}{leadingComma}{thisRequirementText}");
+                        leadingComma = ", ";
+                        startingLine = "";
+                    }
+                }
+            }
+
+            if (delta.MadeFromBuilder.Requirements != null)
+            {
+                foreach (IRequirement requirement in delta.MadeFromBuilder.Requirements)
+                {
+                    string thisRequirementText = requirement.DescribeRequirement();
+                    if (!string.IsNullOrEmpty(thisRequirementText))
+                    {
+                        resultBuilder.Append($"{startingLine}{leadingComma}{thisRequirementText}");
+                        leadingComma = ", ";
+                        startingLine = "";
+                    }
+                }
+            }
+
+            if (resultBuilder.Length > 0)
+            {
+                resultBuilder.Append(":");
+            }
+
+            return resultBuilder.ToString();
         }
 
         #endregion

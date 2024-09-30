@@ -32,7 +32,16 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
 
         public string DescribeEvaluation()
         {
-            return $"current health of {this.TargetToAssess}";
+            if (this.TargetToAssess.ToLower() == "target")
+            {
+                return "target's health";
+            }
+            else if (this.TargetToAssess.ToLower() == "self")
+            {
+                return "own health";
+            }
+
+            return $"{this.TargetToAssess} health";
         }
 
         public static bool TryGetHealthEvaluatableValue(string argument, out HealthEvaluatableValue output)

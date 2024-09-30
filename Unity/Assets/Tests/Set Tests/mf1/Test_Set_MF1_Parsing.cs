@@ -30,7 +30,7 @@ namespace SFDDCards.Tests.EditMode
 
         public static ParseFromFileTestData[] ParsingTests = new ParseFromFileTestData[]
         {
-            new ParseFromFileTestData("mb1_card_starter_strike", "3 + 1 x Force damage. If target's health > 10: Set Force to 0.", ParseKind.Card),
+            new ParseFromFileTestData("mb1_card_starter_strike", "3 + Force damage. If target's health > 10: Clear Force.", ParseKind.Card),
             new ParseFromFileTestData("mb1_card_starter_block", "Gain 3 Block.", ParseKind.Card),
             new ParseFromFileTestData("mb1_card_starter_resonate", "Exile this card. If Cyber + Void + Solar + Bio + Force > 10: Draw a card.", ParseKind.Card),
 

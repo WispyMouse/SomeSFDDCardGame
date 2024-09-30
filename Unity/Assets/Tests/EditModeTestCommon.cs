@@ -60,7 +60,7 @@ namespace SFDDCards.Tests.EditMode
 
             public override string ToString()
             {
-                return this.ExpectedParsedValue;
+                return $"{this.Id}: {this.ExpectedParsedValue}";
             }
         }
 

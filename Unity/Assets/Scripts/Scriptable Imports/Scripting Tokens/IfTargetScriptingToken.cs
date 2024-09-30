@@ -62,5 +62,10 @@ namespace SFDDCards.ScriptingTokens
 
             return false;
         }
+
+        public string DescribeRequirement()
+        {
+            return $"the target is {this.Target.DescribeEvaluation()}";
+        }
     }
 }
