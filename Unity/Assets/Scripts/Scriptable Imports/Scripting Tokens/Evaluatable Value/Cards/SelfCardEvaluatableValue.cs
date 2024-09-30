@@ -32,5 +32,20 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
         {
             return 1;
         }
+
+        public override bool Equals(CardsEvaluatableValue other)
+        {
+            if (other is SpecificCardsEvaluatableValue specific && specific.Cards.Count == 1)
+            {
+                return this.SelfCard == specific.Cards[0];
+            }
+
+            if (!(other is SelfCardEvaluatableValue otherCard))
+            {
+                return false;
+            }
+
+            return this.SelfCard == otherCard.SelfCard;
+        }
     }
 }

@@ -23,18 +23,22 @@ namespace SFDDCards.ScriptingTokens
             ConceptualTokenEvaluatorBuilder previous = tokenBuilder.PreviousBuilder;
             do
             {
-                if (previous.RelevantCards == tokenBuilder.RelevantCards)
+                if (previous.RelevantCards != null && previous.RelevantCards.Equals(tokenBuilder.RelevantCards))
                 {
-                    if (previous.RealizedOperationScriptingToken is GenerateCardScriptingToken generateCards)
+                    if (previous.RealizedOperationScriptingToken is ILaterZoneListenerScriptingToken laterListener)
                     {
-                        if (!string.IsNullOrEmpty(generateCards.LaterRealizedDestinationZone))
+                        if (!string.IsNullOrEmpty(laterListener.LaterRealizedDestinationZone))
                         {
                             break;
                         }
 
-                        generateCards.LaterRealizedDestinationZone = this.Zone;
-                        this.SkipDescribingMe = true;
-                        break;
+                        laterListener.LaterRealizedDestinationZone = this.Zone;
+
+                        if (laterListener.ShouldSilenceSpeaker)
+                        { 
+
+                            this.SkipDescribingMe = true;
+                        }
                     }
                 }
                 else

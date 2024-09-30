@@ -27,6 +27,7 @@ namespace SFDDCards.ScriptingTokens
             new MoveCardToZoneScriptingToken(),
             new GenerateCardScriptingToken(),
             new CopyAndAddToCampaignDeckScriptingToken(),
+            new ShuffleScriptingToken(),
 
             // Targeting Token
             new SetTargetScriptingToken(),

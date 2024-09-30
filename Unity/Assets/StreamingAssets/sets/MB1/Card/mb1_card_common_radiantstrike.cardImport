@@ -1,7 +1,7 @@
 {
 	"Id": "mb1_card_common_radiantstrike",
 	"Name": "Radiant Strike",
-	"EffectScript": "[SETTARGET: FOE][DAMAGE: COUNTELEMENT_SOLAR+COUNTELMENT_CYBER]",
+	"EffectScript": "[SETTARGET: FOE][DAMAGE: COUNTELEMENT_SOLAR+COUNTELEMENT_CYBER]",
 	"Tags":
 	[
 		"mf1",

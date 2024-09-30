@@ -19,6 +19,31 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
             return this.InnerValue.DescribeEvaluation();
         }
 
+        public override bool Equals(CardsEvaluatableValue other)
+        {
+            if (other == this)
+            {
+                return true;
+            }
+
+            if (this.InnerValue == null)
+            {
+                return false;
+            }
+
+            if (this.InnerValue.Equals(other))
+            {
+                return true;
+            }
+
+            if ((other is PromisedCardsEvaluatableValue promise))
+            {
+                return this.InnerValue.Equals(promise.InnerValue);
+            }
+
+            return false;
+        }
+
         public override string GetScriptingTokenText()
         {
             if (this.InnerValue == null)

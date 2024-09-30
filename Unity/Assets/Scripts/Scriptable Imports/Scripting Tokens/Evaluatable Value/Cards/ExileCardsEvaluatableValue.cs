@@ -15,6 +15,11 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
             return "exile";
         }
 
+        public override bool Equals(CardsEvaluatableValue other)
+        {
+            return other is ExileCardsEvaluatableValue;
+        }
+
         public override bool TryEvaluateValue(CampaignContext campaignContext, TokenEvaluatorBuilder currentBuilder, out List<Card> evaluatedValue)
         {
             if (campaignContext?.CurrentCombatContext?.PlayerCombatDeck?.CardsCurrentlyInExile == null)

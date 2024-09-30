@@ -1,10 +1,11 @@
 using SFDDCards.Evaluation.Actual;
+using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
 namespace SFDDCards.ScriptingTokens.EvaluatableValues
 {
-    public abstract class CardsEvaluatableValue : IEvaluatableValue<List<Card>>
+    public abstract class CardsEvaluatableValue : IEvaluatableValue<List<Card>>, IEquatable<CardsEvaluatableValue>
     {
         public const string HandZoneId = "hand";
         public const string DiscardZoneId = "discard";
@@ -47,5 +48,7 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
         {
             return this.DescribeEvaluation();
         }
+
+        public abstract bool Equals(CardsEvaluatableValue other);
     }
 }

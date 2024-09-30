@@ -5,28 +5,40 @@ namespace SFDDCards.ScriptingTokens
     using SFDDCards.ScriptingTokens.EvaluatableValues;
     using System.Collections.Generic;
 
-    public class ChooseCardScriptingToken : BaseScriptingToken
+    public class ChooseCardScriptingToken : BaseScriptingToken, ILaterZoneListenerScriptingToken, IRealizedOperationScriptingToken
     {
         public IEvaluatableValue<int> NumberOfCards { get; private set; }
         public PromisedCardsEvaluatableValue PromisedCards { get; private set; } = new PromisedCardsEvaluatableValue();
 
+        public string LaterRealizedDestinationZone
+        {
+            get
+            {
+                return _laterRealizedDestinationZone;
+            }
+            set
+            {
+                _laterRealizedDestinationZone = value;
+                this.UpdateDescriptionForPromise();
+            }
+        }
+        private string _laterRealizedDestinationZone { get; set; }
+
         public override string ScriptingTokenIdentifier { get; } = "CHOOSECARDS";
+
+        public bool ShouldSilenceSpeaker => false;
+
+        private ConceptualTokenEvaluatorBuilder FromBuilder;
 
         public override void ApplyToken(ConceptualTokenEvaluatorBuilder tokenBuilder)
         {
             tokenBuilder.ChoiceToMake = new PlayerChooseFromCardBrowser(this.PromisedCards, this.NumberOfCards);
-
-            if (tokenBuilder.RelevantCards is HandCardsEvaluatableValue)
-            {
-                this.PromisedCards.DescriptionText = $"{this.NumberOfCards.DescribeEvaluation()} {EffectDescriberDatabase.ExtractSingularOrPlural(this.NumberOfCards, "card")}";
-            }
-            else
-            {
-                this.PromisedCards.DescriptionText = $"{this.NumberOfCards.DescribeEvaluation()} {EffectDescriberDatabase.ExtractSingularOrPlural(this.NumberOfCards, "card")} from {tokenBuilder.RelevantCards.DescribeEvaluation()}";
-            }
-
             this.PromisedCards.SampledPool = tokenBuilder.RelevantCards;
             tokenBuilder.RelevantCards = this.PromisedCards;
+            this.FromBuilder = tokenBuilder;
+            tokenBuilder.RealizedOperationScriptingToken = this;
+
+            this.UpdateDescriptionForPromise();
         }
 
         protected override bool TryGetTokenWithArguments(List<string> arguments, out IScriptingToken scriptingToken)
@@ -44,6 +56,29 @@ namespace SFDDCards.ScriptingTokens
             };
 
             return true;
+        }
+
+        void UpdateDescriptionForPromise()
+        {
+            // If this choice is leading to discarding a card from hand, we don't have to include the zone
+            if (!string.IsNullOrEmpty(LaterRealizedDestinationZone) && LaterRealizedDestinationZone == "discard" && FromBuilder.RelevantCards is HandCardsEvaluatableValue)
+            {
+                this.PromisedCards.DescriptionText = $"{this.NumberOfCards.DescribeEvaluation()} {EffectDescriberDatabase.ExtractSingularOrPlural(this.NumberOfCards, "card")}";
+            }
+            else
+            {
+                this.PromisedCards.DescriptionText = $"{this.NumberOfCards.DescribeEvaluation()} {EffectDescriberDatabase.ExtractSingularOrPlural(this.NumberOfCards, "card")} from {FromBuilder.RelevantCards.DescribeEvaluation()}";
+            }
+        }
+
+        public string DescribeOperationAsEffect(ConceptualDeltaEntry delta, string reactionWindowId)
+        {
+            return string.Empty;
+        }
+
+        public void ApplyToDelta(DeltaEntry applyingDuringEntry, ReactionWindowContext? context, out List<DeltaEntry> stackedDeltas)
+        {
+            stackedDeltas = null;
         }
     }
 }

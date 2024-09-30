@@ -102,6 +102,11 @@ namespace SFDDCards
             GlobalUpdateUX.UpdateUXEvent.Invoke();
         }
 
+        public void ShuffleDeck()
+        {
+            this.CardsCurrentlyInDeck = this.CardsCurrentlyInDeck.ShuffleList();
+        }
+
         public void MoveCardToZone(Card card, List<Card> toMoveTo)
         {
             this.CardsCurrentlyInDeck.Remove(card);

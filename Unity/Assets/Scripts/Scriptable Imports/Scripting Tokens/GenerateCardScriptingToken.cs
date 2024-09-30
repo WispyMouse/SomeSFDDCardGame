@@ -5,16 +5,15 @@ namespace SFDDCards.ScriptingTokens
     using SFDDCards.ScriptingTokens.EvaluatableValues;
     using System.Collections.Generic;
 
-    public class GenerateCardScriptingToken : BaseScriptingToken, IRealizedOperationScriptingToken
+    public class GenerateCardScriptingToken : BaseScriptingToken, IRealizedOperationScriptingToken, ILaterZoneListenerScriptingToken
     {
         public override string ScriptingTokenIdentifier { get; } = "GENERATECARD";
         public string Id { get; set; }
         public IEvaluatableValue<int> NumberOfCards { get; set; } = null;
 
-        /// <summary>
-        /// Other scripting tokens can look backwards to see this token; this can then be used to describe its destination
-        /// </summary>
         public string LaterRealizedDestinationZone { get; set; }
+
+        public bool ShouldSilenceSpeaker => true;
 
         public PromisedCardsEvaluatableValue ReferencedPromise = new PromisedCardsEvaluatableValue();
 

@@ -33,5 +33,10 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
             TryEvaluateValue(toApplyTo.FromCampaign, toApplyTo.MadeFromBuilder, out List<Card> cards);
             return cards.Count;
         }
+
+        public override bool Equals(CardsEvaluatableValue other)
+        {
+            return other is DiscardCardsEvaluatableValue;
+        }
     }
 }

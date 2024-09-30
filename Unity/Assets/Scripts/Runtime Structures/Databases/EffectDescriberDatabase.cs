@@ -449,19 +449,17 @@ namespace SFDDCards
                 return $"Gain {deltaEntry.ConceptualIntensity.DescribeEvaluation()} {deltaEntry.StatusEffect.Name}.";
             }
 
-            string stackstext = ExtractSingularOrPlural(deltaEntry.ConceptualIntensity, "stack");
-
             // If this stack change is targeting the Owner of this entire effect,
             // and it's being applied to the target that holds this status,
             // don't mention the name of the stacks
-            string stacksTextWithMaybeName = $"{stackstext} of {deltaEntry.StatusEffect.Name}";
+            string maybeName = $"{deltaEntry.StatusEffect.Name}";
             string toTargetText = $"to {deltaEntry.ConceptualTarget.DescribeEvaluation().ToLower()}";
             if (deltaEntry.MadeFromBuilder.Owner is StatusEffect ownerStatus 
                 && deltaEntry.StatusEffect != null 
                 && deltaEntry.StatusEffect.Equals(ownerStatus)
                 && deltaEntry.ConceptualTarget is SelfTargetEvaluatableValue)
             {
-                stacksTextWithMaybeName = $"{stackstext}";
+                maybeName = $"";
                 toTargetText = string.Empty;
             }
 
@@ -472,7 +470,7 @@ namespace SFDDCards
                 deltaEntry.PreviousConceptualTarget,
                 deltaEntry.ConceptualIntensity,
                 "Apply",
-                stacksTextWithMaybeName,
+                maybeName,
                 String.Empty,
                 ComposeValueTargetLocation.BetweenMiddleAndSuffix,
                 ComposeValueTargetLocation.BetweenPrefixAndMiddle,
@@ -492,14 +490,14 @@ namespace SFDDCards
             // If this stack change is targeting the Owner of this entire effect,
             // and it's being applied to the target that holds this status,
             // don't mention the name of the stacks
-            string stacksTextWithMaybeName = $"{stackstext} of {builder.StatusEffect.Name}";
+            string maybeName = $"{builder.StatusEffect.Name}";
             string toTargetText = $"to {builder.Target.Name}";
             if (builder.Owner is StatusEffect ownerStatus
                 && builder.StatusEffect != null
                 && builder.StatusEffect.Equals(ownerStatus)
                 && builder.Target == builder.User)
             {
-                stacksTextWithMaybeName = $"{stackstext}";
+                maybeName = $"";
                 toTargetText = string.Empty;
             }
 
@@ -510,7 +508,7 @@ namespace SFDDCards
                 builder?.PreviousTokenBuilder?.Target,
                 builder.Intensity.ToString(),
                 "Apply",
-                stacksTextWithMaybeName,
+                maybeName,
                 builder.GetIntensityDescriptionIfNotConstant(),
                 ComposeValueTargetLocation.BetweenMiddleAndSuffix,
                 ComposeValueTargetLocation.BetweenPrefixAndMiddle,

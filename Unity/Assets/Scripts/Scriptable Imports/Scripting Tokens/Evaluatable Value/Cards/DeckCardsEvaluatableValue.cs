@@ -22,6 +22,16 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
             return $"the top {this.TopCardsCount.DescribeEvaluation()} cards of the deck";
         }
 
+        public override bool Equals(CardsEvaluatableValue other)
+        {
+            if (!(other is DeckCardsEvaluatableValue sameKind))
+            {
+                return false;
+            }
+
+            return this.TopCardsCount.Equals(sameKind.TopCardsCount);
+        }
+
         public override string GetScriptingTokenText()
         {
             if (this.TopCardsCount == null)
