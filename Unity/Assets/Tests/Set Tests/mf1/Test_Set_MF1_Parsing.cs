@@ -23,40 +23,42 @@ namespace SFDDCards.Tests.EditMode
             new DependentFile($"{Application.streamingAssetsPath}/sets/fundamentals/element/solar", ParseKind.Element),
             new DependentFile($"{Application.streamingAssetsPath}/sets/fundamentals/element/force", ParseKind.Element),
             new DependentFile($"{Application.streamingAssetsPath}/sets/fundamentals/element/cyber", ParseKind.Element),
-            new DependentFile($"{Application.streamingAssetsPath}/sets/fundamentals/element/bio", ParseKind.Element)
+            new DependentFile($"{Application.streamingAssetsPath}/sets/fundamentals/element/bio", ParseKind.Element),
+
+            new DependentFile($"{Application.streamingAssetsPath}/sets/fundamentals/statuseffect/block", ParseKind.StatusEffect)
         };
 
         public static ParseFromFileTestData[] ParsingTests = new ParseFromFileTestData[]
         {
-            new ParseFromFileTestData("mb1_card_starter_strike", "3 + 1 x Amount of Force damage. If target's health > 10: Set Force to 0.", ParseKind.Card),
-            new ParseFromFileTestData("mb1_card_starter_block", "Apply 3 stacks of Block on self.", ParseKind.Card),
-            new ParseFromFileTestData("mb1_card_starter_resonate", "Exile this card. If 1 x Amount of Cyber + 1 x Amount of Void + 1 x Amount of Solar + 1 x Amount of Bio + 1 x Amount of Force: Draw 1 card.", ParseKind.Card),
+            new ParseFromFileTestData("mb1_card_starter_strike", "3 + 1 x Force damage. If target's health > 10: Set Force to 0.", ParseKind.Card),
+            new ParseFromFileTestData("mb1_card_starter_block", "Gain 3 Block.", ParseKind.Card),
+            new ParseFromFileTestData("mb1_card_starter_resonate", "Exile this card. If Cyber + Void + Solar + Bio + Force > 10: Draw a card.", ParseKind.Card),
 
             new ParseFromFileTestData("mb1_card_common_burnarecord", "Create 1 x Cyber copies of Loot in hand.", ParseKind.Card),
             new ParseFromFileTestData("mb1_card_common_fueldbypassion", "Exile the top card of the deck. Draw 2 cards.", ParseKind.Card),
             new ParseFromFileTestData("mb1_card_common_glitch", "2 damage to all foes. If Cyber < 3: Exile this card. Else: Reduce Cyber by 3. Return this card to hand.", ParseKind.Card),
-            new ParseFromFileTestData("mb1_card_common_invigorate", "Apply 1 stack of Bio Heal to self.", ParseKind.Card),
-            new ParseFromFileTestData("mb1_card_common_laserblast", "2 damage. Apply 4 stacks of Targeted.", ParseKind.Card),
-            new ParseFromFileTestData("mb1_card_common_radiantstrike", "1 x Amount of Solar + 1 x Amount of Cyber damage.", ParseKind.Card),
-            new ParseFromFileTestData("mb1_card_common_sneeze", "1 x Amount of Force damage to all foes. Apply 1 x Amount of Bio stacks of poison.", ParseKind.Card),
-            new ParseFromFileTestData("mb1_card_common_tuckandroll", "Apply 5 stacks of Block. Choose 1 card from the top 3 cards of your deck. Move that card to hand.", ParseKind.Card),
-            new ParseFromFileTestData("mb1_card_common_voiddrink", "2 damage to self. If Void > 2: Set Void to 0. Draw 2 cards. Exile this card.", ParseKind.Card),
+            new ParseFromFileTestData("mb1_card_common_invigorate", "Gain 1 Bio Heal.", ParseKind.Card),
+            new ParseFromFileTestData("mb1_card_common_laserblast", "2 damage. Apply 4 Targeted.", ParseKind.Card),
+            new ParseFromFileTestData("mb1_card_common_radiantstrike", "Solar + Cyber damage.", ParseKind.Card),
+            new ParseFromFileTestData("mb1_card_common_sneeze", "1 x Force damage to all foes. Apply 1 x Bio stacks of poison.", ParseKind.Card),
+            new ParseFromFileTestData("mb1_card_common_tuckandroll", "Gain 5 block. Choose 1 card from the top 3 cards of your deck. Move that card to hand.", ParseKind.Card),
+            new ParseFromFileTestData("mb1_card_common_voiddrink", "2 damage to self. If Void > 2: Clear Void. Draw 2 cards. Exile this card.", ParseKind.Card),
 
             new ParseFromFileTestData("mb1_card_uncommon_devotiontoacause", "If Solar > 5: Draw 3 cards. Exile 1 card from hand.", ParseKind.Card),
-            new ParseFromFileTestData("mb1_card_uncommon_tomorrowstar", "Apply 2 stacks of Tomorrow Star to self.", ParseKind.Card),
+            new ParseFromFileTestData("mb1_card_uncommon_tomorrowstar", "Gain 2 Tomorrow Star.", ParseKind.Card),
 
-            new ParseFromFileTestData("mb1_card_rare_finaldawn", "If 1 x Amount of Void + 1 x Amount of Solar > 15: 40 damage to all foes. Set Void to 0. Set Solar to 0.", ParseKind.Card),
-            new ParseFromFileTestData("mb1_card_rare_giantlaserfromspace", "Apply 2 stacks of Laser Calibrating Aim on foe.", ParseKind.Card),
+            new ParseFromFileTestData("mb1_card_rare_finaldawn", "If 1 Void + Solar > 15: 40 damage to all foes. Clear Void. Clear Solar", ParseKind.Card),
+            new ParseFromFileTestData("mb1_card_rare_giantlaserfromspace", "Apply 2 Laser Calibrating Aim on foe.", ParseKind.Card),
 
-            new ParseFromFileTestData("mb1_card_generated_loot", "Draw 1 card. Discard 1 card from hand. Exile this card.", ParseKind.Card),
+            new ParseFromFileTestData("mb1_card_generated_loot", "Draw a card. Discard a card from hand. Exile this card.", ParseKind.Card),
 
-            new ParseFromFileTestData("mb1_statuseffect_tomorrowstar", "Owner starts turn: Gain 5 Solar. Remove 1 stack of Tomorrow Star.", ParseKind.StatusEffect),
-            new ParseFromFileTestData("mb1_statuseffect_regen", "Owner starts turn: Heal 1 x Regen to self. Remove 1 stack of Regen from self.", ParseKind.StatusEffect),
-            new ParseFromFileTestData("mb1_statuseffect_poison", "Owner ends turn: 1 x Poison damage to self. Remove 1 stack of Poison from self.", ParseKind.StatusEffect),
-            new ParseFromFileTestData("mb1_statuseffect_lasercalibratingaim", "Owner starts turn: Remove 1 stack of Laser Calibrating Aim from self. If Laser Calibrating Aim = 0: Deal 40 damage to self.", ParseKind.StatusEffect),
-            new ParseFromFileTestData("mb1_statuseffect_delayeddraw", "Owner starts turn: Draw 1 x Delayed Draw cards. Set Delayed Draw to 0.", ParseKind.StatusEffect),
-            new ParseFromFileTestData("mb1_statuseffect_bioheal", "Owner ends turn: Heal Amount of Bio x Amount of Bio Heal. Set Bio Heal to 0.", ParseKind.StatusEffect),
-            new ParseFromFileTestData("mb1_statuseffect_targeted", "Owner starts turn: Remove all stacks of Targeted. Incoming damage: Deal Amount of Targeted to self. Remove all stacks of Targeted.", ParseKind.StatusEffect),
+            new ParseFromFileTestData("mb1_statuseffect_tomorrowstar", "Owner starts turn: Gain 5 Solar. Remove 1 stack.", ParseKind.StatusEffect),
+            new ParseFromFileTestData("mb1_statuseffect_regen", "Owner starts turn: Heal 1 x Regen to self. Remove 1 stack.", ParseKind.StatusEffect),
+            new ParseFromFileTestData("mb1_statuseffect_poison", "Owner ends turn: Take 1 x Poison damage. Remove 1 stack.", ParseKind.StatusEffect),
+            new ParseFromFileTestData("mb1_statuseffect_lasercalibratingaim", "Owner starts turn: Remove 1 stack. If Laser Calibrating Aim = 0: Take 40 damage.", ParseKind.StatusEffect),
+            new ParseFromFileTestData("mb1_statuseffect_delayeddraw", "Owner starts turn: Draw 1 x Delayed Draw cards. Clear Delayed Draw.", ParseKind.StatusEffect),
+            new ParseFromFileTestData("mb1_statuseffect_bioheal", "Owner ends turn: Heal Bio x Bio Heal. Clear Bio Heal.", ParseKind.StatusEffect),
+            new ParseFromFileTestData("mb1_statuseffect_targeted", "Owner starts turn: Clear Targeted. Incoming damage: Take 1 x Targeted damage. Clear Targeted.", ParseKind.StatusEffect),
         };
 
         [OneTimeSetUp]
