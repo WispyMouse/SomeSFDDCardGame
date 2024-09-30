@@ -11,6 +11,7 @@ namespace SFDDCards
         public const string OwnerStartsTurn = "ownerstartsturn";
         public const string OwnerEndsTurn = "ownerendsturn";
         public const string Activated = "activated";
+        public const string ConsideringPlayingFromHand = "consideringplayingfromhand";
 
         public const string IncomingIntensity = "incomingintensity";
         public const string IncomingDamage = "incomingdamage";

@@ -37,11 +37,19 @@ namespace SFDDCards
             {
                 string nextDescriptor = string.Empty;
 
-                string requirement = DescribeRequirement(deltaEntry);
-                if (!string.IsNullOrEmpty(requirement))
+                if (!deltaEntry.MadeFromBuilder.HasSameRequirements())
                 {
-                    nextDescriptor += leadingSpace + requirement;
-                    leadingSpace = " ";
+                    string requirement = DescribeRequirement(deltaEntry.MadeFromBuilder);
+                    if (!string.IsNullOrEmpty(requirement))
+                    {
+                        if (entireEffectText.Length > 0)
+                        {
+                            entireEffectText.Append("\r\n");
+                        }
+
+                        nextDescriptor += leadingSpace + requirement;
+                        leadingSpace = " ";
+                    }
                 }
 
                 string elementChange = DescribeElementChange(deltaEntry, ignoreElement);
@@ -964,13 +972,13 @@ namespace SFDDCards
                         }
                         else if (constant.ConstantValue < 0)
                         {
-                            nextText.Append($"{leadingcomma}Lose {constant.ConstantValue.ToString()} {change.Element.GetNameAndMaybeIcon()}");
+                            nextText.Append($"{leadingcomma}Lose {Mathf.Abs(constant.ConstantValue).ToString()} {change.Element.GetNameAndMaybeIcon()}");
                             leadingcomma = ", ";
                         }
                     }
                     else
                     {
-                        nextText.Append($"{leadingcomma}Modify {change.Element.GetNameAndMaybeIcon()} by {change.SetValue.DescribeEvaluation()}");
+                        nextText.Append($"{leadingcomma}Modify {change.Element.GetNameAndMaybeIcon()} by {change.GainOrLoss.DescribeEvaluation()}");
                         leadingcomma = ", ";
                     }
                 }
@@ -988,38 +996,40 @@ namespace SFDDCards
             return changeText.ToString();
         }
 
-        public static string DescribeRequirement(ConceptualDeltaEntry delta)
+        public static string DescribeRequirement(ConceptualTokenEvaluatorBuilder delta)
         {
             StringBuilder resultBuilder = new StringBuilder();
 
             string leadingComma = "";
             string startingLine = "If ";
 
-            if (delta.MadeFromBuilder.ElementRequirements.Count > 0)
+            if (delta.ElementRequirements.Count > 0)
             {
-                foreach (Element req in delta.MadeFromBuilder.ElementRequirements.Keys)
+                foreach (Element req in delta.ElementRequirements.Keys)
                 {
-                    string thisRequirementText = delta.MadeFromBuilder.ElementRequirements[req].DescribeEvaluation();
+                    string thisRequirementText = delta.ElementRequirements[req].DescribeEvaluation();
                     if (!string.IsNullOrEmpty(thisRequirementText))
                     {
-                        resultBuilder.Append($"{startingLine}{leadingComma}{thisRequirementText}");
+                        resultBuilder.Append($"{startingLine}{leadingComma}{req.Name} >= {thisRequirementText}");
                         leadingComma = ", ";
                         startingLine = "";
                     }
                 }
             }
 
-            if (delta.MadeFromBuilder.Requirements != null)
+            foreach (IRequirement requirement in delta.Requirements)
             {
-                foreach (IRequirement requirement in delta.MadeFromBuilder.Requirements)
+                string thisRequirementText = requirement.DescribeRequirement();
+                if (!string.IsNullOrEmpty(thisRequirementText))
                 {
-                    string thisRequirementText = requirement.DescribeRequirement();
-                    if (!string.IsNullOrEmpty(thisRequirementText))
+                    if (thisRequirementText.StartsWith("1 x "))
                     {
-                        resultBuilder.Append($"{startingLine}{leadingComma}{thisRequirementText}");
-                        leadingComma = ", ";
-                        startingLine = "";
+                        thisRequirementText = thisRequirementText.Substring("1 x ".Length);
                     }
+
+                    resultBuilder.Append($"{startingLine}{leadingComma}{thisRequirementText}");
+                    leadingComma = ", ";
+                    startingLine = "";
                 }
             }
 

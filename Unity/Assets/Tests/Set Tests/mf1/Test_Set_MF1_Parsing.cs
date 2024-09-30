@@ -16,6 +16,7 @@ namespace SFDDCards.Tests.EditMode
     public class Test_Set_MF1_Parsing
     {
         public static string RootPath => $"{Application.streamingAssetsPath}/sets/mb1/";
+        public ReactionWindowContext? PlayedFromHandContext;
 
         public static DependentFile[] DependentFiles = new DependentFile[]
         {
@@ -30,24 +31,24 @@ namespace SFDDCards.Tests.EditMode
 
         public static ParseFromFileTestData[] ParsingTests = new ParseFromFileTestData[]
         {
-            new ParseFromFileTestData("mb1_card_starter_strike", "3 + Force damage. If target's health > 10: Clear Force.", ParseKind.Card),
+            new ParseFromFileTestData("mb1_card_starter_strike", "3 + Force damage.\r\nIf target's health > 10: Clear Force.", ParseKind.Card),
             new ParseFromFileTestData("mb1_card_starter_block", "Gain 3 Block.", ParseKind.Card),
-            new ParseFromFileTestData("mb1_card_starter_resonate", "Exile this card. If Cyber + Void + Solar + Bio + Force > 10: Draw a card.", ParseKind.Card),
+            new ParseFromFileTestData("mb1_card_starter_resonate", "Exile this card.\r\nIf Cyber + Void + Solar + Bio + Force > 10: Draw a card.", ParseKind.Card),
 
             new ParseFromFileTestData("mb1_card_common_burnarecord", "Create 1 x Cyber Loot in hand. Exile this card.", ParseKind.Card),
             new ParseFromFileTestData("mb1_card_common_fueldbypassion", "Exile the top card of the deck. Draw 2 cards.", ParseKind.Card),
-            new ParseFromFileTestData("mb1_card_common_glitch", "2 damage to all foes. If Cyber < 3: Exile this card. Else: Reduce Cyber by 3. Return this card to hand.", ParseKind.Card),
+            new ParseFromFileTestData("mb1_card_common_glitch", "2 damage to all foes.\r\nIf Cyber < 3: Exile this card.\r\nIf Cyber >= 3: Lose 3 Cyber. Return this card to hand.", ParseKind.Card),
             new ParseFromFileTestData("mb1_card_common_invigorate", "Gain 1 Bio Heal.", ParseKind.Card),
             new ParseFromFileTestData("mb1_card_common_laserblast", "2 damage. Apply 4 Targeted.", ParseKind.Card),
             new ParseFromFileTestData("mb1_card_common_radiantstrike", "Solar + Cyber damage.", ParseKind.Card),
             new ParseFromFileTestData("mb1_card_common_sneeze", "1 x Force damage to all foes. Apply 1 x Bio stacks of poison.", ParseKind.Card),
             new ParseFromFileTestData("mb1_card_common_tuckandroll", "Gain 5 block. Choose 1 card from the top 3 cards of your deck. Move that card to hand.", ParseKind.Card),
-            new ParseFromFileTestData("mb1_card_common_voiddrink", "2 damage to self. If Void > 2: Clear Void. Draw 2 cards. Exile this card.", ParseKind.Card),
+            new ParseFromFileTestData("mb1_card_common_voiddrink", "2 damage to self.\r\nIf Void > 2: Clear Void. Draw 2 cards. Exile this card.", ParseKind.Card),
 
             new ParseFromFileTestData("mb1_card_uncommon_devotiontoacause", "If Solar > 5: Draw 3 cards. Exile 1 card from hand.", ParseKind.Card),
             new ParseFromFileTestData("mb1_card_uncommon_tomorrowstar", "Gain 2 Tomorrow Star.", ParseKind.Card),
 
-            new ParseFromFileTestData("mb1_card_rare_finaldawn", "If 1 Void + Solar > 15: 40 damage to all foes. Clear Void. Clear Solar", ParseKind.Card),
+            new ParseFromFileTestData("mb1_card_rare_finaldawn", "If Void + Solar > 15: 40 damage to all foes. Clear Void, Clear Solar", ParseKind.Card),
             new ParseFromFileTestData("mb1_card_rare_giantlaserfromspace", "Apply 2 Laser Calibrating Aim on foe.", ParseKind.Card),
 
             new ParseFromFileTestData("mb1_card_generated_loot", "Draw a card. Discard a card from hand. Exile this card.", ParseKind.Card),
@@ -55,7 +56,7 @@ namespace SFDDCards.Tests.EditMode
             new ParseFromFileTestData("mb1_statuseffect_tomorrowstar", "Owner starts turn: Gain 5 Solar. Remove 1 stack.", ParseKind.StatusEffect),
             new ParseFromFileTestData("mb1_statuseffect_regen", "Owner starts turn: Heal 1 x Regen to self. Remove 1 stack.", ParseKind.StatusEffect),
             new ParseFromFileTestData("mb1_statuseffect_poison", "Owner ends turn: Take 1 x Poison damage. Remove 1 stack.", ParseKind.StatusEffect),
-            new ParseFromFileTestData("mb1_statuseffect_lasercalibratingaim", "Owner starts turn: Remove 1 stack. If Laser Calibrating Aim = 0: Take 40 damage.", ParseKind.StatusEffect),
+            new ParseFromFileTestData("mb1_statuseffect_lasercalibratingaim", "Owner starts turn: Remove 1 stack.\r\nIf Laser Calibrating Aim = 0: Take 40 damage.", ParseKind.StatusEffect),
             new ParseFromFileTestData("mb1_statuseffect_delayeddraw", "Owner starts turn: Draw 1 x Delayed Draw cards. Clear Delayed Draw.", ParseKind.StatusEffect),
             new ParseFromFileTestData("mb1_statuseffect_bioheal", "Owner ends turn: Heal Bio x Bio Heal. Clear Bio Heal.", ParseKind.StatusEffect),
             new ParseFromFileTestData("mb1_statuseffect_targeted", "Owner starts turn: Clear Targeted. Incoming damage: Take 1 x Targeted damage. Clear Targeted.", ParseKind.StatusEffect),
@@ -110,6 +111,12 @@ namespace SFDDCards.Tests.EditMode
 
                 alreadyImportedFiles.Add(parseTestCandidate.Id);
             }
+
+            PlayedFromHandContext = new ReactionWindowContext()
+            {
+                TimingWindowId = KnownReactionWindows.ConsideringPlayingFromHand,
+                PlayedFromZone = "hand"
+            };
         }
 
         [OneTimeTearDown]
@@ -126,7 +133,7 @@ namespace SFDDCards.Tests.EditMode
             switch (testData.ParseKind)
             {
                 case ParseKind.Card:
-                    EditModeTestCommon.AssertCardParsing(CardDatabase.GetModel(testData.Id), testData.ExpectedParsedValue);
+                    EditModeTestCommon.AssertCardParsing(CardDatabase.GetModel(testData.Id), testData.ExpectedParsedValue, PlayedFromHandContext);
                     break;
                 case ParseKind.StatusEffect:
                     EditModeTestCommon.AssertStatusEffectParsing(StatusEffectDatabase.GetModel(testData.Id), testData.ExpectedParsedValue);

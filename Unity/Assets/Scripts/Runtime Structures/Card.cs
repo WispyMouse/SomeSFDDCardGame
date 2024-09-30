@@ -67,12 +67,12 @@ namespace SFDDCards
             }
         }
 
-        public EffectDescription GetDescription()
+        public EffectDescription GetDescription(ReactionWindowContext? context = null)
         {
             return new EffectDescription()
             {
                 MentionedStatusEffects = ScriptTokenEvaluator.GetMentionedStatusEffects(this),
-                DescriptionText = new List<string>() { ScriptTokenEvaluator.DescribeCardText(this) },
+                DescriptionText = new List<string>() { ScriptTokenEvaluator.DescribeCardText(this, context) },
                 DescribingLabel = this.Name
             };
         }

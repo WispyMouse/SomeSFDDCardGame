@@ -98,16 +98,16 @@ namespace SFDDCards
             return delta;
         }
 
-        public static string DescribeCardText(Card importingCard)
+        public static string DescribeCardText(Card importingCard, ReactionWindowContext? context = null)
         {
-            List<ConceptualTokenEvaluatorBuilder> builders = CalculateConceptualBuildersFromTokenEvaluation(importingCard);
+            List<ConceptualTokenEvaluatorBuilder> builders = CalculateConceptualBuildersFromTokenEvaluation(importingCard, context);
             StringBuilder effectText = new StringBuilder();
             ConceptualTokenEvaluatorBuilder previousBuilder = null;
 
             foreach (ConceptualTokenEvaluatorBuilder builder in builders)
             {
                 // If this builder is just a constant resource gain in one or more categories, skip it for generating card text
-                if (builder.ElementResourceChanges.Count != 0)
+                if (builder.ElementResourceChanges.Count != 0 && previousBuilder == null)
                 {
                     bool nonConstantFound = false;
 
@@ -128,32 +128,6 @@ namespace SFDDCards
                     }
                 }
 
-                // When parsing a card, if three abilities sequentially have the same elemental requirements,
-                // don't display the redundant requirements, if the requirements are empty.
-                if (previousBuilder == null
-                    || !previousBuilder.HasSameElementRequirement(builder))
-                {
-                    string currentRequirements = builder.DescribeElementRequirements();
-
-                    if (string.IsNullOrEmpty(currentRequirements))
-                    {
-                        if (previousBuilder != null)
-                        {
-                            // If there are no requirements, but the previous builder had requirements, notate that
-                            // Don't do that if this is the first thing, or the previous requirements were also empty
-                            effectText.Append("(no requirements):");
-                        }
-                    }
-                    else if (!string.IsNullOrEmpty(currentRequirements))
-                    {
-                        if (previousBuilder != null)
-                        {
-                            effectText.AppendLine();
-                        }
-                        effectText.Append(currentRequirements.Trim());
-                    }
-                }
-
                 ConceptualDelta delta = builder.GetConceptualDelta();
 
                 string deltaText = EffectDescriberDatabase.DescribeConceptualEffect(delta);
@@ -162,7 +136,11 @@ namespace SFDDCards
                 {
                     string leadingSpace = "";
 
-                    if (effectText.Length > 0)
+                    if (!builder.HasSameRequirements() && effectText.Length > 0)
+                    {
+                        effectText.AppendLine();
+                    }
+                    else if (effectText.Length > 0)
                     {
                         leadingSpace = " ";
                     }

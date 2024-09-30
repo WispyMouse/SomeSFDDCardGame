@@ -153,7 +153,7 @@ namespace SFDDCards.Tests.EditMode
             }
         }
 
-        public static void AssertCardParsing(string attackTokens, string expectedEvaluation)
+        public static void AssertCardParsing(string attackTokens, string expectedEvaluation, ReactionWindowContext? context)
         {
             CardImport import = new CardImport()
             {
@@ -163,12 +163,12 @@ namespace SFDDCards.Tests.EditMode
             };
 
             Card derivedCard = new Card(import);
-            AssertCardParsing(derivedCard, expectedEvaluation);
+            AssertCardParsing(derivedCard, expectedEvaluation, context);
         }
 
-        public static void AssertCardParsing(Card card, string expectedEvaluation)
+        public static void AssertCardParsing(Card card, string expectedEvaluation, ReactionWindowContext? context)
         {
-            EffectDescription description = card.GetDescription();
+            EffectDescription description = card.GetDescription(context);
 
             List<string> descriptionTexts = description.DescriptionText;
             Assert.AreEqual(1, descriptionTexts.Count, "Scripts should only parse in to one description text when validated using this function.");

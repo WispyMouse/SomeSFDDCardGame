@@ -19,6 +19,8 @@ namespace SFDDCards.Tests.EditMode
         protected const string DebugElementOneIconText = "<sprite index=0>";
         protected const string DebugElementTwoIconText = "<sprite index=1>";
 
+        protected ReactionWindowContext PlayedFromHandContext;
+
         [SetUp]
         public void SetUp()
         {

@@ -79,6 +79,11 @@ namespace SFDDCards.ScriptingTokens
             }
             else if (Zone == CardsEvaluatableValue.HandZoneId)
             {
+                if (delta.MadeFromBuilder.PlayedFromZone == "hand" && delta.MadeFromBuilder.RelevantCards is SelfCardEvaluatableValue)
+                {
+                    return $"Return this card to hand";
+                }
+
                 return $"Put {delta.MadeFromBuilder.RelevantCards.DescribeEvaluation()} in hand";
             }
 

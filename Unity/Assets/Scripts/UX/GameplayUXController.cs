@@ -130,6 +130,7 @@ namespace SFDDCards.UX
             {
                 this.GoNextRoomButton.SetActive(false);
                 this.EndTurnButton.SetActive(false);
+                MouseHoverShowerPanel.CurrentContext = null;
                 return;
             }
 
@@ -202,6 +203,8 @@ namespace SFDDCards.UX
                 {
                     this.EndTurnButton.SetActive(false);
                 }
+
+                MouseHoverShowerPanel.CurrentContext = new ReactionWindowContext(KnownReactionWindows.ConsideringPlayingFromHand, this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.CombatPlayer, combatantTarget: null, playedFromZone: "hand");
             }
             else
             {
