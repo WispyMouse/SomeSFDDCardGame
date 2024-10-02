@@ -31,7 +31,12 @@ namespace SFDDCards
             // If all element changes are gains/modifies, and we haven't yet printed out an ability text,
             // don't include that element.
             // Include it if there's any other kind of operation happening on the elements.
-            bool ignoreElement = true;
+            bool ignoreElement = false;
+
+            if (conceptualDelta.Owner is Card)
+            {
+                ignoreElement = true;
+            }
 
             foreach (ConceptualDeltaEntry deltaEntry in conceptualDelta.DeltaEntries)
             {
@@ -57,7 +62,7 @@ namespace SFDDCards
                 {
                     if (entireEffectText.Length > 0)
                     {
-                        nextDescriptor += "\n";
+                        nextDescriptor += "\r\n";
                     }
                     nextDescriptor += leadingSpace + elementChange;
                     leadingSpace = " ";
@@ -106,7 +111,7 @@ namespace SFDDCards
                 ignoreElement = false;
             }
 
-            return entireEffectText.ToString();
+            return entireEffectText.ToString().Trim();
         }
 
         /// <summary>

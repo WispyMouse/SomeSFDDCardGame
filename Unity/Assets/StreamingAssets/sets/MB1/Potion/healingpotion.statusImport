@@ -5,7 +5,7 @@
 	[
 		{
 			"Window": "ACTIVATED",
-			"Script": "[SETTARGET: SELF][HEAL: 10][REMOVESTATUSEFFECTSTACKS: 1 HEALINGPOTION]"
+			"Script": "[SETTARGET: SELF][HEAL: 10][REMOVESTACKS: 1]"
 		}
 	],
 	"Tags":

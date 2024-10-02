@@ -149,7 +149,7 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
                         builtString.Append(" / ");
                         break;
                     case CommonMath.Multiply:
-                        builtString.Append(" * ");
+                        builtString.Append(" x ");
                         break;
                 }
                 builtString.Append(compositeValue.ThisValue.DescribeEvaluation(topValue));

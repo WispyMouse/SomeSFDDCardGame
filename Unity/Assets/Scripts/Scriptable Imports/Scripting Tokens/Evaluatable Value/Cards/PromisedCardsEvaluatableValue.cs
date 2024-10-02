@@ -17,7 +17,20 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
             }
         }
         public CardsEvaluatableValue SampledPool;
-        public string DescriptionText = "?";
+
+        public string DescriptionText
+        {
+            get
+            {
+                return this.descriptionText;
+            }
+            set
+            {
+                this.descriptionText = value;
+            }
+        }
+
+        private string descriptionText { get; set; } = "?";
 
         public CardsEvaluatableValue innerValue { get; set; }
 

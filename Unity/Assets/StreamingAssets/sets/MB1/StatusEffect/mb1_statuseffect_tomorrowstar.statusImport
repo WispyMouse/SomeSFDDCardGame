@@ -5,7 +5,7 @@
 	[
 		{
 			"Window": "OWNERSTARTSTURN",
-			"Script": "[GAINELEMENT: 5 SOLAR][REMOVESTATUSEFFECTSTACKS: 1 mb1_statuseffect_tomorrowstar]"
+			"Script": "[GAINELEMENT: 5 SOLAR][REMOVESTACKS: 1]"
 		}
 	]
 }

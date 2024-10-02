@@ -180,5 +180,13 @@ namespace SFDDCards.ScriptingTokens
         }
 
         protected abstract bool TryGetTokenWithArguments(List<string> arguments, out IScriptingToken scriptingToken);
+
+        protected void EnsureTarget(ConceptualTokenEvaluatorBuilder tokenBuilder)
+        {
+            if (tokenBuilder.Target == null)
+            {
+                GlobalUpdateUX.LogTextEvent.Invoke($"This effect requires a target to be specified before it can be applied to a token builder. Please specify a target.", GlobalUpdateUX.LogType.RuntimeError);
+            }
+        }
     }
 }

@@ -60,19 +60,24 @@ namespace SFDDCards.ScriptingTokens
 
         void UpdateDescriptionForPromise()
         {
-            // If this choice is leading to discarding a card from hand, we don't have to include the zone
-            if (this.PromisedCards.DescriptionText != "?")
-            {
-                return;
-            }
+            string numberEval;
 
-            if (!string.IsNullOrEmpty(LaterRealizedDestinationZone) && LaterRealizedDestinationZone == "discard" && FromBuilder.RelevantCards is HandCardsEvaluatableValue)
+            if (this.NumberOfCards is ConstantEvaluatableValue<int> constant && constant.ConstantValue == 1)
             {
-                this.PromisedCards.DescriptionText = $"{this.NumberOfCards.DescribeEvaluation()} {EffectDescriberDatabase.ExtractSingularOrPlural(this.NumberOfCards, "card")}";
+                numberEval = "a";
             }
             else
             {
-                this.PromisedCards.DescriptionText = $"{this.NumberOfCards.DescribeEvaluation()} {EffectDescriberDatabase.ExtractSingularOrPlural(this.NumberOfCards, "card")} from {this.PromisedCards.DescribeEvaluation()}";
+                numberEval = this.NumberOfCards.DescribeEvaluation();
+            }
+
+            if (!string.IsNullOrEmpty(LaterRealizedDestinationZone) && LaterRealizedDestinationZone == "discard" && this.PromisedCards.SampledPool != null && this.PromisedCards.SampledPool is HandCardsEvaluatableValue)
+            {
+                this.PromisedCards.DescriptionText = $"{numberEval} {EffectDescriberDatabase.ExtractSingularOrPlural(this.NumberOfCards, "card")}";
+            }
+            else if (this.PromisedCards.SampledPool != null)
+            {
+                this.PromisedCards.DescriptionText = $"{numberEval} {EffectDescriberDatabase.ExtractSingularOrPlural(this.NumberOfCards, "card")} from {this.PromisedCards.SampledPool.DescribeEvaluation()}";
             }
         }
 

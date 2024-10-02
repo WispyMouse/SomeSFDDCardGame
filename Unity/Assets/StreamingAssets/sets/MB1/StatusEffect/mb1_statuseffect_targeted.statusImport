@@ -5,7 +5,7 @@
 	[
 		{
 			"Window": "OWNERSTARTSTURN",
-			"Script": "[SETSTATUSEFFECTSTACKS: mb1_statuseffect_targeted 0]"
+			"Script": "[SETTARGET: SELF][SETSTATUSEFFECTSTACKS: mb1_statuseffect_targeted 0]"
 		},
 		{
 			"Window": "INCOMINGDAMAGE",
