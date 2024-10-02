@@ -5,18 +5,40 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
 {
     public class PromisedCardsEvaluatableValue : CardsEvaluatableValue
     {
-        public CardsEvaluatableValue InnerValue;
+        public CardsEvaluatableValue InnerValue
+        {
+            get
+            {
+                return this.innerValue;
+            }
+            set
+            {
+                this.innerValue = value;
+            }
+        }
         public CardsEvaluatableValue SampledPool;
         public string DescriptionText = "?";
 
+        public CardsEvaluatableValue innerValue { get; set; }
+
         public override string DescribeEvaluation()
         {
-            if (this.InnerValue == null)
+            if (this.DescriptionText != "?")
             {
                 return this.DescriptionText;
             }
 
-            return this.InnerValue.DescribeEvaluation();
+            if (this.innerValue != null)
+            {
+                return this.InnerValue.DescribeEvaluation();
+            }
+
+            if (this.SampledPool != null)
+            {
+                return this.SampledPool.DescribeEvaluation();
+            }
+
+            return this.DescriptionText;
         }
 
         public override bool Equals(CardsEvaluatableValue other)

@@ -31,7 +31,6 @@ namespace SFDDCards.ScriptingTokens
 
             // Targeting Token
             new SetTargetScriptingToken(),
-            new CardBrowserSelectorScriptingToken(),
             new ChooseCardScriptingToken(),
             new CardTargetScriptingToken(),
             new ChooseRandomlyScriptingToken(),

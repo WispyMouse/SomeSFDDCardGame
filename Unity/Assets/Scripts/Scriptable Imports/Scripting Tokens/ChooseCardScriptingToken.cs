@@ -61,13 +61,18 @@ namespace SFDDCards.ScriptingTokens
         void UpdateDescriptionForPromise()
         {
             // If this choice is leading to discarding a card from hand, we don't have to include the zone
+            if (this.PromisedCards.DescriptionText != "?")
+            {
+                return;
+            }
+
             if (!string.IsNullOrEmpty(LaterRealizedDestinationZone) && LaterRealizedDestinationZone == "discard" && FromBuilder.RelevantCards is HandCardsEvaluatableValue)
             {
                 this.PromisedCards.DescriptionText = $"{this.NumberOfCards.DescribeEvaluation()} {EffectDescriberDatabase.ExtractSingularOrPlural(this.NumberOfCards, "card")}";
             }
             else
             {
-                this.PromisedCards.DescriptionText = $"{this.NumberOfCards.DescribeEvaluation()} {EffectDescriberDatabase.ExtractSingularOrPlural(this.NumberOfCards, "card")} from {FromBuilder.RelevantCards.DescribeEvaluation()}";
+                this.PromisedCards.DescriptionText = $"{this.NumberOfCards.DescribeEvaluation()} {EffectDescriberDatabase.ExtractSingularOrPlural(this.NumberOfCards, "card")} from {this.PromisedCards.DescribeEvaluation()}";
             }
         }
 
