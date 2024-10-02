@@ -60,12 +60,14 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
 
         public string DescribeEvaluation(IEvaluatableValue<int> topValue)
         {
+            Element element = ElementDatabase.GetElement(this.ElementToCount);
+
             if (topValue == this)
             {
-                return $"1 x {ElementDatabase.GetElement(this.ElementToCount).Name}";
+                return $"1 x {element.GetNameAndMaybeIcon()}";
             }
 
-            return $"{ElementDatabase.GetElement(this.ElementToCount).Name}";
+            return $"{element.GetNameAndMaybeIcon()}";
         }
     }
 }

@@ -1013,7 +1013,7 @@ namespace SFDDCards
                     string thisRequirementText = delta.ElementRequirements[req].DescribeEvaluation();
                     if (!string.IsNullOrEmpty(thisRequirementText))
                     {
-                        resultBuilder.Append($"{startingLine}{leadingComma}{req.Name} >= {thisRequirementText}");
+                        resultBuilder.Append($"{startingLine}{leadingComma}{req.GetNameAndMaybeIcon()} >= {thisRequirementText}");
                         leadingComma = ", ";
                         startingLine = "";
                     }

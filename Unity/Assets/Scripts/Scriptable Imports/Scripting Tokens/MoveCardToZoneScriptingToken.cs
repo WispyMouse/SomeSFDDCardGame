@@ -23,7 +23,7 @@ namespace SFDDCards.ScriptingTokens
             ConceptualTokenEvaluatorBuilder previous = tokenBuilder.PreviousBuilder;
             do
             {
-                if (previous.RelevantCards != null && previous.RelevantCards.Equals(tokenBuilder.RelevantCards))
+                if (previous != null && previous.RelevantCards != null && previous.RelevantCards.Equals(tokenBuilder.RelevantCards))
                 {
                     if (previous.RealizedOperationScriptingToken is ILaterZoneListenerScriptingToken laterListener)
                     {
