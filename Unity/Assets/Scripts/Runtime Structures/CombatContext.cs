@@ -186,6 +186,8 @@ namespace SFDDCards
                 delta.ApplyDelta(this.FromCampaign);
                 this.FromCampaign.CheckAllStateEffectsAndKnockouts();
                 this.PlayerCombatDeck.MoveCardToZoneIfNotInAnyZonesCurrently(toPlay, this.PlayerCombatDeck.CardsCurrentlyInDiscard);
+
+                GlobalUpdateUX.UpdateUXEvent.Invoke();
             },
             null
             ));

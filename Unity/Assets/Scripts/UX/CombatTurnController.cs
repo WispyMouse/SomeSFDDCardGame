@@ -96,6 +96,8 @@ namespace SFDDCards.UX
             yield return runningEvent.AnimationDelegate();
             runningEvent.ConsequentialAction?.Invoke();
 
+            GlobalUpdateUX.UpdateUXEvent.Invoke();
+
             AnimationCoroutineIsRunning = false;
             AnimationCoroutine = null;
         }

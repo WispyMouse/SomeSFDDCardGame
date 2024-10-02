@@ -18,10 +18,10 @@ namespace SFDDCards.UX
         private GameObject NoRequirementsMetPassiveOverlay;
 
         [SerializeField]
-        private float LerpTimeMinimumSeconds = .25f;
+        private float LerpTimeMinimumSeconds = .15f;
 
         [SerializeField]
-        private float LerpTimeMaximumSeconds = 1.5f;
+        private float LerpTimeMaximumSeconds = .6f;
 
         [SerializeField]
         private float DistanceForMaximumLerp = 4f;

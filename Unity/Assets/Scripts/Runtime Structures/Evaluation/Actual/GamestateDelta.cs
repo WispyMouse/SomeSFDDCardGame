@@ -98,6 +98,7 @@ namespace SFDDCards.Evaluation.Actual
             () =>
                 {
                     curEntry.Target?.ApplyDelta(campaignContext, campaignContext.CurrentCombatContext, curEntry);
+                    campaignContext.CheckAllStateEffectsAndKnockouts();
                 })
             );
 

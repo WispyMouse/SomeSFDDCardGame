@@ -22,6 +22,7 @@ namespace SFDDCards
                 CurrentSequenceEvent = StackedSequenceEvents[0];
                 StackedSequenceEvents.RemoveAt(0);
                 CurrentSequenceEvent.ConsequentialAction?.Invoke();
+                GlobalUpdateUX.UpdateUXEvent.Invoke();
                 CurrentSequenceEvent = null;
             }
         }
@@ -44,6 +45,7 @@ namespace SFDDCards
             {
                 CurrentSequenceEvent.ConsequentialAction?.Invoke();
                 CurrentSequenceEvent = null;
+                GlobalUpdateUX.UpdateUXEvent.Invoke();
             }
         }
 

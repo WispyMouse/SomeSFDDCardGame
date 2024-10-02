@@ -115,6 +115,8 @@ namespace SFDDCards
             this.CardsCurrentlyInExile.Remove(card);
 
             toMoveTo.Add(card);
+
+            GlobalUpdateUX.UpdateUXEvent.Invoke();
         }
 
         public void MoveCardToZoneIfNotInAnyZonesCurrently(Card card, List<Card> toMoveTo)
@@ -124,7 +126,7 @@ namespace SFDDCards
                 return;
             }
 
-            toMoveTo.Add(card);
+            this.MoveCardToZone(card, toMoveTo);
         }
     }
 }
