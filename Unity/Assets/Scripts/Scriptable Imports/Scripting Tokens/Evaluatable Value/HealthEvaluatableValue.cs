@@ -30,6 +30,15 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
             return true;
         }
 
+        public string DescribeEvaluation(CampaignContext campaignContext, TokenEvaluatorBuilder currentBuilder)
+        {
+            if (this.TryEvaluateValue(campaignContext, currentBuilder, out int evaluatedValue))
+            {
+                return $"{this.DescribeEvaluation()} ({evaluatedValue})";
+            }
+            return this.DescribeEvaluation();
+        }
+
         public string DescribeEvaluation()
         {
             if (this.TargetToAssess.ToLower() == "target")

@@ -144,9 +144,18 @@ namespace SFDDCards
                     }
                 }
 
-                ConceptualDelta delta = builder.GetConceptualDelta();
-
-                string deltaText = EffectDescriberDatabase.DescribeConceptualEffect(delta, ignoreElementIfCard: false);
+                string deltaText;
+                
+                if (context.HasValue)
+                {
+                    TokenEvaluatorBuilder realizedBuilder = RealizeConceptualBuilder(builder, context.Value.CampaignContext, context.Value.CombatantEffectOwner, context.Value.CombatantEffectOwner, context.Value.CombatantTarget);
+                    deltaText = EffectDescriberDatabase.DescribeRealizedEffect(realizedBuilder);
+                }
+                else
+                {
+                    ConceptualDelta conceptualDelta = builder.GetConceptualDelta();
+                    deltaText = EffectDescriberDatabase.DescribeConceptualEffect(conceptualDelta, ignoreElementIfCard: false);
+                }
 
                 if (!string.IsNullOrEmpty(deltaText))
                 {

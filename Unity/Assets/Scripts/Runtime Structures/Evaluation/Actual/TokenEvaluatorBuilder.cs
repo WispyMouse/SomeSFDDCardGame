@@ -179,27 +179,5 @@ namespace SFDDCards.Evaluation.Actual
 
             return true;
         }
-
-        public string GetIntensityDescriptionIfNotConstant()
-        {
-            if (this.BasedOnConcept == null)
-            {
-                return String.Empty;
-            }
-
-            if (this.BasedOnConcept.Intensity is ConstantEvaluatableValue<int>)
-            {
-                return String.Empty;
-            }
-
-            string descriptor = this.BasedOnConcept.Intensity.DescribeEvaluation();
-
-            if (!string.IsNullOrEmpty(descriptor))
-            {
-                return $"({descriptor})";
-            }
-
-            return string.Empty;
-        }
     }
 }

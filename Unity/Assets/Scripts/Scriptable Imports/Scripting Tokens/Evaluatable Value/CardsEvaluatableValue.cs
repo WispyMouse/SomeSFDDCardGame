@@ -50,5 +50,10 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
         }
 
         public abstract bool Equals(CardsEvaluatableValue other);
+
+        public string DescribeEvaluation(CampaignContext campaignContext, TokenEvaluatorBuilder currentEvaluator)
+        {
+            return this.DescribeEvaluation();
+        }
     }
 }

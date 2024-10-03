@@ -81,7 +81,7 @@ namespace SFDDCards.Tests.EditMode
         [Test]
         public void AssertEffectScriptResultsInTextAsCard([ValueSource(nameof(AssertEffectScriptResultsInTextValueSource))] AssertEffectScriptResultsValueSourceValue expectations)
         {
-            EditModeTestCommon.AssertCardParsing(expectations.EffectScript, expectations.ExpectedParsedValue, this.PlayedFromHandContext);
+            EditModeTestCommon.AssertCardParsing(expectations.EffectScript, expectations.ExpectedParsedValue, null);
         }
 
         public static List<AssertEffectScriptResultsValueSourceValue> AssertEffectScriptResultsInTextAsStatusEffectValueSource => new List<AssertEffectScriptResultsValueSourceValue>()

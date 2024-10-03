@@ -267,21 +267,15 @@ namespace SFDDCards
 
         public static string DescribeRealizedDamage(TokenEvaluatorBuilder builder)
         {
-            if (!builder.Intensity.TryEvaluateValue(builder.Campaign, builder, out int evaluatedValue))
-            {
-                GlobalUpdateUX.LogTextEvent.Invoke($"Failed to parse conceptual intensity, after it already should be resolveable.", GlobalUpdateUX.LogType.RuntimeError);
-                return String.Empty;
-            }
-
             return ComposeDescriptor<ICombatantTarget>(
                 $"to {builder.Target.Name}",
                 builder.Target,
                 builder.OriginalTarget,
                 builder?.PreviousTokenBuilder?.Target,
-                evaluatedValue.ToString(),
+                builder.Intensity.DescribeEvaluation(builder.Campaign, builder),
+                String.Empty,
                 String.Empty,
                 "damage",
-                builder.GetIntensityDescriptionIfNotConstant(),
                 ComposeValueTargetLocation.AfterSuffix,
                 ComposeValueTargetLocation.BetweenMiddleAndSuffix,
                 (ICombatantTarget curValue) =>
@@ -343,10 +337,10 @@ namespace SFDDCards
                 builder.Target,
                 builder.OriginalTarget,
                 builder?.PreviousTokenBuilder?.Target,
-                builder.Intensity.ToString(),
+                builder.Intensity.DescribeEvaluation(builder.Campaign, builder),
                 "Heal",
                 String.Empty,
-                builder.GetIntensityDescriptionIfNotConstant(),
+                String.Empty,
                 ComposeValueTargetLocation.BetweenMiddleAndSuffix,
                 ComposeValueTargetLocation.BetweenMiddleAndSuffix,
                 (ICombatantTarget curValue) =>
@@ -409,7 +403,7 @@ namespace SFDDCards
 
         public static string DescribeRealizedCards(TokenEvaluatorBuilder builder)
         {
-            string valueText = builder.Intensity.ToString();
+            string valueText = builder.Intensity.DescribeEvaluation(builder.Campaign, builder);
 
             switch (builder.IntensityKindType)
             {
@@ -429,7 +423,7 @@ namespace SFDDCards
                             valueText,
                             "Draw ",
                             ExtractSingularOrPlural(builder.Intensity, "card"),
-                            builder.GetIntensityDescriptionIfNotConstant(),
+                            String.Empty,
                             ComposeValueTargetLocation.BetweenMiddleAndSuffix,
                             ComposeValueTargetLocation.BetweenPrefixAndMiddle,
                             null
@@ -510,7 +504,7 @@ namespace SFDDCards
         {
             if (builder.Target == builder.User)
             {
-                return $"Gain {builder.Intensity} {builder.StatusEffect.Name}.";
+                return $"Gain {builder.Intensity.DescribeEvaluation(builder.Campaign, builder)} {builder.StatusEffect.Name}.";
             }
 
             string stackstext = ExtractSingularOrPlural(builder.Intensity, "stack");
@@ -537,7 +531,7 @@ namespace SFDDCards
                 builder.Intensity.ToString(),
                 "Apply",
                 maybeName,
-                builder.GetIntensityDescriptionIfNotConstant(),
+                String.Empty,
                 ComposeValueTargetLocation.BetweenMiddleAndSuffix,
                 ComposeValueTargetLocation.BetweenPrefixAndMiddle,
                 (ICombatantTarget curValue) =>
@@ -622,10 +616,10 @@ namespace SFDDCards
                 builder.Target,
                 builder.OriginalTarget,
                 builder?.PreviousTokenBuilder?.Target,
-                builder.Intensity.ToString(),
+                builder.Intensity.DescribeEvaluation(builder.Campaign, builder),
                 "Remove",
                 stacksTextWithMaybeName,
-                builder.GetIntensityDescriptionIfNotConstant(),
+                String.Empty,
                 ComposeValueTargetLocation.BetweenMiddleAndSuffix,
                 ComposeValueTargetLocation.BetweenPrefixAndMiddle,
                 (ICombatantTarget curValue) =>
@@ -718,10 +712,10 @@ namespace SFDDCards
                 builder.Target,
                 builder.OriginalTarget,
                 builder?.PreviousTokenBuilder?.Target,
-                builder.Intensity.ToString(),
+                builder.Intensity.DescribeEvaluation(builder.Campaign, builder),
                 stacksTextWithMaybeName,
                 $"{stackstext}",
-                builder.GetIntensityDescriptionIfNotConstant(),
+                String.Empty,
                 ComposeValueTargetLocation.BetweenMiddleAndSuffix,
                 ComposeValueTargetLocation.BetweenPrefixAndMiddle,
                 (ICombatantTarget curValue) =>

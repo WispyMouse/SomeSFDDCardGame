@@ -133,7 +133,7 @@ namespace SFDDCards.Tests.EditMode
             switch (testData.ParseKind)
             {
                 case ParseKind.Card:
-                    EditModeTestCommon.AssertCardParsing(CardDatabase.GetModel(testData.Id), testData.ExpectedParsedValue, PlayedFromHandContext);
+                    EditModeTestCommon.AssertCardParsing(CardDatabase.GetModel(testData.Id), testData.ExpectedParsedValue, null);
                     break;
                 case ParseKind.StatusEffect:
                     EditModeTestCommon.AssertStatusEffectParsing(StatusEffectDatabase.GetModel(testData.Id), testData.ExpectedParsedValue);

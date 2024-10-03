@@ -32,6 +32,15 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
             return this.DescribeEvaluation(this);
         }
 
+        public string DescribeEvaluation(CampaignContext campaignContext, TokenEvaluatorBuilder currentBuilder)
+        {
+            if (this.TryEvaluateValue(campaignContext, currentBuilder, out int evaluatedValue))
+            {
+                return $"{this.DescribeEvaluation()} ({evaluatedValue})";
+            }
+            return this.DescribeEvaluation();
+        }
+
         public static bool TryGetCountElementalEvaluatableValue(string argument, out CountElementEvaluatableValue output, bool allowNameMatch)
         {
             Match regexMatch = Regex.Match(argument, @"COUNTELEMENT_(\w+)");

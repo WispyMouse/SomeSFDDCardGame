@@ -157,5 +157,14 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
 
             return builtString.ToString();
         }
+
+        public string DescribeEvaluation(CampaignContext campaignContext, TokenEvaluatorBuilder currentBuilder)
+        {
+            if (this.TryEvaluateValue(campaignContext, currentBuilder, out int evaluatedValue))
+            {
+                return $"{this.DescribeEvaluation()} ({evaluatedValue})";
+            }
+            return this.DescribeEvaluation();
+        }
     }
 }

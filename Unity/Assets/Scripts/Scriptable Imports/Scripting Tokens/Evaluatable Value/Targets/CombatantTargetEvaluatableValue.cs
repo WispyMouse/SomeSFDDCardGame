@@ -22,5 +22,10 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
         {
             return this.DescribeEvaluation();
         }
+
+        public string DescribeEvaluation(CampaignContext campaignContext, TokenEvaluatorBuilder currentBuilder)
+        {
+            return this.DescribeEvaluation();
+        }
     }
 }
