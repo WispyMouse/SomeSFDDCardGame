@@ -18,6 +18,8 @@ namespace SFDDCards
             Generated
         }
 
+        string IEffectOwner.Id => this.Id;
+
         public string Id;
         public string Name;
         public Sprite Sprite;

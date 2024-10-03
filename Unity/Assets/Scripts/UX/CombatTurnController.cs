@@ -43,6 +43,7 @@ namespace SFDDCards.UX
             this.CurrentlyActive = true;
 
             GlobalSequenceEventHolder.PushSequencesToTop(
+                CentralGameStateControllerInstance.CurrentCampaignContext,
                 new GameplaySequenceEvent(this.SpawnInitialEnemies, null),
                 new GameplaySequenceEvent(() => this.Context.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.PlayerTurn), null)
                 );

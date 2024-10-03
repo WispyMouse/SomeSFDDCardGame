@@ -66,7 +66,7 @@ namespace SFDDCards.Evaluation.Actual
                 sequences.Add(new GameplaySequenceEvent(
                 () =>
                     {
-                        campaignContext.CheckAndApplyReactionWindow(new ReactionWindowContext(KnownReactionWindows.IncomingDamage, curEntry));
+                        campaignContext.CheckAndApplyReactionWindow(new ReactionWindowContext(curEntry.FromCampaign, KnownReactionWindows.IncomingDamage, curEntry));
                     })
                 );
             }
@@ -118,7 +118,7 @@ namespace SFDDCards.Evaluation.Actual
                 this.ContinueApplyingDelta(campaignContext, index + 1);
             }));
 
-            GlobalSequenceEventHolder.PushSequencesToTop(sequences.ToArray());
+            GlobalSequenceEventHolder.PushSequencesToTop(campaignContext, sequences.ToArray());
         }
     }
 }

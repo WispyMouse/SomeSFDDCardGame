@@ -4,5 +4,6 @@ namespace SFDDCards.ImportModels
     {
         public string Window;
         public string Script;
+        public int ApplicationPriority = 0;
     }
 }

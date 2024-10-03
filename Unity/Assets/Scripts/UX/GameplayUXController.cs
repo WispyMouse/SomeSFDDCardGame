@@ -204,7 +204,7 @@ namespace SFDDCards.UX
                     this.EndTurnButton.SetActive(false);
                 }
 
-                MouseHoverShowerPanel.CurrentContext = new ReactionWindowContext(KnownReactionWindows.ConsideringPlayingFromHand, this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.CombatPlayer, combatantTarget: null, playedFromZone: "hand");
+                MouseHoverShowerPanel.CurrentContext = new ReactionWindowContext(this.CentralGameStateControllerInstance.CurrentCampaignContext, KnownReactionWindows.ConsideringPlayingFromHand, this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.CombatPlayer, combatantTarget: null, playedFromZone: "hand");
             }
             else
             {
@@ -676,11 +676,20 @@ namespace SFDDCards.UX
 
         public void StatusEffectClicked(AppliedStatusEffect representingEffect)
         {
-            if (representingEffect.BasedOnStatusEffect.EffectTokens.ContainsKey(KnownReactionWindows.Activated))
+            if (representingEffect.BasedOnStatusEffect.WindowResponders.ContainsKey(KnownReactionWindows.Activated))
             {
-                if (representingEffect.TryGetReactionEvents(this.CentralGameStateControllerInstance.CurrentCampaignContext, new ReactionWindowContext(KnownReactionWindows.Activated, this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignPlayer), out List<GameplaySequenceEvent> events))
+                ReactionWindowContext activatedContext = new ReactionWindowContext(
+                    this.CentralGameStateControllerInstance.CurrentCampaignContext,
+                    KnownReactionWindows.Activated,
+                    this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignPlayer, 
+                    playedFromZone: "potion");
+
+                if (representingEffect.TryGetReactionEvents(this.CentralGameStateControllerInstance.CurrentCampaignContext, activatedContext, out List<WindowResponse> responses))
                 {
-                    GlobalSequenceEventHolder.PushSequencesToTop(events.ToArray());
+                    foreach (WindowResponse response in responses)
+                    {
+                        this.CentralGameStateControllerInstance.CurrentCampaignContext.IngestStatusEffectHappening(activatedContext, response);
+                    }
                 }
             }
         }

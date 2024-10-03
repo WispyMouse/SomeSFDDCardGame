@@ -94,7 +94,7 @@ namespace SFDDCards
 
         public void DiscardHand()
         {
-            for (int ii = this.CardsCurrentlyInHand.Count; ii > 0; ii--)
+            for (int ii = this.CardsCurrentlyInHand.Count - 1; ii >= 0; ii--)
             {
                 this.MoveCardToZone(this.CardsCurrentlyInHand[ii], this.CardsCurrentlyInDiscard);
             }

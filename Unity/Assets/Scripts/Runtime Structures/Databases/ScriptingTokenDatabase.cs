@@ -45,6 +45,7 @@ namespace SFDDCards.ScriptingTokens
         {
             new DrainsElementScriptingToken(),
             new RemoveStacksScriptingToken(),
+            new ClearStacksScriptingToken()
         };
 
         public static bool TryGetScriptingTokenMatch(string input, IEffectOwner owner, out List<IScriptingToken> matches)

@@ -6,6 +6,10 @@
 		{
 			"Window": "INCOMINGDAMAGE",
 			"Script": "[IFTARGET: SELF][DRAINBOTH: INTENSITY BLOCK]"
+		},
+		{
+			"Window": "OWNERSTARTSTURN",
+			"Script": "[CLEARSTACKS]"
 		}
 	]
 }

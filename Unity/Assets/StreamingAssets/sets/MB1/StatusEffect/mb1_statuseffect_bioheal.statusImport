@@ -5,7 +5,7 @@
 	[
 		{
 			"Window": "OWNERENDSTURN",
-			"Script": "[SETTARGET: SELF][HEAL: COUNTELEMENT_BIO*COUNTSTACKS_mb1_statuseffect_bioheal][SETSTATUSEFFECTSTACKS: mb1_statuseffect_bioheal 0]"
+			"Script": "[SETTARGET: SELF][HEAL: COUNTELEMENT_BIO*COUNTSTACKS_mb1_statuseffect_bioheal][CLEARSTACKS]"
 		}
 	]
 }

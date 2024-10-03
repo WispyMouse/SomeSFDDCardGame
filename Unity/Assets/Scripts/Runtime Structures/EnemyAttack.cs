@@ -17,6 +17,8 @@ namespace SFDDCards
 
         public IEffectOwner Owner => this;
 
+        public string Id => string.Empty;
+
         public EnemyAttack(EnemyAttackImport basedOn)
         {
             this.AttackTokenPile = ScriptingTokens.ScriptingTokenDatabase.GetAllTokens(basedOn.AttackScript, this);

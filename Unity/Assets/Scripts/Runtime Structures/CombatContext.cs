@@ -283,10 +283,11 @@ namespace SFDDCards
             this.ElementResourceCounts.Clear();
             this.CurrentTurnStatus = TurnStatus.PlayerTurn;
 
-            this.FromCampaign.CheckAndApplyReactionWindow(new ReactionWindowContext(KnownReactionWindows.OwnerStartsTurn, this.CombatPlayer));
+            this.FromCampaign.CheckAndApplyReactionWindow(new ReactionWindowContext(this.FromCampaign, KnownReactionWindows.OwnerStartsTurn, this.CombatPlayer));
 
             const int playerhandsize = 5;
             GlobalSequenceEventHolder.PushSequencesToTop(
+                this.FromCampaign,
                 new GameplaySequenceEvent(
                     () => this.PlayerCombatDeck.DealCards(playerhandsize),
                     null)
@@ -297,7 +298,10 @@ namespace SFDDCards
         {
             List<GameplaySequenceEvent> nextEvents = new List<GameplaySequenceEvent>();
 
-            nextEvents.Add(new GameplaySequenceEvent(() => { this.FromCampaign.CheckAndApplyReactionWindow(new ReactionWindowContext(KnownReactionWindows.OwnerEndsTurn, this.CombatPlayer)); }));
+            nextEvents.Add(new GameplaySequenceEvent(() => { this.FromCampaign.CheckAndApplyReactionWindow(new ReactionWindowContext(
+                this.FromCampaign,
+                KnownReactionWindows.OwnerEndsTurn, 
+                this.CombatPlayer)); }));
             nextEvents.Add(new GameplaySequenceEvent(() => { this.PlayerCombatDeck.DiscardHand(); }));
 
             if (toTurn == TurnStatus.EnemyTurn)
@@ -305,7 +309,7 @@ namespace SFDDCards
                 nextEvents.Add(new GameplaySequenceEvent(() => { this.EnemyStartTurn(); }));
             }
 
-            GlobalSequenceEventHolder.PushSequencesToTop(nextEvents.ToArray());
+            GlobalSequenceEventHolder.PushSequencesToTop(this.FromCampaign, nextEvents.ToArray());
         }
 
         private void EnemyStartTurn()
@@ -316,7 +320,7 @@ namespace SFDDCards
 
             foreach (Enemy curEnemy in new List<Enemy>(this.Enemies))
             {
-                if (this.FromCampaign.TryGetReactionWindowSequenceEvents(new ReactionWindowContext(KnownReactionWindows.OwnerStartsTurn, curEnemy), out List<GameplaySequenceEvent> windowEvents))
+                if (this.FromCampaign.TryGetReactionWindowSequenceEvents(new ReactionWindowContext(this.FromCampaign, KnownReactionWindows.OwnerStartsTurn, curEnemy), out List<GameplaySequenceEvent> windowEvents))
                 {
                     nextEvents.AddRange(windowEvents);
                 }
@@ -333,7 +337,7 @@ namespace SFDDCards
             
             nextEvents.Add(new GameplaySequenceEvent(() => this.EndCurrentTurnAndChangeTurn(TurnStatus.PlayerTurn)));
 
-            GlobalSequenceEventHolder.PushSequencesToTop(nextEvents.ToArray());
+            GlobalSequenceEventHolder.PushSequencesToTop(this.FromCampaign, nextEvents.ToArray());
         }
 
         private void EndEnemyTurn(TurnStatus toTurn)
@@ -342,7 +346,7 @@ namespace SFDDCards
 
             foreach (Enemy curEnemy in this.Enemies)
             {
-                nextEvents.Add(new GameplaySequenceEvent(() => { this.FromCampaign.CheckAndApplyReactionWindow(new ReactionWindowContext(KnownReactionWindows.OwnerEndsTurn, curEnemy)); }));
+                nextEvents.Add(new GameplaySequenceEvent(() => { this.FromCampaign.CheckAndApplyReactionWindow(new ReactionWindowContext(this.FromCampaign, KnownReactionWindows.OwnerEndsTurn, curEnemy)); }));
             }
 
             if (toTurn == TurnStatus.PlayerTurn)
@@ -350,7 +354,7 @@ namespace SFDDCards
                 nextEvents.Add(new GameplaySequenceEvent(() => { this.PlayerStartTurn(); }));
             }
 
-            GlobalSequenceEventHolder.PushSequencesToTop(nextEvents.ToArray());
+            GlobalSequenceEventHolder.PushSequencesToTop(this.FromCampaign, nextEvents.ToArray());
         }
     }
 }

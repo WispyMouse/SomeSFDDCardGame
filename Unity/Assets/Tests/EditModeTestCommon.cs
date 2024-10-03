@@ -178,8 +178,8 @@ namespace SFDDCards.Tests.EditMode
         public static void AssertStatusEffectParsing(string attackTokens, string expectedEvaluation, string window, StatusEffect effectOwner)
         {
             AttackTokenPile pile = ScriptingTokens.ScriptingTokenDatabase.GetAllTokens(attackTokens, effectOwner);
-            effectOwner.EffectTokens.Clear();
-            effectOwner.EffectTokens.Add(window, new List<AttackTokenPile>() { pile });
+            effectOwner.WindowResponders.Clear();
+            effectOwner.WindowResponders.Add(window, new List<WindowResponder>() { new WindowResponder() { WindowId = window, Effect = pile } });
             AssertStatusEffectParsing(effectOwner, expectedEvaluation);
         }
 

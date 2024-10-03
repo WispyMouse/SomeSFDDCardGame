@@ -5,11 +5,11 @@
 	[
 		{
 			"Window": "OWNERSTARTSTURN",
-			"Script": "[SETTARGET: SELF][SETSTATUSEFFECTSTACKS: mb1_statuseffect_targeted 0]"
+			"Script": "[SETTARGET: SELF][CLEARSTACKS]"
 		},
 		{
 			"Window": "INCOMINGDAMAGE",
-			"Script": "[SETTARGET: SELF][DAMAGE: COUNTSTACKS_mb1_statuseffect_targeted][SETSTATUSEFFECTSTACKS: mb1_statuseffect_targeted 0]"
+			"Script": "[SETTARGET: SELF][DAMAGE: COUNTSTACKS_mb1_statuseffect_targeted][CLEARSTACKS]"
 		}
 	]
 }

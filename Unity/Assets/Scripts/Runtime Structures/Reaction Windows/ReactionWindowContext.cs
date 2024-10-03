@@ -9,16 +9,20 @@ namespace SFDDCards
     {
         public string TimingWindowId;
 
+        public CampaignContext CampaignContext;
         public Combatant CombatantEffectOwner;
         public ICombatantTarget CombatantTarget;
 
         public DeltaEntry ResultingDelta;
         public string PlayedFromZone;
 
-        public ReactionWindowContext(string timingWindowId,
+        public ReactionWindowContext(
+            CampaignContext campaignContext,
+            string timingWindowId,
             DeltaEntry resultingDelta,
             string playedFromZone = null)
         {
+            this.CampaignContext = campaignContext;
             this.TimingWindowId = timingWindowId.ToLower();
 
             this.ResultingDelta = resultingDelta;
@@ -28,11 +32,14 @@ namespace SFDDCards
             this.PlayedFromZone = playedFromZone;
         }
 
-        public ReactionWindowContext(string timingWindowId, 
+        public ReactionWindowContext(
+            CampaignContext campaignContext,
+            string timingWindowId, 
             Combatant combatantEffectOwner,
             ICombatantTarget combatantTarget = null,
             string playedFromZone = null)
         {
+            this.CampaignContext = campaignContext;
             this.TimingWindowId = timingWindowId.ToLower();
             this.CombatantEffectOwner = combatantEffectOwner;
             this.CombatantTarget = combatantTarget;

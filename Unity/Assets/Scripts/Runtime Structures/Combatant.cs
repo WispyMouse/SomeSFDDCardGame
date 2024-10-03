@@ -6,6 +6,8 @@ namespace SFDDCards
     using UnityEngine;
     public abstract class Combatant : ICombatantTarget, IReactionWindowReactor, IEffectOwner
     {
+        public abstract string Id { get; }
+
         public abstract string Name { get; }
         public abstract int MaxHealth { get; }
         public int CurrentHealth { get; set; }
@@ -88,9 +90,9 @@ namespace SFDDCards
             GlobalUpdateUX.UpdateUXEvent.Invoke();
         }
 
-        public bool TryGetReactionEvents(CampaignContext campaignContext, ReactionWindowContext reactionContext, out List<GameplaySequenceEvent> events)
+        public bool TryGetReactionEvents(CampaignContext campaignContext, ReactionWindowContext reactionContext, out List<WindowResponse> responses)
         {
-            events = null;
+            responses = null;
             return false;
         }
 

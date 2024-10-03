@@ -151,7 +151,7 @@ namespace SFDDCards
                 return;
             }
 
-            GlobalSequenceEventHolder.PushSequencesToTop(eventsThatWouldFollow.ToArray());
+            GlobalSequenceEventHolder.PushSequencesToTop(this, eventsThatWouldFollow.ToArray());
         }
 
         public bool TryGetReactionWindowSequenceEvents(ReactionWindowContext context, out List<GameplaySequenceEvent> eventsThatWouldFollow)
@@ -162,14 +162,17 @@ namespace SFDDCards
             {
                 foreach (ReactionWindowSubscription reactor in reactors)
                 {
-                    if (reactor != null && reactor.ShouldApply(context) && reactor.Reactor.TryGetReactionEvents(this, context, out List<GameplaySequenceEvent> events))
+                    if (reactor != null && reactor.ShouldApply(context) && reactor.Reactor.TryGetReactionEvents(this, context, out List<WindowResponse> responses))
                     {
                         if (eventsThatWouldFollow == null)
                         {
                             eventsThatWouldFollow = new List<GameplaySequenceEvent>();
                         }
 
-                        eventsThatWouldFollow.AddRange(events);
+                        foreach (WindowResponse response in responses)
+                        {
+                            eventsThatWouldFollow.Add(new GameplaySequenceEvent(() => this.StatusEffectHappeningProc(new StatusEffectHappening(response))));
+                        }
                     }
                 }
             }
@@ -220,6 +223,11 @@ namespace SFDDCards
             delta.ApplyDelta(this);
 
             this.CheckAllStateEffectsAndKnockouts();
+        }
+
+        public void IngestStatusEffectHappening(ReactionWindowContext reactionWindow, WindowResponse response)
+        {
+            GlobalSequenceEventHolder.PushSequencesToTop(reactionWindow.CampaignContext, response);
         }
 
         public void CheckAllStateEffectsAndKnockouts()
