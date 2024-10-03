@@ -26,15 +26,31 @@ namespace SFDDCards
                 builder.RelevantCards = new SelfCardEvaluatableValue(card);
             }
 
-            foreach (Element baseElement in evaluatedAttack.BaseElementGain.Keys)
+            if (evaluatedAttack.BaseElementGain != null || builder.ElementResourceChanges.Count > 0)
             {
-                builder.ElementResourceChanges.Add(new ElementResourceChange() { Element = baseElement, GainOrLoss = new ConstantEvaluatableValue<int>(evaluatedAttack.BaseElementGain[baseElement]) });
-            }
+                List<ElementResourceChange> elementChanges = new List<ElementResourceChange>();
 
-            if (builder.ElementResourceChanges.Count > 0)
-            {
-                builders.Add(builder);
-                builder = new ConceptualTokenEvaluatorBuilder(builder);
+                ConceptualTokenEvaluatorBuilder elementGainBuilder = new ConceptualTokenEvaluatorBuilder(context, builder)
+                {
+                    Owner = evaluatedAttack.Owner,
+                    RelevantCards = builder.RelevantCards
+                };
+
+                if (evaluatedAttack.BaseElementGain != null && evaluatedAttack.BaseElementGain.Count > 0)
+                {
+                    foreach (Element curElement in evaluatedAttack.BaseElementGain.Keys)
+                    {
+                        elementGainBuilder.ElementResourceChanges.Add(new ElementResourceChange(curElement, new ConstantEvaluatableValue<int>(evaluatedAttack.BaseElementGain[curElement])));
+                    }
+                }
+
+                if (builder.ElementResourceChanges != null)
+                {
+                    elementGainBuilder.ElementResourceChanges.AddRange(builder.ElementResourceChanges);
+                }
+
+                builders.Add(elementGainBuilder);
+                builder = new ConceptualTokenEvaluatorBuilder(elementGainBuilder);
             }
 
             int finalIndex = evaluatedAttack.AttackTokens.Count - 1;
@@ -82,7 +98,7 @@ namespace SFDDCards
 
         public static TokenEvaluatorBuilder RealizeConceptualBuilder(ConceptualTokenEvaluatorBuilder concept, CampaignContext campaignContext, IEffectOwner owner, Combatant user, ICombatantTarget originalTarget, TokenEvaluatorBuilder previousBuilder = null)
         {
-            return new TokenEvaluatorBuilder(concept, campaignContext, owner, user, originalTarget, previousBuilder);
+            return new TokenEvaluatorBuilder(concept, campaignContext, owner, user, originalTarget, concept.ElementResourceChanges, concept.Intensity, concept.IntensityKindType, concept.RealizedOperationScriptingToken, previousBuilder);
         }
 
         public static GamestateDelta GetDeltaFromTokens(string attackTokens, CampaignContext context, Combatant user, ICombatantTarget target)
@@ -130,13 +146,13 @@ namespace SFDDCards
 
                 ConceptualDelta delta = builder.GetConceptualDelta();
 
-                string deltaText = EffectDescriberDatabase.DescribeConceptualEffect(delta);
+                string deltaText = EffectDescriberDatabase.DescribeConceptualEffect(delta, ignoreElementIfCard: false);
 
                 if (!string.IsNullOrEmpty(deltaText))
                 {
                     string leadingSpace = "";
 
-                    if (!builder.HasSameRequirements() && effectText.Length > 0)
+                    if (!builder.HasSameRequirements(builder.PreviousBuilder) && effectText.Length > 0)
                     {
                         effectText.AppendLine();
                     }

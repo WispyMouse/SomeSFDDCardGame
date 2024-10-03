@@ -61,7 +61,7 @@ namespace SFDDCards
 
                     if (!string.IsNullOrEmpty(windowDescription))
                     {
-                        thisWindowString.Append($"<b>{windowDescription}:</b> ");
+                        thisWindowString.Append($"<b>{windowDescription}:</b>");
                     }
 
                     List<ConceptualTokenEvaluatorBuilder> tokenEvaluators = ScriptTokenEvaluator.CalculateConceptualBuildersFromTokenEvaluation(responder.Effect);

@@ -32,7 +32,7 @@ namespace SFDDCards
                 decider = new RandomDecider<CardImport>();
             }
 
-            string lowerId = id.ToString();
+            string lowerId = id.ToLower().ToString();
 
             // If there are brackets, this might be a set of tag criteria.
             Match tagMatches = Regex.Match(lowerId, @"(?:\[(?<tag>[^]]+)\])+");

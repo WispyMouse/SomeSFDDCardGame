@@ -41,7 +41,8 @@ namespace SFDDCards.Tests.EditMode
                 Name = $"{nameof(DebugElementOne)}name".ToUpper()
             };
             ElementDatabase.AddElement(debugOneElementImport);
-            ElementDatabase.GetElement(debugOneElementImport.Id).SpriteIndex = 0;
+            DebugElementOne = ElementDatabase.GetElement(debugOneElementImport.Id);
+            DebugElementOne.SpriteIndex = 0;
 
             ElementImport debugTwoElementImport = new ElementImport()
             {
@@ -49,7 +50,8 @@ namespace SFDDCards.Tests.EditMode
                 Name = $"{nameof(DebugElementTwo)}name".ToUpper()
             };
             ElementDatabase.AddElement(debugTwoElementImport);
-            ElementDatabase.GetElement(debugTwoElementImport.Id).SpriteIndex = 1;
+            DebugElementTwo = ElementDatabase.GetElement(debugTwoElementImport.Id);
+            DebugElementTwo.SpriteIndex = 1;
         }
 
         [TearDown]

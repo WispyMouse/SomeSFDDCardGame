@@ -10,7 +10,7 @@ namespace SFDDCards
     public interface IAttackTokenHolder
     {
         public List<IScriptingToken> AttackTokens { get; }
-        public Dictionary<Element, int> BaseElementGain { get; }
         public IEffectOwner Owner { get; }
+        public Dictionary<Element, int> BaseElementGain { get; }
     }
 }

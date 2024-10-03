@@ -3,6 +3,7 @@ namespace SFDDCards.Tests.EditMode
     using NUnit.Framework;
     using SFDDCards.Evaluation.Actual;
     using SFDDCards.ImportModels;
+    using SFDDCards.ScriptingTokens.EvaluatableValues;
     using System;
     using System.Collections;
     using System.Collections.Generic;
@@ -45,7 +46,7 @@ namespace SFDDCards.Tests.EditMode
                     new DeltaEntry(campaignContext, combatContext.CombatPlayer, combatContext.CombatPlayer)
                     {
                         IntensityKindType = TokenEvaluatorBuilder.IntensityKind.Damage,
-                        Intensity = damageToDealToPlayer
+                        ConceptualIntensity =  new ConstantEvaluatableValue<int>(damageToDealToPlayer)
                     }
                  }
             };
@@ -65,7 +66,7 @@ namespace SFDDCards.Tests.EditMode
                     new DeltaEntry(campaignContext, combatContext.CombatPlayer, combatContext.CombatPlayer)
                     {
                         IntensityKindType = TokenEvaluatorBuilder.IntensityKind.Damage,
-                        Intensity = damageToDealNext
+                        ConceptualIntensity = new ConstantEvaluatableValue<int>(10)
                     }
                  }
             };

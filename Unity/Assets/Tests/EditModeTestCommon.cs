@@ -129,7 +129,7 @@ namespace SFDDCards.Tests.EditMode
                 new DeltaEntry(campaignContext, combatContext.CombatPlayer, toTarget)
                 {
                     IntensityKindType = TokenEvaluatorBuilder.IntensityKind.ApplyStatusEffect,
-                    Intensity = mod,
+                    ConceptualIntensity = new ConstantEvaluatableValue<int>(mod),
                     StatusEffect = StatusEffectDatabase.GetModel(toApply)
                 });
 

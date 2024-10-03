@@ -125,7 +125,8 @@ namespace SFDDCards.Tests.EditMode
         {
             GamestateDelta delta = ScriptTokenEvaluator.CalculateRealizedDeltaEvaluation(attackHolderStack, context.FromCampaign, owner, user, target);
             Assert.GreaterOrEqual(delta.DeltaEntries.Count, deltaIndex, $"There should be enough delta entries to find the specified delta index. Not enough entries returned on evaluation.");
-            Assert.AreEqual(expectedValue, delta.DeltaEntries[deltaIndex].Intensity, $"Value should be as expected after evaluation.");
+            Assert.IsTrue(delta.DeltaEntries[deltaIndex].ConceptualIntensity.TryEvaluateValue(context.FromCampaign, delta.DeltaEntries[deltaIndex].MadeFromBuilder, out int evaluatedIntensity), "Should be able to evaluate intensity.");
+            Assert.AreEqual(expectedValue, evaluatedIntensity, $"Value should be as expected after evaluation.");
         }
     }
 }

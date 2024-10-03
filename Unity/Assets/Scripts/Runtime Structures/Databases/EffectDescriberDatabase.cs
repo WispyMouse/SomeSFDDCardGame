@@ -23,7 +23,7 @@ namespace SFDDCards
         /// This is used to describe Cards and Effects when they aren't happening.
         /// As it is conceptual, none of the numbers have resolved yet.
         /// </summary>
-        public static string DescribeConceptualEffect(ConceptualDelta conceptualDelta, string reactionWindow = "")
+        public static string DescribeConceptualEffect(ConceptualDelta conceptualDelta, string reactionWindow = "", bool ignoreElementIfCard = true)
         {
             StringBuilder entireEffectText = new StringBuilder();
             string leadingSpace = "";
@@ -32,17 +32,25 @@ namespace SFDDCards
             // don't include that element.
             // Include it if there's any other kind of operation happening on the elements.
             bool ignoreElement = false;
-
             if (conceptualDelta.Owner is Card)
             {
-                ignoreElement = true;
+                ignoreElement = ignoreElementIfCard;
             }
+
+            ConceptualTokenEvaluatorBuilder previousRequirementsPrintedBuilder = null;
+            bool first = true;
 
             foreach (ConceptualDeltaEntry deltaEntry in conceptualDelta.DeltaEntries)
             {
+                if (first)
+                {
+                    previousRequirementsPrintedBuilder = deltaEntry.MadeFromBuilder.PreviousBuilder;
+                    first = false;
+                }
+
                 string nextDescriptor = string.Empty;
 
-                if (!deltaEntry.MadeFromBuilder.HasSameRequirements())
+                if (!deltaEntry.MadeFromBuilder.HasSameRequirements(previousRequirementsPrintedBuilder))
                 {
                     string requirement = DescribeRequirement(deltaEntry.MadeFromBuilder);
                     if (!string.IsNullOrEmpty(requirement))
@@ -55,6 +63,8 @@ namespace SFDDCards
                         nextDescriptor += leadingSpace + requirement;
                         leadingSpace = " ";
                     }
+
+                    previousRequirementsPrintedBuilder = deltaEntry.MadeFromBuilder;
                 }
 
                 string elementChange = DescribeElementChange(deltaEntry, ignoreElement);
@@ -102,9 +112,10 @@ namespace SFDDCards
                         break;
                 }
 
-                if (!string.IsNullOrEmpty(nextDescriptor))
+                string trimmed = nextDescriptor.Trim().Trim('.');
+                if (!string.IsNullOrEmpty(trimmed))
                 {
-                    entireEffectText.Append($"{nextDescriptor.Trim().Trim('.')}.");
+                    entireEffectText.Append($"{trimmed}.");
                     leadingSpace = " ";
                 }
 
@@ -225,7 +236,7 @@ namespace SFDDCards
                 }
             }
 
-            return entireEffectText.ToString();
+            return entireEffectText.ToString().Trim();
         }
 
         public static string DescribeDrainEffect(string argumentOne, string argumentTwo)
@@ -256,12 +267,18 @@ namespace SFDDCards
 
         public static string DescribeRealizedDamage(TokenEvaluatorBuilder builder)
         {
+            if (!builder.Intensity.TryEvaluateValue(builder.Campaign, builder, out int evaluatedValue))
+            {
+                GlobalUpdateUX.LogTextEvent.Invoke($"Failed to parse conceptual intensity, after it already should be resolveable.", GlobalUpdateUX.LogType.RuntimeError);
+                return String.Empty;
+            }
+
             return ComposeDescriptor<ICombatantTarget>(
                 $"to {builder.Target.Name}",
                 builder.Target,
                 builder.OriginalTarget,
                 builder?.PreviousTokenBuilder?.Target,
-                builder.Intensity.ToString(),
+                evaluatedValue.ToString(),
                 String.Empty,
                 "damage",
                 builder.GetIntensityDescriptionIfNotConstant(),
@@ -277,12 +294,18 @@ namespace SFDDCards
 
         public static string DescribeResolvedDamage(DeltaEntry delta)
         {
+            if (!delta.ConceptualIntensity.TryEvaluateValue(delta.FromCampaign, delta.MadeFromBuilder, out int evaluatedValue))
+            {
+                GlobalUpdateUX.LogTextEvent.Invoke($"Failed to parse conceptual intensity, after it already should be resolveable.", GlobalUpdateUX.LogType.RuntimeError);
+                return String.Empty;
+            }
+
             return ComposeDescriptor<ICombatantTarget>(
                 $"to {delta.Target.Name}",
                 delta.Target,
                 delta.OriginalTarget,
                 delta.MadeFromBuilder?.PreviousTokenBuilder?.Target,
-                delta.Intensity.ToString(),
+                evaluatedValue.ToString(),
                 String.Empty,
                 String.Empty,
                 "damage",
@@ -339,7 +362,7 @@ namespace SFDDCards
                 delta.Target,
                 delta.OriginalTarget,
                 delta.MadeFromBuilder?.PreviousTokenBuilder?.Target,
-                delta.Intensity.ToString(),
+                delta.ConceptualIntensity.ToString(),
                 "Heal",
                 String.Empty,
                 String.Empty,
@@ -393,7 +416,7 @@ namespace SFDDCards
                 case TokenEvaluatorBuilder.IntensityKind.NumberOfCards:
                     if (builder.NumberOfCardsRelationType == TokenEvaluatorBuilder.NumberOfCardsRelation.Draw)
                     {
-                        if (builder.Intensity == 1)
+                        if (builder.Intensity is ConstantEvaluatableValue<int> constant && constant.ConstantValue == 1)
                         {
                             valueText = "a";
                         }
@@ -430,9 +453,9 @@ namespace SFDDCards
                             null,
                             null,
                             null,
-                            delta.Intensity,
+                            delta.ConceptualIntensity,
                             "Draw ",
-                            ExtractSingularOrPlural(delta.Intensity, "card"),
+                            ExtractSingularOrPlural(delta.ConceptualIntensity, "card"),
                             String.Empty,
                             ComposeValueTargetLocation.BetweenMiddleAndSuffix,
                             ComposeValueTargetLocation.BetweenPrefixAndMiddle,
@@ -527,14 +550,14 @@ namespace SFDDCards
 
         public static string DescribeResolvedApplyStatusEffect(DeltaEntry delta)
         {
-            string stackstext = ExtractSingularOrPlural(delta.Intensity, "stack");
+            string stackstext = ExtractSingularOrPlural(delta.ConceptualIntensity, "stack");
 
             return ComposeDescriptor<ICombatantTarget>(
                 $"to {delta.Target.Name}",
                 delta.Target,
                 delta.OriginalTarget,
                 delta.MadeFromBuilder?.PreviousTokenBuilder?.Target,
-                delta.Intensity.ToString(),
+                delta.ConceptualIntensity.ToString(),
                 "Apply",
                 $"{stackstext} of {delta.StatusEffect.Name}",
                 String.Empty,
@@ -615,14 +638,14 @@ namespace SFDDCards
 
         public static string DescribeResolvedRemoveStatusEffect(DeltaEntry delta)
         {
-            string stackstext = ExtractSingularOrPlural(delta.Intensity, "stack");
+            string stackstext = ExtractSingularOrPlural(delta.ConceptualIntensity, "stack");
 
             return ComposeDescriptor<ICombatantTarget>(
                 $"from {delta.Target.Name}",
                 delta.Target,
                 delta.OriginalTarget,
                 delta.MadeFromBuilder?.PreviousTokenBuilder?.Target,
-                delta.Intensity.ToString(),
+                delta.ConceptualIntensity.ToString(),
                 "Remove",
                 $"{stackstext} of {delta.StatusEffect.Name}",
                 String.Empty,
@@ -670,7 +693,7 @@ namespace SFDDCards
 
         public static string DescribeRealizedSetStatusEffect(TokenEvaluatorBuilder builder)
         {
-            if (builder.Intensity == 0)
+            if (builder.Intensity is ConstantEvaluatableValue<int> constant && constant.ConstantValue == 0)
             {
                 return $"Clear {builder.StatusEffect.Name}.";
             }
@@ -936,7 +959,7 @@ namespace SFDDCards
                 builtString += ".";
             }
 
-            return builtString;
+            return builtString.Trim();
         }
         #endregion
 

@@ -61,7 +61,13 @@ namespace SFDDCards.Evaluation.Actual
 
             List<GameplaySequenceEvent> sequences = new List<GameplaySequenceEvent>();
 
-            if (curEntry.IntensityKindType == TokenEvaluatorBuilder.IntensityKind.Damage && curEntry.Intensity > 0)
+            int evaluatedIntensity = 0;
+            if (curEntry.ConceptualIntensity != null)
+            {
+                curEntry.ConceptualIntensity.TryEvaluateValue(campaignContext, curEntry.MadeFromBuilder, out evaluatedIntensity);
+            }
+
+            if (curEntry.IntensityKindType == TokenEvaluatorBuilder.IntensityKind.Damage && evaluatedIntensity > 0)
             {
                 sequences.Add(new GameplaySequenceEvent(
                 () =>
@@ -88,7 +94,7 @@ namespace SFDDCards.Evaluation.Actual
                     sequences.Add(new GameplaySequenceEvent(
                         () =>
                         {
-                            campaignContext.CurrentCombatContext.PlayerCombatDeck.DealCards(curEntry.Intensity);
+                            campaignContext.CurrentCombatContext.PlayerCombatDeck.DealCards(evaluatedIntensity);
                         })
                     );
                 }

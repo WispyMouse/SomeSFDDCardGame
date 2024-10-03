@@ -16,20 +16,31 @@ namespace SFDDCards
 
         public void ApplyDelta(CampaignContext campaignContext, CombatContext combatContext, DeltaEntry deltaEntry)
         {
+            if (deltaEntry.IntensityKindType == TokenEvaluatorBuilder.IntensityKind.None)
+            {
+                return;
+            }
+
+            if (!deltaEntry.ConceptualIntensity.TryEvaluateValue(campaignContext, deltaEntry.MadeFromBuilder, out int evaluatedIntensity))
+            {
+                GlobalUpdateUX.LogTextEvent.Invoke($"Failed to parse intensity.", GlobalUpdateUX.LogType.RuntimeError);
+                return;
+            }
+
             if (deltaEntry.IntensityKindType == TokenEvaluatorBuilder.IntensityKind.Damage)
             {
-                if (deltaEntry.Intensity > 0)
+                if (evaluatedIntensity > 0)
                 {
-                    this.CurrentHealth = Mathf.Max(0, this.CurrentHealth - deltaEntry.Intensity);
+                    this.CurrentHealth = Mathf.Max(0, this.CurrentHealth - evaluatedIntensity);
                 }
                 return;
             }
 
             if (deltaEntry.IntensityKindType == TokenEvaluatorBuilder.IntensityKind.Heal)
             {
-                if (deltaEntry.Intensity > 0)
+                if (evaluatedIntensity > 0)
                 {
-                    this.CurrentHealth = Mathf.Min(this.MaxHealth, this.CurrentHealth + deltaEntry.Intensity);
+                    this.CurrentHealth = Mathf.Min(this.MaxHealth, this.CurrentHealth + evaluatedIntensity);
                 }
 
                 return;
@@ -40,16 +51,16 @@ namespace SFDDCards
                 AppliedStatusEffect existingEffect = this.AppliedStatusEffects.Find(x => x.BasedOnStatusEffect == deltaEntry.StatusEffect);
                 if (existingEffect != null)
                 {
-                    existingEffect.Stacks += Mathf.Max(0, deltaEntry.Intensity);
+                    existingEffect.Stacks += Mathf.Max(0, evaluatedIntensity);
                     if (existingEffect.Stacks <= 0)
                     {
                         campaignContext.UnsubscribeReactor(existingEffect);
                         AppliedStatusEffects.Remove(existingEffect);
                     }
                 }
-                else if (deltaEntry.Intensity > 0)
+                else if (evaluatedIntensity > 0)
                 {
-                    AppliedStatusEffect newEffect = new AppliedStatusEffect(this, deltaEntry.StatusEffect, deltaEntry.Intensity);
+                    AppliedStatusEffect newEffect = new AppliedStatusEffect(this, deltaEntry.StatusEffect, evaluatedIntensity);
                     this.AppliedStatusEffects.Add(newEffect);
                     newEffect.SetSubscriptions(campaignContext);
                 }
@@ -59,7 +70,7 @@ namespace SFDDCards
                 AppliedStatusEffect existingEffect = this.AppliedStatusEffects.Find(x => x.BasedOnStatusEffect == deltaEntry.StatusEffect);
                 if (existingEffect != null)
                 {
-                    existingEffect.Stacks = Mathf.Max(0, existingEffect.Stacks - deltaEntry.Intensity);
+                    existingEffect.Stacks = Mathf.Max(0, existingEffect.Stacks - evaluatedIntensity);
                     if (existingEffect.Stacks <= 0)
                     {
                         campaignContext.UnsubscribeReactor(existingEffect);
@@ -72,16 +83,16 @@ namespace SFDDCards
                 AppliedStatusEffect existingEffect = this.AppliedStatusEffects.Find(x => x.BasedOnStatusEffect == deltaEntry.StatusEffect);
                 if (existingEffect != null)
                 {
-                    existingEffect.Stacks = deltaEntry.Intensity;
+                    existingEffect.Stacks = evaluatedIntensity;
                     if (existingEffect.Stacks <= 0)
                     {
                         campaignContext.UnsubscribeReactor(existingEffect);
                         AppliedStatusEffects.Remove(existingEffect);
                     }
                 }
-                else if (deltaEntry.Intensity > 0)
+                else if (evaluatedIntensity > 0)
                 {
-                    AppliedStatusEffect newEffect = new AppliedStatusEffect(this, deltaEntry.StatusEffect, deltaEntry.Intensity);
+                    AppliedStatusEffect newEffect = new AppliedStatusEffect(this, deltaEntry.StatusEffect, evaluatedIntensity);
                     this.AppliedStatusEffects.Add(newEffect);
                     newEffect.SetSubscriptions(campaignContext);
                 }
