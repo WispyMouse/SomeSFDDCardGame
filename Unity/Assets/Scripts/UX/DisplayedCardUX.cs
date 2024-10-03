@@ -69,6 +69,11 @@ namespace SFDDCards.UX
             this.UnHoverOnDisable();
         }
 
+        private void OnDestroy()
+        {
+            this.UnHoverOnDisable();
+        }
+
         public bool TryGetStatusEffect(out IStatusEffect toShow)
         {
             toShow = null;

@@ -9,7 +9,8 @@
 		},
 		{
 			"Window": "OWNERSTARTSTURN",
-			"Script": "[CLEARSTACKS]"
+			"Script": "[CLEARSTACKS]",
+			"ApplicationPriority": 10
 		}
 	]
 }

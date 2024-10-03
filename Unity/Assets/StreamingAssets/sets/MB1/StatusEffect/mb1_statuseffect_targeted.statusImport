@@ -5,7 +5,8 @@
 	[
 		{
 			"Window": "OWNERSTARTSTURN",
-			"Script": "[SETTARGET: SELF][CLEARSTACKS]"
+			"Script": "[SETTARGET: SELF][CLEARSTACKS]",
+			"ApplicationPriority": -10
 		},
 		{
 			"Window": "INCOMINGDAMAGE",

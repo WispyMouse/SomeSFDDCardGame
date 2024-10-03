@@ -142,6 +142,11 @@ namespace SFDDCards.UX
             CampaignContext.NonCombatEncounterStatus newNonCombatState = this.CurrentCampaignContext.CurrentNonCombatEncounterStatus;
             CombatContext.TurnStatus newTurnState = this.CurrentCampaignContext.CurrentCombatContext == null ? CombatContext.TurnStatus.NotInCombat : this.CurrentCampaignContext.CurrentCombatContext.CurrentTurnStatus;
 
+            if (this.CurrentCampaignContext?.PendingRewards != null && this.RewardsPanelUXInstance.Rewards != this.CurrentCampaignContext?.PendingRewards)
+            {
+                this.PresentAwards(this.CurrentCampaignContext.PendingRewards);
+            }
+
             CampaignContext.GameplayCampaignState wasPreviousCampaignState = this.previousCampaignState;
             CampaignContext.NonCombatEncounterStatus wasPreviousNonCombatState = this.previousNonCombatEncounterState;
             CombatContext.TurnStatus wasPreviousTurnState = this.previousCombatTurnState;
@@ -161,12 +166,6 @@ namespace SFDDCards.UX
                 || (newCampaignState == CampaignContext.GameplayCampaignState.NonCombatEncounter && newNonCombatState == CampaignContext.NonCombatEncounterStatus.AllowedToLeave))
             {
                 this.GoNextRoomButton.SetActive(true);
-
-                if (wasPreviousCampaignState == CampaignContext.GameplayCampaignState.InCombat 
-                    && this.CurrentCampaignContext?.PendingRewards != null)
-                {
-                    this.PresentAwards(this.CurrentCampaignContext.PendingRewards);
-                }
             }
             else
             {
@@ -606,6 +605,7 @@ namespace SFDDCards.UX
 
         public void PresentAwards(Reward toPresent)
         {
+            this.CurrentCampaignContext.PendingRewards = null;
             this.CancelAllSelections();
             this.ShowRewardsPanel(toPresent);
         }
