@@ -84,6 +84,8 @@ namespace SFDDCards.UX
         private CombatContext.TurnStatus previousCombatTurnState { get; set; } = CombatContext.TurnStatus.NotInCombat;
         private CampaignContext.NonCombatEncounterStatus previousNonCombatEncounterState { get; set; } = CampaignContext.NonCombatEncounterStatus.NotInNonCombatEncounter;
 
+        public CampaignContext CurrentCampaignContext => this.CentralGameStateControllerInstance?.CurrentCampaignContext;
+
         private void Awake()
         {
             this.Annihilate();
@@ -119,7 +121,7 @@ namespace SFDDCards.UX
             }
 
             this.PlayerUXInstance = Instantiate(this.PlayerRepresentationPF, this.PlayerRepresentationTransform);
-            this.PlayerUXInstance.SetFromPlayer(this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignPlayer);
+            this.PlayerUXInstance.SetFromPlayer(this.CurrentCampaignContext.CampaignPlayer);
 
             this.LifeValue.text = $"{this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignPlayer.CurrentHealth} / {this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignPlayer.MaxHealth}";
         }
@@ -136,9 +138,9 @@ namespace SFDDCards.UX
 
             this.CampaignChooserUXInstance.HideChooser();
 
-            CampaignContext.GameplayCampaignState newCampaignState = this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentGameplayCampaignState;
-            CampaignContext.NonCombatEncounterStatus newNonCombatState = this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentNonCombatEncounterStatus;
-            CombatContext.TurnStatus newTurnState = this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext == null ? CombatContext.TurnStatus.NotInCombat : this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.CurrentTurnStatus;
+            CampaignContext.GameplayCampaignState newCampaignState = this.CurrentCampaignContext.CurrentGameplayCampaignState;
+            CampaignContext.NonCombatEncounterStatus newNonCombatState = this.CurrentCampaignContext.CurrentNonCombatEncounterStatus;
+            CombatContext.TurnStatus newTurnState = this.CurrentCampaignContext.CurrentCombatContext == null ? CombatContext.TurnStatus.NotInCombat : this.CurrentCampaignContext.CurrentCombatContext.CurrentTurnStatus;
 
             CampaignContext.GameplayCampaignState wasPreviousCampaignState = this.previousCampaignState;
             CampaignContext.NonCombatEncounterStatus wasPreviousNonCombatState = this.previousNonCombatEncounterState;
@@ -161,9 +163,9 @@ namespace SFDDCards.UX
                 this.GoNextRoomButton.SetActive(true);
 
                 if (wasPreviousCampaignState == CampaignContext.GameplayCampaignState.InCombat 
-                    && this.CentralGameStateControllerInstance.CurrentCampaignContext.PendingRewards != null)
+                    && this.CurrentCampaignContext?.PendingRewards != null)
                 {
-                    this.PresentAwards(this.CentralGameStateControllerInstance.CurrentCampaignContext.PendingRewards);
+                    this.PresentAwards(this.CurrentCampaignContext.PendingRewards);
                 }
             }
             else
@@ -180,7 +182,7 @@ namespace SFDDCards.UX
                     this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentEncounter != null &&
                     this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentEncounter.BasedOn.IsShopEncounter)
                 {
-                    this.ShowShopPanel(this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentEncounter.GetCards().ToArray());
+                    this.ShowShopPanel(this.CurrentCampaignContext.CurrentEncounter.GetCards().ToArray());
                 }
             }
             
@@ -288,8 +290,8 @@ namespace SFDDCards.UX
 
         public void SelectCurrentCard(DisplayedCardUX toSelect)
         {
-            if (this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext == null ||
-                this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.CurrentTurnStatus != CombatContext.TurnStatus.PlayerTurn)
+            if (this.CurrentCampaignContext.CurrentCombatContext == null ||
+                this.CurrentCampaignContext.CurrentCombatContext.CurrentTurnStatus != CombatContext.TurnStatus.PlayerTurn)
             {
                 return;
             }
@@ -364,7 +366,7 @@ namespace SFDDCards.UX
 
         private IEnumerator AnimateEnemyTurnsInternal(Action continuationAction)
         {
-            foreach (Enemy curEnemy in this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.Enemies)
+            foreach (Enemy curEnemy in this.CurrentCampaignContext.CurrentCombatContext.Enemies)
             {
                 yield return AnimateAction(this.spawnedEnemiesLookup[curEnemy], curEnemy.Intent, curEnemy.Intent.PrecalculatedTarget);
             }
@@ -416,7 +418,7 @@ namespace SFDDCards.UX
 
         void UpdatePlayerLabelValues()
         {
-            if (this.CentralGameStateControllerInstance?.CurrentCampaignContext?.CampaignPlayer == null)
+            if (this.CurrentCampaignContext?.CampaignPlayer == null)
             {
                 this.LifeValue.text = "0";
                 this.PlayerStatusEffectUXHolderInstance.Annihilate();
@@ -424,7 +426,7 @@ namespace SFDDCards.UX
                 return;
             }
 
-            this.LifeValue.text = this.CentralGameStateControllerInstance?.CurrentCampaignContext?.CampaignPlayer.CurrentHealth.ToString();
+            this.LifeValue.text = this.CurrentCampaignContext.CampaignPlayer.CurrentHealth.ToString();
             this.PlayerStatusEffectUXHolderInstance.SetStatusEffects(
                 this.CentralGameStateControllerInstance?.CurrentCampaignContext?.CampaignPlayer.AppliedStatusEffects,
                 this.StatusEffectClicked);
@@ -442,9 +444,9 @@ namespace SFDDCards.UX
 
             string startingSeparator = "";
             StringBuilder compositeElements = new StringBuilder();
-            foreach (Element element in this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.ElementResourceCounts.Keys)
+            foreach (Element element in this.CurrentCampaignContext.CurrentCombatContext.ElementResourceCounts.Keys)
             {
-                compositeElements.Append($"{startingSeparator}{this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.ElementResourceCounts[element]}\u00A0{element.GetNameOrIcon()}");
+                compositeElements.Append($"{startingSeparator}{this.CurrentCampaignContext.CurrentCombatContext.ElementResourceCounts[element]}\u00A0{element.GetNameOrIcon()}");
                 startingSeparator = ", ";
             }
 
@@ -556,19 +558,19 @@ namespace SFDDCards.UX
 
         void RepresentTargetables()
         {
-            if (this.CentralGameStateControllerInstance.CurrentCampaignContext?.CurrentCombatContext == null)
+            if (this.CurrentCampaignContext?.CurrentCombatContext == null)
             {
                 ClearAllTargetableIndicators();
                 return;
             }
 
-            if (this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentGameplayCampaignState != CampaignContext.GameplayCampaignState.InCombat)
+            if (this.CurrentCampaignContext.CurrentGameplayCampaignState != CampaignContext.GameplayCampaignState.InCombat)
             {
                 ClearAllTargetableIndicators();
                 return;
             }
 
-            if (this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.CurrentTurnStatus != CombatContext.TurnStatus.PlayerTurn)
+            if (this.CurrentCampaignContext.CurrentCombatContext.CurrentTurnStatus != CombatContext.TurnStatus.PlayerTurn)
             {
                 ClearAllTargetableIndicators();
                 return;
@@ -612,7 +614,7 @@ namespace SFDDCards.UX
         {
             this.CancelAllSelections();
 
-            ChoiceNode campaignNode = this.CentralGameStateControllerInstance.CurrentCampaignContext.GetCampaignCurrentNode();
+            ChoiceNode campaignNode = this.CurrentCampaignContext.GetCampaignCurrentNode();
 
             if (campaignNode == null)
             {
@@ -667,7 +669,7 @@ namespace SFDDCards.UX
 
             foreach (Enemy curEnemy in new List<Enemy>(this.spawnedEnemiesLookup.Keys))
             {
-                if (!this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.Enemies.Contains(curEnemy))
+                if (!this.CurrentCampaignContext.CurrentCombatContext.Enemies.Contains(curEnemy))
                 {
                     this.RemoveEnemy(curEnemy);
                 }
@@ -743,7 +745,7 @@ namespace SFDDCards.UX
 
             if (this.CentralGameStateControllerInstance?.CurrentCampaignContext?.CurrentCombatContext != null)
             {
-                cardsInDeck = new List<Card>(this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.PlayerCombatDeck.CardsCurrentlyInDeck);
+                cardsInDeck = new List<Card>(this.CurrentCampaignContext.CurrentCombatContext.PlayerCombatDeck.CardsCurrentlyInDeck);
             }
 
             cardsInDeck.Sort((Card a, Card b) => a.Name.CompareTo(b.Name));
