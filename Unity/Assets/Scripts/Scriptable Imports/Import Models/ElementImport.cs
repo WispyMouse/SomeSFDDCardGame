@@ -18,7 +18,7 @@ namespace SFDDCards.ImportModels
 
         public override async Task ProcessAdditionalFilesAsync()
         {
-            string normalArtFile = new FileInfo(this.FilePath).Extension.ToLower().Replace("elementimport", "png");
+            string normalArtFile = this.FilePath.ToLower().Replace("elementimport", "png");
 
             if (File.Exists(normalArtFile))
             {

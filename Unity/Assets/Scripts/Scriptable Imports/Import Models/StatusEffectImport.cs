@@ -25,7 +25,7 @@ namespace SFDDCards.ImportModels
 
         public override async Task ProcessAdditionalFilesAsync()
         {
-            string spriteFile = new FileInfo(this.FilePath).Extension.ToLower().Replace("statusimport", "png");
+            string spriteFile = this.FilePath.ToLower().Replace("statusimport", "png");
 
             if (File.Exists(spriteFile))
             {
