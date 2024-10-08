@@ -7,7 +7,7 @@ namespace SFDDCards
 
     public class IncomingDamageReactionWindowSubscription : IncomingIntensityReactionWindowSubscription
     {
-        public override string ReactionWindowId => KnownReactionWindows.IncomingDamage;
+        public override string ReactionWindowId => KnownReactionWindows.DamageIncoming;
 
         public IncomingDamageReactionWindowSubscription(AppliedStatusEffect owningEffect) : base(owningEffect, IntensityKind.Damage)
         {

@@ -33,6 +33,12 @@ namespace SFDDCards
                 {
                     this.CurrentHealth = Mathf.Max(0, this.CurrentHealth - evaluatedIntensity);
                 }
+
+                GlobalSequenceEventHolder.PushSequenceToTop(new GameplaySequenceEvent(() =>
+                {
+                    campaignContext.CheckAndApplyReactionWindow(new ReactionWindowContext(deltaEntry.FromCampaign, KnownReactionWindows.DamageDealt, deltaEntry));
+                }));
+
                 return;
             }
 

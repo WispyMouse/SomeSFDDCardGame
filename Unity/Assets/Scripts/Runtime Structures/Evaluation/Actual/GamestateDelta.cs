@@ -72,7 +72,7 @@ namespace SFDDCards.Evaluation.Actual
                 sequences.Add(new GameplaySequenceEvent(
                 () =>
                     {
-                        campaignContext.CheckAndApplyReactionWindow(new ReactionWindowContext(curEntry.FromCampaign, KnownReactionWindows.IncomingDamage, curEntry));
+                        campaignContext.CheckAndApplyReactionWindow(new ReactionWindowContext(curEntry.FromCampaign, KnownReactionWindows.DamageIncoming, curEntry));
                     })
                 );
             }

@@ -45,7 +45,7 @@ namespace SFDDCards.ScriptingTokens
 
         public string DescribeOperationAsEffect(ConceptualDeltaEntry delta, string reactionWindowId)
         {
-            if (this.ReduceArgumentOne.ToLower() == "intensity" && reactionWindowId == KnownReactionWindows.IncomingDamage)
+            if (this.ReduceArgumentOne.ToLower() == "intensity" && reactionWindowId == KnownReactionWindows.DamageIncoming)
             {
                 return $"Damage first subtracts from {this.ReduceArgumentTwo} before subtracting from health";
             }
