@@ -146,6 +146,7 @@ namespace SFDDCards
             List<ConceptualTokenEvaluatorBuilder> builders = CalculateConceptualBuildersFromTokenEvaluation(importingCard, context);
             StringBuilder effectText = new StringBuilder();
             ConceptualTokenEvaluatorBuilder previousBuilder = null;
+            ConceptualTokenEvaluatorBuilder previousRequirementsBuilder = null;
 
             foreach (ConceptualTokenEvaluatorBuilder builder in builders)
             {
@@ -181,23 +182,35 @@ namespace SFDDCards
                 else
                 {
                     ConceptualDelta conceptualDelta = builder.GetConceptualDelta();
-                    deltaText = EffectDescriberDatabase.DescribeConceptualEffect(conceptualDelta, ignoreElementIfCard: false);
+
+                    if (conceptualDelta.DeltaEntries.Count > 0)
+                    {
+                        deltaText = EffectDescriberDatabase.DescribeConceptualEffect(conceptualDelta, ignoreElementIfCard: false);
+                    }
                 }
 
                 if (!string.IsNullOrEmpty(deltaText))
                 {
                     string leadingSpace = "";
+                    string requirementsText = "";
 
-                    if (!builder.HasSameRequirements(builder.PreviousBuilder) && effectText.Length > 0)
+                    if (!builder.HasSameRequirements(previousRequirementsBuilder))
                     {
-                        effectText.AppendLine();
+                        requirementsText = EffectDescriberDatabase.DescribeRequirement(builder);
+
+                        if (effectText.Length > 0)
+                        {
+                            effectText.AppendLine();
+                        }
+
+                        previousRequirementsBuilder = builder;
                     }
                     else if (effectText.Length > 0)
                     {
                         leadingSpace = " ";
                     }
 
-                    effectText.Append($"{leadingSpace}{deltaText.Trim()}");
+                    effectText.Append($"{leadingSpace}{requirementsText}{deltaText.Trim()}");
                 }
 
                 previousBuilder = builder;

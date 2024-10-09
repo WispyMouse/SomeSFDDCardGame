@@ -37,46 +37,9 @@ namespace SFDDCards
                 ignoreElement = ignoreElementIfCard;
             }
 
-            ConceptualTokenEvaluatorBuilder previousRequirementsPrintedBuilder = null;
-            bool first = true;
-
             foreach (ConceptualDeltaEntry deltaEntry in conceptualDelta.DeltaEntries)
             {
-                if (first)
-                {
-                    previousRequirementsPrintedBuilder = deltaEntry.MadeFromBuilder.PreviousBuilder;
-                    first = false;
-                }
-
                 string nextDescriptor = string.Empty;
-
-                if (!deltaEntry.MadeFromBuilder.HasSameRequirements(previousRequirementsPrintedBuilder))
-                {
-                    string requirement = DescribeRequirement(deltaEntry.MadeFromBuilder);
-                    if (!string.IsNullOrEmpty(requirement))
-                    {
-                        if (entireEffectText.Length > 0)
-                        {
-                            entireEffectText.Append("\r\n");
-                        }
-
-                        nextDescriptor += leadingSpace + requirement;
-                        leadingSpace = " ";
-                    }
-
-                    previousRequirementsPrintedBuilder = deltaEntry.MadeFromBuilder;
-                }
-
-                string elementChange = DescribeElementChange(deltaEntry, ignoreElement);
-                if (!string.IsNullOrEmpty(elementChange))
-                {
-                    if (entireEffectText.Length > 0)
-                    {
-                        nextDescriptor += "\r\n";
-                    }
-                    nextDescriptor += leadingSpace + elementChange;
-                    leadingSpace = " ";
-                }
 
                 if (deltaEntry.MadeFromBuilder.RealizedOperationScriptingToken != null && !deltaEntry.MadeFromBuilder.RealizedOperationScriptingToken.SkipDescribingMe)
                 {

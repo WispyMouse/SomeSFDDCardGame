@@ -64,10 +64,21 @@ namespace SFDDCards
                         thisWindowString.Append($"<b>{windowDescription}:</b>");
                     }
 
+                    ConceptualTokenEvaluatorBuilder previousRequirementsBuilder = null;
                     List<ConceptualTokenEvaluatorBuilder> tokenEvaluators = ScriptTokenEvaluator.CalculateConceptualBuildersFromTokenEvaluation(responder.Effect);
                     foreach (ConceptualTokenEvaluatorBuilder builder in tokenEvaluators)
                     {
-                        thisWindowString.Append($"{EffectDescriberDatabase.DescribeConceptualEffect(builder.GetConceptualDelta(), window.ToLower())} ");
+                        ConceptualDelta delta = builder.GetConceptualDelta();
+                        if (delta.DeltaEntries.Count > 0)
+                        {
+                            if (!builder.HasSameRequirements(previousRequirementsBuilder))
+                            {
+                                thisWindowString.Append(EffectDescriberDatabase.DescribeRequirement(builder));
+                                previousRequirementsBuilder = builder;
+                            }
+
+                            thisWindowString.Append($"{EffectDescriberDatabase.DescribeConceptualEffect(delta, window.ToLower())} ");
+                        }
                     }
 
                     statusEffects.Add(thisWindowString.ToString().Trim());
