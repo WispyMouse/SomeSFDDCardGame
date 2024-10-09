@@ -45,7 +45,7 @@ namespace SFDDCards.Tests.EditMode
 
             ReactionWindowContext fromHandContext = new ReactionWindowContext(campaignContext, KnownReactionWindows.ConsideringPlayingFromHand, combatContext.CombatPlayer, playedFromZone: "hand", combatantTarget: combatContext.Enemies[0]);
 
-            EditModeTestCommon.AssertCardParsing(testGainCard, $"1 x {DebugElementOneIconText}{DebugElementOne.Name} ({stacksToGive}) damage.", fromHandContext);
+            EditModeTestCommon.AssertCardParsing(testGainCard, $"1 x {DebugElementOneIconText}{DebugElementOne.Name} ({stacksToGive}) damage to {combatContext.Enemies[0].Name}.", fromHandContext);
         }
     }
 }

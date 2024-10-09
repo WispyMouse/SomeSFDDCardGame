@@ -3,6 +3,7 @@ namespace SFDDCards.ImportModels
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using System.Threading;
     using static SFDDCards.ImportModels.IImportable;
 
     [System.Serializable]
@@ -22,6 +23,10 @@ namespace SFDDCards.ImportModels
         public virtual async Task ProcessAdditionalFilesAsync()
         {
             await Task.CompletedTask;
+        }
+
+        public virtual void ProcessAdditionalFiles()
+        {
         }
     }
 }

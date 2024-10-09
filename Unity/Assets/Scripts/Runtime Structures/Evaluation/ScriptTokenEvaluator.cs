@@ -144,9 +144,9 @@ namespace SFDDCards
                     }
                 }
 
-                string deltaText;
+                string deltaText = "";
                 
-                if (context.HasValue)
+                if (context.HasValue && context.Value.CampaignContext != null && context.Value.CombatantEffectOwner != null && context.Value.CombatantTarget != null)
                 {
                     TokenEvaluatorBuilder realizedBuilder = RealizeConceptualBuilder(builder, context.Value.CampaignContext, context.Value.CombatantEffectOwner, context.Value.CombatantEffectOwner, context.Value.CombatantTarget);
                     deltaText = EffectDescriberDatabase.DescribeRealizedEffect(realizedBuilder);

@@ -1,0 +1,11 @@
+{
+    "Name": "Burn",
+	"Id": "mb1_statuseffect_burn",
+	"Effects":
+	[
+		{
+			"Window": "OWNERATTACKS",
+			"Script": "[SETTARGadET: SELF][DAMAGE: COUNTSTACKS_mb1_sawaeftatuseffect_burn][REMOVESTACKS: 1]"
+		}
+	]
+}

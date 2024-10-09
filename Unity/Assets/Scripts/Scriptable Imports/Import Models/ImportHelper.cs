@@ -41,39 +41,25 @@ namespace SFDDCards
             List<T> importedFiles = new List<T>();
             foreach (string fileName in importScriptNames)
             {
-                T currentImport = await ImportImportableFileAsync<T>(fileName);
+                T currentImport = await ImportImportableFileAsync<T>(fileName).ConfigureAwait(false);
                 importedFiles.Add(currentImport);
             }
             return importedFiles;
-        }
-
-        public static List<T> ImportImportableFiles<T>(string rootFolder, string fileExtension) where T : IImportable
-        {
-            Task<List<T>> waitOnTask = Task<List<T>>.Run(() => ImportImportableFilesAsync<T>(rootFolder, fileExtension));
-            waitOnTask.Wait();
-            return waitOnTask.Result;
         }
 
         public static async Task<T> ImportImportableFileAsync<T>(string filePath) where T : IImportable
         {
             try
             {
-                T result = await GetFileAsync<T>(filePath);
+                T result = await GetFileAsync<T>(filePath).ConfigureAwait(false);
                 result.FilePath = filePath;
-                await result.ProcessAdditionalFilesAsync();
+                await result.ProcessAdditionalFilesAsync().ConfigureAwait(false);
                 return result;
             }
             catch
             {
                 throw;
             }
-        }
-
-        public static T ImportImportableFile<T>(string filePath) where T : IImportable
-        {
-            Task<T> waitOnTask = Task<T>.Run(() => ImportImportableFileAsync<T>(filePath));
-            waitOnTask.Wait();
-            return waitOnTask.Result;
         }
 
         public static async Task<T> GetFileAsync<T>(string filePath)
@@ -84,7 +70,7 @@ namespace SFDDCards
             }
 
             using StreamReader reader = new StreamReader(filePath);
-            string fileText = await reader.ReadToEndAsync();
+            string fileText = await reader.ReadToEndAsync().ConfigureAwait(false);
 
             try
             {
@@ -105,7 +91,7 @@ namespace SFDDCards
             }
 
             using StreamReader reader = new StreamReader(filePath);
-            string fileText = await reader.ReadToEndAsync();
+            string fileText = await reader.ReadToEndAsync().ConfigureAwait(false);
 
             try
             {
@@ -118,20 +104,6 @@ namespace SFDDCards
             }
         }
 
-        public static T GetFile<T>(string filePath)
-        {
-            Task<T> waitOnTask = Task<T>.Run(() => GetFileAsync<T>(filePath));
-            waitOnTask.Wait();
-            return waitOnTask.Result;
-        }
-
-        public static object GetFile(string filePath, Type toType)
-        {
-            Task<object> waitOnTask = Task<object>.Run(() => GetFileAsync(filePath, toType));
-            waitOnTask.Wait();
-            return waitOnTask.Result;
-        }
-
         public static async Task<byte[]> ReadAllBytesAsync(string filePath)
         {
             if (!File.Exists(filePath))
@@ -140,7 +112,7 @@ namespace SFDDCards
             }
 
             using StreamReader reader = new StreamReader(filePath);
-            string fileText = await reader.ReadToEndAsync();
+            string fileText = await reader.ReadToEndAsync().ConfigureAwait(false);
 
             return File.ReadAllBytes(filePath);
         }
@@ -148,9 +120,78 @@ namespace SFDDCards
         public static async Task<Sprite> GetSpriteAsync(string filePath, int dimensionWidth, int dimensionHeight)
         {
             byte[] imageBytes = await ImportHelper.ReadAllBytesAsync(filePath);
+
+            Sprite createdSprite = null;
             Texture2D texture = new Texture2D(144, 80);
             texture.LoadImage(imageBytes);
-            return Sprite.Create(texture, new Rect(0, 0, dimensionWidth, dimensionHeight), Vector2.zero);
+            createdSprite = Sprite.Create(texture, new Rect(0, 0, dimensionWidth, dimensionHeight), Vector2.zero);
+
+            return createdSprite;
         }
+
+        #region Synchronous Versions
+
+
+        public static T GetFile<T>(string filePath)
+        {
+            if (!File.Exists(filePath))
+            {
+                throw new FileNotFoundException(filePath);
+            }
+
+            using StreamReader reader = new StreamReader(filePath);
+            string fileText = reader.ReadToEnd();
+
+            try
+            {
+                T result = Newtonsoft.Json.JsonConvert.DeserializeObject<T>(fileText);
+                return result;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public static T ImportImportableFile<T>(string filePath) where T : IImportable
+        {
+            try
+            {
+                T result = GetFile<T>(filePath);
+                result.FilePath = filePath;
+                result.ProcessAdditionalFiles();
+                return result;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public static Sprite GetSprite(string filePath, int dimensionWidth, int dimensionHeight)
+        {
+            byte[] imageBytes = ImportHelper.ReadAllBytes(filePath);
+
+            Sprite createdSprite = null;
+            Texture2D texture = new Texture2D(144, 80);
+            texture.LoadImage(imageBytes);
+            createdSprite = Sprite.Create(texture, new Rect(0, 0, dimensionWidth, dimensionHeight), Vector2.zero);
+
+            return createdSprite;
+        }
+
+        public static byte[] ReadAllBytes(string filePath)
+        {
+            if (!File.Exists(filePath))
+            {
+                throw new FileNotFoundException(filePath);
+            }
+
+            using StreamReader reader = new StreamReader(filePath);
+            string fileText = reader.ReadToEnd();
+
+            return File.ReadAllBytes(filePath);
+        }
+        #endregion
     }
 }

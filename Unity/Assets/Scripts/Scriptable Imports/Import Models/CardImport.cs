@@ -3,6 +3,7 @@ namespace SFDDCards.ImportModels
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Threading;
     using System.Threading.Tasks;
     using UnityEngine;
 
@@ -36,7 +37,17 @@ namespace SFDDCards.ImportModels
 
             if (File.Exists(spriteFile))
             {
-                this.CardArt = await ImportHelper.GetSpriteAsync(spriteFile, 144, 80);
+                this.CardArt = await ImportHelper.GetSpriteAsync(spriteFile, 144, 80).ConfigureAwait(false);
+            }
+        }
+
+        public override void ProcessAdditionalFiles()
+        {
+            string spriteFile = this.FilePath.ToLower().Replace("cardimport", "png");
+
+            if (File.Exists(spriteFile))
+            {
+                this.CardArt = ImportHelper.GetSprite(spriteFile, 144, 80);
             }
         }
     }

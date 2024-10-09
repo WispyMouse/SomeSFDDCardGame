@@ -13,7 +13,7 @@ namespace SFDDCards.Tests.EditMode
     using static SFDDCards.Tests.EditMode.EditModeTestCommon;
     using UnityEngine.TestTools;
 
-    public class Test_Set_MF1_Parsing
+    public class Test_Set_MB1_Parsing
     {
         public static string RootPath => $"{Application.streamingAssetsPath}/sets/mb1/";
         public ReactionWindowContext? PlayedFromHandContext;
@@ -133,7 +133,7 @@ namespace SFDDCards.Tests.EditMode
             switch (testData.ParseKind)
             {
                 case ParseKind.Card:
-                    EditModeTestCommon.AssertCardParsing(CardDatabase.GetModel(testData.Id), testData.ExpectedParsedValue, null);
+                    EditModeTestCommon.AssertCardParsing(CardDatabase.GetModel(testData.Id), testData.ExpectedParsedValue, ReactionWindowContext.LookingNotPlayingContext);
                     break;
                 case ParseKind.StatusEffect:
                     EditModeTestCommon.AssertStatusEffectParsing(StatusEffectDatabase.GetModel(testData.Id), testData.ExpectedParsedValue);

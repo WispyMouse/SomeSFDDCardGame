@@ -47,5 +47,16 @@ namespace SFDDCards
 
             this.ResultingDelta = null;
         }
+
+        public static readonly ReactionWindowContext LookingNotPlayingContext =
+            new ReactionWindowContext()
+            {
+                CampaignContext = null,
+                CombatantEffectOwner = null,
+                CombatantTarget = null,
+                PlayedFromZone = "hand",
+                ResultingDelta = null,
+                TimingWindowId = KnownReactionWindows.LookingNotPlaying
+            };
     }
 }
