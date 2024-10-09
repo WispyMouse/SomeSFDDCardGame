@@ -41,6 +41,16 @@ namespace SFDDCards
             {
                 string nextDescriptor = string.Empty;
 
+                if (deltaEntry.ElementResourceChanges.Count > 0)
+                {
+                    string elementDescription = DescribeElementChange(deltaEntry, ignoreElement);
+                    if (!string.IsNullOrEmpty(elementDescription))
+                    {
+                        nextDescriptor += leadingSpace + elementDescription;
+                        leadingSpace = " ";
+                    }
+                }
+
                 if (deltaEntry.MadeFromBuilder.RealizedOperationScriptingToken != null && !deltaEntry.MadeFromBuilder.RealizedOperationScriptingToken.SkipDescribingMe)
                 {
                     string realizedOperation = deltaEntry.MadeFromBuilder.RealizedOperationScriptingToken.DescribeOperationAsEffect(deltaEntry, reactionWindow);
@@ -224,7 +234,7 @@ namespace SFDDCards
                 ComposeValueTargetLocation.BetweenMiddleAndSuffix,
                 (CombatantTargetEvaluatableValue curValue) =>
                 {
-                    return !(curValue is FoeTargetEvaluatableValue);
+                    return curValue is FoeTargetEvaluatableValue;
                 });
         }
 
@@ -243,7 +253,7 @@ namespace SFDDCards
                 ComposeValueTargetLocation.BetweenMiddleAndSuffix,
                 (ICombatantTarget curValue) =>
                 {
-                    return !(builder.Target == builder.OriginalTarget && builder.Target == builder?.PreviousTokenBuilder?.Target
+                    return (builder.Target == builder.OriginalTarget && builder.Target == builder?.PreviousTokenBuilder?.Target
                     && builder.Target.IsFoeOf(builder.User)
                     && builder.Target.GetRepresentingNumberOfTargets() == 1);
                 });
@@ -288,7 +298,8 @@ namespace SFDDCards
                 ComposeValueTargetLocation.BetweenMiddleAndSuffix,
                 (CombatantTargetEvaluatableValue curValue) => 
                 {
-                    return !(curValue is SelfTargetEvaluatableValue);
+                    return curValue is SelfTargetEvaluatableValue
+                        && (deltaEntry.PreviousConceptualTarget == null || deltaEntry.PreviousConceptualTarget == deltaEntry.ConceptualTarget);
                 }
                 );
         }
@@ -308,7 +319,7 @@ namespace SFDDCards
                 ComposeValueTargetLocation.BetweenMiddleAndSuffix,
                 (ICombatantTarget curValue) =>
                 {
-                    return !(builder.Target == builder.User);
+                    return (builder.Target == builder.User);
                 });
         }
 
@@ -459,8 +470,11 @@ namespace SFDDCards
                 String.Empty,
                 ComposeValueTargetLocation.BetweenMiddleAndSuffix,
                 ComposeValueTargetLocation.BetweenPrefixAndMiddle,
-                null
-                ) ;
+                (CombatantTargetEvaluatableValue curValue) =>
+                {
+                    return deltaEntry.PreviousConceptualTarget != null && deltaEntry.ConceptualTarget != null && deltaEntry.OriginalConceptualTarget != null 
+                    && deltaEntry.PreviousConceptualTarget.Equals(deltaEntry.ConceptualTarget) && deltaEntry.ConceptualTarget.Equals(deltaEntry.OriginalConceptualTarget);
+                });
         }
 
         public static string DescribeRealizedApplyStatusEffect(TokenEvaluatorBuilder builder)
@@ -499,7 +513,7 @@ namespace SFDDCards
                 ComposeValueTargetLocation.BetweenPrefixAndMiddle,
                 (ICombatantTarget curValue) =>
                 {
-                    return !(builder.Target == builder.OriginalTarget && builder.Target == builder?.PreviousTokenBuilder?.Target
+                    return (builder.Target == builder.OriginalTarget && builder.Target == builder?.PreviousTokenBuilder?.Target
                     && builder.Target.IsFoeOf(builder.User)
                     && builder.Target.GetRepresentingNumberOfTargets() == 1);
                 });
@@ -587,7 +601,7 @@ namespace SFDDCards
                 ComposeValueTargetLocation.BetweenPrefixAndMiddle,
                 (ICombatantTarget curValue) =>
                 {
-                    return !(builder.Target == builder.OriginalTarget && builder.Target == builder?.PreviousTokenBuilder?.Target
+                    return (builder.Target == builder.OriginalTarget && builder.Target == builder?.PreviousTokenBuilder?.Target
                     && builder.Target.IsFoeOf(builder.User)
                     && builder.Target.GetRepresentingNumberOfTargets() == 1);
                 });
@@ -683,7 +697,7 @@ namespace SFDDCards
                 ComposeValueTargetLocation.BetweenPrefixAndMiddle,
                 (ICombatantTarget curValue) =>
                 {
-                    return !(builder.Target == builder.OriginalTarget && builder.Target == builder?.PreviousTokenBuilder?.Target
+                    return (builder.Target == builder.OriginalTarget && builder.Target == builder?.PreviousTokenBuilder?.Target
                     && builder.Target.IsFoeOf(builder.User)
                     && builder.Target.GetRepresentingNumberOfTargets() == 1);
                 });
@@ -836,11 +850,11 @@ namespace SFDDCards
             StringBuilder descriptor = new StringBuilder();
             string leadingSpace = "";
 
-            bool shouldPutTarget = !(previoustarget != null && previoustarget.Equals(target));
+            bool shouldPutTarget = true;
 
-            if (omitTargetDelegate != null && previoustarget == null && shouldPutTarget)
+            if (omitTargetDelegate != null)
             {
-                shouldPutTarget &= omitTargetDelegate(target);
+                shouldPutTarget &= !omitTargetDelegate(target);
             }
 
             if (!string.IsNullOrEmpty(valueText) && whereToPutValue == ComposeValueTargetLocation.BeforePrefix)

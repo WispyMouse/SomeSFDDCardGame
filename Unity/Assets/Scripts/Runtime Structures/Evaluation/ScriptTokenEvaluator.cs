@@ -141,7 +141,7 @@ namespace SFDDCards
             return delta;
         }
 
-        public static string DescribeCardText(Card importingCard, ReactionWindowContext? context = null)
+        public static string DescribeCardText(Card importingCard, ReactionWindowContext? context = null, bool ignoreFirstElementGainInText = true)
         {
             List<ConceptualTokenEvaluatorBuilder> builders = CalculateConceptualBuildersFromTokenEvaluation(importingCard, context);
             StringBuilder effectText = new StringBuilder();
@@ -150,67 +150,39 @@ namespace SFDDCards
 
             foreach (ConceptualTokenEvaluatorBuilder builder in builders)
             {
-                // If this builder is just a constant resource gain in one or more categories, skip it for generating card text
-                if (builder.ElementResourceChanges.Count != 0 && previousBuilder == null)
+                string deltaText = "";
+                string requirementsText = "";
+                string leadingSpace = "";
+
+                ConceptualDelta conceptualDelta = builder.GetConceptualDelta();
+
+                if (!builder.HasSameRequirements(previousRequirementsBuilder))
                 {
-                    bool nonConstantFound = false;
+                    requirementsText = EffectDescriberDatabase.DescribeRequirement(builder);
+                    effectText.Append($"{leadingSpace}\r\n{requirementsText.Trim()}");
 
-                    foreach (ElementResourceChange change in builder.ElementResourceChanges)
-                    {
-                        if (change.GainOrLoss is ConstantEvaluatableValue<int> constantEvaluatable)
-                        {
-                            continue;
-                        }
-
-                        nonConstantFound = true;
-                        break;
-                    }
-
-                    if (!nonConstantFound)
-                    {
-                        continue;
-                    }
+                    previousRequirementsBuilder = builder;
                 }
 
-                string deltaText = "";
-                
                 if (context.HasValue && context.Value.CampaignContext != null && context.Value.CombatantEffectOwner != null && context.Value.CombatantTarget != null)
                 {
                     TokenEvaluatorBuilder realizedBuilder = RealizeConceptualBuilder(builder, context.Value.CampaignContext, context.Value.CombatantEffectOwner, context.Value.CombatantEffectOwner, context.Value.CombatantTarget);
-                    deltaText = EffectDescriberDatabase.DescribeRealizedEffect(realizedBuilder);
+                    deltaText += $"{leadingSpace}{EffectDescriberDatabase.DescribeRealizedEffect(realizedBuilder)}";
+                    leadingSpace = deltaText.Length > 0 ? " " : "";
                 }
                 else
                 {
-                    ConceptualDelta conceptualDelta = builder.GetConceptualDelta();
 
                     if (conceptualDelta.DeltaEntries.Count > 0)
                     {
-                        deltaText = EffectDescriberDatabase.DescribeConceptualEffect(conceptualDelta, ignoreElementIfCard: false);
+                        deltaText += $"{leadingSpace}{EffectDescriberDatabase.DescribeConceptualEffect(conceptualDelta, ignoreElementIfCard: ignoreFirstElementGainInText)}";
+                        leadingSpace = deltaText.Length > 0 ? " " : "";
                     }
                 }
 
                 if (!string.IsNullOrEmpty(deltaText))
                 {
-                    string leadingSpace = "";
-                    string requirementsText = "";
-
-                    if (!builder.HasSameRequirements(previousRequirementsBuilder))
-                    {
-                        requirementsText = EffectDescriberDatabase.DescribeRequirement(builder);
-
-                        if (effectText.Length > 0)
-                        {
-                            effectText.AppendLine();
-                        }
-
-                        previousRequirementsBuilder = builder;
-                    }
-                    else if (effectText.Length > 0)
-                    {
-                        leadingSpace = " ";
-                    }
-
-                    effectText.Append($"{leadingSpace}{requirementsText}{deltaText.Trim()}");
+                    effectText.Append($"{leadingSpace}{deltaText.Trim()}");
                 }
 
                 previousBuilder = builder;

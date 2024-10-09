@@ -109,7 +109,10 @@ namespace SFDDCards.Evaluation.Conceptual
 
         public ConceptualDelta GetConceptualDelta()
         {
-            ConceptualDelta delta = new ConceptualDelta();
+            ConceptualDelta delta = new ConceptualDelta()
+            {
+                Owner = this.Owner
+            };
 
             if (this.ElementResourceChanges != null && this.ElementResourceChanges.Count > 0)
             {

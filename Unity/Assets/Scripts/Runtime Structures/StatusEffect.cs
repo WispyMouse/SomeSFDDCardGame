@@ -61,7 +61,7 @@ namespace SFDDCards
 
                     if (!string.IsNullOrEmpty(windowDescription))
                     {
-                        thisWindowString.Append($"<b>{windowDescription}:</b>");
+                        thisWindowString.Append($"<b>{windowDescription}:</b> ");
                     }
 
                     ConceptualTokenEvaluatorBuilder previousRequirementsBuilder = null;
@@ -73,7 +73,11 @@ namespace SFDDCards
                         {
                             if (!builder.HasSameRequirements(previousRequirementsBuilder))
                             {
-                                thisWindowString.Append(EffectDescriberDatabase.DescribeRequirement(builder));
+                                string requirementText = EffectDescriberDatabase.DescribeRequirement(builder);
+                                if (!string.IsNullOrEmpty(requirementText))
+                                {
+                                    thisWindowString.Append($"{requirementText} ");
+                                }
                                 previousRequirementsBuilder = builder;
                             }
 
