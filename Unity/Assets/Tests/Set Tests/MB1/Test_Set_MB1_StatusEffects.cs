@@ -19,7 +19,7 @@ namespace SFDDCards.Tests.EditMode
         public void TestBurn_EnemyAction_Single()
         {
             StatusEffectDatabase.AddStatusEffectToDatabase(ImportHelper.ImportImportableFile<StatusEffectImport>(Application.streamingAssetsPath + "/sets/mb1/statuseffect/mb1_statuseffect_burn.statusImport"));
-            StatusEffect burnStatus = StatusEffectDatabase.GetModel("burn");
+            StatusEffect burnStatus = StatusEffectDatabase.GetModel("mb1_statuseffect_burn");
 
             EncounterModel testEncounter = EditModeTestCommon.GetEncounterWithPunchingBags(1, 100);
             CampaignContext campaignContext = EditModeTestCommon.GetBlankCampaignContext();
@@ -50,7 +50,7 @@ namespace SFDDCards.Tests.EditMode
         public void TestBurn_EnemyAction_MultipleHits()
         {
             StatusEffectDatabase.AddStatusEffectToDatabase(ImportHelper.ImportImportableFile<StatusEffectImport>(Application.streamingAssetsPath + "/sets/mb1/statuseffect/mb1_statuseffect_burn.statusImport"));
-            StatusEffect burnStatus = StatusEffectDatabase.GetModel("burn");
+            StatusEffect burnStatus = StatusEffectDatabase.GetModel("mb1_statuseffect_burn");
 
             EncounterModel testEncounter = EditModeTestCommon.GetEncounterWithPunchingBags(1, 100);
             CampaignContext campaignContext = EditModeTestCommon.GetBlankCampaignContext();
@@ -74,14 +74,14 @@ namespace SFDDCards.Tests.EditMode
             Assert.AreEqual(1, combatContext.Enemies[0].AppliedStatusEffects.Count, "Enemy should have one status on them.");
             Assert.AreEqual(numberOfBurnStacksToGiveEnemy - 1, combatContext.Enemies[0].AppliedStatusEffects[0].Stacks, "Enemy should have one fewer stack of burn after ending the turn."); 
             Assert.AreEqual(combatContext.Enemies[0].MaxHealth - numberOfBurnStacksToGiveEnemy * 3, combatContext.Enemies[0].CurrentHealth, "After three attack with 10 burn stacks, the enemy should have taken 30 damage.");
-            Assert.AreEqual(combatContext.CombatPlayer.MaxHealth - 1, combatContext.CombatPlayer.CurrentHealth, $"The enemy attack should have dealt one damage to the player.");
+            Assert.AreEqual(combatContext.CombatPlayer.MaxHealth - 3, combatContext.CombatPlayer.CurrentHealth, $"The enemy attack should have dealt three damage to the player.");
         }
 
         [Test]
         public void TestBurn_EnemyAction_NoDamage()
         {
             StatusEffectDatabase.AddStatusEffectToDatabase(ImportHelper.ImportImportableFile<StatusEffectImport>(Application.streamingAssetsPath + "/sets/mb1/statuseffect/mb1_statuseffect_burn.statusImport"));
-            StatusEffect burnStatus = StatusEffectDatabase.GetModel("burn");
+            StatusEffect burnStatus = StatusEffectDatabase.GetModel("mb1_statuseffect_burn");
 
             EncounterModel testEncounter = EditModeTestCommon.GetEncounterWithPunchingBags(1, 100);
             CampaignContext campaignContext = EditModeTestCommon.GetBlankCampaignContext();
@@ -121,7 +121,7 @@ namespace SFDDCards.Tests.EditMode
             Card derivedCard = CardDatabase.GetModel(damageImport.Id);
 
             StatusEffectDatabase.AddStatusEffectToDatabase(ImportHelper.ImportImportableFile<StatusEffectImport>(Application.streamingAssetsPath + "/sets/mb1/statuseffect/mb1_statuseffect_burn.statusImport"));
-            StatusEffect burnStatus = StatusEffectDatabase.GetModel("burn");
+            StatusEffect burnStatus = StatusEffectDatabase.GetModel("mb1_statuseffect_burn");
 
             EncounterModel testEncounter = EditModeTestCommon.GetEncounterWithPunchingBags(1, 100);
             CampaignContext campaignContext = EditModeTestCommon.GetBlankCampaignContext();
@@ -137,7 +137,7 @@ namespace SFDDCards.Tests.EditMode
             combatContext.PlayCard(derivedCard, combatContext.Enemies[0]);
             GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
 
-            Assert.AreEqual(combatContext.CombatPlayer.MaxHealth - numberOfBurnStacksToGivePlayer, combatContext.Enemies[0].CurrentHealth, "After one attack with 10 burn stacks, the player should have taken 10 damage.");
+            Assert.AreEqual(combatContext.CombatPlayer.MaxHealth - numberOfBurnStacksToGivePlayer, combatContext.CombatPlayer.CurrentHealth, "After one attack with 10 burn stacks, the player should have taken 10 damage.");
         }
     }
 }

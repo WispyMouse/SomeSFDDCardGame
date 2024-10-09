@@ -4,8 +4,12 @@
 	"Effects":
 	[
 		{
-			"Window": "OWNERATTACKS",
-			"Script": "[SETTARGadET: SELF][DAMAGE: COUNTSTACKS_mb1_sawaeftatuseffect_burn][REMOVESTACKS: 1]"
+			"Window": "DAMAGEDEALT",
+			"Script": "[IFTARGET: NOT SELF][SETTARGET: SELF][DAMAGE: COUNTSTACKS_mb1_statuseffect_burn]"
+		},
+		{
+			"Window": "OWNERENDSTURN",
+			"Script": "[REMOVESTACKS: 1]"
 		}
 	]
 }

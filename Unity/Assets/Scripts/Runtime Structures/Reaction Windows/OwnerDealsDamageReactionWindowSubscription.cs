@@ -17,7 +17,8 @@ namespace SFDDCards
 
         public override bool ShouldApply(ReactionWindowContext context)
         {
-            if (this.Owner == context.CombatantEffectOwner && this.Owner != null && this.Owner.CurrentHealth > 0)
+            if (this.Owner == context.CombatantEffectOwner && this.Owner != null && this.Owner.CurrentHealth > 0
+                && context.ResultingDelta != null && context.ResultingDelta.ConceptualIntensity.TryEvaluateValue(context.CampaignContext, context.ResultingDelta.MadeFromBuilder, out int value) && value > 0)
             {
                 return true;
             }

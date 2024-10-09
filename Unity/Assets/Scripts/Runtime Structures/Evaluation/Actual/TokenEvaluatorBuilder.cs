@@ -75,7 +75,7 @@ namespace SFDDCards.Evaluation.Actual
             }
             else
             {
-                this.Target = this.User;
+                this.Target = originalTarget;
             }
 
             if (this.BasedOnConcept?.RelevantCards != null)

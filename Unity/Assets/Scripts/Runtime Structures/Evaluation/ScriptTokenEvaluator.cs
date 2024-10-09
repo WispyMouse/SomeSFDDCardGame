@@ -57,6 +57,17 @@ namespace SFDDCards
             for (int scriptIndex = 0; scriptIndex < evaluatedAttack.AttackTokens.Count; scriptIndex++)
             {
                 IScriptingToken token = evaluatedAttack.AttackTokens[scriptIndex];
+
+                // If this token is not a requirement, and the previous one was,
+                // launch now to make sure that we're evaluating the requirements
+                // in the intended context
+                // i.e. "[IFTARGET: SELF][SETTARGET: FOE]" should work
+                if (scriptIndex > 0 && evaluatedAttack.AttackTokens[scriptIndex-1] is IRequirement && !(token is IRequirement))
+                {
+                    builders.Add(builder);
+                    builder = new ConceptualTokenEvaluatorBuilder(builder);
+                }
+
                 token.ApplyToken(builder);
                 builder.AppliedTokens.Add(token);
 
@@ -83,13 +94,29 @@ namespace SFDDCards
             GamestateDelta resultingDelta = new GamestateDelta();
             TokenEvaluatorBuilder previousBuilder = null;
 
+            bool triggerRequirementsCheck = false;
+
             foreach (ConceptualTokenEvaluatorBuilder conceptBuilder in concepts)
             {
+                if (previousBuilder != null && previousBuilder.BasedOnConcept != null && conceptBuilder.HasSameRequirements(previousBuilder.BasedOnConcept))
+                {
+                    // no - op; 
+                }
+                else
+                {
+                    triggerRequirementsCheck = true;
+                }
+
                 TokenEvaluatorBuilder realizedBuilder = RealizeConceptualBuilder(conceptBuilder, campaignContext, owner, user, originalTarget, previousBuilder);
-                if (realizedBuilder.MeetsElementRequirements(campaignContext.CurrentCombatContext) && realizedBuilder.MeetsRequirements(campaignContext.CurrentCombatContext))
+                if (
+                    !triggerRequirementsCheck ||
+                    (realizedBuilder.MeetsElementRequirements(campaignContext.CurrentCombatContext) && realizedBuilder.MeetsRequirements(campaignContext.CurrentCombatContext))
+                    )
                 {
                     resultingDelta.AppendDelta(realizedBuilder.GetEffectiveDelta(campaignContext));
+                    triggerRequirementsCheck = false;
                 }
+
                 previousBuilder = realizedBuilder;
             }
 

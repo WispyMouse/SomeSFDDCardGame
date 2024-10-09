@@ -218,7 +218,9 @@ namespace SFDDCards
 
         public void StatusEffectHappeningProc(StatusEffectHappening happening)
         {
-            GamestateDelta delta = ScriptTokenEvaluator.CalculateRealizedDeltaEvaluation(happening, this, happening.OwnedStatusEffect?.BasedOnStatusEffect, happening.OwnedStatusEffect?.Owner, this.CampaignPlayer, happening.Context);
+            ICombatantTarget originalTarget = happening.Context.CombatantTarget;
+
+            GamestateDelta delta = ScriptTokenEvaluator.CalculateRealizedDeltaEvaluation(happening, this, happening.OwnedStatusEffect?.BasedOnStatusEffect, happening.OwnedStatusEffect?.Owner, originalTarget, happening.Context);
             GlobalUpdateUX.LogTextEvent.Invoke(EffectDescriberDatabase.DescribeResolvedEffect(delta), GlobalUpdateUX.LogType.GameEvent);
             delta.ApplyDelta(this);
 
