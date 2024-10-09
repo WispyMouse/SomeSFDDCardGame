@@ -33,22 +33,22 @@ namespace SFDDCards.Tests.EditMode
         {
             new ParseFromFileTestData("mb1_card_starter_strike", "3 + Force damage.\r\nIf target's health > 10: Clear Force.", ParseKind.Card),
             new ParseFromFileTestData("mb1_card_starter_block", "Gain 3 Block.", ParseKind.Card),
-            new ParseFromFileTestData("mb1_card_starter_resonate", "Exile this card.\r\nIf Cyber + Void + Solar + Bio + Force > 10: Draw a card.", ParseKind.Card),
+            new ParseFromFileTestData("mb1_card_starter_resonate", $"Exile this card.\r\nIf Cyber + Void + Solar + Bio + Force {RequiresComparisonScriptingToken.GreaterThanOrEqualToAscii} 10: Draw a card.", ParseKind.Card),
 
             new ParseFromFileTestData("mb1_card_common_burnarecord", "Create 1 x Cyber Loot in hand. Exile this card.", ParseKind.Card),
             new ParseFromFileTestData("mb1_card_common_fueldbypassion", "Exile the top card of the deck. Draw 2 cards.", ParseKind.Card),
-            new ParseFromFileTestData("mb1_card_common_glitch", "2 damage to all foes.\r\nIf Cyber < 3: Exile this card.\r\nIf Cyber >= 3: Lose 3 Cyber. Return this card to hand.", ParseKind.Card),
+            new ParseFromFileTestData("mb1_card_common_glitch", $"2 damage to all foes.\r\nIf Cyber < 3: Exile this card.\r\nIf Cyber {RequiresComparisonScriptingToken.GreaterThanOrEqualToAscii} 3: Lose 3 Cyber. Return this card to hand.", ParseKind.Card),
             new ParseFromFileTestData("mb1_card_common_invigorate", "Gain 1 Bio Heal.", ParseKind.Card),
             new ParseFromFileTestData("mb1_card_common_laserblast", "2 damage. Apply 4 Targeted.", ParseKind.Card),
             new ParseFromFileTestData("mb1_card_common_radiantstrike", "Solar + Cyber damage.", ParseKind.Card),
             new ParseFromFileTestData("mb1_card_common_sneeze", "1 x Force damage to all foes. Apply 1 x Bio Poison.", ParseKind.Card),
             new ParseFromFileTestData("mb1_card_common_tuckandroll", "Gain 5 Block. Put a card from the top 3 cards of the deck in hand. Shuffle.", ParseKind.Card),
-            new ParseFromFileTestData("mb1_card_common_voiddrink", "2 damage to self.\r\nIf Void >= 2: Clear Void. Draw 2 cards. Exile this card.", ParseKind.Card),
+            new ParseFromFileTestData("mb1_card_common_voiddrink", $"2 damage to self.\r\nIf Void {RequiresComparisonScriptingToken.GreaterThanOrEqualToAscii} 2: Clear Void. Draw 2 cards. Exile this card.", ParseKind.Card),
 
-            new ParseFromFileTestData("mb1_card_uncommon_devotiontoacause", "If Solar >= 5: Draw 3 cards. Exile a card from hand.", ParseKind.Card),
+            new ParseFromFileTestData("mb1_card_uncommon_devotiontoacause", $"If Solar {RequiresComparisonScriptingToken.GreaterThanOrEqualToAscii} 5: Draw 3 cards. Exile a card from hand.", ParseKind.Card),
             new ParseFromFileTestData("mb1_card_uncommon_tomorrowstar", "Gain 2 Tomorrow Star.", ParseKind.Card),
 
-            new ParseFromFileTestData("mb1_card_rare_finaldawn", "If Void + Solar >= 15: 40 damage to all foes. Clear Void. Clear Solar.", ParseKind.Card),
+            new ParseFromFileTestData("mb1_card_rare_finaldawn", $"If Void + Solar {RequiresComparisonScriptingToken.GreaterThanOrEqualToAscii} 15: 40 damage to all foes. Clear Void. Clear Solar.", ParseKind.Card),
             new ParseFromFileTestData("mb1_card_rare_giantlaserfromspace", "Set Laser Calibrating Aim to 2 stacks on foe.", ParseKind.Card),
 
             new ParseFromFileTestData("mb1_card_generated_loot", "Draw a card. Discard a card. Exile this card.", ParseKind.Card),

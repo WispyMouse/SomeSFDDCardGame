@@ -3,6 +3,7 @@ namespace SFDDCards
     using SFDDCards.Evaluation.Actual;
     using SFDDCards.Evaluation.Conceptual;
     using SFDDCards.ImportModels;
+    using SFDDCards.ScriptingTokens;
     using SFDDCards.ScriptingTokens.EvaluatableValues;
     using System;
     using System.Collections;
@@ -1007,7 +1008,7 @@ namespace SFDDCards
                     string thisRequirementText = delta.ElementRequirements[req].DescribeEvaluation();
                     if (!string.IsNullOrEmpty(thisRequirementText))
                     {
-                        resultBuilder.Append($"{startingLine}{leadingComma}{req.GetNameAndMaybeIcon()} >= {thisRequirementText}");
+                        resultBuilder.Append($"{startingLine}{leadingComma}{req.GetNameAndMaybeIcon()} {RequiresComparisonScriptingToken.GreaterThanOrEqualToAscii} {thisRequirementText}");
                         leadingComma = ", ";
                         startingLine = "";
                     }

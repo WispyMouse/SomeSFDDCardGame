@@ -8,6 +8,8 @@ namespace SFDDCards.ScriptingTokens
 {
     public class RequiresComparisonScriptingToken : BaseScriptingToken, IRequirement
     {
+        public const string GreaterThanOrEqualToAscii = "\u2265";
+        public const string LessThanOrEqualToAscii = "\u2264";
         public enum Comparison
         {
             NotAComparison = 0,
@@ -113,7 +115,7 @@ namespace SFDDCards.ScriptingTokens
                 default:
                     return string.Empty;
                 case Comparison.LessThanOrEqual:
-                    return "<=";
+                    return LessThanOrEqualToAscii;
                 case Comparison.LessThan:
                     return "<";
                 case Comparison.EqualTo:
@@ -121,7 +123,7 @@ namespace SFDDCards.ScriptingTokens
                 case Comparison.GreaterThan:
                     return ">";
                 case Comparison.GreaterThanOrEqual:
-                    return ">=";
+                    return GreaterThanOrEqualToAscii;
             }
         }
 

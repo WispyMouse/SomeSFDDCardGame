@@ -59,8 +59,8 @@ namespace SFDDCards.Tests.EditMode
 
             new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][DAMAGE: COUNTSTACKS_{nameof(DebugStatus)}]", $"1 x {nameof(DebugStatus)} damage."),
 
-            new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][REQUIRESATLEASTELEMENT: 2 DEBUGELEMENTONEID][DAMAGE: 3]", $"If {DebugElementOneIconText}DEBUGELEMENTONENAME >= 2: 3 damage."),
-            new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][REQUIRESATLEASTELEMENT: 2 DEBUGELEMENTONEID][REQUIRESATLEASTELEMENT: 5 DEBUGELEMENTTWOID][DAMAGE: 5][SETTARGET: SELF][HEAL: 7]", $"If {DebugElementOneIconText}DEBUGELEMENTONENAME >= 2, {DebugElementTwoIconText}DEBUGELEMENTTWONAME >= 5: 5 damage. Heal self for 7."),
+            new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][REQUIRESATLEASTELEMENT: 2 DEBUGELEMENTONEID][DAMAGE: 3]", $"If {DebugElementOneIconText}DEBUGELEMENTONENAME {RequiresComparisonScriptingToken.GreaterThanOrEqualToAscii} 2: 3 damage."),
+            new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][REQUIRESATLEASTELEMENT: 2 DEBUGELEMENTONEID][REQUIRESATLEASTELEMENT: 5 DEBUGELEMENTTWOID][DAMAGE: 5][SETTARGET: SELF][HEAL: 7]", $"If {DebugElementOneIconText}DEBUGELEMENTONENAME {RequiresComparisonScriptingToken.GreaterThanOrEqualToAscii} 2, {DebugElementTwoIconText}DEBUGELEMENTTWONAME {RequiresComparisonScriptingToken.GreaterThanOrEqualToAscii} 5: 5 damage. Heal self for 7."),
 
             new AssertEffectScriptResultsValueSourceValue($"[DRAW: 1][CARDTARGET: HAND][CHOOSECARDS: 1][MOVECARDTOZONE: DISCARD]", "Draw a card. Discard a card."),
             new AssertEffectScriptResultsValueSourceValue($"[DRAW: 2][CARDTARGET: HAND][CHOOSECARDS: 2][MOVECARDTOZONE: DISCARD]", "Draw 2 cards. Discard 2 cards."),
