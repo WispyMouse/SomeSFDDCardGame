@@ -491,7 +491,7 @@ namespace SFDDCards.UX
             {
                 if (remainingTargets[0] is AllFoesTarget)
                 {
-                    this.AllFoeTargetsIndicator.SetFromTarget(allFoesTarget, SelectTarget);
+                    this.AllFoeTargetsIndicator.SetFromTarget(allFoesTarget, SelectTarget, BeginHoverTarget, EndHoverTarget);
                     this.AllFoeTargetsIndicator.gameObject.SetActive(true);
                 }
                 else
@@ -499,14 +499,14 @@ namespace SFDDCards.UX
                     foreach (ICombatantTarget target in remainingTargets)
                     {
                         TargetableIndicator indicator = Instantiate(this.SingleCombatantTargetableIndicatorPF, target.UXPositionalTransform);
-                        indicator.SetFromTarget(target, this.SelectTarget);
+                        indicator.SetFromTarget(target, this.SelectTarget, BeginHoverTarget, EndHoverTarget);
                         this.ActiveIndicators.Add(indicator);
                     }
                 }
             }
             else
             {
-                this.NoTargetsIndicator.SetFromTarget(new NoTarget(), SelectTarget);
+                this.NoTargetsIndicator.SetFromTarget(new NoTarget(), SelectTarget, BeginHoverTarget, EndHoverTarget);
                 this.NoTargetsIndicator.gameObject.SetActive(true);
             }
         }
