@@ -26,34 +26,34 @@ namespace SFDDCards
             }
         }
 
-        public static async Task ImportImportableFilesIntoDatabaseAsync<T>(string rootFolder, string fileExtension, ImportFileOperation<T> importFunc) where T : IImportable
+        public static async Task ImportImportableFilesIntoDatabaseAsync<T>(string rootFolder, string fileExtension, ImportFileOperation<T> importFunc, SynchronizationContext mainThreadContext) where T : IImportable
         {
-            List<T> importedFiles = await ImportImportableFilesAsync<T>(rootFolder, fileExtension);
+            List<T> importedFiles = await ImportImportableFilesAsync<T>(rootFolder, fileExtension, mainThreadContext);
             foreach (T importedFile in importedFiles)
             {
                 importFunc(importedFile);
             }
         }
 
-        public static async Task<List<T>> ImportImportableFilesAsync<T>(string rootFolder, string fileExtension) where T : IImportable
+        public static async Task<List<T>> ImportImportableFilesAsync<T>(string rootFolder, string fileExtension, SynchronizationContext mainThreadContext) where T : IImportable
         {
             string[] importScriptNames = Directory.GetFiles(rootFolder, $"*.{fileExtension}", SearchOption.AllDirectories);
             List<T> importedFiles = new List<T>();
             foreach (string fileName in importScriptNames)
             {
-                T currentImport = await ImportImportableFileAsync<T>(fileName).ConfigureAwait(false);
+                T currentImport = await ImportImportableFileAsync<T>(fileName, mainThreadContext).ConfigureAwait(false);
                 importedFiles.Add(currentImport);
             }
             return importedFiles;
         }
 
-        public static async Task<T> ImportImportableFileAsync<T>(string filePath) where T : IImportable
+        public static async Task<T> ImportImportableFileAsync<T>(string filePath, SynchronizationContext mainThreadContext) where T : IImportable
         {
             try
             {
                 T result = await GetFileAsync<T>(filePath).ConfigureAwait(false);
                 result.FilePath = filePath;
-                await result.ProcessAdditionalFilesAsync().ConfigureAwait(false);
+                await result.ProcessAdditionalFilesAsync(mainThreadContext).ConfigureAwait(false);
                 return result;
             }
             catch
@@ -117,16 +117,29 @@ namespace SFDDCards
             return File.ReadAllBytes(filePath);
         }
 
-        public static async Task<Sprite> GetSpriteAsync(string filePath, int dimensionWidth, int dimensionHeight)
+        public static async Task<Sprite> GetSpriteAsync(string filePath, int dimensionWidth, int dimensionHeight, SynchronizationContext mainThreadContext)
         {
-            byte[] imageBytes = await ImportHelper.ReadAllBytesAsync(filePath);
+            SynchronizationContext previousContext = SynchronizationContext.Current;
+            try
+            {
+                SynchronizationContext.SetSynchronizationContext(mainThreadContext);
+                byte[] imageBytes = await ImportHelper.ReadAllBytesAsync(filePath);
 
-            Sprite createdSprite = null;
-            Texture2D texture = new Texture2D(144, 80);
-            texture.LoadImage(imageBytes);
-            createdSprite = Sprite.Create(texture, new Rect(0, 0, dimensionWidth, dimensionHeight), Vector2.zero);
+                Sprite createdSprite = null;
+                Texture2D texture = new Texture2D(144, 80);
+                texture.LoadImage(imageBytes);
+                createdSprite = Sprite.Create(texture, new Rect(0, 0, dimensionWidth, dimensionHeight), Vector2.zero);
 
-            return createdSprite;
+                return createdSprite;
+            }
+            catch
+            {
+                throw;
+            }
+            finally
+            {
+                SynchronizationContext.SetSynchronizationContext(previousContext);
+            }
         }
 
         #region Synchronous Versions

@@ -9,7 +9,7 @@ namespace SFDDCards.ImportModels
     {
         public string FilePath { get; set; }
         public string Id { get; }
-        public Task ProcessAdditionalFilesAsync();
+        public Task ProcessAdditionalFilesAsync(SynchronizationContext mainThreadContext);
         public void ProcessAdditionalFiles();
     }
 }

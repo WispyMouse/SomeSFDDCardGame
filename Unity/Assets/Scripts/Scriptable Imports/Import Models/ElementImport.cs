@@ -17,20 +17,20 @@ namespace SFDDCards.ImportModels
         [NonSerialized]
         public Sprite GreyscaleArt;
 
-        public override async Task ProcessAdditionalFilesAsync()
+        public override async Task ProcessAdditionalFilesAsync(SynchronizationContext mainThreadContext)
         {
             string normalArtFile = this.FilePath.ToLower().Replace("elementimport", "png");
 
             if (File.Exists(normalArtFile))
             {
-                this.NormalArt = await ImportHelper.GetSpriteAsync(normalArtFile, 64, 64).ConfigureAwait(false);
+                this.NormalArt = await ImportHelper.GetSpriteAsync(normalArtFile, 64, 64, mainThreadContext).ConfigureAwait(false);
             }
 
             string greyscaleFile = new FileInfo(this.FilePath).Extension.ToLower().Replace("elementimport", "greyscale.png");
 
             if (File.Exists(greyscaleFile))
             {
-                this.GreyscaleArt = await ImportHelper.GetSpriteAsync(greyscaleFile, 64, 64).ConfigureAwait(false);
+                this.GreyscaleArt = await ImportHelper.GetSpriteAsync(greyscaleFile, 64, 64, mainThreadContext).ConfigureAwait(false);
             }
         }
 

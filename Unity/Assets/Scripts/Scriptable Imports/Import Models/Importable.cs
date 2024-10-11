@@ -20,7 +20,7 @@ namespace SFDDCards.ImportModels
         public string Id;
         public string FilePath { get; set; }
 
-        public virtual async Task ProcessAdditionalFilesAsync()
+        public virtual async Task ProcessAdditionalFilesAsync(SynchronizationContext mainThreadContext)
         {
             await Task.CompletedTask;
         }

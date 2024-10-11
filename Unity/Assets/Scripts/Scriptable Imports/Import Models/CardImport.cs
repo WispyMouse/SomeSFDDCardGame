@@ -31,13 +31,13 @@ namespace SFDDCards.ImportModels
             return true;
         }
 
-        public override async Task ProcessAdditionalFilesAsync()
+        public override async Task ProcessAdditionalFilesAsync(SynchronizationContext mainThreadContext)
         {
             string spriteFile = this.FilePath.ToLower().Replace("cardimport", "png");
 
             if (File.Exists(spriteFile))
             {
-                this.CardArt = await ImportHelper.GetSpriteAsync(spriteFile, 144, 80).ConfigureAwait(false);
+                this.CardArt = await ImportHelper.GetSpriteAsync(spriteFile, 144, 80, mainThreadContext).ConfigureAwait(false);
             }
         }
 

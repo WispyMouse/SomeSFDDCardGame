@@ -14,6 +14,7 @@ namespace SFDDCards.UX
         private RenderedCard RenderedCard;
 
         Action<DisplayedCardUX> cardSelectedAction { get; set; } = null;
+        Func<DisplayedCardUX, ReactionWindowContext?> reactionWindowFuncForHover = null;
 
         public virtual bool ShouldShowBase { get; } = true;
 
@@ -24,6 +25,15 @@ namespace SFDDCards.UX
 
         public virtual void MouseEnterStartHover()
         {
+            if (reactionWindowFuncForHover != null)
+            {
+                MouseHoverShowerPanel.CurrentContext = reactionWindowFuncForHover(this);
+            }
+            else
+            {
+                MouseHoverShowerPanel.CurrentContext = null;
+            }
+
             MouseHoverShowerController.MouseStartHoveredEvent.Invoke(this);
         }
 
@@ -45,10 +55,11 @@ namespace SFDDCards.UX
         {
         }
 
-        public void SetFromCard(Card toSet, Action<DisplayedCardUX> inCardSelectedAction)
+        public void SetFromCard(Card toSet, Action<DisplayedCardUX> inCardSelectedAction = null, Func<DisplayedCardUX, ReactionWindowContext?> inGetReactionWindow = null)
         {
             this.RepresentedCard = toSet;
             this.cardSelectedAction = inCardSelectedAction;
+            this.reactionWindowFuncForHover = inGetReactionWindow;
 
             this.RenderedCard.SetFromCard(toSet);
         }

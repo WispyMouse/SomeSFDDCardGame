@@ -24,13 +24,13 @@ namespace SFDDCards.ImportModels
         [NonSerialized]
         public Sprite StatusEffectArt;
 
-        public override async Task ProcessAdditionalFilesAsync()
+        public override async Task ProcessAdditionalFilesAsync(SynchronizationContext mainThreadContext)
         {
             string spriteFile = this.FilePath.ToLower().Replace("statusimport", "png");
 
             if (File.Exists(spriteFile))
             {
-                this.StatusEffectArt = await ImportHelper.GetSpriteAsync(spriteFile, 64, 64).ConfigureAwait(false);
+                this.StatusEffectArt = await ImportHelper.GetSpriteAsync(spriteFile, 64, 64, mainThreadContext).ConfigureAwait(false);
             }
         }
 

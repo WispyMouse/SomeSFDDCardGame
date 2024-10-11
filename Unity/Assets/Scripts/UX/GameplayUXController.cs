@@ -86,6 +86,8 @@ namespace SFDDCards.UX
 
         public CampaignContext CurrentCampaignContext => this.CentralGameStateControllerInstance?.CurrentCampaignContext;
 
+        public ICombatantTarget HoveredCombatant { get; set; } = null;
+
         private void Awake()
         {
             this.Annihilate();
@@ -774,6 +776,19 @@ namespace SFDDCards.UX
             this.CardBrowserUXInstance.gameObject.SetActive(true);
             this.CardBrowserUXInstance.SetLabelText("Now Viewing: Cards in Exile");
             this.CardBrowserUXInstance.SetFromCards(cardsInExile);
+        }
+
+        public void BeginHoverTarget(ICombatantTarget target)
+        {
+            this.HoveredCombatant = target;
+        }
+
+        public void EndHoverTarget(ICombatantTarget target)
+        {
+            if (this.HoveredCombatant == target)
+            {
+                this.HoveredCombatant = null;
+            }
         }
     }
 }

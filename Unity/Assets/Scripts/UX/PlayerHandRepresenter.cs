@@ -129,7 +129,7 @@ namespace SFDDCards.UX
             if (!this.CardsToRepresentations.TryGetValue(forCard, out CombatCardUX representingCard))
             {
                 representingCard = Instantiate(this.CardRepresentationPF, this.PlayerHandTransform);
-                representingCard.SetFromCard(forCard, SelectCurrentCard);
+                representingCard.SetFromCard(forCard, SelectCurrentCard, GetReactionWindowContextForCard);
                 this.CardsToRepresentations.Add(forCard, representingCard);
                 wasNotVisibleOrJustCreated = true;
             }
@@ -145,6 +145,23 @@ namespace SFDDCards.UX
             }
 
             return representingCard;
+        }
+
+        public ReactionWindowContext? GetReactionWindowContextForCard(DisplayedCardUX ux)
+        {
+            if (this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext == null)
+            {
+                return null;
+            }
+
+            return new ReactionWindowContext()
+            {
+                CampaignContext = this.CentralGameStateControllerInstance.CurrentCampaignContext,
+                CombatantEffectOwner = this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignPlayer,
+                CombatantTarget = UXController.HoveredCombatant,
+                PlayedFromZone = "hand",
+                TimingWindowId = KnownReactionWindows.ConsideringPlayingFromHand
+            };
         }
     }
 }
