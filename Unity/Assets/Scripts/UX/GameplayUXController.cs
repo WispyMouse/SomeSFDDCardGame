@@ -319,7 +319,12 @@ namespace SFDDCards.UX
             this.CurrentSelectedCard?.DisableSelectionGlow();
             this.CurrentSelectedCard = null;
 
-            this.CardBrowserUXInstance.Close();
+            this.PlayerHandRepresenter.DeselectSelectedCard();
+
+            if (this.CardBrowserUXInstance.RemainingCardsToChoose > 0)
+            {
+                this.CardBrowserUXInstance.Close();
+            }
 
             ClearAllTargetableIndicators();
         }
@@ -512,6 +517,7 @@ namespace SFDDCards.UX
         {
             this.PlayerHandRepresenter.Annihilate();
             this.EnemyRepresenterUX.Annihilate();
+            this.CardBrowserUXInstance.Close();
 
             for (int ii = this.PlayerRepresentationTransform.childCount - 1; ii >= 0; ii--)
             {

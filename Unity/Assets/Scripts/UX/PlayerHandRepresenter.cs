@@ -19,8 +19,12 @@ namespace SFDDCards.UX
 
         [SerializeReference]
         private Transform PlayerHandTransform;
+        [SerializeReference]
+        private Transform SelectedCardTransform;
 
         private Dictionary<Card, CombatCardUX> CardsToRepresentations = new Dictionary<Card, CombatCardUX>();
+
+        private DisplayedCardUX selectedCard { get; set; } = null;
 
         private void OnEnable()
         {
@@ -94,6 +98,17 @@ namespace SFDDCards.UX
                 Vector3 objectOffset = new Vector3(leftStartingPoint, 0, 0) + new Vector3(modifiedCardFanDistance, 0, 0) * ii + backpush + downpush;
 
                 CombatCardUX newCard = GetUX(this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.PlayerCombatDeck.CardsCurrentlyInHand[ii]);
+
+                if (ReferenceEquals(this.selectedCard, newCard))
+                {
+                    objectOffset += Vector3.up * 1f;
+                    newCard.transform.parent = this.SelectedCardTransform;
+                }
+                else
+                {
+                    newCard.transform.parent = this.PlayerHandTransform;
+                }
+
                 newCard.SetTargetPosition(newCard.transform.parent.position + objectOffset, -thisCardAngle);
 
                 // Does the player meet the requirements of at least one of the effects?
@@ -119,7 +134,18 @@ namespace SFDDCards.UX
 
         public void SelectCurrentCard(DisplayedCardUX selectedCard)
         {
+            this.selectedCard = selectedCard;
             this.UXController.SelectCurrentCard(selectedCard);
+            this.RepresentPlayerHand();
+        }
+
+        public void DeselectSelectedCard()
+        {
+            if (this.selectedCard != null)
+            {
+                this.selectedCard = null;
+                this.RepresentPlayerHand();
+            }
         }
 
         public CombatCardUX GetUX(Card forCard)
