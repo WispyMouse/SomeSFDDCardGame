@@ -33,14 +33,12 @@ namespace SFDDCards.UX
         private PlayerUX PlayerUXInstance { get; set; }
 
         [SerializeReference]
-        private EnemyUX EnemyRepresentationPF;
-        [SerializeReference]
         private Transform PlayerRepresentationTransform;
-        [SerializeReference]
-        private Transform EnemyRepresntationTransform;
 
         [SerializeReference]
         private PlayerHandRepresenter PlayerHandRepresenter;
+        [SerializeReference]
+        private EnemyRepresenterUX EnemyRepresenterUX;
 
         [SerializeReference]
         private GameObject GoNextRoomButton;
@@ -74,8 +72,6 @@ namespace SFDDCards.UX
 
         [SerializeReference]
         private TMPro.TMP_Text Log;
-
-        private Dictionary<Enemy, EnemyUX> spawnedEnemiesLookup { get; set; } = new Dictionary<Enemy, EnemyUX>();
 
         public DisplayedCardUX CurrentSelectedCard { get; private set; } = null;
         public bool PlayerIsCurrentlyAnimating { get; private set; } = false;
@@ -270,25 +266,6 @@ namespace SFDDCards.UX
             this.CurrentSelectedCard = null;
         }
 
-        public void AddEnemy(Enemy toAdd)
-        {
-            Vector3 objectOffset = new Vector3(3f, 0, 0) * this.EnemyRepresntationTransform.childCount;
-            EnemyUX newEnemy = Instantiate(this.EnemyRepresentationPF, this.EnemyRepresntationTransform);
-            newEnemy.transform.localPosition = objectOffset;
-            newEnemy.SetFromEnemy(toAdd, this.CentralGameStateControllerInstance);
-            this.spawnedEnemiesLookup.Add(toAdd, newEnemy);
-        }
-
-        public void RemoveEnemy(Enemy toRemove)
-        {
-            if (this.spawnedEnemiesLookup.TryGetValue(toRemove, out EnemyUX ux))
-            {
-                EnemyUX representation = this.spawnedEnemiesLookup[toRemove];
-                Destroy(representation.gameObject);
-                this.spawnedEnemiesLookup.Remove(toRemove);
-            }
-        }
-
         public void SelectCurrentCard(DisplayedCardUX toSelect)
         {
             if (this.CurrentCampaignContext.CurrentCombatContext == null ||
@@ -369,7 +346,7 @@ namespace SFDDCards.UX
         {
             foreach (Enemy curEnemy in this.CurrentCampaignContext.CurrentCombatContext.Enemies)
             {
-                yield return AnimateAction(this.spawnedEnemiesLookup[curEnemy], curEnemy.Intent, curEnemy.Intent.PrecalculatedTarget);
+                yield return AnimateAction(this.EnemyRepresenterUX.SpawnedEnemiesLookup[curEnemy], curEnemy.Intent, curEnemy.Intent.PrecalculatedTarget);
             }
 
             continuationAction.Invoke();
@@ -399,7 +376,7 @@ namespace SFDDCards.UX
             }
             else if (target is Enemy targetEnemy)
             {
-                targetPuppet = this.spawnedEnemiesLookup[targetEnemy];
+                targetPuppet = this.EnemyRepresenterUX.SpawnedEnemiesLookup[targetEnemy];
             }
 
             if (targetPuppet == null || targetPuppet == puppet)
@@ -477,12 +454,12 @@ namespace SFDDCards.UX
             List<ICombatantTarget> possibleTargets = new List<ICombatantTarget>();
             possibleTargets.Add(this.CentralGameStateControllerInstance?.CurrentCampaignContext?.CampaignPlayer);
 
-            foreach (Enemy curEnemy in this.spawnedEnemiesLookup.Keys)
+            foreach (Enemy curEnemy in this.EnemyRepresenterUX.SpawnedEnemiesLookup.Keys)
             {
                 possibleTargets.Add(curEnemy);
             }
 
-            AllFoesTarget allFoesTarget = new AllFoesTarget(new List<ICombatantTarget>(this.spawnedEnemiesLookup.Keys));
+            AllFoesTarget allFoesTarget = new AllFoesTarget(new List<ICombatantTarget>(this.EnemyRepresenterUX.SpawnedEnemiesLookup.Keys));
             possibleTargets.Add(allFoesTarget);
 
             List<ICombatantTarget> remainingTargets = ScriptTokenEvaluator.GetTargetsThatCanBeTargeted(this.CentralGameStateControllerInstance?.CurrentCampaignContext?.CampaignPlayer, toTarget, possibleTargets);
@@ -520,7 +497,7 @@ namespace SFDDCards.UX
 
             foreach (Enemy curEnemy in this.CentralGameStateControllerInstance?.CurrentCampaignContext?.CurrentCombatContext?.Enemies)
             {
-                if (!this.spawnedEnemiesLookup.TryGetValue(curEnemy, out EnemyUX value))
+                if (!this.EnemyRepresenterUX.SpawnedEnemiesLookup.TryGetValue(curEnemy, out EnemyUX value))
                 {
                     // It could be that the UpdateUX call was made before these enemies are spawned in to the game
                     // In that case, just continue
@@ -534,11 +511,7 @@ namespace SFDDCards.UX
         public void Annihilate()
         {
             this.PlayerHandRepresenter.Annihilate();
-
-            for (int ii = this.EnemyRepresntationTransform.childCount - 1; ii >= 0; ii--)
-            {
-                Destroy(this.EnemyRepresntationTransform.GetChild(ii).gameObject);
-            }
+            this.EnemyRepresenterUX.Annihilate();
 
             for (int ii = this.PlayerRepresentationTransform.childCount - 1; ii >= 0; ii--)
             {
@@ -661,19 +634,19 @@ namespace SFDDCards.UX
         {
             if (this.CentralGameStateControllerInstance?.CurrentCampaignContext?.CurrentCombatContext == null)
             {
-                foreach (Enemy key in new List<Enemy>(this.spawnedEnemiesLookup.Keys))
+                foreach (Enemy key in new List<Enemy>(this.EnemyRepresenterUX.SpawnedEnemiesLookup.Keys))
                 {
-                    this.RemoveEnemy(key);
+                    this.EnemyRepresenterUX.RemoveEnemy(key);
                 }
 
                 return;
             }
 
-            foreach (Enemy curEnemy in new List<Enemy>(this.spawnedEnemiesLookup.Keys))
+            foreach (Enemy curEnemy in new List<Enemy>(this.EnemyRepresenterUX.SpawnedEnemiesLookup.Keys))
             {
                 if (!this.CurrentCampaignContext.CurrentCombatContext.Enemies.Contains(curEnemy))
                 {
-                    this.RemoveEnemy(curEnemy);
+                    this.EnemyRepresenterUX.RemoveEnemy(curEnemy);
                 }
             }
         }

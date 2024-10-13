@@ -17,6 +17,8 @@ namespace SFDDCards.UX
 
         [SerializeReference]
         private GameplayUXController UXController;
+        [SerializeReference]
+        private EnemyRepresenterUX EnemyRepresenterUX;
 
         private CombatContext Context => this.CentralGameStateControllerInstance?.CurrentCampaignContext?.CurrentCombatContext;
         
@@ -109,15 +111,12 @@ namespace SFDDCards.UX
 
         private void SpawnInitialEnemies()
         {
-            foreach (Enemy curEnemy in this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.Enemies)
-            {
-                this.SpawnEnemy(curEnemy);
-            }
+            this.EnemyRepresenterUX.AddEnemies(this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.Enemies);
         }
 
         private void SpawnEnemy(Enemy toSpawn)
         {
-            this.UXController.AddEnemy(toSpawn);
+            this.EnemyRepresenterUX.AddEnemy(toSpawn);
         }
 
         public void EndPlayerTurn()
