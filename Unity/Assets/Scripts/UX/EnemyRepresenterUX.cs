@@ -54,7 +54,6 @@ namespace SFDDCards.UX
                 this.SpawnedEnemiesLookup.Remove(toRemove);
                 this.OrderedEnemyList.Remove(representation);
                 Destroy(representation.gameObject);
-                this.SituateEnemyPositions();
             }
         }
 
