@@ -1,7 +1,7 @@
 {
 	"Id": "mb1_card_common_chloroblast",
 	"Name": "Chloroblast",
-	"EffectScript": "[DAMAGE: 5][REQUIRESATLEASTELEMENT: 5 SOLAR][APPLYSTATUSEFFECTSTACKS: 1 mb1_statuseffect_burn][SETTARGET: SELF][APPLYSTATUSEFFECTSTACKS: 1 mb1_statuseffect_bioheal]",
+	"EffectScript": "[SETTARGET: FOE][DAMAGE: 5][REQUIRESATLEASTELEMENT: 5 SOLAR][APPLYSTATUSEFFECTSTACKS: 1 mb1_statuseffect_burn][SETTARGET: SELF][APPLYSTATUSEFFECTSTACKS: 1 mb1_statuseffect_bioheal]",
 	"Tags":
 	[
 		"mf1",

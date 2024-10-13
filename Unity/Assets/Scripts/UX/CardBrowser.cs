@@ -41,13 +41,13 @@ namespace SFDDCards.UX
         public void SetFromCards(IEnumerable<Card> cardsToShow)
         {
             this.gameObject.SetActive(true);
-            this.Annihilate();
+            this.Annihilate(false);
             this.CloseButton.SetActive(true);
 
             foreach (Card curCard in cardsToShow)
             {
                 RenderedCard newCard = Instantiate(this.RenderedCardPF, this.CardHolder);
-                newCard.SetFromCard(curCard);
+                newCard.SetFromCard(curCard, null);
                 newCard.OnClickAction = this.CardClicked;
             }
         }
