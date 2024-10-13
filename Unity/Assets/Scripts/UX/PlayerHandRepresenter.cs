@@ -133,7 +133,7 @@ namespace SFDDCards.UX
                 bool anyPassingRequirements = ScriptTokenEvaluator.MeetsAnyRequirements(
                     ScriptTokenEvaluator.CalculateConceptualBuildersFromTokenEvaluation(newCard.RepresentedCard),
                     this.CentralGameStateControllerInstance.CurrentCampaignContext, 
-                    this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignPlayer,
+                    newCard.RepresentedCard,
                     this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignPlayer,
                     null);
                 newCard.RequirementsAreMet = anyPassingRequirements;

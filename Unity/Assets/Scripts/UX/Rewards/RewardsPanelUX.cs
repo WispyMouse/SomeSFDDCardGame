@@ -64,6 +64,7 @@ namespace SFDDCards.UX
                        null,
                        ScriptTokenEvaluator.GetDeltaFromTokens($"[SETTARGET:SELF][APPLYSTATUSEFFECTSTACKS: 1 {slotChosen.RewardedEffect.Id}]",
                        this.CentralGameStateControllerInstance.CurrentCampaignContext,
+                       null,
                        this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignPlayer,
                        this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignPlayer)
                        .DeltaEntries[0]);

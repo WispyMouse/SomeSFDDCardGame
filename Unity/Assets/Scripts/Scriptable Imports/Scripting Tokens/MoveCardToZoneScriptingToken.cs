@@ -94,6 +94,33 @@ namespace SFDDCards.ScriptingTokens
             return $"Move {delta.MadeFromBuilder.RelevantCards.DescribeEvaluation()} to {Zone}";
         }
 
+        public string DescribeOperationAsEffect(TokenEvaluatorBuilder builder)
+        {
+            if (Zone == CardsEvaluatableValue.DiscardZoneId)
+            {
+                return $"Discard {builder.RelevantCardsEvaluatable.DescribeEvaluation()}";
+            }
+            else if (Zone == CardsEvaluatableValue.ExileZoneId)
+            {
+                return $"Exile {builder.RelevantCardsEvaluatable.DescribeEvaluation()}";
+            }
+            else if (Zone == CardsEvaluatableValue.DeckZoneId)
+            {
+                return $"Put {builder.RelevantCardsEvaluatable.DescribeEvaluation()} into the deck and shuffle";
+            }
+            else if (Zone == CardsEvaluatableValue.HandZoneId)
+            {
+                if (builder.BasedOnConcept.PlayedFromZone == "hand" && builder.RelevantCardsEvaluatable is SelfCardEvaluatableValue)
+                {
+                    return $"Return this card to hand";
+                }
+
+                return $"Put {builder.RelevantCardsEvaluatable.DescribeEvaluation()} in hand";
+            }
+
+            return $"Move {builder.RelevantCardsEvaluatable.DescribeEvaluation()} to {Zone}";
+        }
+
         public void ApplyToDelta(DeltaEntry applyingDuringEntry, ReactionWindowContext? context, out List<DeltaEntry> stackedDeltas)
         {
             stackedDeltas = null;

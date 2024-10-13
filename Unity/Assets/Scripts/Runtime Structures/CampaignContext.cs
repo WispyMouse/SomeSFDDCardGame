@@ -220,7 +220,7 @@ namespace SFDDCards
         {
             ICombatantTarget originalTarget = happening.Context.CombatantTarget;
 
-            GamestateDelta delta = ScriptTokenEvaluator.CalculateRealizedDeltaEvaluation(happening, this, happening.OwnedStatusEffect?.BasedOnStatusEffect, happening.OwnedStatusEffect?.Owner, originalTarget, happening.Context);
+            GamestateDelta delta = ScriptTokenEvaluator.CalculateRealizedDeltaEvaluation(happening, this, happening.OwnedStatusEffect?.Owner, originalTarget, happening.Context);
             GlobalUpdateUX.LogTextEvent.Invoke(EffectDescriberDatabase.DescribeResolvedEffect(delta), GlobalUpdateUX.LogType.GameEvent);
             delta.ApplyDelta(this);
 

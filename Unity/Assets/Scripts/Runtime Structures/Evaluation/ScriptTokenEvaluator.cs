@@ -83,10 +83,10 @@ namespace SFDDCards
             return builders;
         }
 
-        public static GamestateDelta CalculateRealizedDeltaEvaluation(IAttackTokenHolder evaluatedAttack, CampaignContext campaignContext, IEffectOwner owner, Combatant user, ICombatantTarget originalTarget, ReactionWindowContext? context = null)
+        public static GamestateDelta CalculateRealizedDeltaEvaluation(IAttackTokenHolder evaluatedAttack, CampaignContext campaignContext, Combatant user, ICombatantTarget originalTarget, ReactionWindowContext? context = null)
         {
             List<ConceptualTokenEvaluatorBuilder> concepts = CalculateConceptualBuildersFromTokenEvaluation(evaluatedAttack, context);
-            return RealizeConceptualBuilders(concepts, campaignContext, owner, user, originalTarget);
+            return RealizeConceptualBuilders(concepts, campaignContext, evaluatedAttack.Owner, user, originalTarget);
         }
 
         public static GamestateDelta RealizeConceptualBuilders(List<ConceptualTokenEvaluatorBuilder> concepts, CampaignContext campaignContext, IEffectOwner owner, Combatant user, ICombatantTarget originalTarget)
@@ -128,13 +128,12 @@ namespace SFDDCards
             return new TokenEvaluatorBuilder(concept, campaignContext, owner, user, originalTarget, concept.ElementResourceChanges, concept.Intensity, concept.IntensityKindType, concept.RealizedOperationScriptingToken, previousBuilder);
         }
 
-        public static GamestateDelta GetDeltaFromTokens(string attackTokens, CampaignContext context, Combatant user, ICombatantTarget target)
+        public static GamestateDelta GetDeltaFromTokens(string attackTokens, CampaignContext context, IEffectOwner owner, Combatant user, ICombatantTarget target)
         {
-            IAttackTokenHolder pile = ScriptingTokenDatabase.GetAllTokens(attackTokens, user);
+            IAttackTokenHolder pile = ScriptingTokenDatabase.GetAllTokens(attackTokens, owner);
             GamestateDelta delta = CalculateRealizedDeltaEvaluation(
                     pile,
                     context,
-                    user,
                     user,
                     target);
 
@@ -154,8 +153,6 @@ namespace SFDDCards
                 string requirementsText = "";
                 string leadingSpace = "";
 
-                ConceptualDelta conceptualDelta = builder.GetConceptualDelta();
-
                 if (!builder.HasSameRequirements(previousRequirementsBuilder))
                 {
                     requirementsText = EffectDescriberDatabase.DescribeRequirement(builder);
@@ -166,17 +163,26 @@ namespace SFDDCards
 
                 if (context.HasValue && context.Value.CampaignContext != null && context.Value.CombatantEffectOwner != null && context.Value.CombatantTarget != null)
                 {
-                    TokenEvaluatorBuilder realizedBuilder = RealizeConceptualBuilder(builder, context.Value.CampaignContext, context.Value.CombatantEffectOwner, context.Value.CombatantEffectOwner, context.Value.CombatantTarget);
-                    deltaText += $"{leadingSpace}{EffectDescriberDatabase.DescribeRealizedEffect(realizedBuilder)}";
-                    leadingSpace = deltaText.Length > 0 ? " " : "";
+                    TokenEvaluatorBuilder realizedBuilder = RealizeConceptualBuilder(builder, context.Value.CampaignContext, importingCard, context.Value.CombatantEffectOwner, context.Value.CombatantTarget);
+
+                    string builderText = $"{EffectDescriberDatabase.DescribeRealizedEffect(realizedBuilder, ignoreFirstElementGainInText)}";
+                    if (!string.IsNullOrEmpty(builderText))
+                    {
+                        deltaText += $"{leadingSpace}{builderText}";
+                        leadingSpace = " ";
+                    }
                 }
                 else
                 {
-
+                    ConceptualDelta conceptualDelta = builder.GetConceptualDelta();
                     if (conceptualDelta.DeltaEntries.Count > 0)
                     {
-                        deltaText += $"{leadingSpace}{EffectDescriberDatabase.DescribeConceptualEffect(conceptualDelta, ignoreElementIfCard: ignoreFirstElementGainInText)}";
-                        leadingSpace = deltaText.Length > 0 ? " " : "";
+                        string builderText = $"{EffectDescriberDatabase.DescribeConceptualEffect(conceptualDelta, ignoreElementIfCard: ignoreFirstElementGainInText)}";
+                        if (!string.IsNullOrEmpty(builderText))
+                        {
+                            deltaText += $"{leadingSpace}{builderText}";
+                            leadingSpace = " ";
+                        }
                     }
                 }
 

@@ -86,6 +86,11 @@ namespace SFDDCards.ScriptingTokens
             return string.Empty;
         }
 
+        public string DescribeOperationAsEffect(TokenEvaluatorBuilder builder)
+        {
+            return string.Empty;
+        }
+
         public void ApplyToDelta(DeltaEntry applyingDuringEntry, ReactionWindowContext? context, out List<DeltaEntry> stackedDeltas)
         {
             stackedDeltas = null;

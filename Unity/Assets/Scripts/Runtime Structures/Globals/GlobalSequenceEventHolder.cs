@@ -92,7 +92,6 @@ namespace SFDDCards
                     response.FromResponder.Effect, 
                     context,
                     response.FromContext.CombatantEffectOwner,
-                    response.FromContext.CombatantEffectOwner,
                     response.FromContext.CombatantEffectOwner, 
                     response.FromContext);
                 GlobalUpdateUX.LogTextEvent.Invoke(EffectDescriberDatabase.DescribeResolvedEffect(delta), GlobalUpdateUX.LogType.GameEvent);

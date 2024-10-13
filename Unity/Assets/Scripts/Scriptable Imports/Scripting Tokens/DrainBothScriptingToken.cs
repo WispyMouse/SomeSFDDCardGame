@@ -45,11 +45,21 @@ namespace SFDDCards.ScriptingTokens
 
         public string DescribeOperationAsEffect(ConceptualDeltaEntry delta, string reactionWindowId)
         {
+            return this.DescribeOperationAsEffect(reactionWindowId);
+        }
+
+        public string DescribeOperationAsEffect(TokenEvaluatorBuilder builder)
+        {
+            return this.DescribeOperationAsEffect(builder.BasedOnConcept?.CreatedFromContext?.TimingWindowId);
+        }
+
+        public string DescribeOperationAsEffect(string reactionWindowId)
+        {
             if (this.ReduceArgumentOne.ToLower() == "intensity" && reactionWindowId == KnownReactionWindows.DamageIncoming)
             {
                 return $"Damage first subtracts from {this.ReduceArgumentTwo} before subtracting from health";
             }
-            
+
             return $"Reduce {this.ReduceArgumentOne} by {this.ReduceArgumentTwo}.";
         }
 

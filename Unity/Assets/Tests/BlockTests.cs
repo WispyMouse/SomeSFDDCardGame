@@ -43,7 +43,7 @@ namespace SFDDCards.Tests.EditMode
             {
                 DeltaEntries = new List<DeltaEntry>()
                  {
-                    new DeltaEntry(campaignContext, combatContext.CombatPlayer, combatContext.CombatPlayer)
+                    new DeltaEntry(campaignContext, null, combatContext.CombatPlayer, combatContext.CombatPlayer)
                     {
                         IntensityKindType = TokenEvaluatorBuilder.IntensityKind.Damage,
                         ConceptualIntensity =  new ConstantEvaluatableValue<int>(damageToDealToPlayer)
@@ -63,7 +63,7 @@ namespace SFDDCards.Tests.EditMode
             {
                 DeltaEntries = new List<DeltaEntry>()
                  {
-                    new DeltaEntry(campaignContext, combatContext.CombatPlayer, combatContext.CombatPlayer)
+                    new DeltaEntry(campaignContext, null, combatContext.CombatPlayer, combatContext.CombatPlayer)
                     {
                         IntensityKindType = TokenEvaluatorBuilder.IntensityKind.Damage,
                         ConceptualIntensity = new ConstantEvaluatableValue<int>(10)

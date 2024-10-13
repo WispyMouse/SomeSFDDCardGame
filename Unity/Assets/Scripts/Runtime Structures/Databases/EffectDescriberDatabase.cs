@@ -106,7 +106,7 @@ namespace SFDDCards
         /// This effect is written as thought it hasn't happened yet.
         /// This can be used to show the value of effects, such as Enemy Intents.
         /// </summary>
-        public static string DescribeRealizedEffect(IAttackTokenHolder attackHolder, CampaignContext campaignContext, IEffectOwner owner, Combatant user, ICombatantTarget target)
+        public static string DescribeRealizedEffect(IAttackTokenHolder attackHolder, CampaignContext campaignContext, Combatant user, ICombatantTarget target, bool ignoreElementIfCard = true)
         {
             StringBuilder entireEffectText = new StringBuilder();
             string leadingSpace = "";
@@ -114,8 +114,8 @@ namespace SFDDCards
             List<ConceptualTokenEvaluatorBuilder> conceptBuilders = ScriptTokenEvaluator.CalculateConceptualBuildersFromTokenEvaluation(attackHolder);
             foreach (ConceptualTokenEvaluatorBuilder conceptBuilder in conceptBuilders)
             {
-                TokenEvaluatorBuilder realizedBuilder = ScriptTokenEvaluator.RealizeConceptualBuilder(conceptBuilder, campaignContext, owner, user, target);
-                string descriptor = DescribeRealizedEffect(realizedBuilder);
+                TokenEvaluatorBuilder realizedBuilder = ScriptTokenEvaluator.RealizeConceptualBuilder(conceptBuilder, campaignContext, attackHolder.Owner, user, target);
+                string descriptor = DescribeRealizedEffect(realizedBuilder, ignoreElementIfCard);
 
                 if (!string.IsNullOrEmpty(descriptor))
                 {
@@ -134,37 +134,58 @@ namespace SFDDCards
         /// This effect is written as thought it hasn't happened yet.
         /// This can be used to show the value of effects, such as Enemy Intents.
         /// </summary>
-        public static string DescribeRealizedEffect(TokenEvaluatorBuilder builder)
+        public static string DescribeRealizedEffect(TokenEvaluatorBuilder builder, bool ignoreElementIfCard = true)
         {
             StringBuilder entireEffectText = new StringBuilder();
 
-            string nextDescriptor = string.Empty;
+            bool ignoreElement = false;
+            if (builder.Owner is Card)
+            {
+                ignoreElement = ignoreElementIfCard;
+            }
+
+            string leadingSpace = "";
+
+            if (builder.ElementResourceChanges.Count > 0)
+            {
+                string elementDescription = DescribeElementChange(builder, ignoreElement);
+                if (!string.IsNullOrEmpty(elementDescription))
+                {
+                    entireEffectText.Append(leadingSpace + elementDescription);
+                    leadingSpace = " ";
+                }
+            }
+
+            if (builder.RealizedOperationScriptingToken != null && !builder.RealizedOperationScriptingToken.SkipDescribingMe)
+            {
+                string realizedOperation = builder.RealizedOperationScriptingToken.DescribeOperationAsEffect(builder);
+                if (!string.IsNullOrEmpty(realizedOperation))
+                {
+                    entireEffectText.Append(leadingSpace + realizedOperation);
+                    leadingSpace = " ";
+                }
+            }
 
             switch (builder.IntensityKindType)
             {
                 case TokenEvaluatorBuilder.IntensityKind.Damage:
-                    nextDescriptor = DescribeRealizedDamage(builder);
+                    entireEffectText.Append(leadingSpace + DescribeRealizedDamage(builder));
                     break;
                 case TokenEvaluatorBuilder.IntensityKind.Heal:
-                    nextDescriptor = DescribeRealizedHeal(builder);
+                    entireEffectText.Append(leadingSpace + DescribeRealizedHeal(builder));
                     break;
                 case TokenEvaluatorBuilder.IntensityKind.NumberOfCards:
-                    nextDescriptor = DescribeRealizedCards(builder);
+                    entireEffectText.Append(leadingSpace + DescribeRealizedCards(builder));
                     break;
                 case TokenEvaluatorBuilder.IntensityKind.ApplyStatusEffect:
-                    nextDescriptor = DescribeRealizedApplyStatusEffect(builder);
+                    entireEffectText.Append(leadingSpace + DescribeRealizedApplyStatusEffect(builder));
                     break;
                 case TokenEvaluatorBuilder.IntensityKind.RemoveStatusEffect:
-                    nextDescriptor = DescribeRealizedRemoveStatusEffect(builder);
+                    entireEffectText.Append(leadingSpace + DescribeRealizedRemoveStatusEffect(builder));
                     break;
                 case TokenEvaluatorBuilder.IntensityKind.SetStatusEffect:
-                    nextDescriptor = DescribeRealizedSetStatusEffect(builder);
+                    entireEffectText.Append(leadingSpace + DescribeRealizedSetStatusEffect(builder));
                     break;
-            }
-
-            if (!string.IsNullOrEmpty(nextDescriptor))
-            {
-                entireEffectText.Append($"{nextDescriptor}");
             }
 
             return entireEffectText.ToString();
@@ -943,6 +964,63 @@ namespace SFDDCards
             string leadingcomma = "";
 
             foreach (ElementResourceChange change in delta.ElementResourceChanges)
+            {
+                StringBuilder nextText = new StringBuilder();
+
+                if (change.SetValue != null)
+                {
+                    if (change.SetValue is ConstantEvaluatableValue<int> constant && constant.ConstantValue == 0)
+                    {
+                        nextText.Append($"{leadingcomma}Clear {change.Element.GetNameAndMaybeIcon()}");
+                    }
+                    else
+                    {
+                        nextText.Append($"{leadingcomma}Set {change.Element.GetNameAndMaybeIcon()} to {change.SetValue.DescribeEvaluation()}");
+                    }
+
+                    leadingcomma = ", ";
+                }
+                else if (change.GainOrLoss != null)
+                {
+                    if (change.GainOrLoss is ConstantEvaluatableValue<int> constant)
+                    {
+                        if (constant.ConstantValue > 0 && !ignoreElementFlag)
+                        {
+                            nextText.Append($"{leadingcomma}Gain {constant.ConstantValue.ToString()} {change.Element.GetNameAndMaybeIcon()}");
+                            leadingcomma = ", ";
+                        }
+                        else if (constant.ConstantValue < 0)
+                        {
+                            nextText.Append($"{leadingcomma}Lose {Mathf.Abs(constant.ConstantValue).ToString()} {change.Element.GetNameAndMaybeIcon()}");
+                            leadingcomma = ", ";
+                        }
+                    }
+                    else
+                    {
+                        nextText.Append($"{leadingcomma}Modify {change.Element.GetNameAndMaybeIcon()} by {change.GainOrLoss.DescribeEvaluation()}");
+                        leadingcomma = ", ";
+                    }
+                }
+
+                string builderResult = nextText.ToString().Trim('.');
+
+                // If this had any text, it should always end in a period
+                if (builderResult.Length > 0)
+                {
+                    builderResult += ".";
+                    changeText.Append(builderResult);
+                }
+            }
+
+            return changeText.ToString();
+        }
+
+        public static string DescribeElementChange(TokenEvaluatorBuilder realizedBuilder, bool ignoreElementFlag)
+        {
+            StringBuilder changeText = new StringBuilder();
+            string leadingcomma = "";
+
+            foreach (ElementResourceChange change in realizedBuilder.ElementResourceChanges)
             {
                 StringBuilder nextText = new StringBuilder();
 

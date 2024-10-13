@@ -4,7 +4,7 @@ namespace SFDDCards
     using System.Collections;
     using System.Collections.Generic;
     using UnityEngine;
-    public abstract class Combatant : ICombatantTarget, IReactionWindowReactor, IEffectOwner
+    public abstract class Combatant : ICombatantTarget, IReactionWindowReactor
     {
         public abstract string Id { get; }
 

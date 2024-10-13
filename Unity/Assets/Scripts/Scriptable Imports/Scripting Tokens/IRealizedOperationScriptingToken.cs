@@ -14,6 +14,7 @@ namespace SFDDCards.Evaluation.Conceptual
     public interface IRealizedOperationScriptingToken : IScriptingToken
     {
         public string DescribeOperationAsEffect(ConceptualDeltaEntry delta, string reactionWindowId);
+        public string DescribeOperationAsEffect(TokenEvaluatorBuilder builder);
         public void ApplyToDelta(DeltaEntry applyingDuringEntry, ReactionWindowContext? context, out List<DeltaEntry> stackedDeltas);
     }
 }

@@ -22,6 +22,16 @@ namespace SFDDCards.ScriptingTokens
 
         public string DescribeOperationAsEffect(ConceptualDeltaEntry delta, string reactionWindowId)
         {
+            return this.DescribeOperationAsEffect();
+        }
+
+        public string DescribeOperationAsEffect(TokenEvaluatorBuilder builder)
+        {
+            return this.DescribeOperationAsEffect();
+        }
+
+        private string DescribeOperationAsEffect()
+        {
             return "Add the selected cards to your campaign deck";
         }
 

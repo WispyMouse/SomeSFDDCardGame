@@ -1,4 +1,4 @@
-namespace SFDDCards.Tests.EditMode
+﻿namespace SFDDCards.Tests.EditMode
 {
     using NUnit.Framework;
     using System;
@@ -36,7 +36,7 @@ namespace SFDDCards.Tests.EditMode
             new ParseFromFileTestData("mb1_card_starter_resonate", $"Exile this card.\r\nIf Cyber + Void + Solar + Bio + Force {RequiresComparisonScriptingToken.GreaterThanOrEqualToAscii} 10: Draw a card.", ParseKind.Card),
 
             new ParseFromFileTestData("mb1_card_common_burnarecord", "Create 1 x Cyber Loot in hand. Exile this card.", ParseKind.Card),
-            new ParseFromFileTestData("mb1_card_common_fueldbypassion", "Exile the top card of the deck. Draw 2 cards.", ParseKind.Card),
+            new ParseFromFileTestData("mb1_card_common_fueledbypassion", "Exile the top card of the deck. Draw 2 cards.", ParseKind.Card),
             new ParseFromFileTestData("mb1_card_common_glitch", $"2 damage to all foes.\r\nIf Cyber < 3: Exile this card.\r\nIf Cyber {RequiresComparisonScriptingToken.GreaterThanOrEqualToAscii} 3: Lose 3 Cyber. Return this card to hand.", ParseKind.Card),
             new ParseFromFileTestData("mb1_card_common_invigorate", "Gain 1 Bio Heal.", ParseKind.Card),
             new ParseFromFileTestData("mb1_card_common_laserblast", "2 damage. Apply 4 Targeted.", ParseKind.Card),
@@ -139,6 +139,148 @@ namespace SFDDCards.Tests.EditMode
                     EditModeTestCommon.AssertStatusEffectParsing(StatusEffectDatabase.GetModel(testData.Id), testData.ExpectedParsedValue);
                     break;
             }
+        }
+
+        /// <summary>
+        /// Addresses bug: Resonate missing "Exile this card.".
+        /// </summary>
+        [Test]
+        public void Resonate_ParsingIncludesExile()
+        {
+            EncounterModel testEncounter = EditModeTestCommon.GetEncounterWithPunchingBags(1, 100);
+            CampaignContext campaignContext = EditModeTestCommon.GetBlankCampaignContext();
+            campaignContext.StartNextRoomFromEncounter(new EvaluatedEncounter(testEncounter));
+            CombatContext combatContext = campaignContext.CurrentCombatContext;
+            combatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.PlayerTurn);
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+
+            Card resonate = CardDatabase.GetModel("mb1_card_starter_resonate");
+            combatContext.PlayerCombatDeck.CardsCurrentlyInHand.Add(resonate);
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+
+            EffectDescription resonateDescription = resonate.GetDescription(new ReactionWindowContext(campaignContext, KnownReactionWindows.ConsideringPlayingFromHand, combatContext.CombatPlayer, new NoTarget(), "hand"));
+            string description = resonateDescription.BreakDescriptionsIntoString();
+            Debug.Log(description);
+            Assert.IsTrue(description.Contains("Exile this card."), "Resonate should exile.");
+        }
+
+        /// <summary>
+        /// Addresses bug: Requires comparison should print out the total of the comparison.
+        /// </summary>
+        [Test]
+        public void Resonate_ParsingIncludesElementalTotal()
+        {
+            EncounterModel testEncounter = EditModeTestCommon.GetEncounterWithPunchingBags(1, 100);
+            CampaignContext campaignContext = EditModeTestCommon.GetBlankCampaignContext();
+            campaignContext.StartNextRoomFromEncounter(new EvaluatedEncounter(testEncounter));
+            CombatContext combatContext = campaignContext.CurrentCombatContext;
+            combatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.PlayerTurn);
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+
+            Card resonate = CardDatabase.GetModel("mb1_card_starter_resonate");
+            combatContext.PlayerCombatDeck.CardsCurrentlyInHand.Add(resonate);
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+
+            EffectDescription resonateDescription = resonate.GetDescription(new ReactionWindowContext(campaignContext, KnownReactionWindows.ConsideringPlayingFromHand, combatContext.CombatPlayer, new NoTarget(), "hand"));
+            string description = resonateDescription.BreakDescriptionsIntoString();
+            Debug.Log(description);
+            Assert.IsTrue(description.Contains("If Cyber + Void + Solar + Bio + Force (0) ≥ 10: Draw a card."), "Total value of elementals should be output as part of comparison.");
+        }
+
+        /// <summary>
+        /// Addresses bug: Fueled By Passion missing "Exile the top card of the deck."
+        /// </summary>
+        [Test]
+        public void FueledByPassion_ExileTopCard()
+        {
+            EncounterModel testEncounter = EditModeTestCommon.GetEncounterWithPunchingBags(1, 100);
+            CampaignContext campaignContext = EditModeTestCommon.GetBlankCampaignContext();
+            campaignContext.StartNextRoomFromEncounter(new EvaluatedEncounter(testEncounter));
+            CombatContext combatContext = campaignContext.CurrentCombatContext;
+            combatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.PlayerTurn);
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+
+            Card fueldByPassion = CardDatabase.GetModel("mb1_card_common_fueledbypassion");
+            combatContext.PlayerCombatDeck.CardsCurrentlyInHand.Add(fueldByPassion);
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+
+            EffectDescription fueldByPassionDescription = fueldByPassion.GetDescription(new ReactionWindowContext(campaignContext, KnownReactionWindows.ConsideringPlayingFromHand, combatContext.CombatPlayer, new NoTarget(), "hand"));
+            string description = fueldByPassionDescription.BreakDescriptionsIntoString();
+            Debug.Log(description);
+            Assert.IsTrue(description.Contains("Exile the top card of the deck."), "Description should contain expected text.");
+        }
+
+        /// <summary>
+        /// Addresses bug: Strike missing "Clear force."
+        /// </summary>
+        [Test]
+        public void Strike_ClearForce()
+        {
+            EncounterModel testEncounter = EditModeTestCommon.GetEncounterWithPunchingBags(1, 100);
+            CampaignContext campaignContext = EditModeTestCommon.GetBlankCampaignContext();
+            campaignContext.StartNextRoomFromEncounter(new EvaluatedEncounter(testEncounter));
+            CombatContext combatContext = campaignContext.CurrentCombatContext;
+            combatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.PlayerTurn);
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+
+            Card strike = CardDatabase.GetModel("mb1_card_starter_strike");
+            combatContext.PlayerCombatDeck.CardsCurrentlyInHand.Add(strike);
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+
+            EffectDescription strikeDescription = strike.GetDescription(new ReactionWindowContext(campaignContext, KnownReactionWindows.ConsideringPlayingFromHand, combatContext.CombatPlayer, new NoTarget(), "hand"));
+            string description = strikeDescription.BreakDescriptionsIntoString();
+            Debug.Log(description);
+            Assert.IsTrue(description.Contains("Clear Force."), "Description should contain expected text.");
+        }
+
+        /// <summary>
+        /// Addresses bug: Target health evaluatable not being printed.
+        /// </summary>
+        [Test]
+        public void Strike_CalculateTargetHealth()
+        {
+            EncounterModel testEncounter = EditModeTestCommon.GetEncounterWithPunchingBags(1, 100);
+            CampaignContext campaignContext = EditModeTestCommon.GetBlankCampaignContext();
+            campaignContext.StartNextRoomFromEncounter(new EvaluatedEncounter(testEncounter));
+            CombatContext combatContext = campaignContext.CurrentCombatContext;
+            combatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.PlayerTurn);
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+
+            Card strike = CardDatabase.GetModel("mb1_card_starter_strike");
+            combatContext.PlayerCombatDeck.CardsCurrentlyInHand.Add(strike);
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+
+            EffectDescription strikeDescription = strike.GetDescription(new ReactionWindowContext(campaignContext, KnownReactionWindows.ConsideringPlayingFromHand, combatContext.CombatPlayer, new NoTarget(), "hand"));
+            string description = strikeDescription.BreakDescriptionsIntoString();
+            Debug.Log(description);
+
+            // The target will have 100 - 3 => 97 health after the effect happens
+            // so indicate the health they'll have when this check happens
+            Assert.IsTrue(description.Contains("If target's health (97) > 10:"), "Description should contain expected text.");
+        }
+
+        /// <summary>
+        /// Addresses bug: All of burn a record missing its text.
+        /// </summary>
+        [Test]
+        public void BurnARecord_Parsing()
+        {
+            EncounterModel testEncounter = EditModeTestCommon.GetEncounterWithPunchingBags(1, 100);
+            CampaignContext campaignContext = EditModeTestCommon.GetBlankCampaignContext();
+            campaignContext.StartNextRoomFromEncounter(new EvaluatedEncounter(testEncounter));
+            CombatContext combatContext = campaignContext.CurrentCombatContext;
+            combatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.PlayerTurn);
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+
+            Card burnARecord = CardDatabase.GetModel("mb1_card_common_burnarecord");
+            combatContext.PlayerCombatDeck.CardsCurrentlyInHand.Add(burnARecord);
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+
+            EffectDescription burnARecordDescription = burnARecord.GetDescription(new ReactionWindowContext(campaignContext, KnownReactionWindows.ConsideringPlayingFromHand, combatContext.CombatPlayer, new NoTarget(), "hand"));
+            string description = burnARecordDescription.BreakDescriptionsIntoString();
+            Debug.Log(description);
+
+            Assert.IsTrue(description.Contains("Create 1 x Cyber (0) Loot in hand. Exile this card."), "Description should contain expected text.");
         }
     }
 }

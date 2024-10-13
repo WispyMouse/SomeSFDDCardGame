@@ -1,5 +1,5 @@
 {
-	"Id": "mb1_card_common_fueldbypassion",
+	"Id": "mb1_card_common_fueledbypassion",
 	"Name": "Fueled By Passion",
 	"EffectScript": "[CARDTARGET: DECK 1][MOVECARDTOZONE: EXILE][DRAW: 2]",
 	"Tags":

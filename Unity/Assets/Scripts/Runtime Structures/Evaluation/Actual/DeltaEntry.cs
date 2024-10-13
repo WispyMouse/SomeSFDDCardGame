@@ -39,7 +39,7 @@ namespace SFDDCards.Evaluation.Actual
         /// </summary>
         public ICombatantTarget OriginalTarget;
 
-        public DeltaEntry(CampaignContext fromCampaign, Combatant user, ICombatantTarget target)
+        public DeltaEntry(CampaignContext fromCampaign, IEffectOwner owner, Combatant user, ICombatantTarget target)
         {
             this.FromCampaign = fromCampaign;
             this.User = user;
@@ -47,7 +47,7 @@ namespace SFDDCards.Evaluation.Actual
 
             this.MadeFromBuilder = new TokenEvaluatorBuilder(new ConceptualTokenEvaluatorBuilder(),
                 fromCampaign,
-                user,
+                owner,
                 user,
                 target,
                 this.ElementResourceChanges,

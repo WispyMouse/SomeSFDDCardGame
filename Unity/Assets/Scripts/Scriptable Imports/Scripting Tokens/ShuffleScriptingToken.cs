@@ -29,6 +29,11 @@ namespace SFDDCards.ScriptingTokens
             return "Shuffle";
         }
 
+        public string DescribeOperationAsEffect(TokenEvaluatorBuilder builder)
+        {
+            return "Shuffle";
+        }
+
         protected override bool TryGetTokenWithArguments(List<string> arguments, out IScriptingToken scriptingToken)
         {
             scriptingToken = new ShuffleScriptingToken();
