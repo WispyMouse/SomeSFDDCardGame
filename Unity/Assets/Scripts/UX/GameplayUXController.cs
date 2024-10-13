@@ -760,6 +760,12 @@ namespace SFDDCards.UX
         public void BeginHoverTarget(ICombatantTarget target)
         {
             this.HoveredCombatant = target;
+            this.PlayerHandRepresenter.ReactionWindowForSelectedCard = new ReactionWindowContext(
+                this.CentralGameStateControllerInstance.CurrentCampaignContext,
+                KnownReactionWindows.ConsideringPlayingFromHand,
+                this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignPlayer,
+                target,
+                "hand");
         }
 
         public void EndHoverTarget(ICombatantTarget target)
@@ -767,6 +773,7 @@ namespace SFDDCards.UX
             if (this.HoveredCombatant == target)
             {
                 this.HoveredCombatant = null;
+                this.PlayerHandRepresenter.ReactionWindowForSelectedCard = null;
             }
         }
     }

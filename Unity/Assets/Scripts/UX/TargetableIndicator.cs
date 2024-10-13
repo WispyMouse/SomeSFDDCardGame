@@ -9,7 +9,7 @@ namespace SFDDCards.UX
     using UnityEngine;
     using UnityEngine.EventSystems;
 
-    public class TargetableIndicator : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+    public class TargetableIndicator : MonoBehaviour
     {
         ICombatantTarget Target { get; set; }
         Action<ICombatantTarget> OnClickAction { get; set; } = null;
@@ -29,12 +29,12 @@ namespace SFDDCards.UX
             this.OnClickAction.Invoke(this.Target);
         }
 
-        public void OnPointerEnter(PointerEventData eventData)
+        public void OnMouseEnter()
         {
             this.OnHoverAction?.Invoke(this.Target);
         }
 
-        public void OnPointerExit(PointerEventData eventData)
+        public void OnMouseExit()
         {
             this.OnHoverEndAction?.Invoke(this.Target);
         }

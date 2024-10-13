@@ -24,7 +24,25 @@ namespace SFDDCards.UX
 
         private Dictionary<Card, CombatCardUX> CardsToRepresentations = new Dictionary<Card, CombatCardUX>();
 
-        private DisplayedCardUX selectedCard { get; set; } = null;
+        public ReactionWindowContext? ReactionWindowForSelectedCard
+        {
+            get
+            {
+                return this.reactionWindowForSelectedCard;
+            }
+            set
+            {
+                this.reactionWindowForSelectedCard = value;
+
+                if (this.SelectedCard != null)
+                {
+                    this.SelectedCard.SetFromCard(this.SelectedCard.RepresentedCard, SelectCurrentCard, this.ReactionWindowForSelectedCard);
+                }
+            }
+        }
+        private ReactionWindowContext? reactionWindowForSelectedCard { get; set; } = null;
+
+        public DisplayedCardUX SelectedCard { get; set; } = null;
 
         private void OnEnable()
         {
@@ -99,7 +117,7 @@ namespace SFDDCards.UX
 
                 CombatCardUX newCard = GetUX(this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.PlayerCombatDeck.CardsCurrentlyInHand[ii]);
 
-                if (ReferenceEquals(this.selectedCard, newCard))
+                if (ReferenceEquals(this.SelectedCard, newCard))
                 {
                     objectOffset += Vector3.up * 1f;
                     newCard.transform.parent = this.SelectedCardTransform;
@@ -134,16 +152,18 @@ namespace SFDDCards.UX
 
         public void SelectCurrentCard(DisplayedCardUX selectedCard)
         {
-            this.selectedCard = selectedCard;
+            this.SelectedCard = selectedCard;
+            this.SelectedCard.SetFromCard(this.SelectedCard.RepresentedCard, SelectCurrentCard, GetReactionWindowContextForCard(selectedCard));
             this.UXController.SelectCurrentCard(selectedCard);
             this.RepresentPlayerHand();
         }
 
         public void DeselectSelectedCard()
         {
-            if (this.selectedCard != null)
+            if (this.SelectedCard != null)
             {
-                this.selectedCard = null;
+                this.SelectedCard.SetFromCard(this.SelectedCard.RepresentedCard, SelectCurrentCard, null);
+                this.SelectedCard = null;
                 this.RepresentPlayerHand();
             }
         }
@@ -155,19 +175,25 @@ namespace SFDDCards.UX
             if (!this.CardsToRepresentations.TryGetValue(forCard, out CombatCardUX representingCard))
             {
                 representingCard = Instantiate(this.CardRepresentationPF, this.PlayerHandTransform);
-                representingCard.SetFromCard(forCard, SelectCurrentCard, GetReactionWindowContextForCard);
+                representingCard.SetFromCard(forCard, SelectCurrentCard, null);
                 this.CardsToRepresentations.Add(forCard, representingCard);
                 wasNotVisibleOrJustCreated = true;
             }
             else if (!this.CardsToRepresentations[forCard].isActiveAndEnabled)
             {
                 representingCard.gameObject.SetActive(true);
+                representingCard.SetFromCard(forCard, SelectCurrentCard, null);
                 wasNotVisibleOrJustCreated = true;
             }
 
             if (wasNotVisibleOrJustCreated)
             {
                 representingCard.SnapToPosition(this.PlayerHandTransform.position);
+            }
+
+            if (ReferenceEquals(this.SelectedCard, representingCard))
+            {
+                this.SelectedCard.SetFromCard(forCard, SelectCurrentCard, this.ReactionWindowForSelectedCard);
             }
 
             return representingCard;
