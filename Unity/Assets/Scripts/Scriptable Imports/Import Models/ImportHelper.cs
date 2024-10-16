@@ -24,6 +24,11 @@ namespace SFDDCards
             {
                 yield return new WaitForFixedUpdate();
             }
+
+            if (toYieldFor.Exception != null)
+            {
+                Debug.LogException(toYieldFor.Exception);
+            }
         }
 
         public static async Task ImportImportableFilesIntoDatabaseAsync<T>(string rootFolder, string fileExtension, ImportFileOperation<T> importFunc, SynchronizationContext mainThreadContext) where T : IImportable

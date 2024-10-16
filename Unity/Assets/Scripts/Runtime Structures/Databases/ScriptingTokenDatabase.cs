@@ -14,10 +14,15 @@ namespace SFDDCards.ScriptingTokens
             new DrawScriptingToken(),
             new HealScriptingToken(),
 
+            // Status Effect
             new ApplyStatusEffectStacksScriptingToken(),
             new RemoveStatusEffectStacksScriptingToken(),
             new SetStatusEffectStacksScriptingToken(),
             new DrainBothScriptingToken(),
+
+            // Currency
+            new SetCurrencyScriptingToken(),
+            new ModCurrencyScriptingToken(),
 
             // Meta Token
             new ResetScriptingToken(),

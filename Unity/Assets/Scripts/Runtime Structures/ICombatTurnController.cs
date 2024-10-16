@@ -9,6 +9,8 @@ namespace SFDDCards
 
     public interface ICombatTurnController
     {
+        public CampaignContext ForCampaign { get; }
+
         public void HandleSequenceEventWithAnimation(GameplaySequenceEvent sequenceEvent);
     }
 }

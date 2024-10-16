@@ -1,6 +1,7 @@
 namespace SFDDCards.Evaluation.Conceptual
 {
     using SFDDCards.Evaluation.Actual;
+    using SFDDCards.ImportModels;
     using SFDDCards.ScriptingTokens;
     using SFDDCards.ScriptingTokens.EvaluatableValues;
     using System;
@@ -29,6 +30,7 @@ namespace SFDDCards.Evaluation.Conceptual
         public NumberOfCardsRelation NumberOfCardsRelationType = NumberOfCardsRelation.None;
 
         public StatusEffect StatusEffect;
+        public CurrencyImport Currency;
 
         public ConceptualTokenEvaluatorBuilder PreviousBuilder;
         public List<Action<DeltaEntry>> ActionsToExecute = new List<Action<DeltaEntry>>();
@@ -135,7 +137,8 @@ namespace SFDDCards.Evaluation.Conceptual
                     ConceptualIntensity = this.Intensity,
                     IntensityKindType = this.IntensityKindType,
                     NumberOfCardsRelationType = this.NumberOfCardsRelationType,
-                    StatusEffect = this.StatusEffect
+                    StatusEffect = this.StatusEffect,
+                    Currency = this.Currency
                 });
             }
 

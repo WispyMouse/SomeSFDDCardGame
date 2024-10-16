@@ -1,6 +1,7 @@
 namespace SFDDCards.UX
 {
     using SFDDCards.Evaluation.Actual;
+    using SFDDCards.ImportModels;
     using System;
     using System.Collections;
     using System.Collections.Generic;
@@ -58,6 +59,8 @@ namespace SFDDCards.UX
         private TMPro.TMP_Text LifeValue;
         [SerializeReference]
         private TMPro.TMP_Text ElementsValue;
+        [SerializeReference]
+        private TMPro.TMP_Text CurrenciesValue;
 
         [SerializeReference]
         private TargetableIndicator SingleCombatantTargetableIndicatorPF;
@@ -175,11 +178,11 @@ namespace SFDDCards.UX
             if (newCampaignState == CampaignContext.GameplayCampaignState.NonCombatEncounter)
             {
                 if (wasPreviousCampaignState != CampaignContext.GameplayCampaignState.NonCombatEncounter &&
-                    this.CentralGameStateControllerInstance.CurrentCampaignContext != null &&
-                    this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentEncounter != null &&
-                    this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentEncounter.BasedOn.IsShopEncounter)
+                    this.CurrentCampaignContext != null &&
+                    this.CurrentCampaignContext.CurrentEncounter != null &&
+                    this.CurrentCampaignContext.CurrentEncounter.BasedOn.IsShopEncounter)
                 {
-                    this.ShowShopPanel(this.CurrentCampaignContext.CurrentEncounter.GetCards().ToArray());
+                    this.ShowShopPanel(this.CurrentCampaignContext.CurrentEncounter.GetShop(this.CurrentCampaignContext).ToArray());
                 }
             }
             
@@ -203,7 +206,7 @@ namespace SFDDCards.UX
                     this.EndTurnButton.SetActive(false);
                 }
 
-                MouseHoverShowerPanel.CurrentContext = new ReactionWindowContext(this.CentralGameStateControllerInstance.CurrentCampaignContext, KnownReactionWindows.ConsideringPlayingFromHand, this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.CombatPlayer, combatantTarget: null, playedFromZone: "hand");
+                MouseHoverShowerPanel.CurrentContext = new ReactionWindowContext(this.CurrentCampaignContext, KnownReactionWindows.ConsideringPlayingFromHand, this.CurrentCampaignContext.CurrentCombatContext.CombatPlayer, combatantTarget: null, playedFromZone: "hand");
             }
             else
             {
@@ -231,7 +234,7 @@ namespace SFDDCards.UX
             }
         }
 
-        public void UpdateUX()
+        public void UpdateUX(CampaignContext forCampaign)
         {
             if (this.CardBrowserUXInstance.gameObject.activeInHierarchy)
             {
@@ -245,6 +248,7 @@ namespace SFDDCards.UX
             this.CheckAndActIfGameCampaignNavigationStateChanged();
             this.RemoveDefeatedEntities();
             this.SetElementValueLabel();
+            this.SetCurrenciesValueLabel();
             this.UpdateEnemyUX();
             this.UpdatePlayerLabelValues();
             this.RepresentTargetables();
@@ -338,13 +342,13 @@ namespace SFDDCards.UX
         {
             this.RewardsPanelUXInstance.gameObject.SetActive(true);
             this.RewardsPanelUXInstance.SetReward(cardsToReward);
-            this.UpdateUX();
+            this.UpdateUX(this.CurrentCampaignContext);
         }
 
-        public void ShowShopPanel(params Card[] cardsInShop)
+        public void ShowShopPanel(params ShopEntry[] itemsInShop)
         {
             this.ShopPanelUXInstance.gameObject.SetActive(true);
-            this.ShopPanelUXInstance.SetRewardCards(cardsInShop);
+            this.ShopPanelUXInstance.SetShopItems(itemsInShop);
         }
 
         private IEnumerator AnimateEnemyTurnsInternal(Action continuationAction)
@@ -434,6 +438,25 @@ namespace SFDDCards.UX
             }
 
             this.ElementsValue.text = compositeElements.ToString();
+        }
+
+        private void SetCurrenciesValueLabel()
+        {
+            if (this.CentralGameStateControllerInstance.CurrentCampaignContext == null || this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrencyCounts.Count == 0)
+            {
+                this.CurrenciesValue.text = "None";
+                return;
+            }
+
+            string startingSeparator = "";
+            StringBuilder compositeCurrencies = new StringBuilder();
+            foreach (CurrencyImport currency in this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrencyCounts.Keys)
+            {
+                compositeCurrencies.Append($"{startingSeparator}{this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrencyCounts[currency]}\u00A0{currency.GetNameAndMaybeIcon()}");
+                startingSeparator = ", ";
+            }
+
+            this.CurrenciesValue.text = compositeCurrencies.ToString();
         }
 
         private void ClearAllTargetableIndicators()
@@ -532,8 +555,6 @@ namespace SFDDCards.UX
             this.ShopPanelUXInstance.gameObject.SetActive(false);
             this.RewardsPanelUXInstance.gameObject.SetActive(false);
             this.PlayerStatusEffectUXHolderInstance.Annihilate();
-
-            this.UpdateUX();
         }
 
         void RepresentTargetables()
@@ -688,7 +709,6 @@ namespace SFDDCards.UX
             this.CardBrowserUXInstance.gameObject.SetActive(true);
             this.CardBrowserUXInstance.SetLabelText("Now Viewing: All Cards");
             this.CardBrowserUXInstance.SetFromCards(CardDatabase.GetOneOfEachCard());
-            GlobalUpdateUX.UpdateUXEvent.Invoke();
         }
 
         public void OpenDiscardCardsBrowser()

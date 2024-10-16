@@ -29,7 +29,7 @@ namespace SFDDCards.ScriptingTokens
 
             if (!TryGetIntegerEvaluatableFromStrings(arguments, out IEvaluatableValue<int> output, out List<string> remainingArguments))
             {
-                output = new ConstantEvaluatableValue<int>(1);
+                output = new ConstantNumericEvaluatableValue(1);
             }
 
             if (remainingArguments.Count != 1)
@@ -60,7 +60,7 @@ namespace SFDDCards.ScriptingTokens
         {
             string creationText = "";
 
-            if (this.NumberOfCards is ConstantEvaluatableValue<int> constant && constant.ConstantValue == 1)
+            if (this.NumberOfCards is ConstantNumericEvaluatableValue constant && constant.ConstantValue == 1)
             {
                 creationText = $"Create {CardDatabase.GetModel(this.Id).Name}";
             }

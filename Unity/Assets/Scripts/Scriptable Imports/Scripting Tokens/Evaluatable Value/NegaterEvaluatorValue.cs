@@ -3,11 +3,11 @@ using SFDDCards.Evaluation.Actual;
 
 namespace SFDDCards.ScriptingTokens.EvaluatableValues
 {
-    public class NegatorEvaluatorValue : IEvaluatableValue<int>
+    public class NegatorEvaluatorValue : INumericEvaluatableValue
     {
-        public readonly IEvaluatableValue<int> ToNegate;
+        public readonly INumericEvaluatableValue ToNegate;
 
-        public NegatorEvaluatorValue(IEvaluatableValue<int> toNegate)
+        public NegatorEvaluatorValue(INumericEvaluatableValue toNegate)
         {
             this.ToNegate = toNegate;
         }
@@ -16,6 +16,18 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
         {
             if (!this.ToNegate.TryEvaluateValue(campaignContext, currentBuilder, out evaluatedValue))
             {
+                return false;
+            }
+
+            evaluatedValue = evaluatedValue * -1;
+            return true;
+        }
+
+        public bool TryEvaluateDecimalValue(CampaignContext campaignContext, TokenEvaluatorBuilder currentBuilder, out decimal evaluatedValue)
+        {
+            if (!this.ToNegate.TryEvaluateDecimalValue(campaignContext, currentBuilder, out evaluatedValue))
+            {
+                evaluatedValue = 0;
                 return false;
             }
 

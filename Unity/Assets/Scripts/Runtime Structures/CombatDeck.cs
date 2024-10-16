@@ -48,7 +48,7 @@ namespace SFDDCards
             this.CardsCurrentlyInHand.Clear();
             this.CardsCurrentlyInExile.Clear();
 
-            GlobalUpdateUX.UpdateUXEvent.Invoke();
+            GlobalUpdateUX.UpdateUXEvent.Invoke(this.BasedOnDeck.ForCampaign);
         }
 
         /// <summary>
@@ -80,7 +80,7 @@ namespace SFDDCards
                 }
             }
 
-            GlobalUpdateUX.UpdateUXEvent.Invoke();
+            GlobalUpdateUX.UpdateUXEvent.Invoke(this.BasedOnDeck.ForCampaign);
         }
 
         public void ShuffleDiscardIntoDeck()
@@ -89,7 +89,7 @@ namespace SFDDCards
             this.CardsCurrentlyInDiscard.Clear();
             this.CardsCurrentlyInDeck = this.CardsCurrentlyInDeck.ShuffleList();
 
-            GlobalUpdateUX.UpdateUXEvent.Invoke();
+            GlobalUpdateUX.UpdateUXEvent.Invoke(this.BasedOnDeck.ForCampaign);
         }
 
         public void DiscardHand()
@@ -99,7 +99,7 @@ namespace SFDDCards
                 this.MoveCardToZone(this.CardsCurrentlyInHand[ii], this.CardsCurrentlyInDiscard);
             }
 
-            GlobalUpdateUX.UpdateUXEvent.Invoke();
+            GlobalUpdateUX.UpdateUXEvent.Invoke(this.BasedOnDeck.ForCampaign);
         }
 
         public void ShuffleDeck()
@@ -116,7 +116,7 @@ namespace SFDDCards
 
             toMoveTo.Add(card);
 
-            GlobalUpdateUX.UpdateUXEvent.Invoke();
+            GlobalUpdateUX.UpdateUXEvent.Invoke(this.BasedOnDeck.ForCampaign);
         }
 
         public void MoveCardToZoneIfNotInAnyZonesCurrently(Card card, List<Card> toMoveTo)

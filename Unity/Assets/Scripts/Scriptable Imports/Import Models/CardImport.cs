@@ -18,10 +18,15 @@ namespace SFDDCards.ImportModels
         [System.NonSerialized]
         public Sprite CardArt;
 
-        public bool MeetsAllTags(HashSet<string> tags)
+        public bool MeetsAllTags(IEnumerable<string> tags)
         {
             foreach (string tag in tags)
             {
+                if (tag.ToLower() == "card")
+                {
+                    continue;
+                }
+
                 if (!this.Tags.Contains(tag))
                 {
                     return false;

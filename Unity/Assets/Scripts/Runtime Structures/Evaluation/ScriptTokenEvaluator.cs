@@ -40,7 +40,7 @@ namespace SFDDCards
                 {
                     foreach (Element curElement in evaluatedAttack.BaseElementGain.Keys)
                     {
-                        elementGainBuilder.ElementResourceChanges.Add(new ElementResourceChange(curElement, new ConstantEvaluatableValue<int>(evaluatedAttack.BaseElementGain[curElement])));
+                        elementGainBuilder.ElementResourceChanges.Add(new ElementResourceChange(curElement, new ConstantNumericEvaluatableValue(evaluatedAttack.BaseElementGain[curElement])));
                     }
                 }
 

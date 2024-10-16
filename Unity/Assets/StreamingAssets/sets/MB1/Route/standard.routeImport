@@ -205,5 +205,68 @@
 				}
 			]
 		}
+	],
+	"CostModifiers": [
+		{
+			"TagMatch": [
+				"common",
+				"card"
+			],
+			"Currency": "currency_gold",
+			"EvaluationScript": "20"
+		},
+		{
+			"TagMatch": [
+				"uncommon",
+				"card"
+			],
+			"Currency": "currency_gold",
+			"EvaluationScript": "50"
+		},
+		{
+			"TagMatch": [
+				"rare",
+				"card"
+			],
+			"Currency": "currency_gold",
+			"EvaluationScript": "100"
+		},
+		{
+			"TagMatch": [
+				"common",
+				"artifact"
+			],
+			"Currency": "currency_gold",
+			"EvaluationScript": "100"
+		},
+		{
+			"TagMatch": [
+				"uncommon",
+				"artifact"
+			],
+			"Currency": "currency_gold",
+			"EvaluationScript": "200"
+		},
+		{
+			"TagMatch": [
+				"rare",
+				"artifact"
+			],
+			"Currency": "currency_gold",
+			"EvaluationScript": "300"
+		},
+		{
+			"TagMatch": [
+				"void"
+			],
+			"Currency": "currency_gold",
+			"EvaluationScript": "value*.3"
+		}
+	],
+	"StartingCurrencies": [
+		{
+			"CurrencyName": "currency_gold",
+			"StartingAmount": 100
+		}
 	]
 }

@@ -1,0 +1,22 @@
+{
+	"Id": "mb1_card_uncommon_withyourwallet",
+	"Name": "With Your Wallet",
+	"EffectScript": "[SETTARGET: FOE][DAMAGE: COUNTCURRENCY_CURRENCY_GOLD/10]",
+	"Tags":
+	[
+		"mb1",
+		"force","cyber",
+		"uncommon"
+	],
+	"ElementGain":
+	[
+		{
+			"Element": "force",
+			"Gain": 2
+		},
+		{
+			"Element": "cyber",
+			"Gain": 1
+		}
+	]
+}

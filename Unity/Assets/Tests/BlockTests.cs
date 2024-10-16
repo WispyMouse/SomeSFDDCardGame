@@ -31,7 +31,7 @@ namespace SFDDCards.Tests.EditMode
             campaignContext.StartNextRoomFromEncounter(new EvaluatedEncounter(testEncounter));
             CombatContext combatContext = campaignContext.CurrentCombatContext;
             combatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.PlayerTurn);
-            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents(campaignContext);
 
             int startingHealth = campaignContext.CampaignPlayer.CurrentHealth;
             int numberOfBlockStacksToGivePlayer = 10;
@@ -46,12 +46,12 @@ namespace SFDDCards.Tests.EditMode
                     new DeltaEntry(campaignContext, null, combatContext.CombatPlayer, combatContext.CombatPlayer)
                     {
                         IntensityKindType = TokenEvaluatorBuilder.IntensityKind.Damage,
-                        ConceptualIntensity =  new ConstantEvaluatableValue<int>(damageToDealToPlayer)
+                        ConceptualIntensity =  new ConstantNumericEvaluatableValue(damageToDealToPlayer)
                     }
                  }
             };
             delta.ApplyDelta(campaignContext);
-            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents(campaignContext);
 
             Assert.AreEqual(startingHealth, campaignContext.CampaignPlayer.CurrentHealth, $"Because of the block, it is expected the player takes no damage.");
             Assert.AreEqual(expectedRemainingBlock, campaignContext.CampaignPlayer.AppliedStatusEffects[0].Stacks, $"The player is expected to have {expectedRemainingBlock} remaining block.");
@@ -66,12 +66,12 @@ namespace SFDDCards.Tests.EditMode
                     new DeltaEntry(campaignContext, null, combatContext.CombatPlayer, combatContext.CombatPlayer)
                     {
                         IntensityKindType = TokenEvaluatorBuilder.IntensityKind.Damage,
-                        ConceptualIntensity = new ConstantEvaluatableValue<int>(10)
+                        ConceptualIntensity = new ConstantNumericEvaluatableValue(10)
                     }
                  }
             };
             delta.ApplyDelta(campaignContext);
-            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents(campaignContext);
 
             Assert.AreEqual(targetHealth, campaignContext.CampaignPlayer.CurrentHealth, $"Because of the block, it is expected the player takes a specific amount of reduced damage.");
             Assert.AreEqual(0, campaignContext.CampaignPlayer.AppliedStatusEffects.Count, "Expecting all of the block to have fallen off, leaving no status effects behind.");

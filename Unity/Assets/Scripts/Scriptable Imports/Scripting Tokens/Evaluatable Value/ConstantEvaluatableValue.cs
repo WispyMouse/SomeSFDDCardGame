@@ -28,13 +28,13 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
             return this.ConstantValue.ToString();
         }
 
-        public static bool TryGetConstantEvaluatableValue(string argument, out ConstantEvaluatableValue<int> output)
+        public static bool TryGetConstantEvaluatableValue(string argument, out ConstantNumericEvaluatableValue output)
         {
             if (Regex.IsMatch(argument, @"^\-?\d+$"))
             {
                 if (int.TryParse(argument, out int result))
                 {
-                    output = new ConstantEvaluatableValue<int>(result);
+                    output = new ConstantNumericEvaluatableValue(result);
                     return true;
                 }
                 else

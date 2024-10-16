@@ -63,6 +63,11 @@ namespace SFDDCards.ScriptingTokens
             return true;
         }
 
+        public static bool TryGetIntegerEvaluatableFromString(string arguments, out IEvaluatableValue<int> output, bool allowNameMatch = false)
+        {
+            return TryGetIntegerEvaluatableFromStrings(new List<string>() { arguments }, out output, out _, allowNameMatch);
+        }
+
         public static bool TryGetIntegerEvaluatableFromStrings(List<string> arguments, out IEvaluatableValue<int> output, out List<string> remainingStrings, bool allowNameMatch  = false)
         {
             remainingStrings = new List<string>();
@@ -98,6 +103,10 @@ namespace SFDDCards.ScriptingTokens
                             nextMath = CompositeEvaluatableValue.CommonMath.Multiply;
                             hitMath = true;
                             break;
+                        case '~':
+                            nextMath = CompositeEvaluatableValue.CommonMath.Range;
+                            hitMath = true;
+                            break;
                         default:
                             currentBuilder.Append(currentArgument[jj]);
                             break;
@@ -116,7 +125,7 @@ namespace SFDDCards.ScriptingTokens
                         currentBuilder.Clear();
 
                         bool successfulParse = false;
-                        if (ConstantEvaluatableValue<int>.TryGetConstantEvaluatableValue(thisPiece, out ConstantEvaluatableValue<int> outputCEVI))
+                        if (ConstantNumericEvaluatableValue.TryGetConstantNumericEvaluatableValue(thisPiece, out ConstantNumericEvaluatableValue outputCEVI))
                         {
                             compositeEvaluatable.CompositeComponents.Add(new CompositeEvaluatableValue.CompositeNext() { RelationToPrevious = currentMath, ThisValue = outputCEVI });
                             successfulParse = true;
@@ -129,6 +138,11 @@ namespace SFDDCards.ScriptingTokens
                         else if (CountElementEvaluatableValue.TryGetCountElementalEvaluatableValue(thisPiece, out CountElementEvaluatableValue outputCEEV, allowNameMatch))
                         {
                             compositeEvaluatable.CompositeComponents.Add(new CompositeEvaluatableValue.CompositeNext() { RelationToPrevious = currentMath, ThisValue = outputCEEV });
+                            successfulParse = true;
+                        }
+                        else if (CountCurrencyEvaluatableValue.TryGetCountCurrencyEvaluatableValue(thisPiece, out CountCurrencyEvaluatableValue outputCCEV, allowNameMatch))
+                        {
+                            compositeEvaluatable.CompositeComponents.Add(new CompositeEvaluatableValue.CompositeNext() { RelationToPrevious = currentMath, ThisValue = outputCCEV });
                             successfulParse = true;
                         }
                         else if (HealthEvaluatableValue.TryGetHealthEvaluatableValue(thisPiece, out HealthEvaluatableValue outputHEV))

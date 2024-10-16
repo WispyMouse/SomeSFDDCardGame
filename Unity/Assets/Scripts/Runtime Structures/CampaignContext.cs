@@ -1,8 +1,12 @@
 namespace SFDDCards
 {
     using SFDDCards.Evaluation.Actual;
+    using SFDDCards.ImportModels;
+    using SFDDCards.ScriptingTokens;
+    using SFDDCards.ScriptingTokens.EvaluatableValues;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Text.RegularExpressions;
     using UnityEngine;
 
     public class CampaignContext
@@ -25,7 +29,7 @@ namespace SFDDCards
             AllowedToLeave = 1
         }
 
-        public readonly Deck CampaignDeck = new Deck();
+        public readonly Deck CampaignDeck;
         public CombatContext CurrentCombatContext { get; private set; } = null;
         public EvaluatedEncounter CurrentEncounter { get; private set; } = null;
         public readonly Player CampaignPlayer;
@@ -38,18 +42,19 @@ namespace SFDDCards
         private readonly Dictionary<IReactionWindowReactor, HashSet<ReactionWindowSubscription>> ReactorsToSubscriptions = new Dictionary<IReactionWindowReactor, HashSet<ReactionWindowSubscription>>();
         private readonly Dictionary<string, List<ReactionWindowSubscription>> WindowsToReactors = new Dictionary<string, List<ReactionWindowSubscription>>();
 
+        public Dictionary<CurrencyImport, int> CurrencyCounts = new Dictionary<CurrencyImport, int>();
         public Reward PendingRewards { get; set; } = null;
 
         public CampaignContext(CampaignRoute onRoute)
         {
             this.CampaignPlayer = new Player(onRoute.BasedOn.StartingMaximumHealth);
+            this.OnRoute = onRoute;
 
+            this.CampaignDeck = new Deck(this);
             foreach (string startingCard in onRoute.BasedOn.StartingDeck)
             {
                 this.CampaignDeck.AddCardToDeck(CardDatabase.GetModel(startingCard));
             }
-
-            this.OnRoute = onRoute;
         }
 
         public void AddCardToDeck(Card toAdd)
@@ -107,7 +112,7 @@ namespace SFDDCards
                 }
             }
 
-            GlobalUpdateUX.UpdateUXEvent?.Invoke();
+            GlobalUpdateUX.UpdateUXEvent?.Invoke(this);
         }
 
         public void MakeChoiceNodeDecision(ChoiceNodeOption chosen)
@@ -115,7 +120,7 @@ namespace SFDDCards
             chosen.WasSelected = true;
             this.CurrentEncounter = chosen.WillEncounter;
             this.StartNextRoomFromEncounter(chosen.WillEncounter);
-            GlobalUpdateUX.UpdateUXEvent?.Invoke();
+            GlobalUpdateUX.UpdateUXEvent?.Invoke(this);
         }
 
         public ChoiceNode GetCampaignCurrentNode()
@@ -259,9 +264,8 @@ namespace SFDDCards
                 return;
             }
 
-            GlobalUpdateUX.UpdateUXEvent?.Invoke();
+            GlobalUpdateUX.UpdateUXEvent?.Invoke(this);
         }
-
 
         private void PlayerDefeat()
         {
@@ -275,6 +279,195 @@ namespace SFDDCards
             this.UnsubscribeReactor(this.CampaignPlayer);
 
             GlobalSequenceEventHolder.StopAllSequences();
+        }
+
+        public int GetCurrencyCount(CurrencyImport toGet)
+        {
+            if (this.CurrencyCounts.TryGetValue(toGet, out int value))
+            {
+                return value;
+            }
+
+            return 0;
+        }
+
+        public void ModCurrency(CurrencyImport toAward, int amount)
+        {
+            if (this.CurrencyCounts.TryGetValue(toAward, out int existingValue))
+            {
+                this.CurrencyCounts[toAward] = Mathf.Max(0, existingValue + amount);
+            }
+            else
+            {
+                this.CurrencyCounts.Add(toAward, Mathf.Max(0, amount));
+            }
+
+            GlobalUpdateUX.UpdateUXEvent.Invoke(this);
+        }
+
+        public void SetCurrency(CurrencyImport toSet, int amount)
+        {
+            if (this.CurrencyCounts.TryGetValue(toSet, out int existingValue))
+            {
+                this.CurrencyCounts[toSet] = Mathf.Max(0, amount);
+            }
+            else
+            {
+                this.CurrencyCounts.Add(toSet, Mathf.Max(0, amount));
+            }
+
+            GlobalUpdateUX.UpdateUXEvent.Invoke(this);
+        }
+
+        public void PurchaseShopItem(ShopEntry toBuy)
+        {
+            bool canAfford = this.CanAfford(toBuy.Costs);
+
+            if (!canAfford)
+            {
+                GlobalUpdateUX.LogTextEvent.Invoke($"Cannot afford the cost of this item, or could not evaluate all its costs.", GlobalUpdateUX.LogType.UserError);
+                return;
+            }
+
+            this.Gain(toBuy);
+
+            foreach (ShopCost cost in toBuy.Costs)
+            {
+                if (!cost.Amount.TryEvaluateValue(this, null, out int shopCostAmount))
+                {
+                    GlobalUpdateUX.LogTextEvent.Invoke($"The cost of a shop item could not be evaluated.", GlobalUpdateUX.LogType.RuntimeError);
+                }
+
+                this.ModCurrency(cost.Currency, -shopCostAmount);
+            }
+        }
+
+        public bool CanAfford(List<ShopCost> costs)
+        {
+            foreach (ShopCost cost in costs)
+            {
+                if (!cost.Amount.TryEvaluateValue(this, null, out int costAmount))
+                {
+                    return false;
+                }
+
+                int amountInPossession = GetCurrencyCount(cost.Currency);
+
+                if (amountInPossession < costAmount)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public void Gain(IGainable toGain)
+        {
+            if (!toGain.GainedAmount.TryEvaluateValue(this, null, out int gainedAmount))
+            {
+                GlobalUpdateUX.LogTextEvent.Invoke($"Failed to evaluate gain amount for gainable. Could not gain.", GlobalUpdateUX.LogType.RuntimeError);
+                return;
+            }
+
+            if (toGain.GainedCard != null)
+            {
+                for (int ii = 0; ii < gainedAmount; ii++)
+                {
+                    this.CampaignDeck.AddCardToDeck(toGain.GainedCard);
+                }
+            }
+            else if (toGain.GainedEffect != null)
+            {
+                GlobalSequenceEventHolder.PushSequenceToTop(new GameplaySequenceEvent(() =>
+                {
+                    this.CampaignPlayer.ApplyDelta(
+                        this,
+                        null,
+                        ScriptTokenEvaluator.GetDeltaFromTokens($"[SETTARGET:SELF][APPLYSTATUSEFFECTSTACKS: {gainedAmount} {toGain.GainedEffect.Id}]",
+                        this,
+                        null,
+                        this.CampaignPlayer,
+                        this.CampaignPlayer)
+                        .DeltaEntries[0]);
+
+                    GlobalUpdateUX.UpdateUXEvent?.Invoke(this);
+                }));
+            }
+            else if (toGain.GainedCurrency != null)
+            {
+                this.ModCurrency(toGain.GainedCurrency, gainedAmount);
+            }
+
+            GlobalUpdateUX.UpdateUXEvent.Invoke(this);
+        }
+
+        public List<ShopCost> GetPriceForItem(IGainable toShopFor)
+        {
+            Dictionary<CurrencyImport, IEvaluatableValue<int>> costs = new Dictionary<CurrencyImport, IEvaluatableValue<int>>();
+
+            foreach (CostEvaluationModifier modifier in this.OnRoute.BasedOn.CostModifiers)
+            {
+                if (!GainableMatchesTags(toShopFor, modifier.TagMatch))
+                {
+                    continue;
+                }
+
+                CurrencyImport referencedCurrency = CurrencyDatabase.GetModel(modifier.Currency);
+                int valueToReplace = 0;
+
+                if (costs.TryGetValue(referencedCurrency, out IEvaluatableValue<int> currentValue))
+                {
+                    if (!currentValue.TryEvaluateValue(this, null, out valueToReplace))
+                    {
+                        GlobalUpdateUX.LogTextEvent.Invoke($"Failed to evaluate existing cost from earlier rule.", GlobalUpdateUX.LogType.RuntimeError);
+                        continue;
+                    }
+                }
+
+                string replacedValueString = modifier.EvaluationScript.ToLower().Replace("value", valueToReplace.ToString());
+                if (!BaseScriptingToken.TryGetIntegerEvaluatableFromString(replacedValueString, out IEvaluatableValue<int> newValue))
+                {
+                    GlobalUpdateUX.LogTextEvent.Invoke($"Failed to evaluate new rule.", GlobalUpdateUX.LogType.RuntimeError);
+                    continue;
+                }
+
+                if (costs.ContainsKey(referencedCurrency))
+                {
+                    costs[referencedCurrency] = newValue;
+                }
+                else
+                {
+                    costs.Add(referencedCurrency, newValue);
+                }
+            }
+
+            List<ShopCost> costsAsShopCost = new List<ShopCost>();
+            foreach (CurrencyImport key in costs.Keys)
+            {
+                costsAsShopCost.Add(new ShopCost() { Amount = costs[key], Currency = key });
+            }
+
+            return costsAsShopCost;
+        }
+
+        public bool GainableMatchesTags(IGainable toMatch, IEnumerable<string> tags)
+        {
+            if (toMatch.GainedCard != null)
+            {
+                return toMatch.GainedCard.BasedOn.MeetsAllTags(tags);
+            }
+            else if (toMatch.GainedEffect != null)
+            {
+                return toMatch.GainedEffect.MeetsAllTags(tags);
+            }
+            else if (toMatch.GainedCurrency != null)
+            {
+                // TODO: Currency tags?
+                return true;
+            }
+
+            return false;
         }
     }
 }

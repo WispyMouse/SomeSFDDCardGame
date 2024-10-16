@@ -4,7 +4,7 @@
 	"EffectScript": "[REQUIRESATLEASTELEMENT: 5 SOLAR][DRAW: 3][CARDTARGET: HAND][CHOOSECARDS: 1][MOVECARDTOZONE: EXILE]",
 	"Tags":
 	[
-		"mf1",
+		"mb1",
 		"solar","cyber",
 		"rare"
 	],

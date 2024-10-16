@@ -25,7 +25,7 @@ namespace SFDDCards.ScriptingTokens
         {
             if (!TryGetIntegerEvaluatableFromStrings(arguments, out IEvaluatableValue<int> output, out List<string> _))
             {
-                output = new ConstantEvaluatableValue<int>(1);
+                output = new ConstantNumericEvaluatableValue(1);
             }
 
             scriptingToken = new ChooseRandomlyScriptingToken()

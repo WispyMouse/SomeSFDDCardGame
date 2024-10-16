@@ -26,6 +26,8 @@
             new DependentFile($"{Application.streamingAssetsPath}/sets/fundamentals/element/cyber", ParseKind.Element),
             new DependentFile($"{Application.streamingAssetsPath}/sets/fundamentals/element/bio", ParseKind.Element),
 
+            new DependentFile($"{Application.streamingAssetsPath}/sets/fundamentals/currency/gold", ParseKind.Currency),
+
             new DependentFile($"{Application.streamingAssetsPath}/sets/fundamentals/statuseffect/block", ParseKind.StatusEffect)
         };
 
@@ -44,9 +46,11 @@
             new ParseFromFileTestData("mb1_card_common_sneeze", "1 x Force damage to all foes. Apply 1 x Bio Poison.", ParseKind.Card),
             new ParseFromFileTestData("mb1_card_common_tuckandroll", "Gain 5 Block. Put a card from the top 3 cards of the deck in hand. Shuffle.", ParseKind.Card),
             new ParseFromFileTestData("mb1_card_common_voiddrink", $"2 damage to self.\r\nIf Void {RequiresComparisonScriptingToken.GreaterThanOrEqualToAscii} 2: Clear Void. Draw 2 cards. Exile this card.", ParseKind.Card),
+            new ParseFromFileTestData("mb1_card_common_moneybag", $"Gain 5 Gold. Exile this card.", ParseKind.Card),
 
             new ParseFromFileTestData("mb1_card_uncommon_devotiontoacause", $"If Solar {RequiresComparisonScriptingToken.GreaterThanOrEqualToAscii} 5: Draw 3 cards. Exile a card from hand.", ParseKind.Card),
             new ParseFromFileTestData("mb1_card_uncommon_tomorrowstar", "Gain 2 Tomorrow Star.", ParseKind.Card),
+            new ParseFromFileTestData("mb1_card_uncommon_withyourwallet", $"Gold / 10 damage.", ParseKind.Card),
 
             new ParseFromFileTestData("mb1_card_rare_finaldawn", $"If Void + Solar {RequiresComparisonScriptingToken.GreaterThanOrEqualToAscii} 15: 40 damage to all foes. Clear Void. Clear Solar.", ParseKind.Card),
             new ParseFromFileTestData("mb1_card_rare_giantlaserfromspace", "Set Laser Calibrating Aim to 2 stacks on foe.", ParseKind.Card),
@@ -87,6 +91,9 @@
                     case ParseKind.Element:
                         ElementDatabase.AddElement(ImportHelper.GetFile<ElementImport>(dependentFile.TypelessFilepath + ".elementimport"));
                         break;
+                    case ParseKind.Currency:
+                        CurrencyDatabase.AddCurrencyToDatabase(ImportHelper.GetFile<CurrencyImport>(dependentFile.TypelessFilepath + ".currencyimport"));
+                        break;
                 }
 
                 alreadyImportedFiles.Add(dependentFile.TypelessFilepath);
@@ -122,9 +129,7 @@
         [OneTimeTearDown]
         public void OneTimeTearDown()
         {
-            CardDatabase.ClearDatabase();
-            ElementDatabase.ClearDatabase();
-            StatusEffectDatabase.ClearDatabase();
+            EditModeTestBase.ResetAll();
         }
 
         [Test]
@@ -152,11 +157,11 @@
             campaignContext.StartNextRoomFromEncounter(new EvaluatedEncounter(testEncounter));
             CombatContext combatContext = campaignContext.CurrentCombatContext;
             combatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.PlayerTurn);
-            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents(campaignContext);
 
             Card resonate = CardDatabase.GetModel("mb1_card_starter_resonate");
             combatContext.PlayerCombatDeck.CardsCurrentlyInHand.Add(resonate);
-            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents(campaignContext);
 
             EffectDescription resonateDescription = resonate.GetDescription(new ReactionWindowContext(campaignContext, KnownReactionWindows.ConsideringPlayingFromHand, combatContext.CombatPlayer, new NoTarget(), "hand"));
             string description = resonateDescription.BreakDescriptionsIntoString();
@@ -175,11 +180,11 @@
             campaignContext.StartNextRoomFromEncounter(new EvaluatedEncounter(testEncounter));
             CombatContext combatContext = campaignContext.CurrentCombatContext;
             combatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.PlayerTurn);
-            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents(campaignContext);
 
             Card resonate = CardDatabase.GetModel("mb1_card_starter_resonate");
             combatContext.PlayerCombatDeck.CardsCurrentlyInHand.Add(resonate);
-            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents(campaignContext);
 
             EffectDescription resonateDescription = resonate.GetDescription(new ReactionWindowContext(campaignContext, KnownReactionWindows.ConsideringPlayingFromHand, combatContext.CombatPlayer, new NoTarget(), "hand"));
             string description = resonateDescription.BreakDescriptionsIntoString();
@@ -198,11 +203,11 @@
             campaignContext.StartNextRoomFromEncounter(new EvaluatedEncounter(testEncounter));
             CombatContext combatContext = campaignContext.CurrentCombatContext;
             combatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.PlayerTurn);
-            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents(campaignContext);
 
             Card fueldByPassion = CardDatabase.GetModel("mb1_card_common_fueledbypassion");
             combatContext.PlayerCombatDeck.CardsCurrentlyInHand.Add(fueldByPassion);
-            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents(campaignContext);
 
             EffectDescription fueldByPassionDescription = fueldByPassion.GetDescription(new ReactionWindowContext(campaignContext, KnownReactionWindows.ConsideringPlayingFromHand, combatContext.CombatPlayer, new NoTarget(), "hand"));
             string description = fueldByPassionDescription.BreakDescriptionsIntoString();
@@ -221,11 +226,11 @@
             campaignContext.StartNextRoomFromEncounter(new EvaluatedEncounter(testEncounter));
             CombatContext combatContext = campaignContext.CurrentCombatContext;
             combatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.PlayerTurn);
-            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents(campaignContext);
 
             Card strike = CardDatabase.GetModel("mb1_card_starter_strike");
             combatContext.PlayerCombatDeck.CardsCurrentlyInHand.Add(strike);
-            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents(campaignContext);
 
             EffectDescription strikeDescription = strike.GetDescription(new ReactionWindowContext(campaignContext, KnownReactionWindows.ConsideringPlayingFromHand, combatContext.CombatPlayer, new NoTarget(), "hand"));
             string description = strikeDescription.BreakDescriptionsIntoString();
@@ -244,11 +249,11 @@
             campaignContext.StartNextRoomFromEncounter(new EvaluatedEncounter(testEncounter));
             CombatContext combatContext = campaignContext.CurrentCombatContext;
             combatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.PlayerTurn);
-            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents(campaignContext);
 
             Card strike = CardDatabase.GetModel("mb1_card_starter_strike");
             combatContext.PlayerCombatDeck.CardsCurrentlyInHand.Add(strike);
-            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents(campaignContext);
 
             EffectDescription strikeDescription = strike.GetDescription(new ReactionWindowContext(campaignContext, KnownReactionWindows.ConsideringPlayingFromHand, combatContext.CombatPlayer, new NoTarget(), "hand"));
             string description = strikeDescription.BreakDescriptionsIntoString();
@@ -270,11 +275,11 @@
             campaignContext.StartNextRoomFromEncounter(new EvaluatedEncounter(testEncounter));
             CombatContext combatContext = campaignContext.CurrentCombatContext;
             combatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.PlayerTurn);
-            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents(campaignContext);
 
             Card burnARecord = CardDatabase.GetModel("mb1_card_common_burnarecord");
             combatContext.PlayerCombatDeck.CardsCurrentlyInHand.Add(burnARecord);
-            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents(campaignContext);
 
             EffectDescription burnARecordDescription = burnARecord.GetDescription(new ReactionWindowContext(campaignContext, KnownReactionWindows.ConsideringPlayingFromHand, combatContext.CombatPlayer, new NoTarget(), "hand"));
             string description = burnARecordDescription.BreakDescriptionsIntoString();

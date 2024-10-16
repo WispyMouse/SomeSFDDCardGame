@@ -84,6 +84,9 @@ namespace SFDDCards
                     case TokenEvaluatorBuilder.IntensityKind.SetStatusEffect:
                         nextDescriptor += DescribeConceptualSetStatusEffect(deltaEntry);
                         break;
+                    case TokenEvaluatorBuilder.IntensityKind.CurrencyMod:
+                        nextDescriptor += DescribeConceptualModCurrency(deltaEntry);
+                        break;
                 }
 
                 string trimmed = nextDescriptor.Trim().Trim('.');
@@ -186,6 +189,9 @@ namespace SFDDCards
                 case TokenEvaluatorBuilder.IntensityKind.SetStatusEffect:
                     entireEffectText.Append(leadingSpace + DescribeRealizedSetStatusEffect(builder));
                     break;
+                case TokenEvaluatorBuilder.IntensityKind.CurrencyMod:
+                    entireEffectText.Append(leadingSpace + DescribeRealizedModCurrency(builder));
+                    break;
             }
 
             return entireEffectText.ToString();
@@ -221,6 +227,9 @@ namespace SFDDCards
                         break;
                     case TokenEvaluatorBuilder.IntensityKind.RemoveStatusEffect:
                         nextDescriptor = DescribeResolvedRemoveStatusEffect(deltaEntry);
+                        break;
+                    case TokenEvaluatorBuilder.IntensityKind.CurrencyMod:
+                        nextDescriptor = DescribeResolvedModCurrency(deltaEntry);
                         break;
                 }
 
@@ -372,7 +381,7 @@ namespace SFDDCards
                 case TokenEvaluatorBuilder.IntensityKind.NumberOfCards:
                     if (deltaEntry.NumberOfCardsRelationType == TokenEvaluatorBuilder.NumberOfCardsRelation.Draw)
                     {
-                        if (deltaEntry.ConceptualIntensity is ConstantEvaluatableValue<int> constant && constant.ConstantValue == 1)
+                        if (deltaEntry.ConceptualIntensity is ConstantNumericEvaluatableValue constant && constant.ConstantValue == 1)
                         {
                             valueText = "a";
                         }
@@ -406,7 +415,7 @@ namespace SFDDCards
                 case TokenEvaluatorBuilder.IntensityKind.NumberOfCards:
                     if (builder.NumberOfCardsRelationType == TokenEvaluatorBuilder.NumberOfCardsRelation.Draw)
                     {
-                        if (builder.Intensity is ConstantEvaluatableValue<int> constant && constant.ConstantValue == 1)
+                        if (builder.Intensity is ConstantNumericEvaluatableValue constant && constant.ConstantValue == 1)
                         {
                             valueText = "a";
                         }
@@ -649,7 +658,7 @@ namespace SFDDCards
 
         public static string DescribeConceptualSetStatusEffect(ConceptualDeltaEntry deltaEntry)
         {
-            if (deltaEntry.ConceptualTarget is SelfTargetEvaluatableValue && deltaEntry.ConceptualIntensity is ConstantEvaluatableValue<int> constant && constant.ConstantValue == 0)
+            if (deltaEntry.ConceptualTarget is SelfTargetEvaluatableValue && deltaEntry.ConceptualIntensity is ConstantNumericEvaluatableValue constant && constant.ConstantValue == 0)
             {
                 return $"Clear {deltaEntry.StatusEffect.Name}.";
             }
@@ -686,7 +695,7 @@ namespace SFDDCards
 
         public static string DescribeRealizedSetStatusEffect(TokenEvaluatorBuilder builder)
         {
-            if (builder.Intensity is ConstantEvaluatableValue<int> constant && constant.ConstantValue == 0)
+            if (builder.Intensity is ConstantNumericEvaluatableValue constant && constant.ConstantValue == 0)
             {
                 return $"Clear {builder.StatusEffect.Name}.";
             }
@@ -723,66 +732,6 @@ namespace SFDDCards
                     && builder.Target.IsFoeOf(builder.User)
                     && builder.Target.GetRepresentingNumberOfTargets() == 1);
                 });
-        }
-
-        public static string ExtractSingularOrPlural(IEvaluatableValue<int> evaluatable, string root)
-        {
-            return ExtractSingularOrPlural(evaluatable, root, $"{root}s", $"{root}(s)");
-        }
-
-        public static string ExtractSingularOrPlural(int toUtilize, string root)
-        {
-            return ExtractSingularOrPlural(toUtilize, root, $"{root}s", $"{root}(s)");
-        }
-
-        public static string ExtractSingularOrPlural(IEvaluatableValue<int> evaluatable, string single, string plural, string dontknow)
-        {
-            switch (DeterminePlurality(evaluatable))
-            {
-                case IsPlural.Yes:
-                    return plural;
-                case IsPlural.No:
-                    return single;
-                default:
-                case IsPlural.DontKnow:
-                    return dontknow;
-            }
-        }
-
-        public static string ExtractSingularOrPlural(int toUse, string single, string plural, string dontknow)
-        {
-            switch (DeterminePlurality(toUse))
-            {
-                case IsPlural.Yes:
-                    return plural;
-                case IsPlural.No:
-                    return single;
-                default:
-                case IsPlural.DontKnow:
-                    return dontknow;
-            }
-        }
-
-        public static IsPlural DeterminePlurality(int toDetermine)
-        {
-            if (toDetermine == 1)
-            {
-                return IsPlural.No;
-            }
-            else
-            {
-                return IsPlural.Yes;
-            }
-        }
-
-        public static IsPlural DeterminePlurality(IEvaluatableValue<int> evaluatable)
-        {
-            if (evaluatable is ConstantEvaluatableValue<int> constant)
-            {
-                return DeterminePlurality(constant.ConstantValue);
-            }
-
-            return IsPlural.DontKnow;
         }
         #endregion
 
@@ -956,6 +905,70 @@ namespace SFDDCards
         }
         #endregion
 
+        #region Plurality
+
+
+        public static string ExtractSingularOrPlural(IEvaluatableValue<int> evaluatable, string root)
+        {
+            return ExtractSingularOrPlural(evaluatable, root, $"{root}s", $"{root}(s)");
+        }
+
+        public static string ExtractSingularOrPlural(int toUtilize, string root)
+        {
+            return ExtractSingularOrPlural(toUtilize, root, $"{root}s", $"{root}(s)");
+        }
+
+        public static string ExtractSingularOrPlural(IEvaluatableValue<int> evaluatable, string single, string plural, string dontknow)
+        {
+            switch (DeterminePlurality(evaluatable))
+            {
+                case IsPlural.Yes:
+                    return plural;
+                case IsPlural.No:
+                    return single;
+                default:
+                case IsPlural.DontKnow:
+                    return dontknow;
+            }
+        }
+
+        public static string ExtractSingularOrPlural(int toUse, string single, string plural, string dontknow)
+        {
+            switch (DeterminePlurality(toUse))
+            {
+                case IsPlural.Yes:
+                    return plural;
+                case IsPlural.No:
+                    return single;
+                default:
+                case IsPlural.DontKnow:
+                    return dontknow;
+            }
+        }
+
+        public static IsPlural DeterminePlurality(int toDetermine)
+        {
+            if (toDetermine == 1)
+            {
+                return IsPlural.No;
+            }
+            else
+            {
+                return IsPlural.Yes;
+            }
+        }
+
+        public static IsPlural DeterminePlurality(IEvaluatableValue<int> evaluatable)
+        {
+            if (evaluatable is ConstantNumericEvaluatableValue constant)
+            {
+                return DeterminePlurality(constant.ConstantValue);
+            }
+
+            return IsPlural.DontKnow;
+        }
+        #endregion
+
         #region Describing Elements
 
         public static string DescribeElementChange(ConceptualDeltaEntry delta, bool ignoreElementFlag)
@@ -969,7 +982,7 @@ namespace SFDDCards
 
                 if (change.SetValue != null)
                 {
-                    if (change.SetValue is ConstantEvaluatableValue<int> constant && constant.ConstantValue == 0)
+                    if (change.SetValue is ConstantNumericEvaluatableValue constant && constant.ConstantValue == 0)
                     {
                         nextText.Append($"{leadingcomma}Clear {change.Element.GetNameAndMaybeIcon()}");
                     }
@@ -982,7 +995,7 @@ namespace SFDDCards
                 }
                 else if (change.GainOrLoss != null)
                 {
-                    if (change.GainOrLoss is ConstantEvaluatableValue<int> constant)
+                    if (change.GainOrLoss is ConstantNumericEvaluatableValue constant)
                     {
                         if (constant.ConstantValue > 0 && !ignoreElementFlag)
                         {
@@ -1026,7 +1039,7 @@ namespace SFDDCards
 
                 if (change.SetValue != null)
                 {
-                    if (change.SetValue is ConstantEvaluatableValue<int> constant && constant.ConstantValue == 0)
+                    if (change.SetValue is ConstantNumericEvaluatableValue constant && constant.ConstantValue == 0)
                     {
                         nextText.Append($"{leadingcomma}Clear {change.Element.GetNameAndMaybeIcon()}");
                     }
@@ -1039,7 +1052,7 @@ namespace SFDDCards
                 }
                 else if (change.GainOrLoss != null)
                 {
-                    if (change.GainOrLoss is ConstantEvaluatableValue<int> constant)
+                    if (change.GainOrLoss is ConstantNumericEvaluatableValue constant)
                     {
                         if (constant.ConstantValue > 0 && !ignoreElementFlag)
                         {
@@ -1115,6 +1128,55 @@ namespace SFDDCards
             }
 
             return resultBuilder.ToString();
+        }
+
+        #endregion
+
+        #region Describing Currency
+
+        public static string DescribeConceptualModCurrency(ConceptualDeltaEntry deltaEntry)
+        {
+            if (deltaEntry.ConceptualIntensity is ConstantNumericEvaluatableValue constantValue)
+            {
+                if (constantValue.ConstantValue > 0)
+                {
+                    return $"Gain {constantValue.ConstantValue} {deltaEntry.Currency.GetNameAndMaybeIcon()}";
+                }
+                else
+                {
+                    return $"Lose {constantValue.ConstantValue} {deltaEntry.Currency.GetNameAndMaybeIcon()}";
+                }
+            }
+
+            return $"Modify {deltaEntry.Currency.GetNameAndMaybeIcon()} by {deltaEntry.ConceptualIntensity.DescribeEvaluation()}";
+        }
+
+        public static string DescribeRealizedModCurrency(TokenEvaluatorBuilder builder)
+        {
+            int mod;
+            builder.Intensity.TryEvaluateValue(builder.Campaign, builder, out mod);
+            if (mod > 0)
+            {
+                return $"Gain {mod} {builder.Currency.GetNameAndMaybeIcon()}";
+            }
+            else
+            {
+                return $"Lose {mod} {builder.Currency.GetNameAndMaybeIcon()}";
+            }
+        }
+
+        public static string DescribeResolvedModCurrency(DeltaEntry delta)
+        {
+            int mod;
+            delta.ConceptualIntensity.TryEvaluateValue(delta.FromCampaign, delta.MadeFromBuilder, out mod);
+            if (mod > 0)
+            {
+                return $"Gained {mod} {delta.MadeFromBuilder.Currency.GetNameAndMaybeIcon()}";
+            }
+            else
+            {
+                return $"Lost {mod} {delta.MadeFromBuilder.Currency.GetNameAndMaybeIcon()}";
+            }
         }
 
         #endregion

@@ -27,13 +27,13 @@ namespace SFDDCards.UX
 
         private Action<RewardArtifactUX> OnClicked {get; set;} 
 
-        public void SetFromArtifact(StatusEffect artifact, Action<RewardArtifactUX> onClick)
+        public void SetFromArtifact(StatusEffect artifact, Action<RewardArtifactUX> onClick, int amount)
         {
             this.RepresentedArtifact = artifact;
 
             this.ImageRepresentation.sprite = artifact.Sprite;
             this.Name.text = artifact.Name;
-            this.Label.text = artifact.DescribeStatusEffect().BreakDescriptionsIntoString();
+            this.Label.text = (amount != 0 ? $"x{amount}" : "") + artifact.DescribeStatusEffect().BreakDescriptionsIntoString();
             this.OnClicked = onClick;
         }
 
@@ -73,6 +73,16 @@ namespace SFDDCards.UX
         public void UnHoverOnDisable()
         {
             MouseHoverShowerController.MouseEndHoveredEvent.Invoke(this);
+        }
+
+        private void OnDisable()
+        {
+            this.UnHoverOnDisable();
+        }
+
+        private void OnDestroy()
+        {
+            this.UnHoverOnDisable();
         }
     }
 }

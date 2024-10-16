@@ -5,7 +5,7 @@ using SFDDCards.Evaluation.Conceptual;
 
 namespace SFDDCards.ScriptingTokens.EvaluatableValues
 {
-    public class CountStacksEvaluatableValue : IEvaluatableValue<int>
+    public class CountStacksEvaluatableValue : INumericEvaluatableValue
     {
         public readonly string StacksToCount;
         public readonly string CountOn;
@@ -32,6 +32,13 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
 
             evaluatedValue = currentBuilder.Target.CountStacks(this.StacksToCount);
             return true;
+        }
+
+        public bool TryEvaluateDecimalValue(CampaignContext campaignContext, TokenEvaluatorBuilder currentBuilder, out decimal evaluatedValue)
+        {
+            bool returnValue = this.TryEvaluateValue(campaignContext, currentBuilder, out int evaluatedIntValue);
+            evaluatedValue = evaluatedIntValue;
+            return returnValue;
         }
 
         public string DescribeEvaluation(CampaignContext campaignContext, TokenEvaluatorBuilder currentBuilder)

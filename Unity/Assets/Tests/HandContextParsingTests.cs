@@ -39,7 +39,7 @@ namespace SFDDCards.Tests.EditMode
             campaignContext.StartNextRoomFromEncounter(new EvaluatedEncounter(testEncounter));
             CombatContext combatContext = campaignContext.CurrentCombatContext;
             combatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.PlayerTurn);
-            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents(campaignContext);
 
             combatContext.ElementResourceCounts.Add(this.DebugElementOne, stacksToGive);
 

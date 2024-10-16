@@ -4,7 +4,7 @@
 	"EffectScript": "[SETTARGET: SELF][APPLYSTATUSEFFECTSTACKS: 1 mb1_statuseffect_bioheal]",
 	"Tags":
 	[
-		"mf1",
+		"mb1",
 		"bio","solar",
 		"common"
 	],

@@ -4,7 +4,7 @@
 	"EffectScript": "[SETTARGET: ALLFOES][DAMAGE: COUNTELEMENT_FORCE][APPLYSTATUSEFFECTSTACKS: COUNTELEMENT_BIO mb1_statuseffect_poison]",
 	"Tags":
 	[
-		"mf1",
+		"mb1",
 		"bio","force","void",
 		"common"
 	],

@@ -35,7 +35,7 @@ namespace SFDDCards.UX
             foreach (PickSomeReward pickReward in toReward.PickRewards)
             {
                 PickXRewardPanelUX pickRewardPanel = Instantiate(this.PickRewardUXPF, this.RewardPanelsHolder);
-                pickRewardPanel.RepresentPick(this, pickReward);
+                pickRewardPanel.RepresentPick(CentralGameStateControllerInstance.CurrentCampaignContext, this, pickReward);
             }
         }
 
@@ -51,27 +51,7 @@ namespace SFDDCards.UX
 
         public void GainReward(PickSomeRewardSlot slotChosen)
         {
-            if (slotChosen.RewardedCard != null)
-            {
-                this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignDeck.AddCardToDeck(slotChosen.RewardedCard);
-            }
-            else if (slotChosen.RewardedEffect != null)
-            {
-                GlobalSequenceEventHolder.PushSequenceToTop(new GameplaySequenceEvent(() =>
-                {
-                    this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignPlayer.ApplyDelta(
-                       this.CentralGameStateControllerInstance.CurrentCampaignContext,
-                       null,
-                       ScriptTokenEvaluator.GetDeltaFromTokens($"[SETTARGET:SELF][APPLYSTATUSEFFECTSTACKS: 1 {slotChosen.RewardedEffect.Id}]",
-                       this.CentralGameStateControllerInstance.CurrentCampaignContext,
-                       null,
-                       this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignPlayer,
-                       this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignPlayer)
-                       .DeltaEntries[0]);
-
-                    GlobalUpdateUX.UpdateUXEvent?.Invoke();
-                }));
-            }
+            this.CentralGameStateControllerInstance.CurrentCampaignContext.Gain(slotChosen);
         }
 
         public void ClosePanel(PickXRewardPanelUX toClose)

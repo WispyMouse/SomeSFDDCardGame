@@ -57,11 +57,17 @@ namespace SFDDCards.Tests.EditMode
         [TearDown]
         public void TearDown()
         {
+            ResetAll();
+        }
+
+        public static void ResetAll()
+        {
             GlobalSequenceEventHolder.StopAllSequences();
             CardDatabase.ClearDatabase();
             EnemyDatabase.ClearDatabase();
             ElementDatabase.ClearDatabase();
             StatusEffectDatabase.ClearDatabase();
+            CurrencyDatabase.ClearDatabase();
             GlobalUpdateUX.PlayerMustMakeChoice.RemoveAllListeners();
             GlobalUpdateUX.PendingPlayerChoice = false;
         }

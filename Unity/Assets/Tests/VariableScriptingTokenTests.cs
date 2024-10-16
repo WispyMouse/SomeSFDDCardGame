@@ -38,9 +38,9 @@ namespace SFDDCards.Tests.EditMode
             Assert.IsTrue(derivedCard.AttackTokens[0] is LogIntScriptingToken, $"Attack token should be of type {typeof(LogIntScriptingToken).Name}.");
 
             LogIntScriptingToken token = derivedCard.AttackTokens[0] as LogIntScriptingToken;
-            Assert.IsTrue(token.ValueToLog is ConstantEvaluatableValue<int>, $"Attack token should have a constant value. Is {token.ValueToLog.GetType()} instead.");
+            Assert.IsTrue(token.ValueToLog is ConstantNumericEvaluatableValue, $"Attack token should have a constant value. Is {token.ValueToLog.GetType()} instead.");
 
-            ConstantEvaluatableValue<int> constant = token.ValueToLog as ConstantEvaluatableValue<int>;
+            ConstantNumericEvaluatableValue constant = token.ValueToLog as ConstantNumericEvaluatableValue;
 
             Assert.AreEqual(randomConstant, constant.ConstantValue, $"Parsed token should have the provided constant value.");
 

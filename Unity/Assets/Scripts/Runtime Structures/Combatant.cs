@@ -103,8 +103,12 @@ namespace SFDDCards
                     newEffect.SetSubscriptions(campaignContext);
                 }
             }
+            else if (deltaEntry.IntensityKindType == TokenEvaluatorBuilder.IntensityKind.CurrencyMod)
+            {
+                campaignContext.ModCurrency(deltaEntry.MadeFromBuilder.Currency, evaluatedIntensity);
+            }
 
-            GlobalUpdateUX.UpdateUXEvent.Invoke();
+            GlobalUpdateUX.UpdateUXEvent.Invoke(campaignContext);
         }
 
         public bool TryGetReactionEvents(CampaignContext campaignContext, ReactionWindowContext reactionContext, out List<WindowResponse> responses)

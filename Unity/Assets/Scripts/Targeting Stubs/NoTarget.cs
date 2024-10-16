@@ -10,7 +10,12 @@ namespace SFDDCards
         
         public void ApplyDelta(CampaignContext campaignContext, CombatContext combatContext, DeltaEntry deltaEntry)
         {
-            // No-op
+            if (deltaEntry.IntensityKindType == TokenEvaluatorBuilder.IntensityKind.CurrencyMod)
+            {
+                int evaluatedIntensity;
+                deltaEntry.ConceptualIntensity.TryEvaluateValue(campaignContext, deltaEntry.MadeFromBuilder, out evaluatedIntensity);
+                campaignContext.ModCurrency(deltaEntry.MadeFromBuilder.Currency, evaluatedIntensity);
+            }
         }
 
         public int CountStacks(string countFor)

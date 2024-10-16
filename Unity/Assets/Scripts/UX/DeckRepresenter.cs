@@ -10,11 +10,6 @@ namespace SFDDCards.UX
     public class DeckRepresenter : MonoBehaviour
     {
         [SerializeReference]
-        private CentralGameStateController CentralGameStateControllerInstance;
-
-        [SerializeReference]
-        private GameObject DeckStatPanel;
-        [SerializeReference]
         private TMPro.TMP_Text CardsInDeckValue;
         [SerializeReference]
         private TMPro.TMP_Text CardsInDiscardValue;
@@ -31,9 +26,9 @@ namespace SFDDCards.UX
             GlobalUpdateUX.UpdateUXEvent.RemoveListener(RepresentDeck);
         }
 
-        public void RepresentDeck()
+        public void RepresentDeck(CampaignContext forContext)
         {
-            if (this.CentralGameStateControllerInstance.CurrentCampaignContext == null)
+            if (forContext == null)
             {
                 this.CardsInDeckValue.text = "0";
                 this.CardsInDiscardValue.text = "0";
@@ -42,17 +37,17 @@ namespace SFDDCards.UX
                 return;
             }
 
-            if (this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext == null)
+            if (forContext.CurrentCombatContext == null)
             {
-                this.CardsInDeckValue.text = this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignDeck.AllCardsInDeck.Count.ToString();
+                this.CardsInDeckValue.text = forContext.CampaignDeck.AllCardsInDeck.Count.ToString();
                 this.CardsInDiscardValue.text = "0";
                 this.CardsInExileValue.text = "0";
                 return;
             }
 
-            this.CardsInDeckValue.text = this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.PlayerCombatDeck.CardsCurrentlyInDeck.Count.ToString();
-            this.CardsInDiscardValue.text = this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.PlayerCombatDeck.CardsCurrentlyInDiscard.Count.ToString();
-            this.CardsInExileValue.text = this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.PlayerCombatDeck.CardsCurrentlyInExile.Count.ToString();
+            this.CardsInDeckValue.text = forContext.CurrentCombatContext.PlayerCombatDeck.CardsCurrentlyInDeck.Count.ToString();
+            this.CardsInDiscardValue.text = forContext.CurrentCombatContext.PlayerCombatDeck.CardsCurrentlyInDiscard.Count.ToString();
+            this.CardsInExileValue.text = forContext.CurrentCombatContext.PlayerCombatDeck.CardsCurrentlyInExile.Count.ToString();
         }
     }
 }

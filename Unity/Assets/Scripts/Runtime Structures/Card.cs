@@ -33,9 +33,11 @@ namespace SFDDCards
         public AttackTokenPile AttackTokenPile { get; set; }
 
         public IEffectOwner Owner => this;
+        public CardImport BasedOn;
 
         public Card(CardImport basedOn)
         {
+            this.BasedOn = basedOn;
             this.Id = basedOn.Id.ToLower();
             this.Name = basedOn.Name;
 

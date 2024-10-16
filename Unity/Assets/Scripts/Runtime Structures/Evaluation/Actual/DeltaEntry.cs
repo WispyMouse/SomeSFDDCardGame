@@ -96,7 +96,7 @@ namespace SFDDCards.Evaluation.Actual
                 return this.ConceptualIntensity;
             }
 
-            int evaluatedValue = 0;
+            int evaluatedValue;
             if (!(BaseScriptingToken.TryGetIntegerEvaluatableFromStrings(new List<string>() { argument }, out IEvaluatableValue<int> output, out _, allowNameMatch: true)))
             {
                 GlobalUpdateUX.LogTextEvent.Invoke($"Failed to parse argument {argument}.", GlobalUpdateUX.LogType.RuntimeError);
@@ -109,14 +109,14 @@ namespace SFDDCards.Evaluation.Actual
         {
             if (argument.ToLower() == "intensity")
             {
-                this.ConceptualIntensity = new ConstantEvaluatableValue<int>(newValue);
+                this.ConceptualIntensity = new ConstantNumericEvaluatableValue(newValue);
                 return null;
             }
 
             if (ElementDatabase.TryGetElement(argument, out Element mappedElement))
             {
                 DeltaEntry elementSet = new DeltaEntry(this);
-                elementSet.ElementResourceChanges.Add(new ElementResourceChange(mappedElement, null, new ConstantEvaluatableValue<int>(newValue)));
+                elementSet.ElementResourceChanges.Add(new ElementResourceChange(mappedElement, null, new ConstantNumericEvaluatableValue(newValue)));
                 return elementSet;
             }
             else if (StatusEffectDatabase.TryGetStatusEffectById(argument, out StatusEffect mappedStatus))
@@ -124,7 +124,7 @@ namespace SFDDCards.Evaluation.Actual
                 DeltaEntry statusSet = new DeltaEntry(this);
                 statusSet.StatusEffect = mappedStatus;
                 statusSet.IntensityKindType = TokenEvaluatorBuilder.IntensityKind.SetStatusEffect;
-                statusSet.ConceptualIntensity = new ConstantEvaluatableValue<int>(newValue);
+                statusSet.ConceptualIntensity = new ConstantNumericEvaluatableValue(newValue);
                 return statusSet;
             }
             else

@@ -22,13 +22,13 @@ namespace SFDDCards.Tests.EditMode
             CombatContext combatContext = campaignContext.CurrentCombatContext;
             EditModeTestCommon.AddBlankCardsToPlayerDeck(combatContext.PlayerCombatDeck, 5);
             combatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.PlayerTurn);
-            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents(campaignContext);
 
             combatContext.PlayerCombatDeck.DealCards(5);
             Card firstCard = combatContext.PlayerCombatDeck.CardsCurrentlyInHand[0];
 
             combatContext.PlayCard(firstCard, combatContext.CombatPlayer);
-            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents(campaignContext);
 
             Assert.Contains(firstCard, combatContext.PlayerCombatDeck.CardsCurrentlyInDiscard, "Expected that the chosen card has been moved to discard.");
             Assert.False(combatContext.PlayerCombatDeck.CardsCurrentlyInExile.Contains(firstCard), "Expected that the chosen card has not been moved to exile.");
@@ -54,12 +54,12 @@ namespace SFDDCards.Tests.EditMode
             CombatContext combatContext = campaignContext.CurrentCombatContext;
             EditModeTestCommon.AddBlankCardsToPlayerDeck(combatContext.PlayerCombatDeck, 5);
             combatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.PlayerTurn);
-            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents(campaignContext);
 
             combatContext.PlayerCombatDeck.DealCards(5);
             combatContext.PlayerCombatDeck.CardsCurrentlyInHand.Add(derivedCard);
             combatContext.PlayCard(derivedCard, combatContext.CombatPlayer);
-            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents(campaignContext);
 
             Assert.Contains(derivedCard, combatContext.PlayerCombatDeck.CardsCurrentlyInExile, "Expected that the chosen card has been moved to exile.");
             Assert.False(combatContext.PlayerCombatDeck.CardsCurrentlyInDiscard.Contains(derivedCard), "Expected that the chosen card has not been moved to discard.");
@@ -85,12 +85,12 @@ namespace SFDDCards.Tests.EditMode
             CombatContext combatContext = campaignContext.CurrentCombatContext;
             EditModeTestCommon.AddBlankCardsToPlayerDeck(combatContext.PlayerCombatDeck, 5);
             combatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.PlayerTurn);
-            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents(campaignContext);
 
             combatContext.PlayerCombatDeck.DealCards(5);
             combatContext.PlayerCombatDeck.CardsCurrentlyInHand.Add(derivedCard);
             combatContext.PlayCard(derivedCard, combatContext.CombatPlayer);
-            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents(campaignContext);
 
             Assert.Contains(derivedCard, combatContext.PlayerCombatDeck.CardsCurrentlyInHand, "Expected that the chosen card has been moved to dihandscard.");
             Assert.False(combatContext.PlayerCombatDeck.CardsCurrentlyInExile.Contains(derivedCard), "Expected that the chosen card has not been moved to exile.");
@@ -116,13 +116,13 @@ namespace SFDDCards.Tests.EditMode
             CombatContext combatContext = campaignContext.CurrentCombatContext;
             EditModeTestCommon.AddBlankCardsToPlayerDeck(combatContext.PlayerCombatDeck, 5);
             combatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.PlayerTurn);
-            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents(campaignContext);
 
             combatContext.PlayerCombatDeck.DealCards(5);
             combatContext.PlayerCombatDeck.CardsCurrentlyInExile.Add(derivedCard);
             combatContext.PlayerCombatDeck.ShuffleDiscardIntoDeck();
 
-            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents(campaignContext);
 
             Assert.Contains(derivedCard, combatContext.PlayerCombatDeck.CardsCurrentlyInExile, "Expected that the card is still in exile.");
             Assert.False(combatContext.PlayerCombatDeck.CardsCurrentlyInHand.Contains(derivedCard), "Expected that the chosen card has not been moved to hand.");
@@ -156,11 +156,11 @@ namespace SFDDCards.Tests.EditMode
             campaignContext.StartNextRoomFromEncounter(new EvaluatedEncounter(testEncounter));
             CombatContext combatContext = campaignContext.CurrentCombatContext;
             combatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.PlayerTurn);
-            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents(campaignContext);
 
             combatContext.PlayerCombatDeck.CardsCurrentlyInHand.Add(derivedCard);
             combatContext.PlayCard(derivedCard, combatContext.CombatPlayer);
-            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents(campaignContext);
 
             Assert.IsTrue(campaignContext.CampaignDeck.AllCardsInDeck.Count == 5, "Expected that there should be five separate copies of the generated card in the campaign deck.");
 

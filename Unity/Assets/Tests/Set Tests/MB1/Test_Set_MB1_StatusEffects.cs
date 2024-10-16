@@ -26,19 +26,19 @@ namespace SFDDCards.Tests.EditMode
             campaignContext.StartNextRoomFromEncounter(new EvaluatedEncounter(testEncounter));
             CombatContext combatContext = campaignContext.CurrentCombatContext;
             combatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.PlayerTurn);
-            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents(campaignContext);
 
             int numberOfBurnStacksToGiveEnemy = 10;
 
             EditModeTestCommon.ApplyStatusEffectStacks(burnStatus.Id, campaignContext, combatContext, combatContext.Enemies[0], numberOfBurnStacksToGiveEnemy);
-            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents(campaignContext);
 
             combatContext.Enemies[0].Intent = new EnemyAttack(new EnemyAttackImport()
             {
                  AttackScript = "[SETTARGET: FOE][DAMAGE: 1]"
             });
             combatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.EnemyTurn);
-            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents(campaignContext);
 
             Assert.AreEqual(1, combatContext.Enemies[0].AppliedStatusEffects.Count, "Enemy should have one status on them.");
             Assert.AreEqual(numberOfBurnStacksToGiveEnemy - 1, combatContext.Enemies[0].AppliedStatusEffects[0].Stacks, "Enemy should have one fewer stack of burn after ending the turn.");
@@ -57,19 +57,19 @@ namespace SFDDCards.Tests.EditMode
             campaignContext.StartNextRoomFromEncounter(new EvaluatedEncounter(testEncounter));
             CombatContext combatContext = campaignContext.CurrentCombatContext;
             combatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.PlayerTurn);
-            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents(campaignContext);
 
             int numberOfBurnStacksToGiveEnemy = 10;
 
             EditModeTestCommon.ApplyStatusEffectStacks(burnStatus.Id, campaignContext, combatContext, combatContext.Enemies[0], numberOfBurnStacksToGiveEnemy);
-            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents(campaignContext);
 
             combatContext.Enemies[0].Intent = new EnemyAttack(new EnemyAttackImport()
             {
                 AttackScript = "[SETTARGET: FOE][DAMAGE: 1][DAMAGE: 1][DAMAGE: 1]"
             });
             combatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.EnemyTurn);
-            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents(campaignContext);
 
             Assert.AreEqual(1, combatContext.Enemies[0].AppliedStatusEffects.Count, "Enemy should have one status on them.");
             Assert.AreEqual(numberOfBurnStacksToGiveEnemy - 1, combatContext.Enemies[0].AppliedStatusEffects[0].Stacks, "Enemy should have one fewer stack of burn after ending the turn."); 
@@ -88,19 +88,19 @@ namespace SFDDCards.Tests.EditMode
             campaignContext.StartNextRoomFromEncounter(new EvaluatedEncounter(testEncounter));
             CombatContext combatContext = campaignContext.CurrentCombatContext;
             combatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.PlayerTurn);
-            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents(campaignContext);
 
             int numberOfBurnStacksToGiveEnemy = 10;
 
             EditModeTestCommon.ApplyStatusEffectStacks(burnStatus.Id, campaignContext, combatContext, combatContext.Enemies[0], numberOfBurnStacksToGiveEnemy);
-            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents(campaignContext);
 
             combatContext.Enemies[0].Intent = new EnemyAttack(new EnemyAttackImport()
             {
                 AttackScript = "[SETTARGET: FOE][DAMAGE: 0]"
             });
             combatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.EnemyTurn);
-            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents(campaignContext);
 
             Assert.AreEqual(1, combatContext.Enemies[0].AppliedStatusEffects.Count, "Enemy should have one status on them.");
             Assert.AreEqual(numberOfBurnStacksToGiveEnemy - 1, combatContext.Enemies[0].AppliedStatusEffects[0].Stacks, "Enemy should have one fewer stack of burn after ending the turn.");
@@ -128,14 +128,14 @@ namespace SFDDCards.Tests.EditMode
             campaignContext.StartNextRoomFromEncounter(new EvaluatedEncounter(testEncounter));
             CombatContext combatContext = campaignContext.CurrentCombatContext;
             combatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.PlayerTurn);
-            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents(campaignContext);
 
             int numberOfBurnStacksToGivePlayer = 10;
 
             EditModeTestCommon.ApplyStatusEffectStacks(burnStatus.Id, campaignContext, combatContext, combatContext.CombatPlayer, numberOfBurnStacksToGivePlayer);
             combatContext.PlayerCombatDeck.MoveCardToZone(derivedCard, combatContext.PlayerCombatDeck.CardsCurrentlyInHand);
             combatContext.PlayCard(derivedCard, combatContext.Enemies[0]);
-            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents(campaignContext);
 
             Assert.AreEqual(combatContext.CombatPlayer.MaxHealth - numberOfBurnStacksToGivePlayer, combatContext.CombatPlayer.CurrentHealth, "After one attack with 10 burn stacks, the player should have taken 10 damage.");
         }

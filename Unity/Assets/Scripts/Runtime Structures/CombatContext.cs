@@ -121,7 +121,7 @@ namespace SFDDCards
                 }
             }
 
-            GlobalUpdateUX.UpdateUXEvent.Invoke();
+            GlobalUpdateUX.UpdateUXEvent.Invoke(this.FromCampaign);
         }
 
         public void EndCurrentTurnAndChangeTurn(TurnStatus toTurn)
@@ -142,7 +142,7 @@ namespace SFDDCards
                 this.PlayerStartTurn();
             }
 
-            GlobalUpdateUX.UpdateUXEvent.Invoke();
+            GlobalUpdateUX.UpdateUXEvent.Invoke(this.FromCampaign);
             return;
         }
 
@@ -187,7 +187,7 @@ namespace SFDDCards
                 this.FromCampaign.CheckAllStateEffectsAndKnockouts();
                 this.PlayerCombatDeck.MoveCardToZoneIfNotInAnyZonesCurrently(toPlay, this.PlayerCombatDeck.CardsCurrentlyInDiscard);
 
-                GlobalUpdateUX.UpdateUXEvent.Invoke();
+                GlobalUpdateUX.UpdateUXEvent.Invoke(this.FromCampaign);
             },
             null
             ));
@@ -253,7 +253,7 @@ namespace SFDDCards
                 }
             }
 
-            GlobalUpdateUX.UpdateUXEvent.Invoke();
+            GlobalUpdateUX.UpdateUXEvent.Invoke(this.FromCampaign);
         }
 
         public void RemoveEnemy(Enemy toRemove)

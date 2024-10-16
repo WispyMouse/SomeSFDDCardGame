@@ -4,7 +4,7 @@
 	"EffectScript": "[SETTARGET: FOE][DAMAGE: 3+COUNTELEMENT_FORCE][REQUIRESCOMPARISON: TARGETHEALTH > 10][SETELEMENTSTACKS: FORCE 0]",
 	"Tags":
 	[
-		"mf1",
+		"mb1",
 		"bio","force",
 		"starter"
 	],

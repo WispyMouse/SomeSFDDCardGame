@@ -58,7 +58,7 @@ namespace SFDDCards.Tests.EditMode
                 // Now actually play the card
                 int previousHealth = target.CurrentHealth;
                 combatContext.PlayCard(playedCard, combatContext.Enemies[0]);
-                GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+                GlobalSequenceEventHolder.SynchronouslyResolveAllEvents(campaignContext);
 
                 // The target should have one less health than before
                 Assert.AreEqual(previousHealth - 1, target.CurrentHealth, $"The chosen target should have one less health.");

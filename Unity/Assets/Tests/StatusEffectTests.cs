@@ -23,7 +23,7 @@ namespace SFDDCards.Tests.EditMode
             campaignContext.StartNextRoomFromEncounter(new EvaluatedEncounter(testEncounter));
             CombatContext combatContext = campaignContext.CurrentCombatContext;
             combatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.PlayerTurn);
-            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents(campaignContext);
 
             const int numberOfStacksToGivePlayer = 10;
             int player_oneturnofpoison_expectedhealth = combatContext.CombatPlayer.CurrentHealth - numberOfStacksToGivePlayer;
@@ -32,7 +32,7 @@ namespace SFDDCards.Tests.EditMode
 
             // End the player's turn, making it go to the enemy. The controller will immediately make it the player's turn again.
             combatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.EnemyTurn);
-            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents(campaignContext);
 
             Assert.AreEqual(CombatContext.TurnStatus.PlayerTurn, combatContext.CurrentTurnStatus, "It should be the player's turn.");
             Assert.AreEqual(player_oneturnofpoison_expectedhealth, combatContext.CombatPlayer.CurrentHealth, "Player should be damaged equal to the number of stacks");
@@ -56,7 +56,7 @@ namespace SFDDCards.Tests.EditMode
             campaignContext.StartNextRoomFromEncounter(new EvaluatedEncounter(testEncounter));
             CombatContext combatContext = campaignContext.CurrentCombatContext;
             combatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.PlayerTurn);
-            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents(campaignContext);
 
             const int numberOfStacksToGivePlayer = 10;
             int player_oneturnofpoison_expectedhealth = combatContext.CombatPlayer.CurrentHealth - numberOfStacksToGivePlayer;
@@ -75,7 +75,7 @@ namespace SFDDCards.Tests.EditMode
 
             // End the player's turn, making it go to the enemy. The controller will immediately make it the player's turn again.
             combatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.EnemyTurn);
-            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents(campaignContext);
 
             Assert.AreEqual(CombatContext.TurnStatus.PlayerTurn, combatContext.CurrentTurnStatus, "It should be the player's turn.");
             Assert.AreEqual(player_oneturnofpoison_expectedhealth, combatContext.CombatPlayer.CurrentHealth, "Player should be damaged equal to the number of stacks");
@@ -86,7 +86,7 @@ namespace SFDDCards.Tests.EditMode
             Assert.AreEqual(singleStackOnEnemyTwo - 1, combatContext.Enemies[1].CountStacks(poisonStatus.Id), "Enemy Two should have one less stack of poison after it applies.");
 
             combatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.EnemyTurn);
-            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents(campaignContext);
 
             Assert.AreEqual(CombatContext.TurnStatus.PlayerTurn, combatContext.CurrentTurnStatus, "It should be the player's turn.");
             Assert.AreEqual(player_twoturnofpoison_expectedhealth, combatContext.CombatPlayer.CurrentHealth, "Player should be damaged equal to the number of stacks");

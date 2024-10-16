@@ -4,7 +4,7 @@
 	"EffectScript": "[SETTARGET: SELF][APPLYSTATUSEFFECTSTACKS: 2 mb1_statuseffect_tomorrowstar]",
 	"Tags":
 	[
-		"mf1",
+		"mb1",
 		"void","SOLAR",
 		"uncommon"
 	],

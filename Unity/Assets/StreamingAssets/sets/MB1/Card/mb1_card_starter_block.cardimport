@@ -4,7 +4,7 @@
 	"EffectScript": "[SETTARGET: SELF][APPLYSTATUSEFFECTSTACKS: 3 BLOCK]",
 	"Tags":
 	[
-		"mf1",
+		"mb1",
 		"cyber","force","bio",
 		"starter"
 	],

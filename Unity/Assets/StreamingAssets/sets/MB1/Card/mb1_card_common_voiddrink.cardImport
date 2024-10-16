@@ -4,7 +4,7 @@
 	"EffectScript": "[SETTARGET: SELF][DAMAGE: 2][REQUIRESATLEASTELEMENT: 2 VOID][SETELEMENT: VOID 0][DRAW: 2][CARDTARGET: SELF][MOVECARDTOZONE: EXILE]",
 	"Tags":
 	[
-		"mf1",
+		"mb1",
 		"void","cyber",
 		"common"
 	],

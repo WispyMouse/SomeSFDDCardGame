@@ -54,7 +54,7 @@ namespace SFDDCards.UX
             GlobalUpdateUX.UpdateUXEvent.RemoveListener(RepresentPlayerHand);
         }
 
-        public void RepresentPlayerHand()
+        public void RepresentPlayerHand(CampaignContext forContext)
         {
             const float MaximumCardFanDistance = 8f;
             const float CardFanDistance = 1.4f;
@@ -63,12 +63,12 @@ namespace SFDDCards.UX
 
             const float MaximumDownwardsness = .6f;
 
-            if (this.CentralGameStateControllerInstance?.CurrentCampaignContext == null)
+            if (forContext == null)
             {
                 return;
             }
 
-            if (this.CentralGameStateControllerInstance?.CurrentCampaignContext?.CurrentCombatContext == null)
+            if (forContext.CurrentCombatContext == null)
             {
                 this.Annihilate();
                 return;
@@ -77,7 +77,7 @@ namespace SFDDCards.UX
             // Delete cards that are in this representer, but not in the hand
             foreach (Card key in new List<Card>(this.CardsToRepresentations.Keys))
             {
-                if (this.CardsToRepresentations[key].gameObject.activeInHierarchy && !this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.PlayerCombatDeck.CardsCurrentlyInHand.Contains(key))
+                if (this.CardsToRepresentations[key].gameObject.activeInHierarchy && !forContext.CurrentCombatContext.PlayerCombatDeck.CardsCurrentlyInHand.Contains(key))
                 {
                     this.CardsToRepresentations[key].gameObject.SetActive(false);
                 }
@@ -85,7 +85,7 @@ namespace SFDDCards.UX
 
             // Identify the angle to fan things out
             // Cards in the center are less rotated than cards on the ends
-            int cardsInHand = this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.PlayerCombatDeck.CardsCurrentlyInHand.Count;
+            int cardsInHand = forContext.CurrentCombatContext.PlayerCombatDeck.CardsCurrentlyInHand.Count;
 
             if (cardsInHand == 0)
             {
@@ -95,7 +95,7 @@ namespace SFDDCards.UX
             float cardsMinusOne = (float)(cardsInHand - 1);
 
             float modifiedCardFanDistance = cardsInHand > 1 ? Mathf.Min(CardFanDistance * (float)cardsInHand, MaximumCardFanDistance) / cardsMinusOne : 0;
-            float leftStartingPoint = -modifiedCardFanDistance * (this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.PlayerCombatDeck.CardsCurrentlyInHand.Count - 1) / 2f;
+            float leftStartingPoint = -modifiedCardFanDistance * (forContext.CurrentCombatContext.PlayerCombatDeck.CardsCurrentlyInHand.Count - 1) / 2f;
             float maxFanAngle = cardsInHand > CountForMaximumFanValue ? FanDegreesMaximum : Mathf.Lerp(0, FanDegreesMaximum, cardsMinusOne / (float)CountForMaximumFanValue);
             float fanAnglePerIndex = cardsInHand > 1 ? maxFanAngle / cardsMinusOne * 2f : 0;
             float leftStartingPointAngle = -maxFanAngle;
@@ -115,7 +115,7 @@ namespace SFDDCards.UX
                 // And where it should be positioned
                 Vector3 objectOffset = new Vector3(leftStartingPoint, 0, 0) + new Vector3(modifiedCardFanDistance, 0, 0) * ii + backpush + downpush;
 
-                CombatCardUX newCard = GetUX(this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.PlayerCombatDeck.CardsCurrentlyInHand[ii]);
+                CombatCardUX newCard = GetUX(forContext.CurrentCombatContext.PlayerCombatDeck.CardsCurrentlyInHand[ii]);
 
                 if (ReferenceEquals(this.SelectedCard, newCard))
                 {
@@ -132,9 +132,9 @@ namespace SFDDCards.UX
                 // Does the player meet the requirements of at least one of the effects?
                 bool anyPassingRequirements = ScriptTokenEvaluator.MeetsAnyRequirements(
                     ScriptTokenEvaluator.CalculateConceptualBuildersFromTokenEvaluation(newCard.RepresentedCard),
-                    this.CentralGameStateControllerInstance.CurrentCampaignContext, 
+                    forContext, 
                     newCard.RepresentedCard,
-                    this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignPlayer,
+                    forContext.CampaignPlayer,
                     null);
                 newCard.RequirementsAreMet = anyPassingRequirements;
             }
@@ -155,7 +155,7 @@ namespace SFDDCards.UX
             this.SelectedCard = selectedCard;
             this.SelectedCard.SetFromCard(this.SelectedCard.RepresentedCard, SelectCurrentCard, GetReactionWindowContextForCard(selectedCard));
             this.UXController.SelectCurrentCard(selectedCard);
-            this.RepresentPlayerHand();
+            this.RepresentPlayerHand(this.CentralGameStateControllerInstance.CurrentCampaignContext);
         }
 
         public void DeselectSelectedCard()
@@ -164,7 +164,7 @@ namespace SFDDCards.UX
             {
                 this.SelectedCard.SetFromCard(this.SelectedCard.RepresentedCard, SelectCurrentCard, null);
                 this.SelectedCard = null;
-                this.RepresentPlayerHand();
+                this.RepresentPlayerHand(this.CentralGameStateControllerInstance.CurrentCampaignContext);
             }
         }
 

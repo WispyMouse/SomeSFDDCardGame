@@ -62,7 +62,7 @@ namespace SFDDCards.ScriptingTokens
         {
             string numberEval;
 
-            if (this.NumberOfCards is ConstantEvaluatableValue<int> constant && constant.ConstantValue == 1)
+            if (this.NumberOfCards is ConstantNumericEvaluatableValue constant && constant.ConstantValue == 1)
             {
                 numberEval = "a";
             }

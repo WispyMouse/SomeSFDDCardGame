@@ -18,7 +18,8 @@ namespace SFDDCards.Tests.EditMode
         {
             Card,
             StatusEffect,
-            Element
+            Element,
+            Currency
         }
 
         public struct ParseFromFileTestData
@@ -129,11 +130,11 @@ namespace SFDDCards.Tests.EditMode
                 new DeltaEntry(campaignContext, null, combatContext.CombatPlayer, toTarget)
                 {
                     IntensityKindType = TokenEvaluatorBuilder.IntensityKind.ApplyStatusEffect,
-                    ConceptualIntensity = new ConstantEvaluatableValue<int>(mod),
+                    ConceptualIntensity = new ConstantNumericEvaluatableValue(mod),
                     StatusEffect = StatusEffectDatabase.GetModel(toApply)
                 });
 
-            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents(campaignContext);
         }
 
         public static void AddBlankCardsToPlayerDeck(CombatDeck deck, int numberOfCards)

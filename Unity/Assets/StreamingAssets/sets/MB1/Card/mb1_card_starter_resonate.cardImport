@@ -4,7 +4,7 @@
 	"EffectScript": "[CARDTARGET: SELF][MOVECARDTOZONE: EXILE][REQUIRESCOMPARISON: COUNTELEMENT_CYBER+COUNTELEMENT_VOID+COUNTELEMENT_SOLAR+COUNTELEMENT_BIO+COUNTELEMENT_FORCE >= 10][DRAW: 1]",
 	"Tags":
 	[
-		"mf1",
+		"mb1",
 		"cyber","void","bio","solar","force",
 		"starter"
 	],

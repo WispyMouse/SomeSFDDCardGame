@@ -4,7 +4,7 @@
 	"EffectScript": "[SETTARGET: FOE][SETSTATUSEFFECTSTACKS: 2 mb1_statuseffect_lasercalibratingaim]",
 	"Tags":
 	[
-		"mf1",
+		"mb1",
 		"void","solar","cyber",
 		"rare"
 	],

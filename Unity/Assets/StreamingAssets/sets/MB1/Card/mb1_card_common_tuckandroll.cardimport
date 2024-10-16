@@ -4,7 +4,7 @@
 	"EffectScript": "[SETTARGET: SELF][APPLYSTATUSEFFECTSTACKS: 5 BLOCK][CARDTARGET: DECK 3][CHOOSECARDS: 1][MOVECARDTOZONE: HAND][SHUFFLE]",
 	"Tags":
 	[
-		"mf1",
+		"mb1",
 		"bio","force","cyber",
 		"common"
 	],

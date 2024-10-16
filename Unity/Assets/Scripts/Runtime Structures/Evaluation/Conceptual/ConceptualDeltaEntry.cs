@@ -1,6 +1,7 @@
 namespace SFDDCards.Evaluation.Conceptual
 {
     using SFDDCards.Evaluation.Actual;
+    using SFDDCards.ImportModels;
     using SFDDCards.ScriptingTokens.EvaluatableValues;
     using System;
     using System.Collections;
@@ -29,7 +30,8 @@ namespace SFDDCards.Evaluation.Conceptual
         public List<ElementResourceChange> ElementResourceChanges = new List<ElementResourceChange>();
 
         public StatusEffect StatusEffect;
-        
+        public CurrencyImport Currency;
+
         public ConceptualDeltaEntry(ConceptualTokenEvaluatorBuilder builder, CombatantTargetEvaluatableValue originalConceptualTarget, CombatantTargetEvaluatableValue previousConceptualTarget)
         {
             this.MadeFromBuilder = builder;

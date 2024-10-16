@@ -16,14 +16,14 @@ namespace SFDDCards
 
         public static UnityEvent OnStopAllSequences = new UnityEvent();
 
-        public static void SynchronouslyResolveAllEvents()
+        public static void SynchronouslyResolveAllEvents(CampaignContext forCampaign)
         {
             while (StackedSequenceEvents.Count > 0)
             {
                 CurrentSequenceEvent = StackedSequenceEvents[0];
                 StackedSequenceEvents.RemoveAt(0);
                 CurrentSequenceEvent.ConsequentialAction?.Invoke();
-                GlobalUpdateUX.UpdateUXEvent.Invoke();
+                GlobalUpdateUX.UpdateUXEvent.Invoke(forCampaign);
                 CurrentSequenceEvent = null;
             }
         }
@@ -46,7 +46,7 @@ namespace SFDDCards
             {
                 CurrentSequenceEvent.ConsequentialAction?.Invoke();
                 CurrentSequenceEvent = null;
-                GlobalUpdateUX.UpdateUXEvent.Invoke();
+                GlobalUpdateUX.UpdateUXEvent.Invoke(controller.ForCampaign);
             }
         }
 

@@ -14,7 +14,7 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
                 return "deck";
             }
 
-            if (this.TopCardsCount is ConstantEvaluatableValue<int> constant && constant.ConstantValue == 1)
+            if (this.TopCardsCount is ConstantNumericEvaluatableValue constant && constant.ConstantValue == 1)
             {
                 return $"the top card of the deck";
             }

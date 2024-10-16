@@ -76,6 +76,8 @@ namespace SFDDCards.Tests.EditMode
             new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][DAMAGE: 2*COUNTELEMENT_DEBUGELEMENTONEID]", $"2 x {DebugElementOneIconText}DEBUGELEMENTONENAME damage."),
             new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][DAMAGE: 3/COUNTELEMENT_DEBUGELEMENTONEID]", $"3 / {DebugElementOneIconText}DEBUGELEMENTONENAME damage."),
             new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][DAMAGE: 4-COUNTELEMENT_DEBUGELEMENTONEID]", $"4 - {DebugElementOneIconText}DEBUGELEMENTONENAME damage."),
+
+            new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][DAMAGE: 1~100]", $"1 ~ 100 damage.")
         };
 
         [Test]

@@ -3,7 +3,7 @@ using SFDDCards.Evaluation.Actual;
 
 namespace SFDDCards.ScriptingTokens.EvaluatableValues
 {
-    public class HealthEvaluatableValue : IEvaluatableValue<int>
+    public class HealthEvaluatableValue : INumericEvaluatableValue
     {
         public readonly string TargetToAssess;
 
@@ -13,6 +13,24 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
         }
 
         public bool TryEvaluateValue(CampaignContext campaignContext, TokenEvaluatorBuilder currentBuilder, out int evaluatedValue)
+        {
+            if (this.TargetToAssess == "self")
+            {
+                evaluatedValue = currentBuilder.User.GetTotalHealth();
+                return true;
+            }
+
+            if (currentBuilder.Target == null)
+            {
+                evaluatedValue = 0;
+                return false;
+            }
+
+            evaluatedValue = currentBuilder.Target.GetTotalHealth();
+            return true;
+        }
+
+        public bool TryEvaluateDecimalValue(CampaignContext campaignContext, TokenEvaluatorBuilder currentBuilder, out decimal evaluatedValue)
         {
             if (this.TargetToAssess == "self")
             {

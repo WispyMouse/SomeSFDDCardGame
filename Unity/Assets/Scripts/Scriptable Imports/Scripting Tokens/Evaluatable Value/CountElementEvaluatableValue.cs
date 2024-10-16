@@ -3,7 +3,7 @@ using SFDDCards.Evaluation.Actual;
 
 namespace SFDDCards.ScriptingTokens.EvaluatableValues
 {
-    public class CountElementEvaluatableValue : IEvaluatableValue<int>
+    public class CountElementEvaluatableValue : INumericEvaluatableValue
     {
         public readonly string ElementToCount;
 
@@ -25,6 +25,25 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
             }
 
             return true;
+        }
+
+        public bool TryEvaluateDecimalValue(CampaignContext campaignContext, TokenEvaluatorBuilder currentBuilder, out decimal evaluatedValue)
+        {
+            if (campaignContext?.CurrentCombatContext == null)
+            {
+                evaluatedValue = 0;
+                return true;
+            }
+            else if (campaignContext.CurrentCombatContext.ElementResourceCounts.TryGetValue(ElementDatabase.GetElement(this.ElementToCount), out int evaluatedIntValue))
+            {
+                evaluatedValue = (int)evaluatedIntValue;
+                return true;
+            }
+            else
+            {
+                evaluatedValue = 0;
+                return false;
+            }
         }
 
         public string DescribeEvaluation()

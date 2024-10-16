@@ -21,11 +21,14 @@ namespace SFDDCards.UX
         private RewardArtifactUX RewardArtifactPF;
 
         [SerializeReference]
+        private RewardCurrencyUX RewardCurrencyPF;
+
+        [SerializeReference]
         private Transform RewardCardHolder;
 
         int PicksRemaining { get; set; } = 0;
 
-        public void RepresentPick(RewardsPanelUX rewardsPanel, PickSomeReward toRepresent)
+        public void RepresentPick(CampaignContext campaignContext, RewardsPanelUX rewardsPanel, PickSomeReward toRepresent)
         {
             this.BasedOnPick = toRepresent;
             this.RewardsPanel = rewardsPanel;
@@ -42,17 +45,30 @@ namespace SFDDCards.UX
 
             foreach (PickSomeRewardSlot slot in this.BasedOnPick.PickRewardSlots)
             {
-                if (slot.RewardedCard != null)
+                PickSomeRewardSlot pulledOutSlot = slot;
+
+                int amountToAward;
+                if (!slot.GainedAmount.TryEvaluateValue(campaignContext, null, out amountToAward))
                 {
-                    PickSomeRewardSlot pulledOutSlot = slot;
-                    RewardCardUX thisCard = Instantiate(this.RewardCardPF, this.RewardCardHolder);
-                    thisCard.SetFromCard(slot.RewardedCard, (DisplayedCardUX card) => { this.RewardSlotChosen(pulledOutSlot); });
+                    amountToAward = 1;
                 }
-                else if (slot.RewardedEffect != null)
+                slot.AmountToAwardEvaluated = amountToAward;
+
+                if (slot.GainedCard != null)
                 {
-                    PickSomeRewardSlot pulledOutSlot = slot;
+                    RewardCardUX thisCard = Instantiate(this.RewardCardPF, this.RewardCardHolder);
+                    thisCard.SetFromCard(slot.GainedCard, (DisplayedCardUX card) => { this.RewardSlotChosen(pulledOutSlot); });
+                    thisCard.SetQuantity(amountToAward);
+                }
+                else if (slot.GainedEffect != null)
+                {
                     RewardArtifactUX rewardArtifact = Instantiate(this.RewardArtifactPF, this.RewardCardHolder);
-                    rewardArtifact.SetFromArtifact(slot.RewardedEffect, (RewardArtifactUX artifact) => { this.RewardSlotChosen(pulledOutSlot); });
+                    rewardArtifact.SetFromArtifact(slot.GainedEffect, (RewardArtifactUX artifact) => { this.RewardSlotChosen(pulledOutSlot); }, amountToAward);
+                }
+                else if (slot.GainedCurrency != null)
+                {
+                    RewardCurrencyUX rewardCurrency = Instantiate(this.RewardCurrencyPF, this.RewardCardHolder);
+                    rewardCurrency.SetFromCurrency(slot.GainedCurrency, (RewardCurrencyUX currency) => { this.RewardSlotChosen(pulledOutSlot); }, amountToAward);
                 }
             }
         }

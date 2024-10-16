@@ -1,10 +1,11 @@
 using SFDDCards.Evaluation.Actual;
 using System.Collections.Generic;
 using System.Text;
+using UnityEngine;
 
 namespace SFDDCards.ScriptingTokens.EvaluatableValues
 {
-    public class CompositeEvaluatableValue : IEvaluatableValue<int>
+    public class CompositeEvaluatableValue : INumericEvaluatableValue
     {
         public enum CommonMath
         {
@@ -12,24 +13,43 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
             Plus,
             Minus,
             Divide,
-            Multiply
+            Multiply,
+            Range
         }
 
         public struct CompositeNext
         {
-            public IEvaluatableValue<int> ThisValue;
+            public INumericEvaluatableValue ThisValue;
             public CommonMath RelationToPrevious;
         }
 
         public List<CompositeNext> CompositeComponents = new List<CompositeNext>();
 
+
         public bool TryEvaluateValue(CampaignContext campaignContext, TokenEvaluatorBuilder currentBuilder, out int evaluatedValue)
         {
-            int runningValue = 0;
+            if (TryEvaluateDecimalValue(campaignContext, currentBuilder, out decimal evaluatedDecimalValue))
+            {
+                evaluatedValue = Mathf.RoundToInt((float)evaluatedDecimalValue);
+                return true;
+            }
+
+            evaluatedValue = 0;
+            return false;
+        }
+
+        public bool TryEvaluateDecimalValue(CampaignContext campaignContext, TokenEvaluatorBuilder currentBuilder, out decimal evaluatedValue)
+        {
+            decimal runningValue = 0;
+
+            // Range is indicated by a ~
+            // It is computed in a Composite by comparing everything to the right of a range indicator to the things on the left
+            // if another range indicator is found, or the end of a composite is hit, submit it
+            decimal? previousRangeSet = null;
 
             foreach (CompositeNext compositeValue in this.CompositeComponents)
             {
-                if (!compositeValue.ThisValue.TryEvaluateValue(campaignContext, currentBuilder, out int currentValue))
+                if (!compositeValue.ThisValue.TryEvaluateDecimalValue(campaignContext, currentBuilder, out decimal currentValue))
                 {
                     GlobalUpdateUX.LogTextEvent.Invoke($"Failed to evaluate inner value for composite.", GlobalUpdateUX.LogType.RuntimeError);
                 }
@@ -51,7 +71,24 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
                     case CommonMath.Multiply:
                         runningValue *= currentValue;
                         break;
+                    case CommonMath.Range:
+                        if (previousRangeSet.HasValue)
+                        {
+                            runningValue = (decimal)Random.Range(Mathf.Min((float)runningValue, (float)previousRangeSet.Value), Mathf.Max((float)runningValue, (float)previousRangeSet.Value));
+                            previousRangeSet = currentValue;
+                        }
+                        else
+                        {
+                            previousRangeSet = runningValue;
+                            runningValue = currentValue;
+                        }
+                        break;
                 }
+            }
+
+            if (previousRangeSet.HasValue)
+            {
+                runningValue = (decimal)Random.Range(Mathf.Min((float)runningValue, (float)previousRangeSet.Value), Mathf.Max((float)runningValue, (float)previousRangeSet.Value));
             }
 
             evaluatedValue = runningValue;
@@ -77,7 +114,7 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
 
             if (this.GetEntireCompositeIsConstants() && this.TryEvaluateValue(null, null, out int total))
             {
-                component = new ConstantEvaluatableValue<int>(total);
+                component = new ConstantNumericEvaluatableValue(total);
                 return;
             }
 
@@ -104,6 +141,9 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
                     case CommonMath.Multiply:
                         builtString.Append("*");
                         break;
+                    case CommonMath.Range:
+                        builtString.Append("~");
+                        break;
                 }
                 builtString.Append(compositeValue.ThisValue.GetScriptingTokenText());
             }
@@ -115,12 +155,17 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
         {
             foreach (CompositeNext composite in this.CompositeComponents)
             {
-                if (composite.ThisValue is ConstantEvaluatableValue<int>)
+                if (composite.RelationToPrevious == CommonMath.Range)
+                {
+                    return false;
+                }
+
+                if (composite.ThisValue is ConstantNumericEvaluatableValue)
                 {
                     continue;
                 }
 
-                if (composite.ThisValue is NegatorEvaluatorValue negater && negater.ToNegate is ConstantEvaluatableValue<int>)
+                if (composite.ThisValue is NegatorEvaluatorValue negater && negater.ToNegate is ConstantNumericEvaluatableValue)
                 {
                     continue;
                 }
@@ -150,6 +195,9 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
                         break;
                     case CommonMath.Multiply:
                         builtString.Append(" x ");
+                        break;
+                    case CommonMath.Range:
+                        builtString.Append(" ~ ");
                         break;
                 }
                 builtString.Append(compositeValue.ThisValue.DescribeEvaluation(topValue));

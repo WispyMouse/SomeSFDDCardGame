@@ -56,7 +56,6 @@ namespace SFDDCards.UX
         {
             this.Annihilate(false);
             this.gameObject.SetActive(false);
-            GlobalUpdateUX.UpdateUXEvent.Invoke();
         }
 
         public void Annihilate(bool close = true)

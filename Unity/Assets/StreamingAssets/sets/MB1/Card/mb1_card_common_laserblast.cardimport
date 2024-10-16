@@ -4,7 +4,7 @@
 	"EffectScript": "[SETTARGET: FOE][DAMAGE: 2][APPLYSTATUSEFFECTSTACKS: 4 mb1_statuseffect_targeted]",
 	"Tags":
 	[
-		"mf1",
+		"mb1",
 		"solar","cyber",
 		"common"
 	],

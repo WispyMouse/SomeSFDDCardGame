@@ -13,5 +13,8 @@ namespace SFDDCards
 
         public List<string> StartingDeck = new List<string>();
         public int StartingMaximumHealth = 50;
+
+        public List<CostEvaluationModifier> CostModifiers = new List<CostEvaluationModifier>();
+        public List<StartingCurrency> StartingCurrencies = new List<StartingCurrency>();
     }
 }

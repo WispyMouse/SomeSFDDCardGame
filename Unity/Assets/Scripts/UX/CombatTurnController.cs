@@ -15,6 +15,8 @@ namespace SFDDCards.UX
         [SerializeReference]
         private CentralGameStateController CentralGameStateControllerInstance;
 
+        public CampaignContext ForCampaign => this.CentralGameStateControllerInstance?.CurrentCampaignContext;
+
         [SerializeReference]
         private GameplayUXController UXController;
         [SerializeReference]
@@ -99,7 +101,7 @@ namespace SFDDCards.UX
             yield return runningEvent.AnimationDelegate();
             runningEvent.ConsequentialAction?.Invoke();
 
-            GlobalUpdateUX.UpdateUXEvent.Invoke();
+            GlobalUpdateUX.UpdateUXEvent.Invoke(this.CentralGameStateControllerInstance.CurrentCampaignContext);
 
             AnimationCoroutineIsRunning = false;
             AnimationCoroutine = null;

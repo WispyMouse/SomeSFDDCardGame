@@ -46,12 +46,22 @@ namespace SFDDCards.UX
             this.UXController.Annihilate();
             this.CurrentCampaignContext = null;
             this.UXController.ShowCampaignChooser();
-            GlobalUpdateUX.UpdateUXEvent.Invoke();
+            GlobalUpdateUX.UpdateUXEvent.Invoke(this.CurrentCampaignContext);
         }
 
         IEnumerator BootupSequence()
         {
             SynchronizationContext currentContext = SynchronizationContext.Current;
+
+            yield return ImportHelper.YieldForTask(ImportHelper.ImportImportableFilesIntoDatabaseAsync<CurrencyImport>(Application.streamingAssetsPath, "currencyImport", CurrencyDatabase.AddCurrencyToDatabase, currentContext));
+            foreach (CurrencyImport currency in CurrencyDatabase.CurrencyData.Values)
+            {
+                if (currency.CurrencyArt != null)
+                {
+                    int spriteIndex = this.TextMeshProSpriteControllerInstance.AddSprite(currency.CurrencyArt);
+                    currency.SpriteIndex = spriteIndex;
+                }
+            }
 
             yield return ImportHelper.YieldForTask(ImportHelper.ImportImportableFilesIntoDatabaseAsync<ElementImport>(Application.streamingAssetsPath, "elementImport", ElementDatabase.AddElement, currentContext));
             foreach (Element element in ElementDatabase.ElementData.Values)
@@ -83,11 +93,16 @@ namespace SFDDCards.UX
         {
             this.CurrentCampaignContext = new CampaignContext(new CampaignRoute(this.CurrentRunConfiguration, route));
 
+            foreach (StartingCurrency startingCurrency in route.StartingCurrencies)
+            {
+                this.CurrentCampaignContext.ModCurrency(CurrencyDatabase.GetModel(startingCurrency.CurrencyName), startingCurrency.StartingAmount);
+            }
+
             this.UXController.PlacePlayerCharacter();
 
             this.CurrentCampaignContext.SetCampaignState(CampaignContext.GameplayCampaignState.MakingRouteChoice);
 
-            GlobalUpdateUX.UpdateUXEvent?.Invoke();
+            GlobalUpdateUX.UpdateUXEvent?.Invoke(this.CurrentCampaignContext);
         }
     }
 }

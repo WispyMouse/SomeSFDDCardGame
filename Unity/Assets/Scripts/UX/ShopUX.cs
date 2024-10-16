@@ -9,48 +9,54 @@ namespace SFDDCards.UX
     public class ShopUX : MonoBehaviour
     {
         [SerializeReference]
-        private RewardCardUX RewardCardUXPF;
+        private ShopItemUX ShopItemUXPF;
         [SerializeReference]
-        private Transform RewardCardUXHolderTransform;
+        private Transform ShopItemUXHolderTransform;
 
         [SerializeReference]
         private CentralGameStateController CentralGameStateControllerInstance;
 
-        private List<RewardCardUX> ActiveRewardCardUX { get; set; } = new List<RewardCardUX>();
+        private List<ShopItemUX> ActiveShopItemUXs { get; set; } = new List<ShopItemUX>();
 
         private void Awake()
         {
-            this.DestroyRewardCards();
+            this.DestroyItems();
         }
 
-        public void CardSelected(DisplayedCardUX selectedCard)
+        void DestroyItems()
         {
-            this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignDeck.AddCardToDeck(selectedCard.RepresentedCard);
-            Destroy(selectedCard.gameObject);
-        }
-
-        public void SetRewardCards(params Card[] toReward)
-        {
-            this.DestroyRewardCards();
-
-            foreach (Card curCard in toReward)
+            for (int ii = ShopItemUXHolderTransform.childCount - 1; ii >= 0; ii--)
             {
-                RewardCardUX rewardedCard = Instantiate(this.RewardCardUXPF, this.RewardCardUXHolderTransform);
-                rewardedCard.SetFromCard(curCard, CardSelected);
-                this.ActiveRewardCardUX.Add(rewardedCard);
+                Destroy(ShopItemUXHolderTransform.GetChild(ii).gameObject);
             }
 
-            GlobalUpdateUX.UpdateUXEvent?.Invoke();
+            this.ActiveShopItemUXs.Clear();
         }
 
-        void DestroyRewardCards()
+        public void ShopItemSelected(ShopItemUX selectedItem)
         {
-            for (int ii = RewardCardUXHolderTransform.childCount - 1; ii >= 0; ii--)
+            if (!this.CentralGameStateControllerInstance.CurrentCampaignContext.CanAfford(selectedItem.RepresentingEntry.Costs))
             {
-                Destroy(RewardCardUXHolderTransform.GetChild(ii).gameObject);
+                GlobalUpdateUX.LogTextEvent.Invoke($"Cannot afford this item!", GlobalUpdateUX.LogType.Info);
+                return;
             }
 
-            this.ActiveRewardCardUX.Clear();
+            this.CentralGameStateControllerInstance.CurrentCampaignContext.PurchaseShopItem(selectedItem.RepresentingEntry);
+            this.ActiveShopItemUXs.Remove(selectedItem);
+            Destroy(selectedItem.gameObject);
         }
+
+        public void SetShopItems(params ShopEntry[] shopEntries)
+        {
+            this.DestroyItems();
+
+            foreach (ShopEntry curEntry in shopEntries)
+            {
+                ShopItemUX shopEntry = Instantiate(this.ShopItemUXPF, this.ShopItemUXHolderTransform);
+                shopEntry.SetFromEntry(this.CentralGameStateControllerInstance.CurrentCampaignContext, curEntry, ShopItemSelected);
+                this.ActiveShopItemUXs.Add(shopEntry);
+            }
+        }
+
     }
 }

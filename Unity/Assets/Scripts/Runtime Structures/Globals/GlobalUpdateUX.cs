@@ -18,7 +18,7 @@ namespace SFDDCards
             UserError
         }
 
-        public static UnityEvent UpdateUXEvent = new UnityEvent();
+        public static UnityEvent<CampaignContext> UpdateUXEvent = new UnityEvent<CampaignContext>();
         public static UnityEvent<string, LogType> LogTextEvent = new UnityEvent<string, LogType>();
 
         public static UnityEvent<DeltaEntry, PlayerChoice, Action> PlayerMustMakeChoice = new UnityEvent<DeltaEntry, PlayerChoice, Action>();

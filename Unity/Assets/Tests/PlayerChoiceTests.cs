@@ -31,7 +31,7 @@ namespace SFDDCards.Tests.EditMode
             CombatContext combatContext = campaignContext.CurrentCombatContext;
             EditModeTestCommon.AddBlankCardsToPlayerDeck(combatContext.PlayerCombatDeck, 5);
             combatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.PlayerTurn);
-            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents(campaignContext);
 
             combatContext.PlayerCombatDeck.DealCards(5);
             combatContext.PlayerCombatDeck.CardsCurrentlyInHand.Add(derivedCard);
@@ -58,7 +58,7 @@ namespace SFDDCards.Tests.EditMode
             GlobalUpdateUX.PlayerMustMakeChoice.AddListener(choiceHandler);
 
             combatContext.PlayCard(derivedCard, combatContext.CombatPlayer);
-            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents(campaignContext);
 
             Assert.Contains(cardsShown[0], combatContext.PlayerCombatDeck.CardsCurrentlyInExile, "Expected that the chosen card has been moved to exile.");
             Assert.False(combatContext.PlayerCombatDeck.CardsCurrentlyInDiscard.Contains(cardsShown[0]), "Expected that the chosen card has not been moved to discard.");
@@ -88,12 +88,12 @@ namespace SFDDCards.Tests.EditMode
             campaignContext.StartNextRoomFromEncounter(new EvaluatedEncounter(testEncounter));
             CombatContext combatContext = campaignContext.CurrentCombatContext;
             combatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.PlayerTurn);
-            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents(campaignContext);
 
             combatContext.PlayerCombatDeck.CardsCurrentlyInHand.Add(derivedCard);
             EditModeTestCommon.AddBlankCardsToPlayerDeck(combatContext.PlayerCombatDeck, 1);
             combatContext.PlayCard(derivedCard, combatContext.CombatPlayer);
-            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents(campaignContext);
 
             Assert.False(GlobalUpdateUX.PendingPlayerChoice, "Expecting there not to be a pending player choice.");
 
@@ -117,11 +117,11 @@ namespace SFDDCards.Tests.EditMode
             campaignContext.StartNextRoomFromEncounter(new EvaluatedEncounter(testEncounter));
             CombatContext combatContext = campaignContext.CurrentCombatContext;
             combatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.PlayerTurn);
-            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents(campaignContext);
 
             combatContext.PlayerCombatDeck.CardsCurrentlyInHand.Add(derivedCard);
             combatContext.PlayCard(derivedCard, combatContext.CombatPlayer);
-            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents(campaignContext);
 
             Assert.False(GlobalUpdateUX.PendingPlayerChoice, "Expecting there not to be a pending player choice.");
 

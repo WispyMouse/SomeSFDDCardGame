@@ -1,6 +1,7 @@
 namespace SFDDCards.Evaluation.Actual
 {
     using SFDDCards.Evaluation.Conceptual;
+    using SFDDCards.ImportModels;
     using SFDDCards.ScriptingTokens;
     using SFDDCards.ScriptingTokens.EvaluatableValues;
     using System;
@@ -20,7 +21,8 @@ namespace SFDDCards.Evaluation.Actual
             NumberOfCards = 3,
             ApplyStatusEffect = 4,
             RemoveStatusEffect = 5,
-            SetStatusEffect = 6
+            SetStatusEffect = 6,
+            CurrencyMod = 7
         }
 
         public enum NumberOfCardsRelation
@@ -47,6 +49,7 @@ namespace SFDDCards.Evaluation.Actual
         public List<IRequirement> Requirements => this.BasedOnConcept.Requirements;
 
         public StatusEffect StatusEffect => this.BasedOnConcept.StatusEffect;
+        public CurrencyImport Currency => this.BasedOnConcept.Currency;
 
         public List<Action<DeltaEntry>> ActionsToExecute => this.BasedOnConcept.ActionsToExecute;
         public TokenEvaluatorBuilder PreviousTokenBuilder = null;

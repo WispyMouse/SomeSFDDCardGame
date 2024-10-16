@@ -4,7 +4,7 @@
 	"EffectScript": "[CARDTARGET: DECK 1][MOVECARDTOZONE: EXILE][DRAW: 2]",
 	"Tags":
 	[
-		"mf1",
+		"mb1",
 		"void","solar","force",
 		"common"
 	],

@@ -122,10 +122,19 @@ namespace SFDDCards
             return false;
         }
 
-        public bool MeetsAllTags(HashSet<string> tags)
+        public bool MeetsAllTags(IEnumerable<string> tags)
         {
             foreach (string tag in tags)
             {
+                if (Persistence == StatusEffectPersistence.Campaign && tag.ToLower() == "artifact")
+                {
+                    continue;
+                }
+                else if (Persistence == StatusEffectPersistence.Combat && tag.ToLower() == "status")
+                {
+                    continue;
+                }
+
                 if (!this.Tags.Contains(tag))
                 {
                     return false;

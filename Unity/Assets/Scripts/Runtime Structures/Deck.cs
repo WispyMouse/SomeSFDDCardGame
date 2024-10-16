@@ -5,6 +5,8 @@ namespace SFDDCards
     using UnityEngine;
     public class Deck
     {
+        public CampaignContext ForCampaign;
+
         /// <summary>
         /// Every card in the deck, regardless of its current location.
         /// This is effectively a campaign level tracking.
@@ -19,6 +21,11 @@ namespace SFDDCards
         public void AddCardToDeck(Card toAdd)
         {
             this.AllCardsInDeck.Add(toAdd);
+        }
+
+        public Deck(CampaignContext forCampaign)
+        {
+            this.ForCampaign = forCampaign;
         }
     }
 
