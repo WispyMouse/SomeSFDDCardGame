@@ -13,6 +13,8 @@ namespace SFDDCards.ScriptingTokens
 
         public override void ApplyToken(ConceptualTokenEvaluatorBuilder tokenBuilder)
         {
+            this.EnsureTarget(tokenBuilder);
+
             tokenBuilder.IntensityKindType = TokenEvaluatorBuilder.IntensityKind.Damage;
             tokenBuilder.Intensity = Damage;
         }

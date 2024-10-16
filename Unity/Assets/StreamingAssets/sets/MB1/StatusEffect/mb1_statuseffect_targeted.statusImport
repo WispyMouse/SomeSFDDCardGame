@@ -1,0 +1,16 @@
+{
+    "Name": "Targeted",
+	"Id": "mb1_statuseffect_targeted",
+	"Effects":
+	[
+		{
+			"Window": "OWNERSTARTSTURN",
+			"Script": "[SETTARGET: SELF][CLEARSTACKS]",
+			"ApplicationPriority": -10
+		},
+		{
+			"Window": "INCOMINGDAMAGE",
+			"Script": "[SETTARGET: SELF][DAMAGE: COUNTSTACKS_mb1_statuseffect_targeted][CLEARSTACKS]"
+		}
+	]
+}

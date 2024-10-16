@@ -1,0 +1,16 @@
+{
+    "Name": "Block",
+	"Id": "block",
+	"Effects":
+	[
+		{
+			"Window": "INCOMINGDAMAGE",
+			"Script": "[IFTARGET: SELF][DRAINBOTH: INTENSITY BLOCK]"
+		},
+		{
+			"Window": "OWNERSTARTSTURN",
+			"Script": "[CLEARSTACKS]",
+			"ApplicationPriority": 10
+		}
+	]
+}

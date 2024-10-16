@@ -30,6 +30,8 @@ namespace SFDDCards.UX
 
         private List<PopupPanel> ActivePanels { get; set; } = new List<PopupPanel>();
 
+        public static ReactionWindowContext? CurrentContext = null;
+
         public void SetFromHoverListener(IMouseHoverListener listener)
         {
             if (listener.TryGetCard(out Card cardToShow))
@@ -68,7 +70,7 @@ namespace SFDDCards.UX
         }
         private void SetPopupPanelsFromCard(Card toShow)
         {
-            this.SetPopupPanels(toShow.GetDescription(), false);
+            this.SetPopupPanels(toShow.GetDescription(CurrentContext), false);
         }
 
         private void SetPopupPanels(EffectDescription description, bool includeBaseDescription = true)

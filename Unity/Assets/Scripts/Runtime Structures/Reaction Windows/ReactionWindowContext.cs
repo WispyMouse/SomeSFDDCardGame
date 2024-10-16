@@ -9,30 +9,54 @@ namespace SFDDCards
     {
         public string TimingWindowId;
 
+        public CampaignContext CampaignContext;
         public Combatant CombatantEffectOwner;
         public ICombatantTarget CombatantTarget;
 
         public DeltaEntry ResultingDelta;
+        public string PlayedFromZone;
 
-        public ReactionWindowContext(string timingWindowId,
-            DeltaEntry resultingDelta)
+        public ReactionWindowContext(
+            CampaignContext campaignContext,
+            string timingWindowId,
+            DeltaEntry resultingDelta,
+            string playedFromZone = null)
         {
+            this.CampaignContext = campaignContext;
             this.TimingWindowId = timingWindowId.ToLower();
 
             this.ResultingDelta = resultingDelta;
             this.CombatantEffectOwner = resultingDelta.User;
             this.CombatantTarget = resultingDelta.Target;
+
+            this.PlayedFromZone = playedFromZone;
         }
 
-        public ReactionWindowContext(string timingWindowId, 
+        public ReactionWindowContext(
+            CampaignContext campaignContext,
+            string timingWindowId, 
             Combatant combatantEffectOwner,
-            ICombatantTarget combatantTarget = null)
+            ICombatantTarget combatantTarget = null,
+            string playedFromZone = null)
         {
+            this.CampaignContext = campaignContext;
             this.TimingWindowId = timingWindowId.ToLower();
             this.CombatantEffectOwner = combatantEffectOwner;
             this.CombatantTarget = combatantTarget;
+            this.PlayedFromZone = playedFromZone;
 
             this.ResultingDelta = null;
         }
+
+        public static readonly ReactionWindowContext LookingNotPlayingContext =
+            new ReactionWindowContext()
+            {
+                CampaignContext = null,
+                CombatantEffectOwner = null,
+                CombatantTarget = null,
+                PlayedFromZone = "hand",
+                ResultingDelta = null,
+                TimingWindowId = KnownReactionWindows.LookingNotPlaying
+            };
     }
 }

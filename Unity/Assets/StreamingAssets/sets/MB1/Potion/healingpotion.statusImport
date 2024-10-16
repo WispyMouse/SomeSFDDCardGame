@@ -1,0 +1,17 @@
+{
+    "Name": "Healing Potion",
+	"Id": "mb1_poiton_healingpotion",
+	"Effects":
+	[
+		{
+			"Window": "ACTIVATED",
+			"Script": "[SETTARGET: SELF][HEAL: 10][REMOVESTACKS: 1]"
+		}
+	],
+	"Tags":
+	[
+		"potion",
+		"common"
+	],
+	"Persistence": "Campaign"
+}

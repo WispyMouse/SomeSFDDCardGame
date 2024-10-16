@@ -20,11 +20,6 @@ namespace SFDDCards.ScriptingTokens
                 if (this.ValueToLog.TryEvaluateValue(currentDelta?.MadeFromBuilder?.Campaign, currentDelta?.MadeFromBuilder, out int evaluatedValue))
                 {
                     GlobalUpdateUX.LogTextEvent?.Invoke(evaluatedValue.ToString(), GlobalUpdateUX.LogType.Info);
-
-                    if (currentDelta?.MadeFromBuilder != null)
-                    {
-                        currentDelta.MadeFromBuilder.Intensity = evaluatedValue;
-                    }
                 }
             });
         }

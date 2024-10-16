@@ -18,6 +18,8 @@ namespace SFDDCards
             Generated
         }
 
+        string IEffectOwner.Id => this.Id;
+
         public string Id;
         public string Name;
         public Sprite Sprite;
@@ -49,7 +51,7 @@ namespace SFDDCards
             }
 
             this.Tags = lowerCaseTags;
-            this.Sprite = basedOn.Sprite;
+            this.Sprite = basedOn.CardArt;
 
             this.AttackTokenPile = ScriptingTokens.ScriptingTokenDatabase.GetAllTokens(basedOn.EffectScript, this);
 
@@ -67,12 +69,12 @@ namespace SFDDCards
             }
         }
 
-        public EffectDescription GetDescription()
+        public EffectDescription GetDescription(ReactionWindowContext? context = null)
         {
             return new EffectDescription()
             {
                 MentionedStatusEffects = ScriptTokenEvaluator.GetMentionedStatusEffects(this),
-                DescriptionText = new List<string>() { ScriptTokenEvaluator.DescribeCardText(this) },
+                DescriptionText = new List<string>() { ScriptTokenEvaluator.DescribeCardText(this, context) },
                 DescribingLabel = this.Name
             };
         }

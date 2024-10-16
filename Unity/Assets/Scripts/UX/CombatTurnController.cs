@@ -17,6 +17,8 @@ namespace SFDDCards.UX
 
         [SerializeReference]
         private GameplayUXController UXController;
+        [SerializeReference]
+        private EnemyRepresenterUX EnemyRepresenterUX;
 
         private CombatContext Context => this.CentralGameStateControllerInstance?.CurrentCampaignContext?.CurrentCombatContext;
         
@@ -43,6 +45,7 @@ namespace SFDDCards.UX
             this.CurrentlyActive = true;
 
             GlobalSequenceEventHolder.PushSequencesToTop(
+                CentralGameStateControllerInstance.CurrentCampaignContext,
                 new GameplaySequenceEvent(this.SpawnInitialEnemies, null),
                 new GameplaySequenceEvent(() => this.Context.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.PlayerTurn), null)
                 );
@@ -96,6 +99,8 @@ namespace SFDDCards.UX
             yield return runningEvent.AnimationDelegate();
             runningEvent.ConsequentialAction?.Invoke();
 
+            GlobalUpdateUX.UpdateUXEvent.Invoke();
+
             AnimationCoroutineIsRunning = false;
             AnimationCoroutine = null;
         }
@@ -106,15 +111,12 @@ namespace SFDDCards.UX
 
         private void SpawnInitialEnemies()
         {
-            foreach (Enemy curEnemy in this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.Enemies)
-            {
-                this.SpawnEnemy(curEnemy);
-            }
+            this.EnemyRepresenterUX.AddEnemies(this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.Enemies);
         }
 
         private void SpawnEnemy(Enemy toSpawn)
         {
-            this.UXController.AddEnemy(toSpawn);
+            this.EnemyRepresenterUX.AddEnemy(toSpawn);
         }
 
         public void EndPlayerTurn()

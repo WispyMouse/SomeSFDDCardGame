@@ -3,6 +3,7 @@ namespace SFDDCards
     using SFDDCards.Evaluation.Actual;
     using SFDDCards.Evaluation.Conceptual;
     using SFDDCards.ImportModels;
+    using SFDDCards.ScriptingTokens;
     using SFDDCards.ScriptingTokens.EvaluatableValues;
     using System;
     using System.Collections;
@@ -23,7 +24,7 @@ namespace SFDDCards
         /// This is used to describe Cards and Effects when they aren't happening.
         /// As it is conceptual, none of the numbers have resolved yet.
         /// </summary>
-        public static string DescribeConceptualEffect(ConceptualDelta conceptualDelta, string reactionWindow = "")
+        public static string DescribeConceptualEffect(ConceptualDelta conceptualDelta, string reactionWindow = "", bool ignoreElementIfCard = true)
         {
             StringBuilder entireEffectText = new StringBuilder();
             string leadingSpace = "";
@@ -31,26 +32,37 @@ namespace SFDDCards
             // If all element changes are gains/modifies, and we haven't yet printed out an ability text,
             // don't include that element.
             // Include it if there's any other kind of operation happening on the elements.
-            bool ignoreElement = true;
+            bool ignoreElement = false;
+            if (conceptualDelta.Owner is Card)
+            {
+                ignoreElement = ignoreElementIfCard;
+            }
 
             foreach (ConceptualDeltaEntry deltaEntry in conceptualDelta.DeltaEntries)
             {
                 string nextDescriptor = string.Empty;
 
-                string elementChange = DescribeElementChange(deltaEntry, ignoreElement);
-                if (!string.IsNullOrEmpty(elementChange))
+                if (deltaEntry.ElementResourceChanges.Count > 0)
                 {
-                    if (entireEffectText.Length > 0)
+                    string elementDescription = DescribeElementChange(deltaEntry, ignoreElement);
+                    if (!string.IsNullOrEmpty(elementDescription))
                     {
-                        nextDescriptor += "\n";
+                        nextDescriptor += leadingSpace + elementDescription;
+                        leadingSpace = " ";
                     }
-                    nextDescriptor += elementChange;
                 }
 
-                if (deltaEntry.MadeFromBuilder.RealizedOperationScriptingToken != null)
+                if (deltaEntry.MadeFromBuilder.RealizedOperationScriptingToken != null && !deltaEntry.MadeFromBuilder.RealizedOperationScriptingToken.SkipDescribingMe)
                 {
-                    nextDescriptor += deltaEntry.MadeFromBuilder.RealizedOperationScriptingToken.DescribeOperationAsEffect(deltaEntry, reactionWindow);
+                    string realizedOperation = deltaEntry.MadeFromBuilder.RealizedOperationScriptingToken.DescribeOperationAsEffect(deltaEntry, reactionWindow);
+                    if (!string.IsNullOrEmpty(realizedOperation))
+                    {
+                        nextDescriptor += leadingSpace + realizedOperation;
+                        leadingSpace = " ";
+                    }
                 }
+
+                nextDescriptor += leadingSpace;
 
                 switch (deltaEntry.IntensityKindType)
                 {
@@ -74,16 +86,17 @@ namespace SFDDCards
                         break;
                 }
 
-                if (!string.IsNullOrEmpty(nextDescriptor))
+                string trimmed = nextDescriptor.Trim().Trim('.');
+                if (!string.IsNullOrEmpty(trimmed))
                 {
-                    entireEffectText.Append($"{leadingSpace}{nextDescriptor.Trim('.')}.");
+                    entireEffectText.Append($"{trimmed}.");
                     leadingSpace = " ";
                 }
 
                 ignoreElement = false;
             }
 
-            return entireEffectText.ToString();
+            return entireEffectText.ToString().Trim();
         }
 
         /// <summary>
@@ -93,7 +106,7 @@ namespace SFDDCards
         /// This effect is written as thought it hasn't happened yet.
         /// This can be used to show the value of effects, such as Enemy Intents.
         /// </summary>
-        public static string DescribeRealizedEffect(IAttackTokenHolder attackHolder, CampaignContext campaignContext, IEffectOwner owner, Combatant user, ICombatantTarget target)
+        public static string DescribeRealizedEffect(IAttackTokenHolder attackHolder, CampaignContext campaignContext, Combatant user, ICombatantTarget target, bool ignoreElementIfCard = true)
         {
             StringBuilder entireEffectText = new StringBuilder();
             string leadingSpace = "";
@@ -101,8 +114,8 @@ namespace SFDDCards
             List<ConceptualTokenEvaluatorBuilder> conceptBuilders = ScriptTokenEvaluator.CalculateConceptualBuildersFromTokenEvaluation(attackHolder);
             foreach (ConceptualTokenEvaluatorBuilder conceptBuilder in conceptBuilders)
             {
-                TokenEvaluatorBuilder realizedBuilder = ScriptTokenEvaluator.RealizeConceptualBuilder(conceptBuilder, campaignContext, owner, user, target);
-                string descriptor = DescribeRealizedEffect(realizedBuilder);
+                TokenEvaluatorBuilder realizedBuilder = ScriptTokenEvaluator.RealizeConceptualBuilder(conceptBuilder, campaignContext, attackHolder.Owner, user, target);
+                string descriptor = DescribeRealizedEffect(realizedBuilder, ignoreElementIfCard);
 
                 if (!string.IsNullOrEmpty(descriptor))
                 {
@@ -121,37 +134,58 @@ namespace SFDDCards
         /// This effect is written as thought it hasn't happened yet.
         /// This can be used to show the value of effects, such as Enemy Intents.
         /// </summary>
-        public static string DescribeRealizedEffect(TokenEvaluatorBuilder builder)
+        public static string DescribeRealizedEffect(TokenEvaluatorBuilder builder, bool ignoreElementIfCard = true)
         {
             StringBuilder entireEffectText = new StringBuilder();
 
-            string nextDescriptor = string.Empty;
+            bool ignoreElement = false;
+            if (builder.Owner is Card)
+            {
+                ignoreElement = ignoreElementIfCard;
+            }
+
+            string leadingSpace = "";
+
+            if (builder.ElementResourceChanges.Count > 0)
+            {
+                string elementDescription = DescribeElementChange(builder, ignoreElement);
+                if (!string.IsNullOrEmpty(elementDescription))
+                {
+                    entireEffectText.Append(leadingSpace + elementDescription);
+                    leadingSpace = " ";
+                }
+            }
+
+            if (builder.RealizedOperationScriptingToken != null && !builder.RealizedOperationScriptingToken.SkipDescribingMe)
+            {
+                string realizedOperation = builder.RealizedOperationScriptingToken.DescribeOperationAsEffect(builder);
+                if (!string.IsNullOrEmpty(realizedOperation))
+                {
+                    entireEffectText.Append(leadingSpace + realizedOperation);
+                    leadingSpace = " ";
+                }
+            }
 
             switch (builder.IntensityKindType)
             {
                 case TokenEvaluatorBuilder.IntensityKind.Damage:
-                    nextDescriptor = DescribeRealizedDamage(builder);
+                    entireEffectText.Append(leadingSpace + DescribeRealizedDamage(builder));
                     break;
                 case TokenEvaluatorBuilder.IntensityKind.Heal:
-                    nextDescriptor = DescribeRealizedHeal(builder);
+                    entireEffectText.Append(leadingSpace + DescribeRealizedHeal(builder));
                     break;
                 case TokenEvaluatorBuilder.IntensityKind.NumberOfCards:
-                    nextDescriptor = DescribeRealizedCards(builder);
+                    entireEffectText.Append(leadingSpace + DescribeRealizedCards(builder));
                     break;
                 case TokenEvaluatorBuilder.IntensityKind.ApplyStatusEffect:
-                    nextDescriptor = DescribeRealizedApplyStatusEffect(builder);
+                    entireEffectText.Append(leadingSpace + DescribeRealizedApplyStatusEffect(builder));
                     break;
                 case TokenEvaluatorBuilder.IntensityKind.RemoveStatusEffect:
-                    nextDescriptor = DescribeRealizedRemoveStatusEffect(builder);
+                    entireEffectText.Append(leadingSpace + DescribeRealizedRemoveStatusEffect(builder));
                     break;
                 case TokenEvaluatorBuilder.IntensityKind.SetStatusEffect:
-                    nextDescriptor = DescribeRealizedSetStatusEffect(builder);
+                    entireEffectText.Append(leadingSpace + DescribeRealizedSetStatusEffect(builder));
                     break;
-            }
-
-            if (!string.IsNullOrEmpty(nextDescriptor))
-            {
-                entireEffectText.Append($"{nextDescriptor}");
             }
 
             return entireEffectText.ToString();
@@ -197,7 +231,7 @@ namespace SFDDCards
                 }
             }
 
-            return entireEffectText.ToString();
+            return entireEffectText.ToString().Trim();
         }
 
         public static string DescribeDrainEffect(string argumentOne, string argumentTwo)
@@ -222,7 +256,7 @@ namespace SFDDCards
                 ComposeValueTargetLocation.BetweenMiddleAndSuffix,
                 (CombatantTargetEvaluatableValue curValue) =>
                 {
-                    return !(curValue is FoeTargetEvaluatableValue);
+                    return curValue is FoeTargetEvaluatableValue;
                 });
         }
 
@@ -233,15 +267,15 @@ namespace SFDDCards
                 builder.Target,
                 builder.OriginalTarget,
                 builder?.PreviousTokenBuilder?.Target,
-                builder.Intensity.ToString(),
+                builder.Intensity.DescribeEvaluation(builder.Campaign, builder),
+                String.Empty,
                 String.Empty,
                 "damage",
-                builder.GetIntensityDescriptionIfNotConstant(),
                 ComposeValueTargetLocation.AfterSuffix,
                 ComposeValueTargetLocation.BetweenMiddleAndSuffix,
                 (ICombatantTarget curValue) =>
                 {
-                    return !(builder.Target == builder.OriginalTarget && builder.Target == builder?.PreviousTokenBuilder?.Target
+                    return (builder.Target == builder.OriginalTarget && builder.Target == builder?.PreviousTokenBuilder?.Target
                     && builder.Target.IsFoeOf(builder.User)
                     && builder.Target.GetRepresentingNumberOfTargets() == 1);
                 });
@@ -249,12 +283,18 @@ namespace SFDDCards
 
         public static string DescribeResolvedDamage(DeltaEntry delta)
         {
+            if (!delta.ConceptualIntensity.TryEvaluateValue(delta.FromCampaign, delta.MadeFromBuilder, out int evaluatedValue))
+            {
+                GlobalUpdateUX.LogTextEvent.Invoke($"Failed to parse conceptual intensity, after it already should be resolveable.", GlobalUpdateUX.LogType.RuntimeError);
+                return String.Empty;
+            }
+
             return ComposeDescriptor<ICombatantTarget>(
                 $"to {delta.Target.Name}",
                 delta.Target,
                 delta.OriginalTarget,
                 delta.MadeFromBuilder?.PreviousTokenBuilder?.Target,
-                delta.Intensity.ToString(),
+                evaluatedValue.ToString(),
                 String.Empty,
                 String.Empty,
                 "damage",
@@ -280,7 +320,8 @@ namespace SFDDCards
                 ComposeValueTargetLocation.BetweenMiddleAndSuffix,
                 (CombatantTargetEvaluatableValue curValue) => 
                 {
-                    return !(curValue is SelfTargetEvaluatableValue);
+                    return curValue is SelfTargetEvaluatableValue
+                        && (deltaEntry.PreviousConceptualTarget == null || deltaEntry.PreviousConceptualTarget == deltaEntry.ConceptualTarget);
                 }
                 );
         }
@@ -292,15 +333,15 @@ namespace SFDDCards
                 builder.Target,
                 builder.OriginalTarget,
                 builder?.PreviousTokenBuilder?.Target,
-                builder.Intensity.ToString(),
+                builder.Intensity.DescribeEvaluation(builder.Campaign, builder),
                 "Heal",
                 String.Empty,
-                builder.GetIntensityDescriptionIfNotConstant(),
+                String.Empty,
                 ComposeValueTargetLocation.BetweenMiddleAndSuffix,
                 ComposeValueTargetLocation.BetweenMiddleAndSuffix,
                 (ICombatantTarget curValue) =>
                 {
-                    return !(builder.Target == builder.User);
+                    return (builder.Target == builder.User);
                 });
         }
 
@@ -311,7 +352,7 @@ namespace SFDDCards
                 delta.Target,
                 delta.OriginalTarget,
                 delta.MadeFromBuilder?.PreviousTokenBuilder?.Target,
-                delta.Intensity.ToString(),
+                delta.ConceptualIntensity.ToString(),
                 "Heal",
                 String.Empty,
                 String.Empty,
@@ -324,17 +365,24 @@ namespace SFDDCards
         #region Describing Cards
         public static string DescribeConceptualCards(ConceptualDeltaEntry deltaEntry)
         {
+            string valueText = deltaEntry.ConceptualIntensity.DescribeEvaluation();
+
             switch (deltaEntry.IntensityKindType)
             {
                 case TokenEvaluatorBuilder.IntensityKind.NumberOfCards:
                     if (deltaEntry.NumberOfCardsRelationType == TokenEvaluatorBuilder.NumberOfCardsRelation.Draw)
                     {
-                        return ComposeDescriptor(
+                        if (deltaEntry.ConceptualIntensity is ConstantEvaluatableValue<int> constant && constant.ConstantValue == 1)
+                        {
+                            valueText = "a";
+                        }
+
+                        return ComposeDescriptor<CombatantTargetEvaluatableValue>(
                             String.Empty,
                             null,
                             null,
                             null,
-                            deltaEntry.ConceptualIntensity,
+                            valueText,
                             "Draw ",
                             ExtractSingularOrPlural(deltaEntry.ConceptualIntensity, "card"),
                             String.Empty,
@@ -351,20 +399,27 @@ namespace SFDDCards
 
         public static string DescribeRealizedCards(TokenEvaluatorBuilder builder)
         {
+            string valueText = builder.Intensity.DescribeEvaluation(builder.Campaign, builder);
+
             switch (builder.IntensityKindType)
             {
                 case TokenEvaluatorBuilder.IntensityKind.NumberOfCards:
                     if (builder.NumberOfCardsRelationType == TokenEvaluatorBuilder.NumberOfCardsRelation.Draw)
                     {
-                        return ComposeDescriptor(
+                        if (builder.Intensity is ConstantEvaluatableValue<int> constant && constant.ConstantValue == 1)
+                        {
+                            valueText = "a";
+                        }
+
+                        return ComposeDescriptor<ICombatantTarget>(
                             String.Empty,
                             null,
                             null,
                             null,
-                            builder.Intensity,
+                            valueText,
                             "Draw ",
                             ExtractSingularOrPlural(builder.Intensity, "card"),
-                            builder.GetIntensityDescriptionIfNotConstant(),
+                            String.Empty,
                             ComposeValueTargetLocation.BetweenMiddleAndSuffix,
                             ComposeValueTargetLocation.BetweenPrefixAndMiddle,
                             null
@@ -388,9 +443,9 @@ namespace SFDDCards
                             null,
                             null,
                             null,
-                            delta.Intensity,
+                            delta.ConceptualIntensity,
                             "Draw ",
-                            ExtractSingularOrPlural(delta.Intensity, "card"),
+                            ExtractSingularOrPlural(delta.ConceptualIntensity, "card"),
                             String.Empty,
                             ComposeValueTargetLocation.BetweenMiddleAndSuffix,
                             ComposeValueTargetLocation.BetweenPrefixAndMiddle,
@@ -407,19 +462,22 @@ namespace SFDDCards
         #region Describing Status Effect
         public static string DescribeConceptualApplyStatusEffect(ConceptualDeltaEntry deltaEntry)
         {
-            string stackstext = ExtractSingularOrPlural(deltaEntry.ConceptualIntensity, "stack");
+            if (deltaEntry.ConceptualTarget is SelfTargetEvaluatableValue)
+            {
+                return $"Gain {deltaEntry.ConceptualIntensity.DescribeEvaluation()} {deltaEntry.StatusEffect.Name}.";
+            }
 
             // If this stack change is targeting the Owner of this entire effect,
             // and it's being applied to the target that holds this status,
             // don't mention the name of the stacks
-            string stacksTextWithMaybeName = $"{stackstext} of {deltaEntry.StatusEffect.Name}";
+            string maybeName = $"{deltaEntry.StatusEffect.Name}";
             string toTargetText = $"to {deltaEntry.ConceptualTarget.DescribeEvaluation().ToLower()}";
             if (deltaEntry.MadeFromBuilder.Owner is StatusEffect ownerStatus 
                 && deltaEntry.StatusEffect != null 
                 && deltaEntry.StatusEffect.Equals(ownerStatus)
                 && deltaEntry.ConceptualTarget is SelfTargetEvaluatableValue)
             {
-                stacksTextWithMaybeName = $"{stackstext}";
+                maybeName = $"";
                 toTargetText = string.Empty;
             }
 
@@ -430,29 +488,37 @@ namespace SFDDCards
                 deltaEntry.PreviousConceptualTarget,
                 deltaEntry.ConceptualIntensity,
                 "Apply",
-                stacksTextWithMaybeName,
+                maybeName,
                 String.Empty,
                 ComposeValueTargetLocation.BetweenMiddleAndSuffix,
                 ComposeValueTargetLocation.BetweenPrefixAndMiddle,
-                null
-                ) ;
+                (CombatantTargetEvaluatableValue curValue) =>
+                {
+                    return deltaEntry.PreviousConceptualTarget != null && deltaEntry.ConceptualTarget != null && deltaEntry.OriginalConceptualTarget != null 
+                    && deltaEntry.PreviousConceptualTarget.Equals(deltaEntry.ConceptualTarget) && deltaEntry.ConceptualTarget.Equals(deltaEntry.OriginalConceptualTarget);
+                });
         }
 
         public static string DescribeRealizedApplyStatusEffect(TokenEvaluatorBuilder builder)
         {
+            if (builder.Target == builder.User)
+            {
+                return $"Gain {builder.Intensity.DescribeEvaluation(builder.Campaign, builder)} {builder.StatusEffect.Name}.";
+            }
+
             string stackstext = ExtractSingularOrPlural(builder.Intensity, "stack");
 
             // If this stack change is targeting the Owner of this entire effect,
             // and it's being applied to the target that holds this status,
             // don't mention the name of the stacks
-            string stacksTextWithMaybeName = $"{stackstext} of {builder.StatusEffect.Name}";
+            string maybeName = $"{builder.StatusEffect.Name}";
             string toTargetText = $"to {builder.Target.Name}";
             if (builder.Owner is StatusEffect ownerStatus
                 && builder.StatusEffect != null
                 && builder.StatusEffect.Equals(ownerStatus)
                 && builder.Target == builder.User)
             {
-                stacksTextWithMaybeName = $"{stackstext}";
+                maybeName = $"";
                 toTargetText = string.Empty;
             }
 
@@ -463,13 +529,13 @@ namespace SFDDCards
                 builder?.PreviousTokenBuilder?.Target,
                 builder.Intensity.ToString(),
                 "Apply",
-                stacksTextWithMaybeName,
-                builder.GetIntensityDescriptionIfNotConstant(),
+                maybeName,
+                String.Empty,
                 ComposeValueTargetLocation.BetweenMiddleAndSuffix,
                 ComposeValueTargetLocation.BetweenPrefixAndMiddle,
                 (ICombatantTarget curValue) =>
                 {
-                    return !(builder.Target == builder.OriginalTarget && builder.Target == builder?.PreviousTokenBuilder?.Target
+                    return (builder.Target == builder.OriginalTarget && builder.Target == builder?.PreviousTokenBuilder?.Target
                     && builder.Target.IsFoeOf(builder.User)
                     && builder.Target.GetRepresentingNumberOfTargets() == 1);
                 });
@@ -477,14 +543,14 @@ namespace SFDDCards
 
         public static string DescribeResolvedApplyStatusEffect(DeltaEntry delta)
         {
-            string stackstext = ExtractSingularOrPlural(delta.Intensity, "stack");
+            string stackstext = ExtractSingularOrPlural(delta.ConceptualIntensity, "stack");
 
             return ComposeDescriptor<ICombatantTarget>(
                 $"to {delta.Target.Name}",
                 delta.Target,
                 delta.OriginalTarget,
                 delta.MadeFromBuilder?.PreviousTokenBuilder?.Target,
-                delta.Intensity.ToString(),
+                delta.ConceptualIntensity.ToString(),
                 "Apply",
                 $"{stackstext} of {delta.StatusEffect.Name}",
                 String.Empty,
@@ -549,15 +615,15 @@ namespace SFDDCards
                 builder.Target,
                 builder.OriginalTarget,
                 builder?.PreviousTokenBuilder?.Target,
-                builder.Intensity.ToString(),
+                builder.Intensity.DescribeEvaluation(builder.Campaign, builder),
                 "Remove",
                 stacksTextWithMaybeName,
-                builder.GetIntensityDescriptionIfNotConstant(),
+                String.Empty,
                 ComposeValueTargetLocation.BetweenMiddleAndSuffix,
                 ComposeValueTargetLocation.BetweenPrefixAndMiddle,
                 (ICombatantTarget curValue) =>
                 {
-                    return !(builder.Target == builder.OriginalTarget && builder.Target == builder?.PreviousTokenBuilder?.Target
+                    return (builder.Target == builder.OriginalTarget && builder.Target == builder?.PreviousTokenBuilder?.Target
                     && builder.Target.IsFoeOf(builder.User)
                     && builder.Target.GetRepresentingNumberOfTargets() == 1);
                 });
@@ -565,14 +631,14 @@ namespace SFDDCards
 
         public static string DescribeResolvedRemoveStatusEffect(DeltaEntry delta)
         {
-            string stackstext = ExtractSingularOrPlural(delta.Intensity, "stack");
+            string stackstext = ExtractSingularOrPlural(delta.ConceptualIntensity, "stack");
 
             return ComposeDescriptor<ICombatantTarget>(
                 $"from {delta.Target.Name}",
                 delta.Target,
                 delta.OriginalTarget,
                 delta.MadeFromBuilder?.PreviousTokenBuilder?.Target,
-                delta.Intensity.ToString(),
+                delta.ConceptualIntensity.ToString(),
                 "Remove",
                 $"{stackstext} of {delta.StatusEffect.Name}",
                 String.Empty,
@@ -583,6 +649,11 @@ namespace SFDDCards
 
         public static string DescribeConceptualSetStatusEffect(ConceptualDeltaEntry deltaEntry)
         {
+            if (deltaEntry.ConceptualTarget is SelfTargetEvaluatableValue && deltaEntry.ConceptualIntensity is ConstantEvaluatableValue<int> constant && constant.ConstantValue == 0)
+            {
+                return $"Clear {deltaEntry.StatusEffect.Name}.";
+            }
+
             string stackstext = ExtractSingularOrPlural(deltaEntry.ConceptualIntensity, "stack");
 
             // If this stack change is targeting the Owner of this entire effect,
@@ -615,6 +686,11 @@ namespace SFDDCards
 
         public static string DescribeRealizedSetStatusEffect(TokenEvaluatorBuilder builder)
         {
+            if (builder.Intensity is ConstantEvaluatableValue<int> constant && constant.ConstantValue == 0)
+            {
+                return $"Clear {builder.StatusEffect.Name}.";
+            }
+
             string stackstext = ExtractSingularOrPlural(builder.Intensity, "stack");
 
             // If this stack change is targeting the Owner of this entire effect,
@@ -635,15 +711,15 @@ namespace SFDDCards
                 builder.Target,
                 builder.OriginalTarget,
                 builder?.PreviousTokenBuilder?.Target,
-                builder.Intensity.ToString(),
+                builder.Intensity.DescribeEvaluation(builder.Campaign, builder),
                 stacksTextWithMaybeName,
                 $"{stackstext}",
-                builder.GetIntensityDescriptionIfNotConstant(),
+                String.Empty,
                 ComposeValueTargetLocation.BetweenMiddleAndSuffix,
                 ComposeValueTargetLocation.BetweenPrefixAndMiddle,
                 (ICombatantTarget curValue) =>
                 {
-                    return !(builder.Target == builder.OriginalTarget && builder.Target == builder?.PreviousTokenBuilder?.Target
+                    return (builder.Target == builder.OriginalTarget && builder.Target == builder?.PreviousTokenBuilder?.Target
                     && builder.Target.IsFoeOf(builder.User)
                     && builder.Target.GetRepresentingNumberOfTargets() == 1);
                 });
@@ -796,11 +872,11 @@ namespace SFDDCards
             StringBuilder descriptor = new StringBuilder();
             string leadingSpace = "";
 
-            bool shouldPutTarget = !(previoustarget != null && previoustarget.Equals(target));
+            bool shouldPutTarget = true;
 
-            if (omitTargetDelegate != null && previoustarget == null && shouldPutTarget)
+            if (omitTargetDelegate != null)
             {
-                shouldPutTarget &= omitTargetDelegate(target);
+                shouldPutTarget &= !omitTargetDelegate(target);
             }
 
             if (!string.IsNullOrEmpty(valueText) && whereToPutValue == ComposeValueTargetLocation.BeforePrefix)
@@ -876,7 +952,7 @@ namespace SFDDCards
                 builtString += ".";
             }
 
-            return builtString;
+            return builtString.Trim();
         }
         #endregion
 
@@ -893,7 +969,15 @@ namespace SFDDCards
 
                 if (change.SetValue != null)
                 {
-                    nextText.Append($"{leadingcomma}Set {change.Element.GetNameAndMaybeIcon()} to {change.SetValue.DescribeEvaluation()}");
+                    if (change.SetValue is ConstantEvaluatableValue<int> constant && constant.ConstantValue == 0)
+                    {
+                        nextText.Append($"{leadingcomma}Clear {change.Element.GetNameAndMaybeIcon()}");
+                    }
+                    else
+                    {
+                        nextText.Append($"{leadingcomma}Set {change.Element.GetNameAndMaybeIcon()} to {change.SetValue.DescribeEvaluation()}");
+                    }
+
                     leadingcomma = ", ";
                 }
                 else if (change.GainOrLoss != null)
@@ -907,13 +991,13 @@ namespace SFDDCards
                         }
                         else if (constant.ConstantValue < 0)
                         {
-                            nextText.Append($"{leadingcomma}Lose {constant.ConstantValue.ToString()} {change.Element.GetNameAndMaybeIcon()}");
+                            nextText.Append($"{leadingcomma}Lose {Mathf.Abs(constant.ConstantValue).ToString()} {change.Element.GetNameAndMaybeIcon()}");
                             leadingcomma = ", ";
                         }
                     }
                     else
                     {
-                        nextText.Append($"{leadingcomma}Modify {change.Element.GetNameAndMaybeIcon()} by {change.SetValue.DescribeEvaluation()}");
+                        nextText.Append($"{leadingcomma}Modify {change.Element.GetNameAndMaybeIcon()} by {change.GainOrLoss.DescribeEvaluation()}");
                         leadingcomma = ", ";
                     }
                 }
@@ -929,6 +1013,108 @@ namespace SFDDCards
             }
 
             return changeText.ToString();
+        }
+
+        public static string DescribeElementChange(TokenEvaluatorBuilder realizedBuilder, bool ignoreElementFlag)
+        {
+            StringBuilder changeText = new StringBuilder();
+            string leadingcomma = "";
+
+            foreach (ElementResourceChange change in realizedBuilder.ElementResourceChanges)
+            {
+                StringBuilder nextText = new StringBuilder();
+
+                if (change.SetValue != null)
+                {
+                    if (change.SetValue is ConstantEvaluatableValue<int> constant && constant.ConstantValue == 0)
+                    {
+                        nextText.Append($"{leadingcomma}Clear {change.Element.GetNameAndMaybeIcon()}");
+                    }
+                    else
+                    {
+                        nextText.Append($"{leadingcomma}Set {change.Element.GetNameAndMaybeIcon()} to {change.SetValue.DescribeEvaluation()}");
+                    }
+
+                    leadingcomma = ", ";
+                }
+                else if (change.GainOrLoss != null)
+                {
+                    if (change.GainOrLoss is ConstantEvaluatableValue<int> constant)
+                    {
+                        if (constant.ConstantValue > 0 && !ignoreElementFlag)
+                        {
+                            nextText.Append($"{leadingcomma}Gain {constant.ConstantValue.ToString()} {change.Element.GetNameAndMaybeIcon()}");
+                            leadingcomma = ", ";
+                        }
+                        else if (constant.ConstantValue < 0)
+                        {
+                            nextText.Append($"{leadingcomma}Lose {Mathf.Abs(constant.ConstantValue).ToString()} {change.Element.GetNameAndMaybeIcon()}");
+                            leadingcomma = ", ";
+                        }
+                    }
+                    else
+                    {
+                        nextText.Append($"{leadingcomma}Modify {change.Element.GetNameAndMaybeIcon()} by {change.GainOrLoss.DescribeEvaluation()}");
+                        leadingcomma = ", ";
+                    }
+                }
+
+                string builderResult = nextText.ToString().Trim('.');
+
+                // If this had any text, it should always end in a period
+                if (builderResult.Length > 0)
+                {
+                    builderResult += ".";
+                    changeText.Append(builderResult);
+                }
+            }
+
+            return changeText.ToString();
+        }
+
+        public static string DescribeRequirement(ConceptualTokenEvaluatorBuilder delta)
+        {
+            StringBuilder resultBuilder = new StringBuilder();
+
+            string leadingComma = "";
+            string startingLine = "If ";
+
+            if (delta.ElementRequirements.Count > 0)
+            {
+                foreach (Element req in delta.ElementRequirements.Keys)
+                {
+                    string thisRequirementText = delta.ElementRequirements[req].DescribeEvaluation();
+                    if (!string.IsNullOrEmpty(thisRequirementText))
+                    {
+                        resultBuilder.Append($"{startingLine}{leadingComma}{req.GetNameAndMaybeIcon()} {RequiresComparisonScriptingToken.GreaterThanOrEqualToAscii} {thisRequirementText}");
+                        leadingComma = ", ";
+                        startingLine = "";
+                    }
+                }
+            }
+
+            foreach (IRequirement requirement in delta.Requirements)
+            {
+                string thisRequirementText = requirement.DescribeRequirement();
+                if (!string.IsNullOrEmpty(thisRequirementText))
+                {
+                    if (thisRequirementText.StartsWith("1 x "))
+                    {
+                        thisRequirementText = thisRequirementText.Substring("1 x ".Length);
+                    }
+
+                    resultBuilder.Append($"{startingLine}{leadingComma}{thisRequirementText}");
+                    leadingComma = ", ";
+                    startingLine = "";
+                }
+            }
+
+            if (resultBuilder.Length > 0)
+            {
+                resultBuilder.Append(":");
+            }
+
+            return resultBuilder.ToString();
         }
 
         #endregion

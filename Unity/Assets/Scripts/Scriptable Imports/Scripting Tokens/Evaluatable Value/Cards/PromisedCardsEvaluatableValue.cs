@@ -5,18 +5,78 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
 {
     public class PromisedCardsEvaluatableValue : CardsEvaluatableValue
     {
-        public CardsEvaluatableValue InnerValue;
+        public CardsEvaluatableValue InnerValue
+        {
+            get
+            {
+                return this.innerValue;
+            }
+            set
+            {
+                this.innerValue = value;
+            }
+        }
         public CardsEvaluatableValue SampledPool;
-        public string DescriptionText = "?";
+
+        public string DescriptionText
+        {
+            get
+            {
+                return this.descriptionText;
+            }
+            set
+            {
+                this.descriptionText = value;
+            }
+        }
+
+        private string descriptionText { get; set; } = "?";
+
+        public CardsEvaluatableValue innerValue { get; set; }
 
         public override string DescribeEvaluation()
         {
-            if (this.InnerValue == null)
+            if (this.DescriptionText != "?")
             {
                 return this.DescriptionText;
             }
 
-            return this.InnerValue.DescribeEvaluation();
+            if (this.innerValue != null)
+            {
+                return this.InnerValue.DescribeEvaluation();
+            }
+
+            if (this.SampledPool != null)
+            {
+                return this.SampledPool.DescribeEvaluation();
+            }
+
+            return this.DescriptionText;
+        }
+
+        public override bool Equals(CardsEvaluatableValue other)
+        {
+            if (other == this)
+            {
+                return true;
+            }
+
+            if (this.InnerValue == null)
+            {
+                return false;
+            }
+
+            if (this.InnerValue.Equals(other))
+            {
+                return true;
+            }
+
+            if ((other is PromisedCardsEvaluatableValue promise))
+            {
+                return this.InnerValue.Equals(promise.InnerValue);
+            }
+
+            return false;
         }
 
         public override string GetScriptingTokenText()

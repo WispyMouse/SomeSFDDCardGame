@@ -14,7 +14,22 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
                 return "deck";
             }
 
-            return $"top {this.TopCardsCount.DescribeEvaluation()} cards of the deck";
+            if (this.TopCardsCount is ConstantEvaluatableValue<int> constant && constant.ConstantValue == 1)
+            {
+                return $"the top card of the deck";
+            }
+
+            return $"the top {this.TopCardsCount.DescribeEvaluation()} cards of the deck";
+        }
+
+        public override bool Equals(CardsEvaluatableValue other)
+        {
+            if (!(other is DeckCardsEvaluatableValue sameKind))
+            {
+                return false;
+            }
+
+            return this.TopCardsCount.Equals(sameKind.TopCardsCount);
         }
 
         public override string GetScriptingTokenText()
@@ -24,7 +39,7 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
                 return "deck";
             }
 
-            return $"deck {this.TopCardsCount.GetScriptingTokenText()}";
+            return $"the deck {this.TopCardsCount.GetScriptingTokenText()}";
         }
 
         public override int RepresentingNumberOfCards(DeltaEntry toApplyTo)

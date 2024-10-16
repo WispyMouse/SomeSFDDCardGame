@@ -26,21 +26,48 @@ namespace SFDDCards
                 builder.RelevantCards = new SelfCardEvaluatableValue(card);
             }
 
-            foreach (Element baseElement in evaluatedAttack.BaseElementGain.Keys)
+            if (evaluatedAttack.BaseElementGain != null || builder.ElementResourceChanges.Count > 0)
             {
-                builder.ElementResourceChanges.Add(new ElementResourceChange() { Element = baseElement, GainOrLoss = new ConstantEvaluatableValue<int>(evaluatedAttack.BaseElementGain[baseElement]) });
-            }
+                List<ElementResourceChange> elementChanges = new List<ElementResourceChange>();
 
-            if (builder.ElementResourceChanges.Count > 0)
-            {
-                builders.Add(builder);
-                builder = new ConceptualTokenEvaluatorBuilder(builder);
+                ConceptualTokenEvaluatorBuilder elementGainBuilder = new ConceptualTokenEvaluatorBuilder(context, builder)
+                {
+                    Owner = evaluatedAttack.Owner,
+                    RelevantCards = builder.RelevantCards
+                };
+
+                if (evaluatedAttack.BaseElementGain != null && evaluatedAttack.BaseElementGain.Count > 0)
+                {
+                    foreach (Element curElement in evaluatedAttack.BaseElementGain.Keys)
+                    {
+                        elementGainBuilder.ElementResourceChanges.Add(new ElementResourceChange(curElement, new ConstantEvaluatableValue<int>(evaluatedAttack.BaseElementGain[curElement])));
+                    }
+                }
+
+                if (builder.ElementResourceChanges != null)
+                {
+                    elementGainBuilder.ElementResourceChanges.AddRange(builder.ElementResourceChanges);
+                }
+
+                builders.Add(elementGainBuilder);
+                builder = new ConceptualTokenEvaluatorBuilder(elementGainBuilder);
             }
 
             int finalIndex = evaluatedAttack.AttackTokens.Count - 1;
             for (int scriptIndex = 0; scriptIndex < evaluatedAttack.AttackTokens.Count; scriptIndex++)
             {
                 IScriptingToken token = evaluatedAttack.AttackTokens[scriptIndex];
+
+                // If this token is not a requirement, and the previous one was,
+                // launch now to make sure that we're evaluating the requirements
+                // in the intended context
+                // i.e. "[IFTARGET: SELF][SETTARGET: FOE]" should work
+                if (scriptIndex > 0 && evaluatedAttack.AttackTokens[scriptIndex-1] is IRequirement && !(token is IRequirement))
+                {
+                    builders.Add(builder);
+                    builder = new ConceptualTokenEvaluatorBuilder(builder);
+                }
+
                 token.ApplyToken(builder);
                 builder.AppliedTokens.Add(token);
 
@@ -56,10 +83,10 @@ namespace SFDDCards
             return builders;
         }
 
-        public static GamestateDelta CalculateRealizedDeltaEvaluation(IAttackTokenHolder evaluatedAttack, CampaignContext campaignContext, IEffectOwner owner, Combatant user, ICombatantTarget originalTarget, ReactionWindowContext? context = null)
+        public static GamestateDelta CalculateRealizedDeltaEvaluation(IAttackTokenHolder evaluatedAttack, CampaignContext campaignContext, Combatant user, ICombatantTarget originalTarget, ReactionWindowContext? context = null)
         {
             List<ConceptualTokenEvaluatorBuilder> concepts = CalculateConceptualBuildersFromTokenEvaluation(evaluatedAttack, context);
-            return RealizeConceptualBuilders(concepts, campaignContext, owner, user, originalTarget);
+            return RealizeConceptualBuilders(concepts, campaignContext, evaluatedAttack.Owner, user, originalTarget);
         }
 
         public static GamestateDelta RealizeConceptualBuilders(List<ConceptualTokenEvaluatorBuilder> concepts, CampaignContext campaignContext, IEffectOwner owner, Combatant user, ICombatantTarget originalTarget)
@@ -67,13 +94,29 @@ namespace SFDDCards
             GamestateDelta resultingDelta = new GamestateDelta();
             TokenEvaluatorBuilder previousBuilder = null;
 
+            bool triggerRequirementsCheck = false;
+
             foreach (ConceptualTokenEvaluatorBuilder conceptBuilder in concepts)
             {
+                if (previousBuilder != null && previousBuilder.BasedOnConcept != null && conceptBuilder.HasSameRequirements(previousBuilder.BasedOnConcept))
+                {
+                    // no - op; 
+                }
+                else
+                {
+                    triggerRequirementsCheck = true;
+                }
+
                 TokenEvaluatorBuilder realizedBuilder = RealizeConceptualBuilder(conceptBuilder, campaignContext, owner, user, originalTarget, previousBuilder);
-                if (realizedBuilder.MeetsElementRequirements(campaignContext.CurrentCombatContext) && realizedBuilder.MeetsRequirements(campaignContext.CurrentCombatContext))
+                if (
+                    !triggerRequirementsCheck ||
+                    (realizedBuilder.MeetsElementRequirements(campaignContext.CurrentCombatContext) && realizedBuilder.MeetsRequirements(campaignContext.CurrentCombatContext))
+                    )
                 {
                     resultingDelta.AppendDelta(realizedBuilder.GetEffectiveDelta(campaignContext));
+                    triggerRequirementsCheck = false;
                 }
+
                 previousBuilder = realizedBuilder;
             }
 
@@ -82,91 +125,69 @@ namespace SFDDCards
 
         public static TokenEvaluatorBuilder RealizeConceptualBuilder(ConceptualTokenEvaluatorBuilder concept, CampaignContext campaignContext, IEffectOwner owner, Combatant user, ICombatantTarget originalTarget, TokenEvaluatorBuilder previousBuilder = null)
         {
-            return new TokenEvaluatorBuilder(concept, campaignContext, owner, user, originalTarget, previousBuilder);
+            return new TokenEvaluatorBuilder(concept, campaignContext, owner, user, originalTarget, concept.ElementResourceChanges, concept.Intensity, concept.IntensityKindType, concept.RealizedOperationScriptingToken, previousBuilder);
         }
 
-        public static GamestateDelta GetDeltaFromTokens(string attackTokens, CampaignContext context, Combatant user, ICombatantTarget target)
+        public static GamestateDelta GetDeltaFromTokens(string attackTokens, CampaignContext context, IEffectOwner owner, Combatant user, ICombatantTarget target)
         {
-            IAttackTokenHolder pile = ScriptingTokenDatabase.GetAllTokens(attackTokens, user);
+            IAttackTokenHolder pile = ScriptingTokenDatabase.GetAllTokens(attackTokens, owner);
             GamestateDelta delta = CalculateRealizedDeltaEvaluation(
                     pile,
                     context,
-                    user,
                     user,
                     target);
 
             return delta;
         }
 
-        public static string DescribeCardText(Card importingCard)
+        public static string DescribeCardText(Card importingCard, ReactionWindowContext? context = null, bool ignoreFirstElementGainInText = true)
         {
-            List<ConceptualTokenEvaluatorBuilder> builders = CalculateConceptualBuildersFromTokenEvaluation(importingCard);
+            List<ConceptualTokenEvaluatorBuilder> builders = CalculateConceptualBuildersFromTokenEvaluation(importingCard, context);
             StringBuilder effectText = new StringBuilder();
             ConceptualTokenEvaluatorBuilder previousBuilder = null;
+            ConceptualTokenEvaluatorBuilder previousRequirementsBuilder = null;
 
             foreach (ConceptualTokenEvaluatorBuilder builder in builders)
             {
-                // If this builder is just a constant resource gain in one or more categories, skip it for generating card text
-                if (builder.ElementResourceChanges.Count != 0)
+                string deltaText = "";
+                string requirementsText = "";
+                string leadingSpace = "";
+
+                if (!builder.HasSameRequirements(previousRequirementsBuilder))
                 {
-                    bool nonConstantFound = false;
+                    requirementsText = EffectDescriberDatabase.DescribeRequirement(builder);
+                    effectText.Append($"{leadingSpace}\r\n{requirementsText.Trim()}");
 
-                    foreach (ElementResourceChange change in builder.ElementResourceChanges)
-                    {
-                        if (change.GainOrLoss is ConstantEvaluatableValue<int> constantEvaluatable)
-                        {
-                            continue;
-                        }
-
-                        nonConstantFound = true;
-                        break;
-                    }
-
-                    if (!nonConstantFound)
-                    {
-                        continue;
-                    }
+                    previousRequirementsBuilder = builder;
                 }
 
-                // When parsing a card, if three abilities sequentially have the same elemental requirements,
-                // don't display the redundant requirements, if the requirements are empty.
-                if (previousBuilder == null
-                    || !previousBuilder.HasSameElementRequirement(builder))
+                if (context.HasValue && context.Value.CampaignContext != null && context.Value.CombatantEffectOwner != null && context.Value.CombatantTarget != null)
                 {
-                    string currentRequirements = builder.DescribeElementRequirements();
+                    TokenEvaluatorBuilder realizedBuilder = RealizeConceptualBuilder(builder, context.Value.CampaignContext, importingCard, context.Value.CombatantEffectOwner, context.Value.CombatantTarget);
 
-                    if (string.IsNullOrEmpty(currentRequirements))
+                    string builderText = $"{EffectDescriberDatabase.DescribeRealizedEffect(realizedBuilder, ignoreFirstElementGainInText)}";
+                    if (!string.IsNullOrEmpty(builderText))
                     {
-                        if (previousBuilder != null)
-                        {
-                            // If there are no requirements, but the previous builder had requirements, notate that
-                            // Don't do that if this is the first thing, or the previous requirements were also empty
-                            effectText.Append("(no requirements):");
-                        }
-                    }
-                    else if (!string.IsNullOrEmpty(currentRequirements))
-                    {
-                        if (previousBuilder != null)
-                        {
-                            effectText.AppendLine();
-                        }
-                        effectText.Append(currentRequirements.Trim());
+                        deltaText += $"{leadingSpace}{builderText}";
+                        leadingSpace = " ";
                     }
                 }
-
-                ConceptualDelta delta = builder.GetConceptualDelta();
-
-                string deltaText = EffectDescriberDatabase.DescribeConceptualEffect(delta);
+                else
+                {
+                    ConceptualDelta conceptualDelta = builder.GetConceptualDelta();
+                    if (conceptualDelta.DeltaEntries.Count > 0)
+                    {
+                        string builderText = $"{EffectDescriberDatabase.DescribeConceptualEffect(conceptualDelta, ignoreElementIfCard: ignoreFirstElementGainInText)}";
+                        if (!string.IsNullOrEmpty(builderText))
+                        {
+                            deltaText += $"{leadingSpace}{builderText}";
+                            leadingSpace = " ";
+                        }
+                    }
+                }
 
                 if (!string.IsNullOrEmpty(deltaText))
                 {
-                    string leadingSpace = "";
-
-                    if (effectText.Length > 0)
-                    {
-                        leadingSpace = " ";
-                    }
-
                     effectText.Append($"{leadingSpace}{deltaText.Trim()}");
                 }
 

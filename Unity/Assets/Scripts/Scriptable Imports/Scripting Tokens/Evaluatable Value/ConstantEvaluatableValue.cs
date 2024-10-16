@@ -18,6 +18,11 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
             return true;
         }
 
+        public string DescribeEvaluation(CampaignContext campaignContext, TokenEvaluatorBuilder currentBuilder)
+        {
+            return this.DescribeEvaluation();
+        }
+
         public string DescribeEvaluation()
         {
             return this.ConstantValue.ToString();
@@ -52,6 +57,11 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
 
             GlobalUpdateUX.LogTextEvent.Invoke($"Asked to re-parse a constant value other than an int.", GlobalUpdateUX.LogType.RuntimeError);
             return string.Empty;
+        }
+
+        public string DescribeEvaluation(IEvaluatableValue<T> topValue)
+        {
+            return this.DescribeEvaluation();
         }
     }
 }

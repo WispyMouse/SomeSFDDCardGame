@@ -5,11 +5,15 @@ namespace SFDDCards.ScriptingTokens
     using SFDDCards.ScriptingTokens.EvaluatableValues;
     using System.Collections.Generic;
 
-    public class GenerateCardScriptingToken : BaseScriptingToken, IRealizedOperationScriptingToken
+    public class GenerateCardScriptingToken : BaseScriptingToken, IRealizedOperationScriptingToken, ILaterZoneListenerScriptingToken
     {
         public override string ScriptingTokenIdentifier { get; } = "GENERATECARD";
         public string Id { get; set; }
         public IEvaluatableValue<int> NumberOfCards { get; set; } = null;
+
+        public string LaterRealizedDestinationZone { get; set; }
+
+        public bool ShouldSilenceSpeaker => true;
 
         public PromisedCardsEvaluatableValue ReferencedPromise = new PromisedCardsEvaluatableValue();
 
@@ -44,7 +48,44 @@ namespace SFDDCards.ScriptingTokens
 
         public string DescribeOperationAsEffect(ConceptualDeltaEntry delta, string reactionWindowId)
         {
-            return $"Create {Id}";
+            return this.DescribeOperationAsEffect();
+        }
+
+        public string DescribeOperationAsEffect(TokenEvaluatorBuilder builder)
+        {
+            return this.DescribeOperationAsEffect();
+        }
+
+        private string DescribeOperationAsEffect()
+        {
+            string creationText = "";
+
+            if (this.NumberOfCards is ConstantEvaluatableValue<int> constant && constant.ConstantValue == 1)
+            {
+                creationText = $"Create {CardDatabase.GetModel(this.Id).Name}";
+            }
+            else
+            {
+                creationText = $"Create {this.NumberOfCards.DescribeEvaluation()} {CardDatabase.GetModel(this.Id).Name}";
+            }
+
+            if (!string.IsNullOrEmpty(LaterRealizedDestinationZone))
+            {
+                switch (this.LaterRealizedDestinationZone.ToLower())
+                {
+                    case "hand":
+                        creationText += " in hand";
+                        break;
+                    case "discard":
+                        creationText += " in discard";
+                        break;
+                    case "exile":
+                        creationText += " in exile";
+                        break;
+                }
+            }
+
+            return creationText;
         }
 
         public void ApplyToDelta(DeltaEntry applyingDuringEntry, ReactionWindowContext? context, out List<DeltaEntry> stackedDeltas)

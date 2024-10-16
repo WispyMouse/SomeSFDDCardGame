@@ -11,15 +11,14 @@ namespace SFDDCards
     {
         public static Dictionary<string, Element> ElementData { get; set; } = new Dictionary<string, Element>();
 
-        public static void AddElement(ElementImport toAdd, Sprite forSprite, Sprite greyscaleSprite, int? spriteIndex = null)
+        public static void AddElement(ElementImport toAdd)
         {
             Element newElement = new Element()
             {
                 Id = toAdd.Id.ToLower(),
                 Name = toAdd.Name,
-                Sprite = forSprite,
-                SpriteIndex = spriteIndex,
-                GreyscaleSprite = greyscaleSprite
+                Sprite = toAdd.NormalArt,
+                GreyscaleSprite = toAdd.GreyscaleArt
             };
 
             ElementData.Add(toAdd.Id.ToLower(), newElement);

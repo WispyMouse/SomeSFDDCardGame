@@ -1,0 +1,36 @@
+{
+	"Id": "demoreward",
+	"PickRewards":
+	[
+		{
+			"Protocol": "ChooseX",
+			"ProtocolArgument": 2,
+			"RewardIdentities":
+			[
+				{ "IdentityKind": "Card", "RewardIdentifier": "[common]" },
+				{ "IdentityKind": "Card", "RewardIdentifier": "[common]" },
+				{ "IdentityKind": "Card", "RewardIdentifier": "[common]" }
+			]
+		},
+		{
+			"Protocol": "ChooseX",
+			"ProtocolArgument": 1,
+			"RewardIdentities":
+			[
+				{ "IdentityKind": "Artifact", "RewardIdentifier": "[potion][common]" },
+				{ "IdentityKind": "Artifact", "RewardIdentifier": "[potion][common]" },
+				{ "IdentityKind": "Artifact", "RewardIdentifier": "[potion][common]" }
+			]
+		},
+		{
+			"Protocol": "ChooseX",
+			"ProtocolArgument": 1,
+			"RewardIdentities":
+			[
+				{ "IdentityKind": "Artifact", "RewardIdentifier": "[artifact][common]" },
+				{ "IdentityKind": "Artifact", "RewardIdentifier": "[artifact][common]" },
+				{ "IdentityKind": "Artifact", "RewardIdentifier": "[artifact][common]" }
+			]
+		}
+	]
+}

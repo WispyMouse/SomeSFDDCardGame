@@ -20,7 +20,7 @@ namespace SFDDCards.Tests.EditMode
             {
                 Id = nameof(ChooseAndDiscard),
                 Name = nameof(ChooseAndDiscard),
-                EffectScript = "[CARDBROWSER: HAND][CHOOSECARDS: 1][MOVECARDTOZONE: EXILE]"
+                EffectScript = "[CARDTARGET: HAND][CHOOSECARDS: 1][MOVECARDTOZONE: EXILE]"
             };
 
             Card derivedCard = new Card(import);
@@ -78,7 +78,7 @@ namespace SFDDCards.Tests.EditMode
             {
                 Id = nameof(AutomatiallyMakeChoiceWithOneTarget),
                 Name = nameof(AutomatiallyMakeChoiceWithOneTarget),
-                EffectScript = "[CARDBROWSER: DECK][CHOOSECARDS: 1][MOVECARDTOZONE: EXILE]"
+                EffectScript = "[CARDTARGET: DECK][CHOOSECARDS: 1][MOVECARDTOZONE: EXILE]"
             };
 
             Card derivedCard = new Card(import);
@@ -107,7 +107,7 @@ namespace SFDDCards.Tests.EditMode
             {
                 Id = nameof(AutomatiallyMakeChoiceWithOneTarget),
                 Name = nameof(AutomatiallyMakeChoiceWithOneTarget),
-                EffectScript = "[CARDBROWSER: DECK][CHOOSECARDS: 1][MOVECARDTOZONE: EXILE]"
+                EffectScript = "[CARDTARGET: DECK][CHOOSECARDS: 1][MOVECARDTOZONE: EXILE]"
             };
 
             Card derivedCard = new Card(import);

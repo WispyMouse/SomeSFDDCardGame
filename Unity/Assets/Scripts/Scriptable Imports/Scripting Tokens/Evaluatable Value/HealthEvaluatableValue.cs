@@ -30,9 +30,27 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
             return true;
         }
 
+        public string DescribeEvaluation(CampaignContext campaignContext, TokenEvaluatorBuilder currentBuilder)
+        {
+            if (this.TryEvaluateValue(campaignContext, currentBuilder, out int evaluatedValue))
+            {
+                return $"{this.DescribeEvaluation()} ({evaluatedValue})";
+            }
+            return this.DescribeEvaluation();
+        }
+
         public string DescribeEvaluation()
         {
-            return $"current health of {this.TargetToAssess}";
+            if (this.TargetToAssess.ToLower() == "target")
+            {
+                return "target's health";
+            }
+            else if (this.TargetToAssess.ToLower() == "self")
+            {
+                return "own health";
+            }
+
+            return $"{this.TargetToAssess} health";
         }
 
         public static bool TryGetHealthEvaluatableValue(string argument, out HealthEvaluatableValue output)
@@ -60,6 +78,11 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
         public string GetScriptingTokenText()
         {
             return $"{this.TargetToAssess}HEALTH";
+        }
+
+        public string DescribeEvaluation(IEvaluatableValue<int> topValue)
+        {
+            return this.DescribeEvaluation();
         }
     }
 }

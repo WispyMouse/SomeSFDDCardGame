@@ -19,6 +19,35 @@ namespace SFDDCards.ScriptingTokens
             }
 
             tokenBuilder.RealizedOperationScriptingToken = this;
+
+            ConceptualTokenEvaluatorBuilder previous = tokenBuilder.PreviousBuilder;
+            do
+            {
+                if (previous != null && previous.RelevantCards != null && previous.RelevantCards.Equals(tokenBuilder.RelevantCards))
+                {
+                    if (previous.RealizedOperationScriptingToken is ILaterZoneListenerScriptingToken laterListener)
+                    {
+                        if (!string.IsNullOrEmpty(laterListener.LaterRealizedDestinationZone))
+                        {
+                            break;
+                        }
+
+                        laterListener.LaterRealizedDestinationZone = this.Zone;
+
+                        if (laterListener.ShouldSilenceSpeaker)
+                        { 
+
+                            this.SkipDescribingMe = true;
+                        }
+                    }
+                }
+                else
+                {
+                    break;
+                }
+
+                previous = previous.PreviousBuilder;
+            } while (previous != null);
         }
 
         protected override bool TryGetTokenWithArguments(List<string> arguments, out IScriptingToken scriptingToken)
@@ -54,10 +83,42 @@ namespace SFDDCards.ScriptingTokens
             }
             else if (Zone == CardsEvaluatableValue.HandZoneId)
             {
+                if (delta.MadeFromBuilder.PlayedFromZone == "hand" && delta.MadeFromBuilder.RelevantCards is SelfCardEvaluatableValue)
+                {
+                    return $"Return this card to hand";
+                }
+
                 return $"Put {delta.MadeFromBuilder.RelevantCards.DescribeEvaluation()} in hand";
             }
 
             return $"Move {delta.MadeFromBuilder.RelevantCards.DescribeEvaluation()} to {Zone}";
+        }
+
+        public string DescribeOperationAsEffect(TokenEvaluatorBuilder builder)
+        {
+            if (Zone == CardsEvaluatableValue.DiscardZoneId)
+            {
+                return $"Discard {builder.RelevantCardsEvaluatable.DescribeEvaluation()}";
+            }
+            else if (Zone == CardsEvaluatableValue.ExileZoneId)
+            {
+                return $"Exile {builder.RelevantCardsEvaluatable.DescribeEvaluation()}";
+            }
+            else if (Zone == CardsEvaluatableValue.DeckZoneId)
+            {
+                return $"Put {builder.RelevantCardsEvaluatable.DescribeEvaluation()} into the deck and shuffle";
+            }
+            else if (Zone == CardsEvaluatableValue.HandZoneId)
+            {
+                if (builder.BasedOnConcept.PlayedFromZone == "hand" && builder.RelevantCardsEvaluatable is SelfCardEvaluatableValue)
+                {
+                    return $"Return this card to hand";
+                }
+
+                return $"Put {builder.RelevantCardsEvaluatable.DescribeEvaluation()} in hand";
+            }
+
+            return $"Move {builder.RelevantCardsEvaluatable.DescribeEvaluation()} to {Zone}";
         }
 
         public void ApplyToDelta(DeltaEntry applyingDuringEntry, ReactionWindowContext? context, out List<DeltaEntry> stackedDeltas)

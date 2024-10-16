@@ -6,6 +6,7 @@ namespace SFDDCards
 
     public class Player : Combatant
     {
+        public override string Id => "player";
         public override string Name => "Player";
         public override int MaxHealth { get; }
 

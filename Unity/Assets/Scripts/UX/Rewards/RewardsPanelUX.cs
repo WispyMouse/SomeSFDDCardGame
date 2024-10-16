@@ -18,6 +18,8 @@ namespace SFDDCards.UX
         [SerializeReference]
         private CentralGameStateController CentralGameStateControllerInstance;
 
+        public Reward Rewards;
+
         private void Awake()
         {
             this.Annihilate();
@@ -25,15 +27,16 @@ namespace SFDDCards.UX
 
         public void SetReward(Reward toReward)
         {
+            this.gameObject.SetActive(true);
             this.Annihilate();
+
+            this.Rewards = toReward;
 
             foreach (PickSomeReward pickReward in toReward.PickRewards)
             {
                 PickXRewardPanelUX pickRewardPanel = Instantiate(this.PickRewardUXPF, this.RewardPanelsHolder);
                 pickRewardPanel.RepresentPick(this, pickReward);
             }
-
-            this.gameObject.SetActive(true);
         }
 
         void Annihilate()
@@ -42,6 +45,8 @@ namespace SFDDCards.UX
             {
                 Destroy(this.RewardPanelsHolder.GetChild(ii).gameObject);
             }
+
+            this.Rewards = null;
         }
 
         public void GainReward(PickSomeRewardSlot slotChosen)
@@ -59,6 +64,7 @@ namespace SFDDCards.UX
                        null,
                        ScriptTokenEvaluator.GetDeltaFromTokens($"[SETTARGET:SELF][APPLYSTATUSEFFECTSTACKS: 1 {slotChosen.RewardedEffect.Id}]",
                        this.CentralGameStateControllerInstance.CurrentCampaignContext,
+                       null,
                        this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignPlayer,
                        this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignPlayer)
                        .DeltaEntries[0]);

@@ -23,6 +23,15 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
             return true;
         }
 
+        public string DescribeEvaluation(CampaignContext campaignContext, TokenEvaluatorBuilder currentBuilder)
+        {
+            if (this.TryEvaluateValue(campaignContext, currentBuilder, out int evaluatedValue))
+            {
+                return $"-{evaluatedValue}";
+            }
+            return this.DescribeEvaluation();
+        }
+
         public string DescribeEvaluation()
         {
             return "-";
@@ -37,6 +46,11 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
         public string GetScriptingTokenText()
         {
             return $"-{this.ToNegate.GetScriptingTokenText()}";
+        }
+
+        public string DescribeEvaluation(IEvaluatableValue<int> topValue)
+        {
+            return this.DescribeEvaluation();
         }
     }
 }

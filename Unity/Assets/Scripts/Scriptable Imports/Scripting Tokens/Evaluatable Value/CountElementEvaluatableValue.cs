@@ -29,7 +29,16 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
 
         public string DescribeEvaluation()
         {
-            return $"amount of {ElementToCount}";
+            return this.DescribeEvaluation(this);
+        }
+
+        public string DescribeEvaluation(CampaignContext campaignContext, TokenEvaluatorBuilder currentBuilder)
+        {
+            if (this.TryEvaluateValue(campaignContext, currentBuilder, out int evaluatedValue))
+            {
+                return $"{this.DescribeEvaluation()} ({evaluatedValue})";
+            }
+            return this.DescribeEvaluation();
         }
 
         public static bool TryGetCountElementalEvaluatableValue(string argument, out CountElementEvaluatableValue output, bool allowNameMatch)
@@ -56,6 +65,18 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
         public string GetScriptingTokenText()
         {
             return $"COUNTELEMENT_{this.ElementToCount}";
+        }
+
+        public string DescribeEvaluation(IEvaluatableValue<int> topValue)
+        {
+            Element element = ElementDatabase.GetElement(this.ElementToCount);
+
+            if (topValue == this)
+            {
+                return $"1 x {element.GetNameAndMaybeIcon()}";
+            }
+
+            return $"{element.GetNameAndMaybeIcon()}";
         }
     }
 }

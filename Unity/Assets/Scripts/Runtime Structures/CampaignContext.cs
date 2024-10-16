@@ -40,14 +40,16 @@ namespace SFDDCards
 
         public Reward PendingRewards { get; set; } = null;
 
-        public CampaignContext(RunConfiguration runConfig)
+        public CampaignContext(CampaignRoute onRoute)
         {
-            this.CampaignPlayer = new Player(runConfig.StartingMaximumHealth);
+            this.CampaignPlayer = new Player(onRoute.BasedOn.StartingMaximumHealth);
 
-            foreach (string startingCard in runConfig.StartingDeck)
+            foreach (string startingCard in onRoute.BasedOn.StartingDeck)
             {
                 this.CampaignDeck.AddCardToDeck(CardDatabase.GetModel(startingCard));
             }
+
+            this.OnRoute = onRoute;
         }
 
         public void AddCardToDeck(Card toAdd)
@@ -108,11 +110,6 @@ namespace SFDDCards
             GlobalUpdateUX.UpdateUXEvent?.Invoke();
         }
 
-        public void SetRoute(RunConfiguration configuration, RouteImport routeToStart)
-        {
-            this.OnRoute = new CampaignRoute(configuration, routeToStart);
-        }
-
         public void MakeChoiceNodeDecision(ChoiceNodeOption chosen)
         {
             chosen.WasSelected = true;
@@ -154,7 +151,7 @@ namespace SFDDCards
                 return;
             }
 
-            GlobalSequenceEventHolder.PushSequencesToTop(eventsThatWouldFollow.ToArray());
+            GlobalSequenceEventHolder.PushSequencesToTop(this, eventsThatWouldFollow.ToArray());
         }
 
         public bool TryGetReactionWindowSequenceEvents(ReactionWindowContext context, out List<GameplaySequenceEvent> eventsThatWouldFollow)
@@ -165,14 +162,17 @@ namespace SFDDCards
             {
                 foreach (ReactionWindowSubscription reactor in reactors)
                 {
-                    if (reactor != null && reactor.ShouldApply(context) && reactor.Reactor.TryGetReactionEvents(this, context, out List<GameplaySequenceEvent> events))
+                    if (reactor != null && reactor.ShouldApply(context) && reactor.Reactor.TryGetReactionEvents(this, context, out List<WindowResponse> responses))
                     {
                         if (eventsThatWouldFollow == null)
                         {
                             eventsThatWouldFollow = new List<GameplaySequenceEvent>();
                         }
 
-                        eventsThatWouldFollow.AddRange(events);
+                        foreach (WindowResponse response in responses)
+                        {
+                            eventsThatWouldFollow.Add(new GameplaySequenceEvent(() => this.StatusEffectHappeningProc(new StatusEffectHappening(response))));
+                        }
                     }
                 }
             }
@@ -218,11 +218,18 @@ namespace SFDDCards
 
         public void StatusEffectHappeningProc(StatusEffectHappening happening)
         {
-            GamestateDelta delta = ScriptTokenEvaluator.CalculateRealizedDeltaEvaluation(happening, this, happening.OwnedStatusEffect?.BasedOnStatusEffect, happening.OwnedStatusEffect?.Owner, this.CampaignPlayer, happening.Context);
+            ICombatantTarget originalTarget = happening.Context.CombatantTarget;
+
+            GamestateDelta delta = ScriptTokenEvaluator.CalculateRealizedDeltaEvaluation(happening, this, happening.OwnedStatusEffect?.Owner, originalTarget, happening.Context);
             GlobalUpdateUX.LogTextEvent.Invoke(EffectDescriberDatabase.DescribeResolvedEffect(delta), GlobalUpdateUX.LogType.GameEvent);
             delta.ApplyDelta(this);
 
             this.CheckAllStateEffectsAndKnockouts();
+        }
+
+        public void IngestStatusEffectHappening(ReactionWindowContext reactionWindow, WindowResponse response)
+        {
+            GlobalSequenceEventHolder.PushSequencesToTop(reactionWindow.CampaignContext, response);
         }
 
         public void CheckAllStateEffectsAndKnockouts()

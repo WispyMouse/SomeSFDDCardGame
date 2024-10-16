@@ -346,6 +346,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CentralGameStateControllerInstance: {fileID: 557897350}
   UXController: {fileID: 596646348}
+  EnemyRepresenterUX: {fileID: 2121006158}
 --- !u!1 &105321726
 GameObject:
   m_ObjectHideFlags: 0
@@ -751,7 +752,7 @@ RectTransform:
   - {fileID: 636848192}
   - {fileID: 2137407850}
   m_Father: {fileID: 1273290078}
-  m_RootOrder: 1
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -1493,6 +1494,36 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 360254963}
   m_CullTransparentMesh: 1
+--- !u!1 &364129332
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 364129333}
+  m_Layer: 0
+  m_Name: Hand Cards
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &364129333
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 364129332}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1852686336}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &383222108
 GameObject:
   m_ObjectHideFlags: 0
@@ -1998,7 +2029,7 @@ RectTransform:
   m_Children:
   - {fileID: 569096174}
   m_Father: {fileID: 1273290078}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -2025,6 +2056,38 @@ MonoBehaviour:
         - m_Target: {fileID: 585735592}
           m_TargetAssemblyTypeName: SFDDCards.TargetableIndicator, Assembly-CSharp
           m_MethodName: OnMouseUpAsButton
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+  - eventID: 0
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 585735592}
+          m_TargetAssemblyTypeName: SFDDCards.UX.TargetableIndicator, UX
+          m_MethodName: OnMouseEnter
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+  - eventID: 1
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 585735592}
+          m_TargetAssemblyTypeName: SFDDCards.UX.TargetableIndicator, UX
+          m_MethodName: OnMouseExit
           m_Mode: 1
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
@@ -2122,10 +2185,9 @@ MonoBehaviour:
   RewardsPanelUXInstance: {fileID: 1644388019}
   ShopPanelUXInstance: {fileID: 1237346909}
   PlayerRepresentationPF: {fileID: 8670198336706055196, guid: 590b34b4a42297142a9ad49bab93f0a2, type: 3}
-  EnemyRepresentationPF: {fileID: 1561262193006254764, guid: 6e2c95f5da881c64584b7ad1234c90ca, type: 3}
   PlayerRepresentationTransform: {fileID: 383222109}
-  EnemyRepresntationTransform: {fileID: 2121006157}
   PlayerHandRepresenter: {fileID: 1852686337}
+  EnemyRepresenterUX: {fileID: 2121006158}
   GoNextRoomButton: {fileID: 1270256453}
   ResetGameButton: {fileID: 1385260563}
   EndTurnButton: {fileID: 1393651915}
@@ -4531,8 +4593,8 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_Children:
   - {fileID: 1277495654}
-  - {fileID: 195420130}
   - {fileID: 585735590}
+  - {fileID: 195420130}
   m_Father: {fileID: 495849371}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -4662,6 +4724,38 @@ MonoBehaviour:
         - m_Target: {fileID: 1277495656}
           m_TargetAssemblyTypeName: SFDDCards.TargetableIndicator, Assembly-CSharp
           m_MethodName: OnMouseUpAsButton
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+  - eventID: 0
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 1277495656}
+          m_TargetAssemblyTypeName: SFDDCards.UX.TargetableIndicator, UX
+          m_MethodName: OnMouseEnter
+          m_Mode: 1
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+  - eventID: 1
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 1277495656}
+          m_TargetAssemblyTypeName: SFDDCards.UX.TargetableIndicator, UX
+          m_MethodName: OnMouseExit
           m_Mode: 1
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
@@ -5398,6 +5492,36 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 885b09c098a313e48a586450fc84948d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &1435583492
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1435583493}
+  m_Layer: 0
+  m_Name: Selected Card
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1435583493
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1435583492}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: -0.1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1852686336}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1437104353
 GameObject:
   m_ObjectHideFlags: 0
@@ -6893,7 +7017,9 @@ Transform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: -1.95, z: -5}
   m_LocalScale: {x: 1.5, y: 1.5, z: 1}
-  m_Children: []
+  m_Children:
+  - {fileID: 1435583493}
+  - {fileID: 364129333}
   m_Father: {fileID: 495849371}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -6912,7 +7038,8 @@ MonoBehaviour:
   UXController: {fileID: 596646348}
   CentralGameStateControllerInstance: {fileID: 557897350}
   CardRepresentationPF: {fileID: -2401335007970755610, guid: a121caa79f619f54faab2590fe5b2827, type: 3}
-  PlayerHandTransform: {fileID: 1852686336}
+  PlayerHandTransform: {fileID: 364129333}
+  SelectedCardTransform: {fileID: 1435583493}
 --- !u!1 &1870618769
 GameObject:
   m_ObjectHideFlags: 0
@@ -7750,6 +7877,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2121006157}
+  - component: {fileID: 2121006158}
   m_Layer: 0
   m_Name: EnemyPosition
   m_TagString: Untagged
@@ -7765,12 +7893,27 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2121006156}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 2.18, y: 0.35, z: 0}
+  m_LocalPosition: {x: 4, y: 0.35, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 495849371}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2121006158
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2121006156}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c50a65610bbb2ec4e94dc33aead98589, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  EnemyRepresentationPF: {fileID: 1561262193006254764, guid: 6e2c95f5da881c64584b7ad1234c90ca, type: 3}
+  EnemyRepresentationTransform: {fileID: 2121006157}
+  CentralGameStateControllerInstance: {fileID: 557897350}
 --- !u!1 &2130877476
 GameObject:
   m_ObjectHideFlags: 0

@@ -52,7 +52,7 @@ namespace SFDDCards.Tests.EditMode
                 Enemy target = combatContext.Enemies[0];
                 Card playedCard = combatContext.PlayerCombatDeck.CardsCurrentlyInHand[0];
 
-                GamestateDelta delta = ScriptTokenEvaluator.CalculateRealizedDeltaEvaluation(playedCard, combatContext.FromCampaign, combatContext.CombatPlayer, combatContext.CombatPlayer, target);
+                GamestateDelta delta = ScriptTokenEvaluator.CalculateRealizedDeltaEvaluation(playedCard, combatContext.FromCampaign, combatContext.CombatPlayer, target);
                 Assert.AreEqual(target, delta.DeltaEntries[0].Target, $"The predicted target of the effect should be the first intentional target, not another one.");
 
                 // Now actually play the card

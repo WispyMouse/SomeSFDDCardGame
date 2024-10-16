@@ -1,10 +1,11 @@
 using SFDDCards.Evaluation.Actual;
+using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
 namespace SFDDCards.ScriptingTokens.EvaluatableValues
 {
-    public abstract class CardsEvaluatableValue : IEvaluatableValue<List<Card>>
+    public abstract class CardsEvaluatableValue : IEvaluatableValue<List<Card>>, IEquatable<CardsEvaluatableValue>
     {
         public const string HandZoneId = "hand";
         public const string DiscardZoneId = "discard";
@@ -41,6 +42,18 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
             GlobalUpdateUX.LogTextEvent.Invoke($"Failed to determine card evaluatable for zone '{zone}'.", GlobalUpdateUX.LogType.RuntimeError);
 
             return null;
+        }
+
+        public string DescribeEvaluation(IEvaluatableValue<List<Card>> topValue)
+        {
+            return this.DescribeEvaluation();
+        }
+
+        public abstract bool Equals(CardsEvaluatableValue other);
+
+        public string DescribeEvaluation(CampaignContext campaignContext, TokenEvaluatorBuilder currentEvaluator)
+        {
+            return this.DescribeEvaluation();
         }
     }
 }

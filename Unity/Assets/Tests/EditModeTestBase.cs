@@ -8,7 +8,7 @@ namespace SFDDCards.Tests.EditMode
     using System.IO;
     using System.Text;
     using UnityEngine;
-
+    using UnityEngine.TestTools;
 
     public abstract class EditModeTestBase
     {
@@ -19,9 +19,13 @@ namespace SFDDCards.Tests.EditMode
         protected const string DebugElementOneIconText = "<sprite index=0>";
         protected const string DebugElementTwoIconText = "<sprite index=1>";
 
+        protected ReactionWindowContext PlayedFromHandContext;
+
         [SetUp]
         public void SetUp()
         {
+            LogAssert.ignoreFailingMessages = false;
+
             StatusEffectImport debugStatusEffect = new StatusEffectImport()
             {
                 Id = nameof(DebugStatus),
@@ -36,14 +40,18 @@ namespace SFDDCards.Tests.EditMode
                 Id = $"{nameof(DebugElementOne)}id".ToUpper(),
                 Name = $"{nameof(DebugElementOne)}name".ToUpper()
             };
-            ElementDatabase.AddElement(debugOneElementImport, null, null, 0);
+            ElementDatabase.AddElement(debugOneElementImport);
+            DebugElementOne = ElementDatabase.GetElement(debugOneElementImport.Id);
+            DebugElementOne.SpriteIndex = 0;
 
             ElementImport debugTwoElementImport = new ElementImport()
             {
                 Id = $"{nameof(DebugElementTwo)}id".ToUpper(),
                 Name = $"{nameof(DebugElementTwo)}name".ToUpper()
             };
-            ElementDatabase.AddElement(debugTwoElementImport, null, null, 1);
+            ElementDatabase.AddElement(debugTwoElementImport);
+            DebugElementTwo = ElementDatabase.GetElement(debugTwoElementImport.Id);
+            DebugElementTwo.SpriteIndex = 1;
         }
 
         [TearDown]

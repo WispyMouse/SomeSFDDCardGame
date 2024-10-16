@@ -15,28 +15,35 @@ namespace SFDDCards
     {
         public readonly string Name;
         public readonly string Id;
-        public readonly Dictionary<string, List<AttackTokenPile>> EffectTokens = new Dictionary<string, List<AttackTokenPile>>();
+        public readonly Dictionary<string, List<WindowResponder>> WindowResponders = new Dictionary<string, List<WindowResponder>>();
         public readonly Sprite Sprite;
         public readonly StatusEffectPersistence Persistence = StatusEffectPersistence.Combat;
         public readonly HashSet<string> Tags = new HashSet<string>();
 
-        public StatusEffect(StatusEffectImport basedOn, Sprite sprite = null)
+        string IEffectOwner.Id => this.Id;
+
+        public StatusEffect(StatusEffectImport basedOn)
         {
             this.Name = basedOn.Name;
             this.Id = basedOn.Id;
-            this.Sprite = sprite;
+            this.Sprite = basedOn.StatusEffectArt;
             this.Persistence = basedOn.Persistence;
             this.Tags = basedOn.Tags;
 
             foreach (EffectOnProcImport import in basedOn.Effects)
             {
-                if (!this.EffectTokens.TryGetValue(import.Window.ToLower(), out List<AttackTokenPile> tokens))
+                if (!this.WindowResponders.TryGetValue(import.Window.ToLower(), out List<WindowResponder> responses))
                 {
-                    tokens = new List<AttackTokenPile>();
-                    this.EffectTokens.Add(import.Window.ToLower(), tokens);
+                    responses = new List<WindowResponder>();
+                    this.WindowResponders.Add(import.Window.ToLower(), responses);
                 }
 
-                tokens.Add(ScriptingTokenDatabase.GetAllTokens(import.Script, this));
+                responses.Add(new WindowResponder()
+                {
+                    ApplicationPriority = import.ApplicationPriority,
+                    WindowId = import.Window,
+                    Effect = ScriptingTokenDatabase.GetAllTokens(import.Script, this)
+                });
             }
         }
 
@@ -44,35 +51,51 @@ namespace SFDDCards
         {
             List<string> statusEffects = new List<string>();
 
-            foreach (string window in this.EffectTokens.Keys)
+            foreach (string window in this.WindowResponders.Keys)
             {
-                StringBuilder thisWindowString = new StringBuilder();
-
-                string windowDescription = KnownReactionWindows.GetWindowDescriptor(window.ToLower());
-
-                if (!string.IsNullOrEmpty(windowDescription))
+                foreach (WindowResponder responder in this.WindowResponders[window])
                 {
-                    thisWindowString.Append($"<b>{windowDescription}:</b> ");
-                }
+                    StringBuilder thisWindowString = new StringBuilder();
 
-                foreach (AttackTokenPile attackTokenList in this.EffectTokens[window])
-                {
-                    List<ConceptualTokenEvaluatorBuilder> tokenEvaluators = ScriptTokenEvaluator.CalculateConceptualBuildersFromTokenEvaluation(attackTokenList);
+                    string windowDescription = KnownReactionWindows.GetWindowDescriptor(window.ToLower());
+
+                    if (!string.IsNullOrEmpty(windowDescription))
+                    {
+                        thisWindowString.Append($"<b>{windowDescription}:</b> ");
+                    }
+
+                    ConceptualTokenEvaluatorBuilder previousRequirementsBuilder = null;
+                    List<ConceptualTokenEvaluatorBuilder> tokenEvaluators = ScriptTokenEvaluator.CalculateConceptualBuildersFromTokenEvaluation(responder.Effect);
                     foreach (ConceptualTokenEvaluatorBuilder builder in tokenEvaluators)
                     {
-                        thisWindowString.Append($"{EffectDescriberDatabase.DescribeConceptualEffect(builder.GetConceptualDelta(), window.ToLower())} ");
-                    }
-                }
+                        ConceptualDelta delta = builder.GetConceptualDelta();
+                        if (delta.DeltaEntries.Count > 0)
+                        {
+                            if (!builder.HasSameRequirements(previousRequirementsBuilder))
+                            {
+                                string requirementText = EffectDescriberDatabase.DescribeRequirement(builder);
+                                if (!string.IsNullOrEmpty(requirementText))
+                                {
+                                    thisWindowString.Append($"{requirementText} ");
+                                }
+                                previousRequirementsBuilder = builder;
+                            }
 
-                statusEffects.Add(thisWindowString.ToString());
+                            thisWindowString.Append($"{EffectDescriberDatabase.DescribeConceptualEffect(delta, window.ToLower())} ");
+                        }
+                    }
+
+                    statusEffects.Add(thisWindowString.ToString().Trim());
+                }
             }
 
             HashSet<StatusEffect> mentionedEffects = new HashSet<StatusEffect>();
-            foreach (List<AttackTokenPile> piles in this.EffectTokens.Values)
+
+            foreach (string window in this.WindowResponders.Keys)
             {
-                foreach (AttackTokenPile curPile in piles)
+                foreach (WindowResponder responder in this.WindowResponders[window])
                 {
-                    mentionedEffects.UnionWith(ScriptTokenEvaluator.GetMentionedStatusEffects(curPile));
+                    mentionedEffects.UnionWith(ScriptTokenEvaluator.GetMentionedStatusEffects(responder.Effect));
                 }
             }
 

@@ -1,0 +1,11 @@
+{
+    "Name": "Bio Heal",
+	"Id": "mb1_statuseffect_bioheal",
+	"Effects":
+	[
+		{
+			"Window": "OWNERENDSTURN",
+			"Script": "[SETTARGET: SELF][HEAL: COUNTELEMENT_BIO*COUNTSTACKS_mb1_statuseffect_bioheal][CLEARSTACKS]"
+		}
+	]
+}

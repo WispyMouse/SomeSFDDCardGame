@@ -83,22 +83,22 @@ namespace SFDDCards.Tests.EditMode
 
             // Count the number of stacks, which should be zero on everyone now
             // The created token above should target the owner
-            TestVariableInCombatContext(selfCountDerivedCard, 0, combatContext, selfCountDerivedCard, combatContext.CombatPlayer, combatContext.Enemies[0]);
+            TestVariableInCombatContext(selfCountDerivedCard, 0, combatContext, combatContext.CombatPlayer, combatContext.Enemies[0]);
 
             // Give the player stacks of the status
             const int numberOfStacksToGivePlayer = 10;
             EditModeTestCommon.ApplyStatusEffectStacks(statusImport.Id, campaignContext, combatContext, combatContext.CombatPlayer, numberOfStacksToGivePlayer);
-            TestVariableInCombatContext(selfCountDerivedCard, numberOfStacksToGivePlayer, combatContext, selfCountDerivedCard, combatContext.CombatPlayer, combatContext.Enemies[0]);
+            TestVariableInCombatContext(selfCountDerivedCard, numberOfStacksToGivePlayer, combatContext, combatContext.CombatPlayer, combatContext.Enemies[0]);
 
             // Give the enemy some stacks of the status, which shouldn't affect the evaluation of the token
             const int numberOfStacksToGiveOpponent = 8;
             EditModeTestCommon.ApplyStatusEffectStacks(statusImport.Id, campaignContext, combatContext, combatContext.Enemies[0], numberOfStacksToGiveOpponent);
-            TestVariableInCombatContext(selfCountDerivedCard, numberOfStacksToGivePlayer, combatContext, selfCountDerivedCard, combatContext.CombatPlayer, combatContext.Enemies[0]);
+            TestVariableInCombatContext(selfCountDerivedCard, numberOfStacksToGivePlayer, combatContext, combatContext.CombatPlayer, combatContext.Enemies[0]);
 
             // Give the player some more stacks and make sure that updates
             const int numberOfStacksToGivePlayerNext = 18;
             EditModeTestCommon.ApplyStatusEffectStacks(statusImport.Id, campaignContext, combatContext, combatContext.CombatPlayer, numberOfStacksToGivePlayerNext);
-            TestVariableInCombatContext(selfCountDerivedCard, numberOfStacksToGivePlayer + numberOfStacksToGivePlayerNext, combatContext, selfCountDerivedCard, combatContext.CombatPlayer, combatContext.Enemies[0]);
+            TestVariableInCombatContext(selfCountDerivedCard, numberOfStacksToGivePlayer + numberOfStacksToGivePlayerNext, combatContext, combatContext.CombatPlayer, combatContext.Enemies[0]);
 
             // Give the player a different status effect; it shouldn't change the evaluation
             StatusEffectImport otherStatus = new StatusEffectImport()
@@ -109,7 +109,7 @@ namespace SFDDCards.Tests.EditMode
             };
             StatusEffectDatabase.AddStatusEffectToDatabase(otherStatus);
             EditModeTestCommon.ApplyStatusEffectStacks(otherStatus.Id, campaignContext, combatContext, combatContext.CombatPlayer, 99);
-            TestVariableInCombatContext(selfCountDerivedCard, numberOfStacksToGivePlayer + numberOfStacksToGivePlayerNext, combatContext, selfCountDerivedCard, combatContext.CombatPlayer, combatContext.Enemies[0]);
+            TestVariableInCombatContext(selfCountDerivedCard, numberOfStacksToGivePlayer + numberOfStacksToGivePlayerNext, combatContext, combatContext.CombatPlayer, combatContext.Enemies[0]);
         }
 
         public void TestVariableInCombatContext(IAttackTokenHolder attackHolderStack, IEvaluatableValue<int> variable, int expectedValue, IEffectOwner owner, int builderIndexContainingToken = 0)
@@ -118,14 +118,15 @@ namespace SFDDCards.Tests.EditMode
             CampaignContext campaignContext = EditModeTestCommon.GetBlankCampaignContext();
             campaignContext.StartNextRoomFromEncounter(new EvaluatedEncounter(testEncounter));
             CombatContext combatContext = campaignContext.CurrentCombatContext;
-            TestVariableInCombatContext(attackHolderStack, expectedValue, combatContext, owner, combatContext.CombatPlayer, combatContext.Enemies[0], builderIndexContainingToken);
+            TestVariableInCombatContext(attackHolderStack, expectedValue, combatContext, combatContext.CombatPlayer, combatContext.Enemies[0], builderIndexContainingToken);
         }
 
-        public void TestVariableInCombatContext(IAttackTokenHolder attackHolderStack, int expectedValue, CombatContext context, IEffectOwner owner, Combatant user, ICombatantTarget target, int deltaIndex = 0)
+        public void TestVariableInCombatContext(IAttackTokenHolder attackHolderStack, int expectedValue, CombatContext context, Combatant user, ICombatantTarget target, int deltaIndex = 0)
         {
-            GamestateDelta delta = ScriptTokenEvaluator.CalculateRealizedDeltaEvaluation(attackHolderStack, context.FromCampaign, owner, user, target);
+            GamestateDelta delta = ScriptTokenEvaluator.CalculateRealizedDeltaEvaluation(attackHolderStack, context.FromCampaign, user, target);
             Assert.GreaterOrEqual(delta.DeltaEntries.Count, deltaIndex, $"There should be enough delta entries to find the specified delta index. Not enough entries returned on evaluation.");
-            Assert.AreEqual(expectedValue, delta.DeltaEntries[deltaIndex].Intensity, $"Value should be as expected after evaluation.");
+            Assert.IsTrue(delta.DeltaEntries[deltaIndex].ConceptualIntensity.TryEvaluateValue(context.FromCampaign, delta.DeltaEntries[deltaIndex].MadeFromBuilder, out int evaluatedIntensity), "Should be able to evaluate intensity.");
+            Assert.AreEqual(expectedValue, evaluatedIntensity, $"Value should be as expected after evaluation.");
         }
     }
 }

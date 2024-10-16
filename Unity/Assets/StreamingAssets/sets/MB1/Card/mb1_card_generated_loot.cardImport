@@ -1,0 +1,14 @@
+{
+	"Id": "mb1_card_generated_loot",
+	"Name": "Loot",
+	"EffectScript": "[DRAW: 1][CARDTARGET: HAND][CHOOSECARDS: 1][MOVECARDTOZONE: DISCARD][CARDTARGET: SELF][MOVECARDTOZONE: EXILE]",
+	"Tags":
+	[
+		"m1e",
+		"cyber","void",
+		"generated"
+	],
+	"ElementGain":
+	[
+	]
+}

@@ -15,6 +15,11 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
             return "hand";
         }
 
+        public override bool Equals(CardsEvaluatableValue other)
+        {
+            return other is HandCardsEvaluatableValue;
+        }
+
         public override bool TryEvaluateValue(CampaignContext campaignContext, TokenEvaluatorBuilder currentBuilder, out List<Card> evaluatedValue)
         {
             if (campaignContext?.CurrentCombatContext?.PlayerCombatDeck?.CardsCurrentlyInHand == null)

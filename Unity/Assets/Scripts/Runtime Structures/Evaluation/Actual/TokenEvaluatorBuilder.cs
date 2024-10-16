@@ -38,8 +38,8 @@ namespace SFDDCards.Evaluation.Actual
         public ICombatantTarget OriginalTarget;
         public ICombatantTarget Target;
 
-        public int Intensity;
-        public IntensityKind IntensityKindType => this.BasedOnConcept.IntensityKindType;
+        public IEvaluatableValue<int> Intensity;
+        public IntensityKind IntensityKindType;
         public NumberOfCardsRelation NumberOfCardsRelationType => this.BasedOnConcept.NumberOfCardsRelationType;
 
         public List<ElementResourceChange> ElementResourceChanges = new List<ElementResourceChange>();
@@ -55,7 +55,9 @@ namespace SFDDCards.Evaluation.Actual
         public PlayerChoice PlayerChoiceToMake => this.BasedOnConcept?.ChoiceToMake;
         public CardsEvaluatableValue RelevantCardsEvaluatable;
 
-        public TokenEvaluatorBuilder(ConceptualTokenEvaluatorBuilder concept, CampaignContext campaignContext, IEffectOwner owner, Combatant user, ICombatantTarget originalTarget, TokenEvaluatorBuilder previousBuilder = null)
+        public IRealizedOperationScriptingToken RealizedOperationScriptingToken = null;
+
+        protected TokenEvaluatorBuilder(ConceptualTokenEvaluatorBuilder concept, CampaignContext campaignContext, IEffectOwner owner, Combatant user, ICombatantTarget originalTarget, TokenEvaluatorBuilder previousBuilder = null)
         {
             this.Campaign = campaignContext;
             this.BasedOnConcept = concept;
@@ -63,7 +65,6 @@ namespace SFDDCards.Evaluation.Actual
             this.Owner = owner;
             this.User = user;
             this.OriginalTarget = originalTarget;
-            this.ElementResourceChanges = concept.ElementResourceChanges;
 
             if (concept.Target != null)
             {
@@ -74,12 +75,7 @@ namespace SFDDCards.Evaluation.Actual
             }
             else
             {
-                this.Target = this.User;
-            }
-
-            if (concept.Intensity != null && !concept.Intensity.TryEvaluateValue(campaignContext, this, out this.Intensity))
-            {
-                GlobalUpdateUX.LogTextEvent.Invoke($"Intensity cannot be evaluated, cannot resolve effect.", GlobalUpdateUX.LogType.RuntimeError);
+                this.Target = originalTarget;
             }
 
             if (this.BasedOnConcept?.RelevantCards != null)
@@ -92,11 +88,62 @@ namespace SFDDCards.Evaluation.Actual
             }
         }
 
+        public TokenEvaluatorBuilder(ConceptualTokenEvaluatorBuilder concept, CampaignContext campaignContext, IEffectOwner owner, Combatant user, ICombatantTarget originalTarget, List<ElementResourceChange> resourceChanges, TokenEvaluatorBuilder previousBuilder = null) : this(concept, campaignContext, owner, user, originalTarget, previousBuilder)
+        {
+            this.ElementResourceChanges = resourceChanges;
+        }
+
+        public TokenEvaluatorBuilder(ConceptualTokenEvaluatorBuilder concept, CampaignContext campaignContext, IEffectOwner owner, Combatant user, ICombatantTarget originalTarget, IEvaluatableValue<int> intensity, IntensityKind intensityKindType, TokenEvaluatorBuilder previousBuilder = null) : this(concept, campaignContext, owner, user, originalTarget, previousBuilder)
+        {
+            this.Intensity = intensity;
+            this.IntensityKindType = intensityKindType;
+        }
+
+        public TokenEvaluatorBuilder(ConceptualTokenEvaluatorBuilder concept, CampaignContext campaignContext, IEffectOwner owner, Combatant user, ICombatantTarget originalTarget, List<ElementResourceChange> elementResourceChanges, IEvaluatableValue<int> intensity, IntensityKind intensityKindType, IRealizedOperationScriptingToken realizedOperationScriptingToken, TokenEvaluatorBuilder previousBuilder = null) : this(concept, campaignContext, owner, user, originalTarget, previousBuilder)
+        {
+            this.Intensity = intensity;
+            this.IntensityKindType = intensityKindType;
+            this.ElementResourceChanges = elementResourceChanges;
+            this.RealizedOperationScriptingToken = realizedOperationScriptingToken;
+        }
+
         public GamestateDelta GetEffectiveDelta(CampaignContext campaignContext)
         {
             GamestateDelta delta = new GamestateDelta();
-            DeltaEntry deltaEntry = new DeltaEntry(this);
-            delta.DeltaEntries.Add(deltaEntry);
+
+            if (this.ElementResourceChanges != null && this.ElementResourceChanges.Count > 0)
+            {
+                delta.DeltaEntries.Add(new DeltaEntry(this)
+                {
+                    ElementResourceChanges = this.ElementResourceChanges
+                });
+            }
+
+            if (this.Intensity != null)
+            {
+                delta.DeltaEntries.Add(new DeltaEntry(this)
+                {
+                    IntensityKindType = this.IntensityKindType,
+                    ConceptualIntensity = this.Intensity,
+                    StatusEffect = this.StatusEffect
+                });
+            }
+
+            if (this.RealizedOperationScriptingToken != null)
+            {
+                delta.DeltaEntries.Add(new DeltaEntry(this)
+                {
+                    RealizedOperationScriptingToken = this.RealizedOperationScriptingToken
+                });
+            }
+
+            if (this.ActionsToExecute != null && this.ActionsToExecute.Count > 0)
+            {
+                delta.DeltaEntries.Add(new DeltaEntry(this)
+                {
+                    ActionsToExecute = this.ActionsToExecute
+                });
+            }
 
             return delta;
         }
@@ -131,28 +178,6 @@ namespace SFDDCards.Evaluation.Actual
             }
 
             return true;
-        }
-
-        public string GetIntensityDescriptionIfNotConstant()
-        {
-            if (this.BasedOnConcept == null)
-            {
-                return String.Empty;
-            }
-
-            if (this.BasedOnConcept.Intensity is ConstantEvaluatableValue<int>)
-            {
-                return String.Empty;
-            }
-
-            string descriptor = this.BasedOnConcept.Intensity.DescribeEvaluation();
-
-            if (!string.IsNullOrEmpty(descriptor))
-            {
-                return $"({descriptor})";
-            }
-
-            return string.Empty;
         }
     }
 }

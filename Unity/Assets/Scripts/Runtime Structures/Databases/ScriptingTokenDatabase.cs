@@ -27,10 +27,10 @@ namespace SFDDCards.ScriptingTokens
             new MoveCardToZoneScriptingToken(),
             new GenerateCardScriptingToken(),
             new CopyAndAddToCampaignDeckScriptingToken(),
+            new ShuffleScriptingToken(),
 
             // Targeting Token
             new SetTargetScriptingToken(),
-            new CardBrowserSelectorScriptingToken(),
             new ChooseCardScriptingToken(),
             new CardTargetScriptingToken(),
             new ChooseRandomlyScriptingToken(),
@@ -38,13 +38,14 @@ namespace SFDDCards.ScriptingTokens
             // Element Token
             new GainElementScriptingToken(),
             new RequiresAtLeastElementScriptingToken(),
-            new DrainsElementScriptingToken(),
             new SetElementScriptingToken()
         };
 
         public static List<AliasScriptingToken> AllTokenAliases = new List<AliasScriptingToken>()
         {
-            new RemoveStacksScriptingToken()
+            new DrainsElementScriptingToken(),
+            new RemoveStacksScriptingToken(),
+            new ClearStacksScriptingToken()
         };
 
         public static bool TryGetScriptingTokenMatch(string input, IEffectOwner owner, out List<IScriptingToken> matches)

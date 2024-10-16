@@ -1,0 +1,22 @@
+{
+	"Id": "mb1_card_common_glitch",
+	"Name": "Glitch",
+	"EffectScript": "[SETTARGET: ALLFOES][DAMAGE: 2][REQUIRESCOMPARISON: COUNTELEMENT_CYBER < 3][CARDTARGET: SELF][MOVECARDTOZONE: EXILE][RESET][DRAINSELEMENT: 3 CYBER][CARDTARGET: SELF][MOVECARDTOZONE: HAND]",
+	"Tags":
+	[
+		"mf1",
+		"void","cyber",
+		"common"
+	],
+	"ElementGain":
+	[
+		{
+			"Element": "void",
+			"Gain": 1
+		},
+		{
+			"Element": "cyber",
+			"Gain": 1
+		}
+	]
+}

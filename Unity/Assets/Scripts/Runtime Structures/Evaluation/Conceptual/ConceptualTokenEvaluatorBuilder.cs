@@ -22,6 +22,7 @@ namespace SFDDCards.Evaluation.Conceptual
         public CombatantTargetEvaluatableValue Target;
         public CombatantTargetEvaluatableValue OriginalTarget;
         public IEffectOwner Owner;
+        public string PlayedFromZone => this?.CreatedFromContext?.PlayedFromZone;
 
         public IEvaluatableValue<int> Intensity;
         public IntensityKind IntensityKindType;
@@ -31,7 +32,7 @@ namespace SFDDCards.Evaluation.Conceptual
 
         public ConceptualTokenEvaluatorBuilder PreviousBuilder;
         public List<Action<DeltaEntry>> ActionsToExecute = new List<Action<DeltaEntry>>();
-        public IRealizedOperationScriptingToken RealizedOperationScriptingToken = null;
+        public IRealizedOperationScriptingToken RealizedOperationScriptingToken;
         public ReactionWindowContext? CreatedFromContext;
 
         public CardsEvaluatableValue RelevantCards = null;
@@ -49,7 +50,10 @@ namespace SFDDCards.Evaluation.Conceptual
                 this.Owner = previousBuilder.Owner;
                 this.CreatedFromContext = previousBuilder.CreatedFromContext;
                 this.RelevantCards = previousBuilder.RelevantCards;
+                this.Requirements = new List<IRequirement>(previousBuilder.Requirements);
             }
+
+            this.CreatedFromContext = previousBuilder?.CreatedFromContext;
         }
 
         public ConceptualTokenEvaluatorBuilder(ReactionWindowContext? context, ConceptualTokenEvaluatorBuilder previousBuilder = null) : this(previousBuilder)
@@ -57,21 +61,31 @@ namespace SFDDCards.Evaluation.Conceptual
             this.CreatedFromContext = context;
         }
 
-        public bool HasSameElementRequirement(ConceptualTokenEvaluatorBuilder previous)
+        public bool HasSameRequirements(ConceptualTokenEvaluatorBuilder previous)
         {
             if (previous == null)
+            {
+                if (this.ElementRequirements.Count == 0 && this.Requirements.Count == 0)
+                {
+                    return true;
+                }
+
+                return false;
+            }
+
+            if (this.ElementRequirements.Count != this.PreviousBuilder.ElementRequirements.Count)
             {
                 return false;
             }
 
-            if (this.ElementRequirements.Count != previous.ElementRequirements.Count)
+            if (this.Requirements.Count != this.PreviousBuilder.Requirements.Count)
             {
                 return false;
             }
 
             foreach (Element elementKey in this.ElementRequirements.Keys)
             {
-                if (!previous.ElementRequirements.TryGetValue(elementKey, out IEvaluatableValue<int> value))
+                if (!this.PreviousBuilder.ElementRequirements.TryGetValue(elementKey, out IEvaluatableValue<int> value))
                 {
                     return false;
                 }
@@ -82,51 +96,58 @@ namespace SFDDCards.Evaluation.Conceptual
                 }
             }
 
+            for (int ii = 0; ii < this.Requirements.Count; ii++)
+            {
+                if (this.Requirements[ii] != this.PreviousBuilder.Requirements[ii])
+                {
+                    return false;
+                }
+            }
+
             return true;
-        }
-
-        public string DescribeElementRequirements()
-        {
-            if (this.ElementRequirements.Count == 0)
-            {
-                return string.Empty;
-            }
-
-            StringBuilder compositeRequirements = new StringBuilder();
-            string startingComma = "";
-            bool nonzeroFound = false;
-
-            foreach (Element element in this.ElementRequirements.Keys)
-            {
-                compositeRequirements.Append($"{startingComma}{this.ElementRequirements[element].DescribeEvaluation()} {element.GetNameAndMaybeIcon()}");
-                startingComma = ", ";
-                nonzeroFound = true;
-            }
-
-            if (!nonzeroFound)
-            {
-                return string.Empty;
-            }
-
-            compositeRequirements.Append(":");
-
-            return compositeRequirements.ToString().Trim();
         }
 
         public ConceptualDelta GetConceptualDelta()
         {
-            ConceptualDelta delta = new ConceptualDelta();
-
-            delta.DeltaEntries.Add(new ConceptualDeltaEntry(this, this.OriginalTarget, this.PreviousBuilder?.Target)
+            ConceptualDelta delta = new ConceptualDelta()
             {
-                MadeFromBuilder = this,
-                ConceptualTarget = this.Target,
-                ConceptualIntensity = this.Intensity,
-                IntensityKindType = this.IntensityKindType,
-                NumberOfCardsRelationType = this.NumberOfCardsRelationType,
-                ElementResourceChanges = this.ElementResourceChanges,
-                StatusEffect = this.StatusEffect
-            });
+                Owner = this.Owner
+            };
+
+            if (this.ElementResourceChanges != null && this.ElementResourceChanges.Count > 0)
+            {
+                delta.DeltaEntries.Add(new ConceptualDeltaEntry(this, this.OriginalTarget, this.PreviousBuilder?.Target)
+                {
+                    MadeFromBuilder = this,
+                    ConceptualTarget = this.Target,
+                    IntensityKindType = IntensityKind.None,
+                    NumberOfCardsRelationType = NumberOfCardsRelation.None,
+                    ElementResourceChanges = this.ElementResourceChanges
+                });
+            }
+
+            if (this.Intensity != null)
+            {
+                delta.DeltaEntries.Add(new ConceptualDeltaEntry(this, this.OriginalTarget, this.PreviousBuilder?.Target)
+                {
+                    MadeFromBuilder = this,
+                    ConceptualTarget = this.Target,
+                    ConceptualIntensity = this.Intensity,
+                    IntensityKindType = this.IntensityKindType,
+                    NumberOfCardsRelationType = this.NumberOfCardsRelationType,
+                    StatusEffect = this.StatusEffect
+                });
+            }
+
+            if (this.RealizedOperationScriptingToken != null)
+            {
+                delta.DeltaEntries.Add(new ConceptualDeltaEntry(this, this.OriginalTarget, this.PreviousBuilder?.Target)
+                {
+                    MadeFromBuilder = this,
+                    IntensityKindType = IntensityKind.None,
+                    NumberOfCardsRelationType = NumberOfCardsRelation.None
+                });
+            }
 
             return delta;
         }

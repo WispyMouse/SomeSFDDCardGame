@@ -1,0 +1,11 @@
+{
+    "Name": "Tomorrow Star",
+	"Id": "mb1_statuseffect_tomorrowstar",
+	"Effects":
+	[
+		{
+			"Window": "OWNERSTARTSTURN",
+			"Script": "[GAINELEMENT: 5 SOLAR][REMOVESTACKS: 1]"
+		}
+	]
+}

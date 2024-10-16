@@ -31,7 +31,7 @@ namespace SFDDCards.UX
 
         public Action<RenderedCard> OnClickAction { get; set; } = null;
 
-        public void SetFromCard(Card representedCard)
+        public void SetFromCard(Card representedCard, ReactionWindowContext? reactionWindowContext = null)
         {
             this.Annihilate();
 
@@ -39,7 +39,7 @@ namespace SFDDCards.UX
 
             this.NameText.text = representedCard.Name;
             this.CardImage.sprite = representedCard.Sprite;
-            this.EffectText.text = representedCard.GetDescription().BreakDescriptionsIntoString();
+            this.EffectText.text = representedCard.GetDescription(reactionWindowContext).BreakDescriptionsIntoString();
 
             foreach (Element curElement in ElementDatabase.ElementData.Values)
             {

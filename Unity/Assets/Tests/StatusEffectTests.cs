@@ -1,6 +1,7 @@
 namespace SFDDCards.Tests.EditMode
 {
     using NUnit.Framework;
+    using SFDDCards.ImportModels;
     using System;
     using System.Collections;
     using System.Collections.Generic;
@@ -11,6 +12,33 @@ namespace SFDDCards.Tests.EditMode
 
     public class StatusEffectTests : EditModeTestBase
     {
+        [Test]
+        public void TestPoisonStatus_OneTick()
+        {
+            StatusEffectDatabase.AddStatusEffectToDatabase(ImportHelper.ImportImportableFile<StatusEffectImport>(Application.streamingAssetsPath + "/sets/mb1/statuseffect/mb1_statuseffect_poison.statusImport"));
+            StatusEffect poisonStatus = StatusEffectDatabase.GetModel("mb1_statuseffect_poison");
+
+            EncounterModel testEncounter = EditModeTestCommon.GetEncounterWithPunchingBags(2, 100);
+            CampaignContext campaignContext = EditModeTestCommon.GetBlankCampaignContext();
+            campaignContext.StartNextRoomFromEncounter(new EvaluatedEncounter(testEncounter));
+            CombatContext combatContext = campaignContext.CurrentCombatContext;
+            combatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.PlayerTurn);
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+
+            const int numberOfStacksToGivePlayer = 10;
+            int player_oneturnofpoison_expectedhealth = combatContext.CombatPlayer.CurrentHealth - numberOfStacksToGivePlayer;
+            int player_twoturnofpoison_expectedhealth = combatContext.CombatPlayer.CurrentHealth - numberOfStacksToGivePlayer - (numberOfStacksToGivePlayer - 1);
+            EditModeTestCommon.ApplyStatusEffectStacks(poisonStatus.Id, campaignContext, combatContext, combatContext.CombatPlayer, numberOfStacksToGivePlayer);
+
+            // End the player's turn, making it go to the enemy. The controller will immediately make it the player's turn again.
+            combatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.EnemyTurn);
+            GlobalSequenceEventHolder.SynchronouslyResolveAllEvents();
+
+            Assert.AreEqual(CombatContext.TurnStatus.PlayerTurn, combatContext.CurrentTurnStatus, "It should be the player's turn.");
+            Assert.AreEqual(player_oneturnofpoison_expectedhealth, combatContext.CombatPlayer.CurrentHealth, "Player should be damaged equal to the number of stacks");
+                        Assert.AreEqual(numberOfStacksToGivePlayer - 1, combatContext.CombatPlayer.CountStacks(poisonStatus.Id), "Player should have one less stack of poison after it applies.");
+        }
+
         /// <summary>
         /// This test is meant to test one of the most simple status effects, Poison.
         /// It tries to load the actual poison status effect configuration, starts a combat context,
@@ -18,13 +46,10 @@ namespace SFDDCards.Tests.EditMode
         /// The test observes that poison proc'd appropriately and has the desired effects.
         /// </summary>
         [Test]
-        public void TestPoisonStatus()
+        public void TestPoisonStatus_MultipleSamples()
         {
-            string poisonFilePath = Application.streamingAssetsPath + "/statusImport/status effects/poison.statusImport";
-            if (!StatusEffectDatabase.TryImportStatusEffectFromFile(poisonFilePath, out StatusEffect poisonStatus))
-            {
-                Assert.Fail($"Expected to find poison at {poisonFilePath}, did not find it there.");
-            }
+            StatusEffectDatabase.AddStatusEffectToDatabase(ImportHelper.ImportImportableFile<StatusEffectImport>(Application.streamingAssetsPath + "/sets/mb1/statuseffect/mb1_statuseffect_poison.statusImport"));
+            StatusEffect poisonStatus = StatusEffectDatabase.GetModel("mb1_statuseffect_poison");
 
             EncounterModel testEncounter = EditModeTestCommon.GetEncounterWithPunchingBags(2, 100);
             CampaignContext campaignContext = EditModeTestCommon.GetBlankCampaignContext();

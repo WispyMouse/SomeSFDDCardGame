@@ -18,8 +18,8 @@ namespace SFDDCards
             List<string> descriptionTexts = this.DescriptionText;
             for (int ii = 0; ii < descriptionTexts.Count; ii++)
             {
-                descriptionBuilder.AppendLine($"{leadingNewline}{descriptionTexts[ii].Trim()}");
-                leadingNewline = "\n";
+                descriptionBuilder.Append($"{leadingNewline}{descriptionTexts[ii].Trim()}");
+                leadingNewline = "\r\n";
             }
 
             return descriptionBuilder.ToString().Trim();

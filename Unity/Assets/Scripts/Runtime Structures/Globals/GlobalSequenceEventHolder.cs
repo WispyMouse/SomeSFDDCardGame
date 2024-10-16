@@ -1,5 +1,6 @@
 namespace SFDDCards
 {
+    using SFDDCards.Evaluation.Actual;
     using System;
     using System.Collections;
     using System.Collections.Generic;
@@ -22,6 +23,7 @@ namespace SFDDCards
                 CurrentSequenceEvent = StackedSequenceEvents[0];
                 StackedSequenceEvents.RemoveAt(0);
                 CurrentSequenceEvent.ConsequentialAction?.Invoke();
+                GlobalUpdateUX.UpdateUXEvent.Invoke();
                 CurrentSequenceEvent = null;
             }
         }
@@ -44,6 +46,7 @@ namespace SFDDCards
             {
                 CurrentSequenceEvent.ConsequentialAction?.Invoke();
                 CurrentSequenceEvent = null;
+                GlobalUpdateUX.UpdateUXEvent.Invoke();
             }
         }
 
@@ -56,12 +59,46 @@ namespace SFDDCards
         /// Used because it is intuitive to list things 
         /// in the order they happen while programming.
         /// </summary>
-        public static void PushSequencesToTop(params GameplaySequenceEvent[] eventsToPush)
+        public static void PushSequencesToTop(CampaignContext context, params GameplaySequenceEvent[] eventsToPush)
         {
+            if (eventsToPush.Length == 0)
+            {
+                return;
+            }
+
             for (int ii = eventsToPush.Length - 1; ii >= 0; ii--)
             {
                 PushSequenceToTop(eventsToPush[ii]);
             }
+        }
+
+        public static void PushSequencesToTop(CampaignContext context, params WindowResponse[] responses)
+        {
+            if (responses.Length == 0)
+            {
+                return;
+            }
+
+            List<WindowResponse> orderedList = new List<WindowResponse>(responses);
+
+            // The compare uses a negative so that higher ApplicationPriority values happen before lower values
+            orderedList.Sort((WindowResponse x, WindowResponse y) => -x.FromResponder.ApplicationPriority.CompareTo(y.FromResponder.ApplicationPriority));
+
+            List<GameplaySequenceEvent> sequences = new List<GameplaySequenceEvent>();
+
+            foreach (WindowResponse response in orderedList)
+            {
+                GamestateDelta delta = ScriptTokenEvaluator.CalculateRealizedDeltaEvaluation(
+                    response.FromResponder.Effect, 
+                    context,
+                    response.FromContext.CombatantEffectOwner,
+                    response.FromContext.CombatantEffectOwner, 
+                    response.FromContext);
+                GlobalUpdateUX.LogTextEvent.Invoke(EffectDescriberDatabase.DescribeResolvedEffect(delta), GlobalUpdateUX.LogType.GameEvent);
+                delta.ApplyDelta(context);
+            };
+
+            PushSequencesToTop(context, sequences.ToArray());
         }
 
         public static void PushSequenceToTop(GameplaySequenceEvent eventToPush)

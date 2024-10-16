@@ -5,10 +5,8 @@ namespace SFDDCards.ImportModels
 
     [Serializable]
 
-    public class RewardImport
+    public class RewardImport : Importable
     {
-        public string RewardId { get; set; }
-
         public List<PickRewardImport> PickRewards { get; set; } = new List<PickRewardImport>();
     }
 }

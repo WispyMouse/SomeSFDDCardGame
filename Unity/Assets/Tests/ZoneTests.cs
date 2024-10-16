@@ -140,7 +140,7 @@ namespace SFDDCards.Tests.EditMode
                 EffectScript = ""
             };
 
-            CardDatabase.AddCardToDatabase(cardToGenerate, null);
+            CardDatabase.AddCardToDatabase(cardToGenerate);
 
             CardImport generatingCard = new CardImport()
             {

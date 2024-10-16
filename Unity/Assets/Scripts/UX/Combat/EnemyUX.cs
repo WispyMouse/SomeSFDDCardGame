@@ -67,7 +67,6 @@ namespace SFDDCards.UX
                     this.RepresentedEnemy.Intent,
                     centralGameStateController.CurrentCampaignContext,
                     this.RepresentedEnemy,
-                    this.RepresentedEnemy,
                     centralGameStateController.CurrentCampaignContext.CurrentCombatContext.CombatPlayer
                     );
             }

@@ -24,6 +24,7 @@ namespace SFDDCards.UX
 
         public virtual void MouseEnterStartHover()
         {
+            MouseHoverShowerPanel.CurrentContext = null;
             MouseHoverShowerController.MouseStartHoveredEvent.Invoke(this);
         }
 
@@ -45,12 +46,12 @@ namespace SFDDCards.UX
         {
         }
 
-        public void SetFromCard(Card toSet, Action<DisplayedCardUX> inCardSelectedAction)
+        public void SetFromCard(Card toSet, Action<DisplayedCardUX> inCardSelectedAction = null, ReactionWindowContext? reactionWindowContext = null)
         {
             this.RepresentedCard = toSet;
             this.cardSelectedAction = inCardSelectedAction;
 
-            this.RenderedCard.SetFromCard(toSet);
+            this.RenderedCard.SetFromCard(toSet, reactionWindowContext);
         }
 
         public Transform GetTransform()
@@ -65,6 +66,11 @@ namespace SFDDCards.UX
         }
 
         private void OnDisable()
+        {
+            this.UnHoverOnDisable();
+        }
+
+        private void OnDestroy()
         {
             this.UnHoverOnDisable();
         }

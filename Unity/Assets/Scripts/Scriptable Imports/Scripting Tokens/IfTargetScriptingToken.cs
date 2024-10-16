@@ -11,6 +11,7 @@ namespace SFDDCards.ScriptingTokens
         public override string ScriptingTokenIdentifier => "IFTARGET";
 
         public CombatantTargetEvaluatableValue Target;
+        public bool NotTarget = false;
 
         public override void ApplyToken(ConceptualTokenEvaluatorBuilder tokenBuilder)
         {
@@ -21,27 +22,42 @@ namespace SFDDCards.ScriptingTokens
         {
             scriptingToken = null;
 
+            // This should contain either just the target, or the word NOT and then the target
             // The only expected argument is the targeting value
-            if (arguments.Count != 1)
+            if (arguments.Count != 1 && arguments.Count != 2)
             {
                 return false;
             }
 
-            string firstArgument = arguments[0].ToLower();
+            bool notTarget = false;
+
+            if (arguments.Count == 2)
+            {
+                if (arguments[0].ToLower() == "not")
+                {
+                    notTarget = true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            string firstArgument = arguments[arguments.Count - 1].ToLower();
 
             switch (firstArgument)
             {
                 case "self":
-                    scriptingToken = new IfTargetScriptingToken() { Target = new SelfTargetEvaluatableValue() };
+                    scriptingToken = new IfTargetScriptingToken() { Target = new SelfTargetEvaluatableValue(), NotTarget = notTarget };
                     return true;
                 case "foe":
-                    scriptingToken = new IfTargetScriptingToken() { Target = new FoeTargetEvaluatableValue() };
+                    scriptingToken = new IfTargetScriptingToken() { Target = new FoeTargetEvaluatableValue(), NotTarget = notTarget };
                     return true;
                 case "allfoes":
-                    scriptingToken = new IfTargetScriptingToken() { Target = new AllFoeTargetEvaluatableValue() };
+                    scriptingToken = new IfTargetScriptingToken() { Target = new AllFoeTargetEvaluatableValue(), NotTarget = notTarget };
                     return true;
                 case "original":
-                    scriptingToken = new IfTargetScriptingToken() { Target = new OriginalTargetEvaluatableValue() };
+                    scriptingToken = new IfTargetScriptingToken() { Target = new OriginalTargetEvaluatableValue(), NotTarget = notTarget };
                     return true;
             }
 
@@ -55,12 +71,17 @@ namespace SFDDCards.ScriptingTokens
                 return false;
             }
 
-            if (builder.User.OverlapsTarget(builder.User, targetEvaluated))
+            if (builder.Target.OverlapsTarget(builder.User, targetEvaluated) != this.NotTarget)
             {
                 return true;
             }
 
             return false;
+        }
+
+        public string DescribeRequirement()
+        {
+            return $"the target is {(this.NotTarget == true ? "not " : "")}{this.Target.DescribeEvaluation()}";
         }
     }
 }

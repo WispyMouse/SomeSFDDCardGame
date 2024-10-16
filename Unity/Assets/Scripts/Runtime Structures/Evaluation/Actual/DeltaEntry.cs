@@ -15,7 +15,7 @@ namespace SFDDCards.Evaluation.Actual
 
         public ICombatantTarget Target;
 
-        public int Intensity;
+        public IEvaluatableValue<int> ConceptualIntensity;
 
         public TokenEvaluatorBuilder MadeFromBuilder;
         public PlayerChoice ChoiceToMake => this?.MadeFromBuilder?.PlayerChoiceToMake;
@@ -39,7 +39,7 @@ namespace SFDDCards.Evaluation.Actual
         /// </summary>
         public ICombatantTarget OriginalTarget;
 
-        public DeltaEntry(CampaignContext fromCampaign, Combatant user, ICombatantTarget target)
+        public DeltaEntry(CampaignContext fromCampaign, IEffectOwner owner, Combatant user, ICombatantTarget target)
         {
             this.FromCampaign = fromCampaign;
             this.User = user;
@@ -47,9 +47,14 @@ namespace SFDDCards.Evaluation.Actual
 
             this.MadeFromBuilder = new TokenEvaluatorBuilder(new ConceptualTokenEvaluatorBuilder(),
                 fromCampaign,
+                owner,
                 user,
-                user,
-                target);
+                target,
+                this.ElementResourceChanges,
+                this.ConceptualIntensity,
+                this.IntensityKindType,
+                this.RealizedOperationScriptingToken,
+                this.MadeFromBuilder?.PreviousTokenBuilder);
         }
 
         public DeltaEntry(TokenEvaluatorBuilder builder)
@@ -59,13 +64,7 @@ namespace SFDDCards.Evaluation.Actual
             this.Target = builder.Target;
 
             this.MadeFromBuilder = builder;
-            this.Intensity = builder.Intensity;
-            this.IntensityKindType = builder.IntensityKindType;
-            this.ElementResourceChanges = builder.ElementResourceChanges;
             this.OriginalTarget = builder.OriginalTarget;
-            this.StatusEffect = builder.StatusEffect;
-            this.ActionsToExecute = builder.ActionsToExecute;
-            this.RealizedOperationScriptingToken = builder.BasedOnConcept.RealizedOperationScriptingToken;
             this.RelevantCards = builder.RelevantCardsEvaluatable;
             this.NumberOfCardsRelationType = builder.NumberOfCardsRelationType;
         }
@@ -90,27 +89,27 @@ namespace SFDDCards.Evaluation.Actual
             }
         }
 
-        public int GetArgumentValue(string argument)
+        public IEvaluatableValue<int> GetArgumentValue(string argument)
         {
             if (argument.ToLower() == "intensity")
             {
-                return this.Intensity;
+                return this.ConceptualIntensity;
             }
 
             int evaluatedValue = 0;
-            if (!(BaseScriptingToken.TryGetIntegerEvaluatableFromStrings(new List<string>() { argument }, out IEvaluatableValue<int> output, out _, allowNameMatch: true) && output.TryEvaluateValue(this.FromCampaign, this.MadeFromBuilder, out evaluatedValue)))
+            if (!(BaseScriptingToken.TryGetIntegerEvaluatableFromStrings(new List<string>() { argument }, out IEvaluatableValue<int> output, out _, allowNameMatch: true)))
             {
                 GlobalUpdateUX.LogTextEvent.Invoke($"Failed to parse argument {argument}.", GlobalUpdateUX.LogType.RuntimeError);
             }
 
-            return evaluatedValue;
+            return output;
         }
 
         public DeltaEntry SetArgumentValue(string argument, int newValue)
         {
             if (argument.ToLower() == "intensity")
             {
-                this.Intensity = newValue;
+                this.ConceptualIntensity = new ConstantEvaluatableValue<int>(newValue);
                 return null;
             }
 
@@ -125,7 +124,7 @@ namespace SFDDCards.Evaluation.Actual
                 DeltaEntry statusSet = new DeltaEntry(this);
                 statusSet.StatusEffect = mappedStatus;
                 statusSet.IntensityKindType = TokenEvaluatorBuilder.IntensityKind.SetStatusEffect;
-                statusSet.Intensity = newValue;
+                statusSet.ConceptualIntensity = new ConstantEvaluatableValue<int>(newValue);
                 return statusSet;
             }
             else

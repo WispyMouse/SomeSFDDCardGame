@@ -17,5 +17,15 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
         public abstract string GetScriptingTokenText();
 
         public abstract bool TryEvaluateValue(CampaignContext campaignContext, TokenEvaluatorBuilder currentBuilder, out ICombatantTarget evaluatedValue);
+
+        public string DescribeEvaluation(IEvaluatableValue<ICombatantTarget> topValue)
+        {
+            return this.DescribeEvaluation();
+        }
+
+        public string DescribeEvaluation(CampaignContext campaignContext, TokenEvaluatorBuilder currentBuilder)
+        {
+            return this.DescribeEvaluation();
+        }
     }
 }

@@ -12,7 +12,7 @@ namespace SFDDCards
     {
         public static Dictionary<string, CardImport> CardData { get; private set; } = new Dictionary<string, CardImport>();
 
-        public static void AddCardToDatabase(CardImport importData, Sprite cardArt)
+        public static void AddCardToDatabase(CardImport importData)
         {
             string lowerId = importData.Id.ToLower();
 
@@ -23,7 +23,6 @@ namespace SFDDCards
             }
 
             CardData.Add(lowerId, importData);
-            importData.Sprite = cardArt;
         }
 
         public static Card GetModel(string id, RandomDecider<CardImport> decider = null)
@@ -33,7 +32,7 @@ namespace SFDDCards
                 decider = new RandomDecider<CardImport>();
             }
 
-            string lowerId = id.ToString();
+            string lowerId = id.ToLower().ToString();
 
             // If there are brackets, this might be a set of tag criteria.
             Match tagMatches = Regex.Match(lowerId, @"(?:\[(?<tag>[^]]+)\])+");

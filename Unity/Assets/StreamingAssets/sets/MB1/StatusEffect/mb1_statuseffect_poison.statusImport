@@ -1,0 +1,11 @@
+{
+    "Name": "Poison",
+	"Id": "mb1_statuseffect_poison",
+	"Effects":
+	[
+		{
+			"Window": "OWNERENDSTURN",
+			"Script": "[SETTARGET: SELF][DAMAGE: COUNTSTACKS_mb1_statuseffect_poison][REMOVESTACKS: 1]"
+		}
+	]
+}

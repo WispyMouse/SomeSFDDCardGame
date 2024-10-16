@@ -22,7 +22,7 @@ namespace SFDDCards
 
         public void SetSubscriptions(CampaignContext context)
         {
-            foreach (string window in this.BasedOnStatusEffect.EffectTokens.Keys)
+            foreach (string window in this.BasedOnStatusEffect.WindowResponders.Keys)
             {
                 ReactionWindowSubscription subscription = KnownReactionWindows.ParseWindow(window, this);
                 if (subscription != null)
@@ -32,23 +32,21 @@ namespace SFDDCards
             }
         }
 
-        public bool TryGetReactionEvents(CampaignContext campaignContext, ReactionWindowContext reactionContext, out List<GameplaySequenceEvent> events)
+        public bool TryGetReactionEvents(CampaignContext campaignContext, ReactionWindowContext reactionContext, out List<WindowResponse> responses)
         {
-            events = null;
-
-            if (!this.BasedOnStatusEffect.EffectTokens.TryGetValue(reactionContext.TimingWindowId, out List<AttackTokenPile> tokens))
+            if (!this.BasedOnStatusEffect.WindowResponders.TryGetValue(reactionContext.TimingWindowId, out List<WindowResponder> responders))
             {
+                responses = null;
                 return false;
             }
 
-            events = new List<GameplaySequenceEvent>();
-
-            foreach (AttackTokenPile tokenList in tokens)
+            responses = new List<WindowResponse>();
+            foreach (WindowResponder responder in responders)
             {
-                events.Add(new GameplaySequenceEvent(() => campaignContext.StatusEffectHappeningProc(new StatusEffectHappening(this, reactionContext, tokenList.AttackTokens)), null));
-            };
+                responses.Add(new WindowResponse(responder, reactionContext, this));
+            }
 
-            return true;
+            return responses.Count > 0;
         }
 
         public EffectDescription DescribeStatusEffect()

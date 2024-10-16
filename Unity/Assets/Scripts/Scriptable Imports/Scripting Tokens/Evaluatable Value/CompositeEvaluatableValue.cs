@@ -60,29 +60,7 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
 
         public string DescribeEvaluation()
         {
-            StringBuilder builtString = new StringBuilder();
-
-            foreach (CompositeNext compositeValue in this.CompositeComponents)
-            {
-                switch (compositeValue.RelationToPrevious)
-                {
-                    case CommonMath.Plus:
-                        builtString.Append(" + ");
-                        break;
-                    case CommonMath.Minus:
-                        builtString.Append(" - ");
-                        break;
-                    case CommonMath.Divide:
-                        builtString.Append(" / ");
-                        break;
-                    case CommonMath.Multiply:
-                        builtString.Append(" * ");
-                        break;
-                }
-                builtString.Append(compositeValue.ThisValue.DescribeEvaluation());
-            }
-
-            return builtString.ToString();
+            return this.DescribeEvaluation(this);
         }
 
         /// <summary>
@@ -151,6 +129,42 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
             }
 
             return true;
+        }
+
+        public string DescribeEvaluation(IEvaluatableValue<int> topValue)
+        {
+            StringBuilder builtString = new StringBuilder();
+
+            foreach (CompositeNext compositeValue in this.CompositeComponents)
+            {
+                switch (compositeValue.RelationToPrevious)
+                {
+                    case CommonMath.Plus:
+                        builtString.Append(" + ");
+                        break;
+                    case CommonMath.Minus:
+                        builtString.Append(" - ");
+                        break;
+                    case CommonMath.Divide:
+                        builtString.Append(" / ");
+                        break;
+                    case CommonMath.Multiply:
+                        builtString.Append(" x ");
+                        break;
+                }
+                builtString.Append(compositeValue.ThisValue.DescribeEvaluation(topValue));
+            }
+
+            return builtString.ToString();
+        }
+
+        public string DescribeEvaluation(CampaignContext campaignContext, TokenEvaluatorBuilder currentBuilder)
+        {
+            if (this.TryEvaluateValue(campaignContext, currentBuilder, out int evaluatedValue))
+            {
+                return $"{this.DescribeEvaluation()} ({evaluatedValue})";
+            }
+            return this.DescribeEvaluation();
         }
     }
 }

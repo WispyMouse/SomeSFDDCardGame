@@ -9,7 +9,5 @@ namespace SFDDCards
     [Serializable]
     public class RunConfiguration
     {
-        public List<string> StartingDeck = new List<string>();
-        public int StartingMaximumHealth = 50;
     }
 }

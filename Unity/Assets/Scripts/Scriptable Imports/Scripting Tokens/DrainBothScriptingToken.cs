@@ -45,11 +45,21 @@ namespace SFDDCards.ScriptingTokens
 
         public string DescribeOperationAsEffect(ConceptualDeltaEntry delta, string reactionWindowId)
         {
-            if (this.ReduceArgumentOne.ToLower() == "intensity" && reactionWindowId == KnownReactionWindows.IncomingDamage)
+            return this.DescribeOperationAsEffect(reactionWindowId);
+        }
+
+        public string DescribeOperationAsEffect(TokenEvaluatorBuilder builder)
+        {
+            return this.DescribeOperationAsEffect(builder.BasedOnConcept?.CreatedFromContext?.TimingWindowId);
+        }
+
+        public string DescribeOperationAsEffect(string reactionWindowId)
+        {
+            if (this.ReduceArgumentOne.ToLower() == "intensity" && reactionWindowId == KnownReactionWindows.DamageIncoming)
             {
                 return $"Damage first subtracts from {this.ReduceArgumentTwo} before subtracting from health";
             }
-            
+
             return $"Reduce {this.ReduceArgumentOne} by {this.ReduceArgumentTwo}.";
         }
 
@@ -60,11 +70,18 @@ namespace SFDDCards.ScriptingTokens
                 GlobalUpdateUX.LogTextEvent.Invoke($"Attempted to apply a reaction realized token without a context.", GlobalUpdateUX.LogType.RuntimeError);
             }
 
-            int argumentOneValue = context.Value.ResultingDelta.GetArgumentValue(this.ReduceArgumentOne);
-            int argumentTwoValue = context.Value.ResultingDelta.GetArgumentValue(this.ReduceArgumentTwo);
+            IEvaluatableValue<int> argumentOneValue = context.Value.ResultingDelta.GetArgumentValue(this.ReduceArgumentOne);
+            IEvaluatableValue<int> argumentTwoValue = context.Value.ResultingDelta.GetArgumentValue(this.ReduceArgumentTwo);
 
-            int argumentOneFinalValue = argumentOneValue > argumentTwoValue ? argumentOneValue - argumentTwoValue : 0;
-            int argumentTwoFinalValue = argumentTwoValue > argumentOneValue ? argumentTwoValue - argumentOneValue : 0;
+            if (!argumentOneValue.TryEvaluateValue(applyingDuringEntry.FromCampaign, applyingDuringEntry.MadeFromBuilder, out int argumentOneEvaluatedValue) || !argumentTwoValue.TryEvaluateValue(applyingDuringEntry.FromCampaign, applyingDuringEntry.MadeFromBuilder, out int argumentTwoEvaluatedValue))
+            {
+                GlobalUpdateUX.LogTextEvent.Invoke($"Could not evaluate both arguments.", GlobalUpdateUX.LogType.RuntimeError);
+                stackedDeltas = null;
+                return;
+            }
+
+            int argumentOneFinalValue = argumentOneEvaluatedValue > argumentTwoEvaluatedValue ? argumentOneEvaluatedValue - argumentTwoEvaluatedValue : 0;
+            int argumentTwoFinalValue = argumentTwoEvaluatedValue > argumentOneEvaluatedValue ? argumentTwoEvaluatedValue - argumentOneEvaluatedValue : 0;
 
             DeltaEntry pushDeltaOne = context.Value.ResultingDelta.SetArgumentValue(ReduceArgumentOne, argumentOneFinalValue);
             DeltaEntry pushDeltaTwo = context.Value.ResultingDelta.SetArgumentValue(ReduceArgumentTwo, argumentTwoFinalValue);

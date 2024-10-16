@@ -25,7 +25,7 @@ namespace SFDDCards.UX
         private GameObject CloseButton;
 
         private Action<List<Card>> SelectionFinishedAction { get; set; } = null;
-        private int RemainingCardsToChoose { get; set; } = 0;
+        public int RemainingCardsToChoose { get; set; } = 0;
         private List<Card> ChosenCards { get; set; } = new List<Card>();
 
         public void Awake()
@@ -41,25 +41,25 @@ namespace SFDDCards.UX
         public void SetFromCards(IEnumerable<Card> cardsToShow)
         {
             this.gameObject.SetActive(true);
-            this.Annihilate();
+            this.Annihilate(false);
             this.CloseButton.SetActive(true);
 
             foreach (Card curCard in cardsToShow)
             {
                 RenderedCard newCard = Instantiate(this.RenderedCardPF, this.CardHolder);
-                newCard.SetFromCard(curCard);
+                newCard.SetFromCard(curCard, null);
                 newCard.OnClickAction = this.CardClicked;
             }
         }
 
         public void Close()
         {
-            this.Annihilate();
+            this.Annihilate(false);
             this.gameObject.SetActive(false);
             GlobalUpdateUX.UpdateUXEvent.Invoke();
         }
 
-        void Annihilate()
+        public void Annihilate(bool close = true)
         {
             for (int ii = this.CardHolder.childCount - 1; ii >= 0; ii--)
             {
@@ -68,6 +68,11 @@ namespace SFDDCards.UX
 
             this.ChosenCards = new List<Card>();
             this.RemainingCardsToChoose = 0;
+
+            if (close)
+            {
+                this.Close();
+            }
         }
 
         public void SetFromCardBrowserChoice(DeltaEntry fromDelta, PlayerChooseFromCardBrowser toHandle, Action<List<Card>> continuationAction)

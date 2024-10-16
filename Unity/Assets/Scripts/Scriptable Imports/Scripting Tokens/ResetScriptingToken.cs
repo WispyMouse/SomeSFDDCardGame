@@ -18,6 +18,9 @@ namespace SFDDCards.ScriptingTokens
             tokenBuilder.NumberOfCardsRelationType = TokenEvaluatorBuilder.NumberOfCardsRelation.None;
             tokenBuilder.Intensity = null;
             tokenBuilder.ElementResourceChanges.Clear();
+            tokenBuilder.Requirements.Clear();
+            tokenBuilder.RealizedOperationScriptingToken = null;
+            tokenBuilder.RelevantCards = null;
         }
 
         protected override bool TryGetTokenWithArguments(List<string> arguments, out IScriptingToken scriptingToken)

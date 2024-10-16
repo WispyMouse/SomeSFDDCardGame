@@ -10,6 +10,7 @@ namespace SFDDCards.ScriptingTokens
         public override string ScriptingTokenIdentifier { get; } = "CARDTARGET";
         public string Zone { get; set; }
         public IEvaluatableValue<int> NumberOfCards { get; set; } = null;
+        public CardsEvaluatableValue Cards { get; set; } = null;
 
         public override void ApplyToken(ConceptualTokenEvaluatorBuilder tokenBuilder)
         {
@@ -20,11 +21,14 @@ namespace SFDDCards.ScriptingTokens
                     GlobalUpdateUX.LogTextEvent.Invoke($"Told to target this card, but the owner of the effect isn't a card.", GlobalUpdateUX.LogType.RuntimeError);
                     return;
                 }
-                tokenBuilder.RelevantCards = new SelfCardEvaluatableValue(ownedCard);
+
+                this.Cards = new SelfCardEvaluatableValue(ownedCard);
+                tokenBuilder.RelevantCards = this.Cards;
             }
             else
             {
-                tokenBuilder.RelevantCards = CardsEvaluatableValue.GetEvaluatable(this.Zone, this.NumberOfCards);
+                this.Cards = CardsEvaluatableValue.GetEvaluatable(this.Zone, this.NumberOfCards);
+                tokenBuilder.RelevantCards = this.Cards;
             }
         }
 

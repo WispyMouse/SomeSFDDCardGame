@@ -21,6 +21,8 @@ namespace SFDDCards
 
         public bool DefeatHasBeenSignaled { get; set; } = false;
 
+        public override string Id => this.BaseModel.Id;
+
         public Enemy(EnemyModel baseModel)
         {
             this.BaseModel = baseModel;

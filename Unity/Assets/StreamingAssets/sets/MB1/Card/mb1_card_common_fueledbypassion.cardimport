@@ -1,0 +1,26 @@
+{
+	"Id": "mb1_card_common_fueledbypassion",
+	"Name": "Fueled By Passion",
+	"EffectScript": "[CARDTARGET: DECK 1][MOVECARDTOZONE: EXILE][DRAW: 2]",
+	"Tags":
+	[
+		"mf1",
+		"void","solar","force",
+		"common"
+	],
+	"ElementGain":
+	[
+		{
+			"Element": "force",
+			"Gain": 1
+		},
+		{
+			"Element": "solar",
+			"Gain": 1
+		},
+		{
+			"Element": "void",
+			"Gain": 1
+		}
+	]
+}

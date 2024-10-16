@@ -38,6 +38,16 @@ namespace SFDDCards.ScriptingTokens
 
         public string DescribeOperationAsEffect(ConceptualDeltaEntry delta, string reactionWindowId)
         {
+            return this.DescribeOperationAsEffect();
+        }
+
+        public string DescribeOperationAsEffect(TokenEvaluatorBuilder builder)
+        {
+            return this.DescribeOperationAsEffect();
+        }
+
+        public string DescribeOperationAsEffect()
+        {
             return $"Randomly choose {this.NumberOfCards.DescribeEvaluation()}";
         }
 

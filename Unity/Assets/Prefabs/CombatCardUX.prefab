@@ -301,6 +301,9 @@ MonoBehaviour:
   RequirementsMetSelectedGlow: {fileID: 4132722413086856974}
   NoRequirementsMetSelectedGlow: {fileID: 1597895052318875880}
   NoRequirementsMetPassiveOverlay: {fileID: 7543487191535439221}
+  LerpTimeMinimumSeconds: 0.15
+  LerpTimeMaximumSeconds: 0.6
+  DistanceForMaximumLerp: 4
 --- !u!1 &7543487191535439221
 GameObject:
   m_ObjectHideFlags: 0
@@ -561,3 +564,4 @@ MonoBehaviour:
   CardImage: {fileID: 0}
   ElementResourceIconUXPF: {fileID: 0}
   ElementResourceIconHolder: {fileID: 0}
+  MyRarityIndicator: {fileID: 0}

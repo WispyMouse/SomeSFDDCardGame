@@ -94,12 +94,17 @@ namespace SFDDCards
 
         public void DiscardHand()
         {
-            for (int ii = this.CardsCurrentlyInHand.Count; ii > 0; ii--)
+            for (int ii = this.CardsCurrentlyInHand.Count - 1; ii >= 0; ii--)
             {
                 this.MoveCardToZone(this.CardsCurrentlyInHand[ii], this.CardsCurrentlyInDiscard);
             }
 
             GlobalUpdateUX.UpdateUXEvent.Invoke();
+        }
+
+        public void ShuffleDeck()
+        {
+            this.CardsCurrentlyInDeck = this.CardsCurrentlyInDeck.ShuffleList();
         }
 
         public void MoveCardToZone(Card card, List<Card> toMoveTo)
@@ -110,6 +115,8 @@ namespace SFDDCards
             this.CardsCurrentlyInExile.Remove(card);
 
             toMoveTo.Add(card);
+
+            GlobalUpdateUX.UpdateUXEvent.Invoke();
         }
 
         public void MoveCardToZoneIfNotInAnyZonesCurrently(Card card, List<Card> toMoveTo)
@@ -119,7 +126,7 @@ namespace SFDDCards
                 return;
             }
 
-            toMoveTo.Add(card);
+            this.MoveCardToZone(card, toMoveTo);
         }
     }
 }

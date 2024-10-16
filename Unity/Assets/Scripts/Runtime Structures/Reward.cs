@@ -13,7 +13,7 @@ namespace SFDDCards
 
         public Reward(RewardImport basedOn)
         {
-            this.RewardId = basedOn.RewardId;
+            this.RewardId = basedOn.Id;
         }
     }
 }

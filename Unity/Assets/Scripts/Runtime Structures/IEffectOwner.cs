@@ -7,6 +7,6 @@ namespace SFDDCards
 
     public interface IEffectOwner
     {
-
+        public string Id { get; }
     }
 }

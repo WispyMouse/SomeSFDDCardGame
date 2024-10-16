@@ -1,0 +1,22 @@
+{
+	"Id": "mb1_card_common_voiddrink",
+	"Name": "Void Drink",
+	"EffectScript": "[SETTARGET: SELF][DAMAGE: 2][REQUIRESATLEASTELEMENT: 2 VOID][SETELEMENT: VOID 0][DRAW: 2][CARDTARGET: SELF][MOVECARDTOZONE: EXILE]",
+	"Tags":
+	[
+		"mf1",
+		"void","cyber",
+		"common"
+	],
+	"ElementGain":
+	[
+		{	
+			"Element": "void",
+			"Gain": 1
+		},
+		{
+			"Element": "cyber",
+			"Gain": 1
+		}
+	]
+}

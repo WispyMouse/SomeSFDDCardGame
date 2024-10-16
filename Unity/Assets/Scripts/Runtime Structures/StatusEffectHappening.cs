@@ -8,18 +8,20 @@ namespace SFDDCards
 
     public struct StatusEffectHappening : IAttackTokenHolder
     {
-        public List<IScriptingToken> AttackTokens { get; set; }
+        public WindowResponse Response { get; set; }
         public AppliedStatusEffect OwnedStatusEffect { get; set; }
         public ReactionWindowContext Context { get; set; }
         public Dictionary<Element, int> BaseElementGain => new Dictionary<Element, int>();
 
         public IEffectOwner Owner => this.OwnedStatusEffect.BasedOnStatusEffect;
 
-        public StatusEffectHappening(AppliedStatusEffect ownedStatusEffect, ReactionWindowContext context, List<IScriptingToken> attackTokens)
+        public List<IScriptingToken> AttackTokens => this.Response.FromResponder?.Effect?.AttackTokens;
+
+        public StatusEffectHappening(WindowResponse response)
         {
-            this.AttackTokens = attackTokens;
-            this.Context = context;
-            this.OwnedStatusEffect = ownedStatusEffect;
+            this.Response = response;
+            this.Context = response.FromContext;
+            this.OwnedStatusEffect = response.FromStatusEffect;
         }
     }
 }

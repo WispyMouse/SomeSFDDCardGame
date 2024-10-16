@@ -1,0 +1,26 @@
+{
+	"Id": "mb1_card_common_tuckandroll",
+	"Name": "Tuck And Roll",
+	"EffectScript": "[SETTARGET: SELF][APPLYSTATUSEFFECTSTACKS: 5 BLOCK][CARDTARGET: DECK 3][CHOOSECARDS: 1][MOVECARDTOZONE: HAND][SHUFFLE]",
+	"Tags":
+	[
+		"mf1",
+		"bio","force","cyber",
+		"common"
+	],
+	"ElementGain":
+	[
+		{
+			"Element": "force",
+			"Gain": 1
+		},
+		{
+			"Element": "cyber",
+			"Gain": 1
+		},
+		{
+			"Element": "bio",
+			"Gain": 1
+		}
+	]
+}

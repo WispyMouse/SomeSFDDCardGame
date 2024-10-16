@@ -8,6 +8,8 @@ namespace SFDDCards.ScriptingTokens
 {
     public class RequiresComparisonScriptingToken : BaseScriptingToken, IRequirement
     {
+        public const string GreaterThanOrEqualToAscii = "\u2265";
+        public const string LessThanOrEqualToAscii = "\u2264";
         public enum Comparison
         {
             NotAComparison = 0,
@@ -105,6 +107,26 @@ namespace SFDDCards.ScriptingTokens
             }
         }
 
+        public static string GetComparisonString(Comparison argument)
+        {
+            switch (argument)
+            {
+                case Comparison.NotAComparison:
+                default:
+                    return string.Empty;
+                case Comparison.LessThanOrEqual:
+                    return LessThanOrEqualToAscii;
+                case Comparison.LessThan:
+                    return "<";
+                case Comparison.EqualTo:
+                    return "=";
+                case Comparison.GreaterThan:
+                    return ">";
+                case Comparison.GreaterThanOrEqual:
+                    return GreaterThanOrEqualToAscii;
+            }
+        }
+
         public bool MeetsRequirement(TokenEvaluatorBuilder builder, CampaignContext context)
         {
             if (!this.Left.TryEvaluateValue(context, builder, out int leftValue))
@@ -132,6 +154,11 @@ namespace SFDDCards.ScriptingTokens
             }
 
             return false;
+        }
+
+        public string DescribeRequirement()
+        {
+            return $"{this.Left.DescribeEvaluation()} {GetComparisonString(this.ComparisonType)} {this.Right.DescribeEvaluation()}";
         }
     }
 }

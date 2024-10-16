@@ -4,8 +4,10 @@ namespace SFDDCards
     using System.Collections;
     using System.Collections.Generic;
     using UnityEngine;
-    public abstract class Combatant : ICombatantTarget, IReactionWindowReactor, IEffectOwner
+    public abstract class Combatant : ICombatantTarget, IReactionWindowReactor
     {
+        public abstract string Id { get; }
+
         public abstract string Name { get; }
         public abstract int MaxHealth { get; }
         public int CurrentHealth { get; set; }
@@ -14,20 +16,37 @@ namespace SFDDCards
 
         public void ApplyDelta(CampaignContext campaignContext, CombatContext combatContext, DeltaEntry deltaEntry)
         {
+            if (deltaEntry.IntensityKindType == TokenEvaluatorBuilder.IntensityKind.None)
+            {
+                return;
+            }
+
+            if (!deltaEntry.ConceptualIntensity.TryEvaluateValue(campaignContext, deltaEntry.MadeFromBuilder, out int evaluatedIntensity))
+            {
+                GlobalUpdateUX.LogTextEvent.Invoke($"Failed to parse intensity.", GlobalUpdateUX.LogType.RuntimeError);
+                return;
+            }
+
             if (deltaEntry.IntensityKindType == TokenEvaluatorBuilder.IntensityKind.Damage)
             {
-                if (deltaEntry.Intensity > 0)
+                if (evaluatedIntensity > 0)
                 {
-                    this.CurrentHealth = Mathf.Max(0, this.CurrentHealth - deltaEntry.Intensity);
+                    this.CurrentHealth = Mathf.Max(0, this.CurrentHealth - evaluatedIntensity);
                 }
+
+                GlobalSequenceEventHolder.PushSequenceToTop(new GameplaySequenceEvent(() =>
+                {
+                    campaignContext.CheckAndApplyReactionWindow(new ReactionWindowContext(deltaEntry.FromCampaign, KnownReactionWindows.DamageDealt, deltaEntry));
+                }));
+
                 return;
             }
 
             if (deltaEntry.IntensityKindType == TokenEvaluatorBuilder.IntensityKind.Heal)
             {
-                if (deltaEntry.Intensity > 0)
+                if (evaluatedIntensity > 0)
                 {
-                    this.CurrentHealth = Mathf.Min(this.MaxHealth, this.CurrentHealth + deltaEntry.Intensity);
+                    this.CurrentHealth = Mathf.Min(this.MaxHealth, this.CurrentHealth + evaluatedIntensity);
                 }
 
                 return;
@@ -38,16 +57,16 @@ namespace SFDDCards
                 AppliedStatusEffect existingEffect = this.AppliedStatusEffects.Find(x => x.BasedOnStatusEffect == deltaEntry.StatusEffect);
                 if (existingEffect != null)
                 {
-                    existingEffect.Stacks += Mathf.Max(0, deltaEntry.Intensity);
+                    existingEffect.Stacks += Mathf.Max(0, evaluatedIntensity);
                     if (existingEffect.Stacks <= 0)
                     {
                         campaignContext.UnsubscribeReactor(existingEffect);
                         AppliedStatusEffects.Remove(existingEffect);
                     }
                 }
-                else if (deltaEntry.Intensity > 0)
+                else if (evaluatedIntensity > 0)
                 {
-                    AppliedStatusEffect newEffect = new AppliedStatusEffect(this, deltaEntry.StatusEffect, deltaEntry.Intensity);
+                    AppliedStatusEffect newEffect = new AppliedStatusEffect(this, deltaEntry.StatusEffect, evaluatedIntensity);
                     this.AppliedStatusEffects.Add(newEffect);
                     newEffect.SetSubscriptions(campaignContext);
                 }
@@ -57,7 +76,7 @@ namespace SFDDCards
                 AppliedStatusEffect existingEffect = this.AppliedStatusEffects.Find(x => x.BasedOnStatusEffect == deltaEntry.StatusEffect);
                 if (existingEffect != null)
                 {
-                    existingEffect.Stacks = Mathf.Max(0, existingEffect.Stacks - deltaEntry.Intensity);
+                    existingEffect.Stacks = Mathf.Max(0, existingEffect.Stacks - evaluatedIntensity);
                     if (existingEffect.Stacks <= 0)
                     {
                         campaignContext.UnsubscribeReactor(existingEffect);
@@ -70,16 +89,16 @@ namespace SFDDCards
                 AppliedStatusEffect existingEffect = this.AppliedStatusEffects.Find(x => x.BasedOnStatusEffect == deltaEntry.StatusEffect);
                 if (existingEffect != null)
                 {
-                    existingEffect.Stacks = deltaEntry.Intensity;
+                    existingEffect.Stacks = evaluatedIntensity;
                     if (existingEffect.Stacks <= 0)
                     {
                         campaignContext.UnsubscribeReactor(existingEffect);
                         AppliedStatusEffects.Remove(existingEffect);
                     }
                 }
-                else if (deltaEntry.Intensity > 0)
+                else if (evaluatedIntensity > 0)
                 {
-                    AppliedStatusEffect newEffect = new AppliedStatusEffect(this, deltaEntry.StatusEffect, deltaEntry.Intensity);
+                    AppliedStatusEffect newEffect = new AppliedStatusEffect(this, deltaEntry.StatusEffect, evaluatedIntensity);
                     this.AppliedStatusEffects.Add(newEffect);
                     newEffect.SetSubscriptions(campaignContext);
                 }
@@ -88,9 +107,9 @@ namespace SFDDCards
             GlobalUpdateUX.UpdateUXEvent.Invoke();
         }
 
-        public bool TryGetReactionEvents(CampaignContext campaignContext, ReactionWindowContext reactionContext, out List<GameplaySequenceEvent> events)
+        public bool TryGetReactionEvents(CampaignContext campaignContext, ReactionWindowContext reactionContext, out List<WindowResponse> responses)
         {
-            events = null;
+            responses = null;
             return false;
         }
 

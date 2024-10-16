@@ -45,8 +45,8 @@ namespace SFDDCards.Tests.EditMode
             new AssertEffectScriptResultsValueSourceValue("[SETTARGET: SELF][HEAL: 1]", "Heal 1."),
             new AssertEffectScriptResultsValueSourceValue("[SETTARGET: FOE][HEAL: 1]", "Heal foe for 1."),
 
-            new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][APPLYSTATUSEFFECTSTACKS: 1 {nameof(DebugStatus)}]", $"Apply 1 stack of {nameof(DebugStatus)} to foe."),
-            new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: SELF][APPLYSTATUSEFFECTSTACKS: 2 {nameof(DebugStatus)}]", $"Apply 2 stacks of {nameof(DebugStatus)} to self."),
+            new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][APPLYSTATUSEFFECTSTACKS: 1 {nameof(DebugStatus)}]", $"Apply 1 {nameof(DebugStatus)} to foe."),
+            new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: SELF][APPLYSTATUSEFFECTSTACKS: 2 {nameof(DebugStatus)}]", $"Gain 2 {nameof(DebugStatus)}."),
 
             new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][REMOVESTATUSEFFECTSTACKS: 1 {nameof(DebugStatus)}]", $"Remove 1 stack of {nameof(DebugStatus)} from foe."),
             new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: SELF][REMOVESTATUSEFFECTSTACKS: 2 {nameof(DebugStatus)}]", $"Remove 2 stacks of {nameof(DebugStatus)} from self."),
@@ -55,14 +55,14 @@ namespace SFDDCards.Tests.EditMode
             new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: SELF][SETSTATUSEFFECTSTACKS: 2 {nameof(DebugStatus)}]", $"Set {nameof(DebugStatus)} to 2 stacks on self."),
 
             new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][SETELEMENT: 1 DEBUGELEMENTONEID]", $"Set {DebugElementOneIconText}DEBUGELEMENTONENAME to 1."),
-            new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: SELF][SETELEMENT: 0 DEBUGELEMENTONEID]", $"Set {DebugElementOneIconText}DEBUGELEMENTONENAME to 0."),
+            new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: SELF][SETELEMENT: 0 DEBUGELEMENTONEID]", $"Clear {DebugElementOneIconText}DEBUGELEMENTONENAME."),
 
             new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][DAMAGE: COUNTSTACKS_{nameof(DebugStatus)}]", $"1 x {nameof(DebugStatus)} damage."),
 
-            new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][REQUIRESATLEASTELEMENT: 2 DEBUGELEMENTONEID][DAMAGE: 3]", $"2 {DebugElementOneIconText}DEBUGELEMENTONENAME: 3 damage."),
-            new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][REQUIRESATLEASTELEMENT: 2 DEBUGELEMENTONEID][REQUIRESATLEASTELEMENT: 5 DEBUGELEMENTTWOID][DAMAGE: 5][SETTARGET: SELF][HEAL: 7]", $"2 {DebugElementOneIconText}DEBUGELEMENTONENAME, 5 {DebugElementTwoIconText}DEBUGELEMENTTWONAME: 5 damage. Heal self for 7."),
+            new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][REQUIRESATLEASTELEMENT: 2 DEBUGELEMENTONEID][DAMAGE: 3]", $"If {DebugElementOneIconText}DEBUGELEMENTONENAME {RequiresComparisonScriptingToken.GreaterThanOrEqualToAscii} 2: 3 damage."),
+            new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][REQUIRESATLEASTELEMENT: 2 DEBUGELEMENTONEID][REQUIRESATLEASTELEMENT: 5 DEBUGELEMENTTWOID][DAMAGE: 5][SETTARGET: SELF][HEAL: 7]", $"If {DebugElementOneIconText}DEBUGELEMENTONENAME {RequiresComparisonScriptingToken.GreaterThanOrEqualToAscii} 2, {DebugElementTwoIconText}DEBUGELEMENTTWONAME {RequiresComparisonScriptingToken.GreaterThanOrEqualToAscii} 5: 5 damage. Heal self for 7."),
 
-            new AssertEffectScriptResultsValueSourceValue($"[DRAW: 1][CARDTARGET: HAND][CHOOSECARDS: 1][MOVECARDTOZONE: DISCARD]", "Draw 1 card. Discard 1 card."),
+            new AssertEffectScriptResultsValueSourceValue($"[DRAW: 1][CARDTARGET: HAND][CHOOSECARDS: 1][MOVECARDTOZONE: DISCARD]", "Draw a card. Discard a card."),
             new AssertEffectScriptResultsValueSourceValue($"[DRAW: 2][CARDTARGET: HAND][CHOOSECARDS: 2][MOVECARDTOZONE: DISCARD]", "Draw 2 cards. Discard 2 cards."),
 
             new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][DAMAGE: 1][MOVECARDTOZONE: EXILE]", "1 damage. Exile this card."),
@@ -72,45 +72,28 @@ namespace SFDDCards.Tests.EditMode
             new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][DAMAGE: 9/3]", "3 damage."),
             new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][DAMAGE: 4-3]", "1 damage."),
 
-            new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][DAMAGE: 1+COUNTELEMENT_DEBUGELEMENTONEID]", "1 + amount of DEBUGELEMENTONEID damage."),
-            new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][DAMAGE: 2*COUNTELEMENT_DEBUGELEMENTONEID]", "2 * amount of DEBUGELEMENTONEID damage."),
-            new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][DAMAGE: 3/COUNTELEMENT_DEBUGELEMENTONEID]", "3 / amount of DEBUGELEMENTONEID damage."),
-            new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][DAMAGE: 4-COUNTELEMENT_DEBUGELEMENTONEID]", "4 - amount of DEBUGELEMENTONEID damage."),
+            new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][DAMAGE: 1+COUNTELEMENT_DEBUGELEMENTONEID]", $"1 + {DebugElementOneIconText}DEBUGELEMENTONENAME damage."),
+            new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][DAMAGE: 2*COUNTELEMENT_DEBUGELEMENTONEID]", $"2 x {DebugElementOneIconText}DEBUGELEMENTONENAME damage."),
+            new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][DAMAGE: 3/COUNTELEMENT_DEBUGELEMENTONEID]", $"3 / {DebugElementOneIconText}DEBUGELEMENTONENAME damage."),
+            new AssertEffectScriptResultsValueSourceValue($"[SETTARGET: FOE][DAMAGE: 4-COUNTELEMENT_DEBUGELEMENTONEID]", $"4 - {DebugElementOneIconText}DEBUGELEMENTONENAME damage."),
         };
 
         [Test]
         public void AssertEffectScriptResultsInTextAsCard([ValueSource(nameof(AssertEffectScriptResultsInTextValueSource))] AssertEffectScriptResultsValueSourceValue expectations)
         {
-            CardImport import = new CardImport()
-            {
-                Id = nameof(AssertEffectScriptResultsInTextAsCard),
-                Name = nameof(AssertEffectScriptResultsInTextAsCard),
-                EffectScript = expectations.EffectScript
-            };
-
-            Card derivedCard = new Card(import);
-            EffectDescription description = derivedCard.GetDescription();
-
-            List<string> descriptionTexts = description.DescriptionText;
-            Assert.AreEqual(1, descriptionTexts.Count, "Scripts should only parse in to one description text when validated using this function.");
-            Assert.AreEqual(expectations.ExpectedParsedValue, descriptionTexts[0], "Script should parse out to expected value.");
+            EditModeTestCommon.AssertCardParsing(expectations.EffectScript, expectations.ExpectedParsedValue, null);
         }
 
         public static List<AssertEffectScriptResultsValueSourceValue> AssertEffectScriptResultsInTextAsStatusEffectValueSource => new List<AssertEffectScriptResultsValueSourceValue>()
         {
             new AssertEffectScriptResultsValueSourceValue("[REMOVESTACKS: 1]", $"Remove 1 stack."),
-            new AssertEffectScriptResultsValueSourceValue("[IFTARGET: SELF][DRAINBOTH: INTENSITY DEBUGSTATUS]", $"<b>Incoming Damage:</b> Damage first subtracts from DEBUGSTATUS before subtracting from health.", KnownReactionWindows.IncomingDamage)
+            new AssertEffectScriptResultsValueSourceValue("[IFTARGET: SELF][DRAINBOTH: INTENSITY DEBUGSTATUS]", $"<b>Incoming Damage:</b> If the target is Self: Damage first subtracts from DEBUGSTATUS before subtracting from health.", KnownReactionWindows.DamageIncoming)
         };
 
         [Test]
         public void AssertEffectScriptResultsInTextAsStatusEffect([ValueSource(nameof(AssertEffectScriptResultsInTextAsStatusEffectValueSource))] AssertEffectScriptResultsValueSourceValue expectations)
         {
-            AttackTokenPile pile = ScriptingTokens.ScriptingTokenDatabase.GetAllTokens(expectations.EffectScript, this.DebugStatus);
-            this.DebugStatus.EffectTokens.Clear();
-            this.DebugStatus.EffectTokens.Add(expectations.ReactionWindow, new List<AttackTokenPile>() { pile });
-
-            string resolvedDescription = this.DebugStatus.DescribeStatusEffect().BreakDescriptionsIntoString();
-            Assert.AreEqual(expectations.ExpectedParsedValue, resolvedDescription, "Script should parse out to expected value.");
+            EditModeTestCommon.AssertStatusEffectParsing(expectations.EffectScript, expectations.ExpectedParsedValue, expectations.ReactionWindow, this.DebugStatus);
         }
     }
 }

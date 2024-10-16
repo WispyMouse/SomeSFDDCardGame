@@ -1,0 +1,15 @@
+{
+    "Name": "Burn",
+	"Id": "mb1_statuseffect_burn",
+	"Effects":
+	[
+		{
+			"Window": "DAMAGEDEALT",
+			"Script": "[IFTARGET: NOT SELF][SETTARGET: SELF][DAMAGE: COUNTSTACKS_mb1_statuseffect_burn]"
+		},
+		{
+			"Window": "OWNERENDSTURN",
+			"Script": "[REMOVESTACKS: 1]"
+		}
+	]
+}

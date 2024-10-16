@@ -2,11 +2,14 @@ namespace SFDDCards.Tests.EditMode
 {
     using NUnit.Framework;
     using SFDDCards.Evaluation.Actual;
+    using SFDDCards.ImportModels;
+    using SFDDCards.ScriptingTokens.EvaluatableValues;
     using System;
     using System.Collections;
     using System.Collections.Generic;
     using System.IO;
     using System.Text;
+    using System.Threading.Tasks;
     using UnityEngine;
 
 
@@ -20,11 +23,8 @@ namespace SFDDCards.Tests.EditMode
         [Test]
         public void TestBlock()
         {
-            string blockFilePath = Application.streamingAssetsPath + "/statusImport/status effects/block.statusImport";
-            if (!StatusEffectDatabase.TryImportStatusEffectFromFile(blockFilePath, out StatusEffect blockStatus))
-            {
-                Assert.Fail($"Expected to find block at {blockFilePath}, did not find it there.");
-            }
+            StatusEffectDatabase.AddStatusEffectToDatabase(ImportHelper.ImportImportableFile<StatusEffectImport>(Application.streamingAssetsPath + "/sets/fundamentals/statuseffect/block.statusImport"));
+            StatusEffect blockStatus = StatusEffectDatabase.GetModel("block");
 
             EncounterModel testEncounter = EditModeTestCommon.GetEncounterWithPunchingBags(2, 100);
             CampaignContext campaignContext = EditModeTestCommon.GetBlankCampaignContext();
@@ -43,10 +43,10 @@ namespace SFDDCards.Tests.EditMode
             {
                 DeltaEntries = new List<DeltaEntry>()
                  {
-                    new DeltaEntry(campaignContext, combatContext.CombatPlayer, combatContext.CombatPlayer)
+                    new DeltaEntry(campaignContext, null, combatContext.CombatPlayer, combatContext.CombatPlayer)
                     {
                         IntensityKindType = TokenEvaluatorBuilder.IntensityKind.Damage,
-                        Intensity = damageToDealToPlayer
+                        ConceptualIntensity =  new ConstantEvaluatableValue<int>(damageToDealToPlayer)
                     }
                  }
             };
@@ -63,10 +63,10 @@ namespace SFDDCards.Tests.EditMode
             {
                 DeltaEntries = new List<DeltaEntry>()
                  {
-                    new DeltaEntry(campaignContext, combatContext.CombatPlayer, combatContext.CombatPlayer)
+                    new DeltaEntry(campaignContext, null, combatContext.CombatPlayer, combatContext.CombatPlayer)
                     {
                         IntensityKindType = TokenEvaluatorBuilder.IntensityKind.Damage,
-                        Intensity = damageToDealNext
+                        ConceptualIntensity = new ConstantEvaluatableValue<int>(10)
                     }
                  }
             };

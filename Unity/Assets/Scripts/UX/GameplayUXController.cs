@@ -33,14 +33,12 @@ namespace SFDDCards.UX
         private PlayerUX PlayerUXInstance { get; set; }
 
         [SerializeReference]
-        private EnemyUX EnemyRepresentationPF;
-        [SerializeReference]
         private Transform PlayerRepresentationTransform;
-        [SerializeReference]
-        private Transform EnemyRepresntationTransform;
 
         [SerializeReference]
         private PlayerHandRepresenter PlayerHandRepresenter;
+        [SerializeReference]
+        private EnemyRepresenterUX EnemyRepresenterUX;
 
         [SerializeReference]
         private GameObject GoNextRoomButton;
@@ -75,14 +73,16 @@ namespace SFDDCards.UX
         [SerializeReference]
         private TMPro.TMP_Text Log;
 
-        private Dictionary<Enemy, EnemyUX> spawnedEnemiesLookup { get; set; } = new Dictionary<Enemy, EnemyUX>();
-
         public DisplayedCardUX CurrentSelectedCard { get; private set; } = null;
         public bool PlayerIsCurrentlyAnimating { get; private set; } = false;
 
         private CampaignContext.GameplayCampaignState previousCampaignState { get; set; } = CampaignContext.GameplayCampaignState.NotStarted;
         private CombatContext.TurnStatus previousCombatTurnState { get; set; } = CombatContext.TurnStatus.NotInCombat;
         private CampaignContext.NonCombatEncounterStatus previousNonCombatEncounterState { get; set; } = CampaignContext.NonCombatEncounterStatus.NotInNonCombatEncounter;
+
+        public CampaignContext CurrentCampaignContext => this.CentralGameStateControllerInstance?.CurrentCampaignContext;
+
+        public ICombatantTarget HoveredCombatant { get; set; } = null;
 
         private void Awake()
         {
@@ -119,7 +119,7 @@ namespace SFDDCards.UX
             }
 
             this.PlayerUXInstance = Instantiate(this.PlayerRepresentationPF, this.PlayerRepresentationTransform);
-            this.PlayerUXInstance.SetFromPlayer(this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignPlayer);
+            this.PlayerUXInstance.SetFromPlayer(this.CurrentCampaignContext.CampaignPlayer);
 
             this.LifeValue.text = $"{this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignPlayer.CurrentHealth} / {this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignPlayer.MaxHealth}";
         }
@@ -130,14 +130,20 @@ namespace SFDDCards.UX
             {
                 this.GoNextRoomButton.SetActive(false);
                 this.EndTurnButton.SetActive(false);
+                MouseHoverShowerPanel.CurrentContext = null;
                 return;
             }
 
             this.CampaignChooserUXInstance.HideChooser();
 
-            CampaignContext.GameplayCampaignState newCampaignState = this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentGameplayCampaignState;
-            CampaignContext.NonCombatEncounterStatus newNonCombatState = this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentNonCombatEncounterStatus;
-            CombatContext.TurnStatus newTurnState = this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext == null ? CombatContext.TurnStatus.NotInCombat : this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.CurrentTurnStatus;
+            CampaignContext.GameplayCampaignState newCampaignState = this.CurrentCampaignContext.CurrentGameplayCampaignState;
+            CampaignContext.NonCombatEncounterStatus newNonCombatState = this.CurrentCampaignContext.CurrentNonCombatEncounterStatus;
+            CombatContext.TurnStatus newTurnState = this.CurrentCampaignContext.CurrentCombatContext == null ? CombatContext.TurnStatus.NotInCombat : this.CurrentCampaignContext.CurrentCombatContext.CurrentTurnStatus;
+
+            if (this.CurrentCampaignContext?.PendingRewards != null && this.RewardsPanelUXInstance.Rewards != this.CurrentCampaignContext?.PendingRewards)
+            {
+                this.PresentAwards(this.CurrentCampaignContext.PendingRewards);
+            }
 
             CampaignContext.GameplayCampaignState wasPreviousCampaignState = this.previousCampaignState;
             CampaignContext.NonCombatEncounterStatus wasPreviousNonCombatState = this.previousNonCombatEncounterState;
@@ -158,12 +164,6 @@ namespace SFDDCards.UX
                 || (newCampaignState == CampaignContext.GameplayCampaignState.NonCombatEncounter && newNonCombatState == CampaignContext.NonCombatEncounterStatus.AllowedToLeave))
             {
                 this.GoNextRoomButton.SetActive(true);
-
-                if (wasPreviousCampaignState == CampaignContext.GameplayCampaignState.InCombat 
-                    && this.CentralGameStateControllerInstance.CurrentCampaignContext.PendingRewards != null)
-                {
-                    this.PresentAwards(this.CentralGameStateControllerInstance.CurrentCampaignContext.PendingRewards);
-                }
             }
             else
             {
@@ -179,7 +179,7 @@ namespace SFDDCards.UX
                     this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentEncounter != null &&
                     this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentEncounter.BasedOn.IsShopEncounter)
                 {
-                    this.ShowShopPanel(this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentEncounter.GetCards().ToArray());
+                    this.ShowShopPanel(this.CurrentCampaignContext.CurrentEncounter.GetCards().ToArray());
                 }
             }
             
@@ -202,6 +202,8 @@ namespace SFDDCards.UX
                 {
                     this.EndTurnButton.SetActive(false);
                 }
+
+                MouseHoverShowerPanel.CurrentContext = new ReactionWindowContext(this.CentralGameStateControllerInstance.CurrentCampaignContext, KnownReactionWindows.ConsideringPlayingFromHand, this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.CombatPlayer, combatantTarget: null, playedFromZone: "hand");
             }
             else
             {
@@ -264,29 +266,10 @@ namespace SFDDCards.UX
             this.CurrentSelectedCard = null;
         }
 
-        public void AddEnemy(Enemy toAdd)
-        {
-            Vector3 objectOffset = new Vector3(3f, 0, 0) * this.EnemyRepresntationTransform.childCount;
-            EnemyUX newEnemy = Instantiate(this.EnemyRepresentationPF, this.EnemyRepresntationTransform);
-            newEnemy.transform.localPosition = objectOffset;
-            newEnemy.SetFromEnemy(toAdd, this.CentralGameStateControllerInstance);
-            this.spawnedEnemiesLookup.Add(toAdd, newEnemy);
-        }
-
-        public void RemoveEnemy(Enemy toRemove)
-        {
-            if (this.spawnedEnemiesLookup.TryGetValue(toRemove, out EnemyUX ux))
-            {
-                EnemyUX representation = this.spawnedEnemiesLookup[toRemove];
-                Destroy(representation.gameObject);
-                this.spawnedEnemiesLookup.Remove(toRemove);
-            }
-        }
-
         public void SelectCurrentCard(DisplayedCardUX toSelect)
         {
-            if (this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext == null ||
-                this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.CurrentTurnStatus != CombatContext.TurnStatus.PlayerTurn)
+            if (this.CurrentCampaignContext.CurrentCombatContext == null ||
+                this.CurrentCampaignContext.CurrentCombatContext.CurrentTurnStatus != CombatContext.TurnStatus.PlayerTurn)
             {
                 return;
             }
@@ -336,7 +319,12 @@ namespace SFDDCards.UX
             this.CurrentSelectedCard?.DisableSelectionGlow();
             this.CurrentSelectedCard = null;
 
-            this.CardBrowserUXInstance.Close();
+            this.PlayerHandRepresenter.DeselectSelectedCard();
+
+            if (this.CardBrowserUXInstance.RemainingCardsToChoose > 0)
+            {
+                this.CardBrowserUXInstance.Close();
+            }
 
             ClearAllTargetableIndicators();
         }
@@ -361,9 +349,9 @@ namespace SFDDCards.UX
 
         private IEnumerator AnimateEnemyTurnsInternal(Action continuationAction)
         {
-            foreach (Enemy curEnemy in this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.Enemies)
+            foreach (Enemy curEnemy in this.CurrentCampaignContext.CurrentCombatContext.Enemies)
             {
-                yield return AnimateAction(this.spawnedEnemiesLookup[curEnemy], curEnemy.Intent, curEnemy.Intent.PrecalculatedTarget);
+                yield return AnimateAction(this.EnemyRepresenterUX.SpawnedEnemiesLookup[curEnemy], curEnemy.Intent, curEnemy.Intent.PrecalculatedTarget);
             }
 
             continuationAction.Invoke();
@@ -393,7 +381,7 @@ namespace SFDDCards.UX
             }
             else if (target is Enemy targetEnemy)
             {
-                targetPuppet = this.spawnedEnemiesLookup[targetEnemy];
+                targetPuppet = this.EnemyRepresenterUX.SpawnedEnemiesLookup[targetEnemy];
             }
 
             if (targetPuppet == null || targetPuppet == puppet)
@@ -413,7 +401,7 @@ namespace SFDDCards.UX
 
         void UpdatePlayerLabelValues()
         {
-            if (this.CentralGameStateControllerInstance?.CurrentCampaignContext?.CampaignPlayer == null)
+            if (this.CurrentCampaignContext?.CampaignPlayer == null)
             {
                 this.LifeValue.text = "0";
                 this.PlayerStatusEffectUXHolderInstance.Annihilate();
@@ -421,7 +409,7 @@ namespace SFDDCards.UX
                 return;
             }
 
-            this.LifeValue.text = this.CentralGameStateControllerInstance?.CurrentCampaignContext?.CampaignPlayer.CurrentHealth.ToString();
+            this.LifeValue.text = this.CurrentCampaignContext.CampaignPlayer.CurrentHealth.ToString();
             this.PlayerStatusEffectUXHolderInstance.SetStatusEffects(
                 this.CentralGameStateControllerInstance?.CurrentCampaignContext?.CampaignPlayer.AppliedStatusEffects,
                 this.StatusEffectClicked);
@@ -439,9 +427,9 @@ namespace SFDDCards.UX
 
             string startingSeparator = "";
             StringBuilder compositeElements = new StringBuilder();
-            foreach (Element element in this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.ElementResourceCounts.Keys)
+            foreach (Element element in this.CurrentCampaignContext.CurrentCombatContext.ElementResourceCounts.Keys)
             {
-                compositeElements.Append($"{startingSeparator}{this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.ElementResourceCounts[element]}\u00A0{element.GetNameOrIcon()}");
+                compositeElements.Append($"{startingSeparator}{this.CurrentCampaignContext.CurrentCombatContext.ElementResourceCounts[element]}\u00A0{element.GetNameOrIcon()}");
                 startingSeparator = ", ";
             }
 
@@ -471,12 +459,12 @@ namespace SFDDCards.UX
             List<ICombatantTarget> possibleTargets = new List<ICombatantTarget>();
             possibleTargets.Add(this.CentralGameStateControllerInstance?.CurrentCampaignContext?.CampaignPlayer);
 
-            foreach (Enemy curEnemy in this.spawnedEnemiesLookup.Keys)
+            foreach (Enemy curEnemy in this.EnemyRepresenterUX.SpawnedEnemiesLookup.Keys)
             {
                 possibleTargets.Add(curEnemy);
             }
 
-            AllFoesTarget allFoesTarget = new AllFoesTarget(new List<ICombatantTarget>(this.spawnedEnemiesLookup.Keys));
+            AllFoesTarget allFoesTarget = new AllFoesTarget(new List<ICombatantTarget>(this.EnemyRepresenterUX.SpawnedEnemiesLookup.Keys));
             possibleTargets.Add(allFoesTarget);
 
             List<ICombatantTarget> remainingTargets = ScriptTokenEvaluator.GetTargetsThatCanBeTargeted(this.CentralGameStateControllerInstance?.CurrentCampaignContext?.CampaignPlayer, toTarget, possibleTargets);
@@ -485,7 +473,7 @@ namespace SFDDCards.UX
             {
                 if (remainingTargets[0] is AllFoesTarget)
                 {
-                    this.AllFoeTargetsIndicator.SetFromTarget(allFoesTarget, SelectTarget);
+                    this.AllFoeTargetsIndicator.SetFromTarget(allFoesTarget, SelectTarget, BeginHoverTarget, EndHoverTarget);
                     this.AllFoeTargetsIndicator.gameObject.SetActive(true);
                 }
                 else
@@ -493,14 +481,14 @@ namespace SFDDCards.UX
                     foreach (ICombatantTarget target in remainingTargets)
                     {
                         TargetableIndicator indicator = Instantiate(this.SingleCombatantTargetableIndicatorPF, target.UXPositionalTransform);
-                        indicator.SetFromTarget(target, this.SelectTarget);
+                        indicator.SetFromTarget(target, this.SelectTarget, BeginHoverTarget, EndHoverTarget);
                         this.ActiveIndicators.Add(indicator);
                     }
                 }
             }
             else
             {
-                this.NoTargetsIndicator.SetFromTarget(new NoTarget(), SelectTarget);
+                this.NoTargetsIndicator.SetFromTarget(new NoTarget(), SelectTarget, BeginHoverTarget, EndHoverTarget);
                 this.NoTargetsIndicator.gameObject.SetActive(true);
             }
         }
@@ -514,7 +502,7 @@ namespace SFDDCards.UX
 
             foreach (Enemy curEnemy in this.CentralGameStateControllerInstance?.CurrentCampaignContext?.CurrentCombatContext?.Enemies)
             {
-                if (!this.spawnedEnemiesLookup.TryGetValue(curEnemy, out EnemyUX value))
+                if (!this.EnemyRepresenterUX.SpawnedEnemiesLookup.TryGetValue(curEnemy, out EnemyUX value))
                 {
                     // It could be that the UpdateUX call was made before these enemies are spawned in to the game
                     // In that case, just continue
@@ -528,11 +516,8 @@ namespace SFDDCards.UX
         public void Annihilate()
         {
             this.PlayerHandRepresenter.Annihilate();
-
-            for (int ii = this.EnemyRepresntationTransform.childCount - 1; ii >= 0; ii--)
-            {
-                Destroy(this.EnemyRepresntationTransform.GetChild(ii).gameObject);
-            }
+            this.EnemyRepresenterUX.Annihilate();
+            this.CardBrowserUXInstance.Close();
 
             for (int ii = this.PlayerRepresentationTransform.childCount - 1; ii >= 0; ii--)
             {
@@ -553,19 +538,19 @@ namespace SFDDCards.UX
 
         void RepresentTargetables()
         {
-            if (this.CentralGameStateControllerInstance.CurrentCampaignContext?.CurrentCombatContext == null)
+            if (this.CurrentCampaignContext?.CurrentCombatContext == null)
             {
                 ClearAllTargetableIndicators();
                 return;
             }
 
-            if (this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentGameplayCampaignState != CampaignContext.GameplayCampaignState.InCombat)
+            if (this.CurrentCampaignContext.CurrentGameplayCampaignState != CampaignContext.GameplayCampaignState.InCombat)
             {
                 ClearAllTargetableIndicators();
                 return;
             }
 
-            if (this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.CurrentTurnStatus != CombatContext.TurnStatus.PlayerTurn)
+            if (this.CurrentCampaignContext.CurrentCombatContext.CurrentTurnStatus != CombatContext.TurnStatus.PlayerTurn)
             {
                 ClearAllTargetableIndicators();
                 return;
@@ -601,6 +586,7 @@ namespace SFDDCards.UX
 
         public void PresentAwards(Reward toPresent)
         {
+            this.CurrentCampaignContext.PendingRewards = null;
             this.CancelAllSelections();
             this.ShowRewardsPanel(toPresent);
         }
@@ -609,7 +595,7 @@ namespace SFDDCards.UX
         {
             this.CancelAllSelections();
 
-            ChoiceNode campaignNode = this.CentralGameStateControllerInstance.CurrentCampaignContext.GetCampaignCurrentNode();
+            ChoiceNode campaignNode = this.CurrentCampaignContext.GetCampaignCurrentNode();
 
             if (campaignNode == null)
             {
@@ -654,30 +640,39 @@ namespace SFDDCards.UX
         {
             if (this.CentralGameStateControllerInstance?.CurrentCampaignContext?.CurrentCombatContext == null)
             {
-                foreach (Enemy key in new List<Enemy>(this.spawnedEnemiesLookup.Keys))
+                foreach (Enemy key in new List<Enemy>(this.EnemyRepresenterUX.SpawnedEnemiesLookup.Keys))
                 {
-                    this.RemoveEnemy(key);
+                    this.EnemyRepresenterUX.RemoveEnemy(key);
                 }
 
                 return;
             }
 
-            foreach (Enemy curEnemy in new List<Enemy>(this.spawnedEnemiesLookup.Keys))
+            foreach (Enemy curEnemy in new List<Enemy>(this.EnemyRepresenterUX.SpawnedEnemiesLookup.Keys))
             {
-                if (!this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.Enemies.Contains(curEnemy))
+                if (!this.CurrentCampaignContext.CurrentCombatContext.Enemies.Contains(curEnemy))
                 {
-                    this.RemoveEnemy(curEnemy);
+                    this.EnemyRepresenterUX.RemoveEnemy(curEnemy);
                 }
             }
         }
 
         public void StatusEffectClicked(AppliedStatusEffect representingEffect)
         {
-            if (representingEffect.BasedOnStatusEffect.EffectTokens.ContainsKey(KnownReactionWindows.Activated))
+            if (representingEffect.BasedOnStatusEffect.WindowResponders.ContainsKey(KnownReactionWindows.Activated))
             {
-                if (representingEffect.TryGetReactionEvents(this.CentralGameStateControllerInstance.CurrentCampaignContext, new ReactionWindowContext(KnownReactionWindows.Activated, this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignPlayer), out List<GameplaySequenceEvent> events))
+                ReactionWindowContext activatedContext = new ReactionWindowContext(
+                    this.CentralGameStateControllerInstance.CurrentCampaignContext,
+                    KnownReactionWindows.Activated,
+                    this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignPlayer, 
+                    playedFromZone: "potion");
+
+                if (representingEffect.TryGetReactionEvents(this.CentralGameStateControllerInstance.CurrentCampaignContext, activatedContext, out List<WindowResponse> responses))
                 {
-                    GlobalSequenceEventHolder.PushSequencesToTop(events.ToArray());
+                    foreach (WindowResponse response in responses)
+                    {
+                        this.CentralGameStateControllerInstance.CurrentCampaignContext.IngestStatusEffectHappening(activatedContext, response);
+                    }
                 }
             }
         }
@@ -731,7 +726,7 @@ namespace SFDDCards.UX
 
             if (this.CentralGameStateControllerInstance?.CurrentCampaignContext?.CurrentCombatContext != null)
             {
-                cardsInDeck = new List<Card>(this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentCombatContext.PlayerCombatDeck.CardsCurrentlyInDeck);
+                cardsInDeck = new List<Card>(this.CurrentCampaignContext.CurrentCombatContext.PlayerCombatDeck.CardsCurrentlyInDeck);
             }
 
             cardsInDeck.Sort((Card a, Card b) => a.Name.CompareTo(b.Name));
@@ -760,6 +755,26 @@ namespace SFDDCards.UX
             this.CardBrowserUXInstance.gameObject.SetActive(true);
             this.CardBrowserUXInstance.SetLabelText("Now Viewing: Cards in Exile");
             this.CardBrowserUXInstance.SetFromCards(cardsInExile);
+        }
+
+        public void BeginHoverTarget(ICombatantTarget target)
+        {
+            this.HoveredCombatant = target;
+            this.PlayerHandRepresenter.ReactionWindowForSelectedCard = new ReactionWindowContext(
+                this.CentralGameStateControllerInstance.CurrentCampaignContext,
+                KnownReactionWindows.ConsideringPlayingFromHand,
+                this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignPlayer,
+                target,
+                "hand");
+        }
+
+        public void EndHoverTarget(ICombatantTarget target)
+        {
+            if (this.HoveredCombatant == target)
+            {
+                this.HoveredCombatant = null;
+                this.PlayerHandRepresenter.ReactionWindowForSelectedCard = null;
+            }
         }
     }
 }

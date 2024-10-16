@@ -1,7 +1,9 @@
 namespace SFDDCards.Tests.EditMode
 {
+    using NUnit.Framework;
     using SFDDCards.Evaluation.Actual;
     using SFDDCards.ImportModels;
+    using SFDDCards.ScriptingTokens;
     using SFDDCards.ScriptingTokens.EvaluatableValues;
     using System;
     using System.Collections;
@@ -12,6 +14,68 @@ namespace SFDDCards.Tests.EditMode
 
     public static class EditModeTestCommon
     {
+        public enum ParseKind
+        {
+            Card,
+            StatusEffect,
+            Element
+        }
+
+        public struct ParseFromFileTestData
+        {
+            public string Id;
+            public string ExpectedParsedValue;
+            public ParseKind ParseKind;
+
+            public ParseFromFileTestData(string id, string expectedParse, ParseKind parseKind)
+            {
+                this.Id = id;
+                this.ExpectedParsedValue = expectedParse;
+                this.ParseKind = parseKind;
+            }
+
+            public string FindFileLocation()
+            {
+                string fileName = $"{Id}.{GetImportForType()}";
+                string[] files = Directory.GetFiles(Application.streamingAssetsPath, fileName, SearchOption.AllDirectories);
+                if (files.Length != 1)
+                {
+                    throw new FileNotFoundException($"Could not find file {fileName}");
+                }
+                return files[0];
+            }
+
+            public string GetImportForType()
+            {
+                switch (ParseKind)
+                {
+                    case ParseKind.Card:
+                        return ".cardImport";
+                    case ParseKind.StatusEffect:
+                        return ".statusImport";
+                    default:
+                        return "";
+                }
+            }
+
+            public override string ToString()
+            {
+                return $"{this.Id}: {this.ExpectedParsedValue}";
+            }
+        }
+
+        public class DependentFile
+        {
+            public string TypelessFilepath;
+            public ParseKind ParseKind;
+
+            public DependentFile(string id, ParseKind parseKind)
+            {
+                this.TypelessFilepath = id;
+                this.ParseKind = parseKind;
+            }
+        }
+
         public static EncounterModel GetEncounterWithPunchingBags(int numberOfPunchingBags, int amountOfHealth)
         {
             EnemyImport punchingBag = new EnemyImport()
@@ -44,11 +108,7 @@ namespace SFDDCards.Tests.EditMode
         public static CampaignContext GetBlankCampaignContext()
         {
             RunConfiguration blankConfiguration = GetDefaultRunConfiguration();
-
-            // Empty out the starting deck, so tests have a guaranteed hand of cards
-            blankConfiguration.StartingDeck = new List<string>();
-
-            CampaignContext newContext = new CampaignContext(blankConfiguration);
+            CampaignContext newContext = new CampaignContext(new CampaignRoute(new RunConfiguration(), new RouteImport()));
             return newContext;
         }
 
@@ -66,10 +126,10 @@ namespace SFDDCards.Tests.EditMode
         {
             toTarget.ApplyDelta(campaignContext,
                 combatContext,
-                new DeltaEntry(campaignContext, combatContext.CombatPlayer, toTarget)
+                new DeltaEntry(campaignContext, null, combatContext.CombatPlayer, toTarget)
                 {
                     IntensityKindType = TokenEvaluatorBuilder.IntensityKind.ApplyStatusEffect,
-                    Intensity = mod,
+                    ConceptualIntensity = new ConstantEvaluatableValue<int>(mod),
                     StatusEffect = StatusEffectDatabase.GetModel(toApply)
                 });
 
@@ -91,6 +151,42 @@ namespace SFDDCards.Tests.EditMode
                 Card derivedCard = new Card(import);
                 deck.CardsCurrentlyInDeck.Add(derivedCard);
             }
+        }
+
+        public static void AssertCardParsing(string attackTokens, string expectedEvaluation, ReactionWindowContext? context)
+        {
+            CardImport import = new CardImport()
+            {
+                Id = nameof(AssertCardParsing),
+                Name = nameof(AssertCardParsing),
+                EffectScript = attackTokens
+            };
+
+            Card derivedCard = new Card(import);
+            AssertCardParsing(derivedCard, expectedEvaluation, context);
+        }
+
+        public static void AssertCardParsing(Card card, string expectedEvaluation, ReactionWindowContext? context)
+        {
+            EffectDescription description = card.GetDescription(context);
+
+            List<string> descriptionTexts = description.DescriptionText;
+            Assert.AreEqual(1, descriptionTexts.Count, "Scripts should only parse in to one description text when validated using this function.");
+            Assert.AreEqual(expectedEvaluation, descriptionTexts[0], "Script should parse out to expected value.");
+        }
+
+        public static void AssertStatusEffectParsing(string attackTokens, string expectedEvaluation, string window, StatusEffect effectOwner)
+        {
+            AttackTokenPile pile = ScriptingTokens.ScriptingTokenDatabase.GetAllTokens(attackTokens, effectOwner);
+            effectOwner.WindowResponders.Clear();
+            effectOwner.WindowResponders.Add(window, new List<WindowResponder>() { new WindowResponder() { WindowId = window, Effect = pile } });
+            AssertStatusEffectParsing(effectOwner, expectedEvaluation);
+        }
+
+        public static void AssertStatusEffectParsing(StatusEffect statusEffect, string expectedEvaluation)
+        {
+            string resolvedDescription = statusEffect.DescribeStatusEffect().BreakDescriptionsIntoString();
+            Assert.AreEqual(expectedEvaluation, resolvedDescription, "Script should parse out to expected value.");
         }
     }
 }
