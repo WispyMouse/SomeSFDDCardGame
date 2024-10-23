@@ -1,0 +1,92 @@
+{
+	"Id": "heystranger",
+	"Name": "Hey Stranger!",
+	"Description": "Stranger seeks stranger to gamble belongings with.",
+	"Tags":
+	[
+		"gambling"
+	],
+	"EncounterScripts": [
+		{
+			"Id": "intro",
+			"DialogueParts": [
+				{
+					"RequirementScript": "",
+					"Dialogue": "HEY, stranger! Wanna take a risk and see if it pays out? (25 $CURRENCYNAMEANDICON_CURRENCY_GOLD)"
+				},
+				{
+					"RequirementScript": "COUNTCURRENCY_CURRENCY_GOLD<25",
+					"Dialogue": "Wait a sec! You don't have the grit for this game. Get outta here."
+				}
+			],
+			"Options": [
+				{
+					"RequirementScript": "",
+					"Dialogue": "Leave",
+					"PossibleOutcomes": [
+						{
+							"Criteria": "",
+							"Effect": "[LEAVE]"
+						}
+					]
+				},
+				{
+					"RequirementScript": "COUNTCURRENCY_CURRENCYGOLD >= 25",
+					"Dialogue": "Let's go gambling!",
+					"PossibleOutcomes": [
+						{
+							"Criteria": "0~100<50",
+							"Effect": "[GOTO LOSE]"
+						},
+						{
+							"Criteria": "",
+							"Effect": "[GOTO WIN]"
+						}
+					]
+				}
+			]
+		},
+		{
+			"Id": "lose",
+			"DialogueParts": [
+				{
+					"RequirementScript": "",
+					"Dialogue": "Oh that's too bad! (You lost 25 $CURRENCYNAMEANDICON_CURRENCY_GOLD)"
+				}
+			],
+			"Options": [
+				{
+					"RequirementScript": "",
+					"Dialogue": "Leave",
+					"PossibleOutcomes": [
+						{
+							"Criteria": "",
+							"Effect": "[MODCURRENCY: -25 CURRENCY_GOLD][LEAVE]"
+						}
+					]
+				}
+			]
+		},
+		{
+			"Id": "win",
+			"DialogueParts": [
+				{
+					"RequirementScript": "",
+					"Dialogue": "It's your lucky day! (You gained 25 $CURRENCYNAMEANDICON_CURRENCY_GOLD)"
+				}
+			],
+			"Options": [
+				{
+					"RequirementScript": "",
+					"Dialogue": "Leave",
+					"PossibleOutcomes": [
+						{
+							"Criteria": "",
+							"Effect": "[MODCURRENCY: 25 CURRENCY_GOLD][LEAVE]"
+						}
+					]
+				}
+			]
+		}
+	]
+}

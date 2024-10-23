@@ -1,0 +1,126 @@
+{
+	"RouteName": "Gambling Route",	
+	"StartingDeck": [
+		"mb1_card_starter_resonate",
+		"mb1_card_starter_resonate",
+		
+		"mb1_card_starter_block",
+		"mb1_card_starter_block",
+		"mb1_card_starter_block",
+		
+		"mb1_card_starter_strike",
+		"mb1_card_starter_strike",
+		"mb1_card_starter_strike",
+		
+		"[common]",
+		"[common]"
+	],
+	"StartingMaximumHealth": 50,	
+	"RouteNodes": [
+		{
+			"NodeName": "Let's go gambling!",
+			"Options": [
+				{
+					"ChoiceNodeKind": "[GAMBLING]"
+				},
+				{
+					"ChoiceNodeKind": "[GAMBLING]"
+				},
+				{
+					"ChoiceNodeKind": "[GAMBLING]"
+				}
+			]
+		},
+		{
+			"NodeName": "Let's go gambling!",
+			"Options": [
+				{
+					"ChoiceNodeKind": "[GAMBLING]"
+				},
+				{
+					"ChoiceNodeKind": "[GAMBLING]"
+				},
+				{
+					"ChoiceNodeKind": "[GAMBLING]"
+				}
+			]
+		},
+		{
+			"NodeName": "Let's go gambling!",
+			"Options": [
+				{
+					"ChoiceNodeKind": "[GAMBLING]"
+				},
+				{
+					"ChoiceNodeKind": "[GAMBLING]"
+				},
+				{
+					"ChoiceNodeKind": "[GAMBLING]"
+				}
+			]
+		}
+	],
+	"CostModifiers": [
+		{
+			"TagMatch": [
+				"common",
+				"card"
+			],
+			"Currency": "currency_gold",
+			"EvaluationScript": "20"
+		},
+		{
+			"TagMatch": [
+				"uncommon",
+				"card"
+			],
+			"Currency": "currency_gold",
+			"EvaluationScript": "50"
+		},
+		{
+			"TagMatch": [
+				"rare",
+				"card"
+			],
+			"Currency": "currency_gold",
+			"EvaluationScript": "100"
+		},
+		{
+			"TagMatch": [
+				"common",
+				"artifact"
+			],
+			"Currency": "currency_gold",
+			"EvaluationScript": "100"
+		},
+		{
+			"TagMatch": [
+				"uncommon",
+				"artifact"
+			],
+			"Currency": "currency_gold",
+			"EvaluationScript": "200"
+		},
+		{
+			"TagMatch": [
+				"rare",
+				"artifact"
+			],
+			"Currency": "currency_gold",
+			"EvaluationScript": "300"
+		},
+		{
+			"TagMatch": [
+				"void"
+			],
+			"Currency": "currency_gold",
+			"EvaluationScript": "value/2"
+		}
+	],
+	"StartingCurrencies": [
+		{
+			"CurrencyName": "currency_gold",
+			"StartingAmount": 500
+		}
+	]
+}

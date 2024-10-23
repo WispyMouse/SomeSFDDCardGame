@@ -15,5 +15,7 @@ namespace SFDDCards.ImportModels
 
         public RewardImport CustomReward = null;
         public string StandardRewardId;
+
+        public List<EncounterScriptImport> EncounterScripts = null;
     }
 }
