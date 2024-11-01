@@ -126,5 +126,28 @@ namespace SFDDCards.Evaluation.Actual
 
             GlobalSequenceEventHolder.PushSequencesToTop(campaignContext, sequences.ToArray());
         }
+
+        /// <summary>
+        /// Determines the encounter index that would result from executing this Delta.
+        /// If there are no destinations determined, this will return an empty string.
+        /// The last destination to be in the list of deltas is the one that will be applied.
+        /// This generally means that if a script had three different destinations, only
+        /// the last one to be set will be used.
+        /// </summary>
+        /// <returns></returns>
+        public string GetEncounterDestination()
+        {
+            string destination = string.Empty;
+
+            foreach (DeltaEntry deltaEntry in this.DeltaEntries)
+            {
+                if (!string.IsNullOrWhiteSpace(deltaEntry.EncounterDialogueDestination))
+                {
+                    destination = deltaEntry.EncounterDialogueDestination;
+                }
+            }
+
+            return destination;
+        }
     }
 }

@@ -23,6 +23,8 @@ namespace SFDDCards.UX
         private CampaignChooserUX CampaignChooserUXInstance;
         [SerializeReference]
         private CardBrowser CardBrowserUXInstance;
+        [SerializeReference]
+        private EncounterRepresenterUX EncounterRepresenterUXInstance;
 
         [SerializeReference]
         private RewardsPanelUX RewardsPanelUXInstance;
@@ -179,10 +181,17 @@ namespace SFDDCards.UX
             {
                 if (wasPreviousCampaignState != CampaignContext.GameplayCampaignState.NonCombatEncounter &&
                     this.CurrentCampaignContext != null &&
-                    this.CurrentCampaignContext.CurrentEncounter != null &&
-                    this.CurrentCampaignContext.CurrentEncounter.BasedOn.IsShopEncounter)
+                    this.CurrentCampaignContext.CurrentEncounter != null
+                    )
                 {
-                    this.ShowShopPanel(this.CurrentCampaignContext.CurrentEncounter.GetShop(this.CurrentCampaignContext).ToArray());
+                    if (this.CurrentCampaignContext.CurrentEncounter.BasedOn.EncounterScripts != null && this.CurrentCampaignContext.CurrentEncounter.BasedOn.EncounterScripts.Count > 0)
+                    {
+                        this.EncounterRepresenterUXInstance.RepresentEncounter(this.CurrentCampaignContext.CurrentEncounter);
+                    }
+                    else if (this.CurrentCampaignContext.CurrentEncounter.BasedOn.IsShopEncounter)
+                    {
+                        this.ShowShopPanel(this.CurrentCampaignContext.CurrentEncounter.GetShop(this.CurrentCampaignContext).ToArray());
+                    }
                 }
             }
             
@@ -795,6 +804,11 @@ namespace SFDDCards.UX
                 this.HoveredCombatant = null;
                 this.PlayerHandRepresenter.ReactionWindowForSelectedCard = null;
             }
+        }
+
+        public void EncounterDialogueComplete()
+        {
+
         }
     }
 }

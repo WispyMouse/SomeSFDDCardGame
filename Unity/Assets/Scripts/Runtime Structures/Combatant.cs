@@ -14,6 +14,19 @@ namespace SFDDCards
         public Transform UXPositionalTransform { get; set; }
         public virtual List<AppliedStatusEffect> AppliedStatusEffects { get; set; } = new List<AppliedStatusEffect>();
 
+        public void ApplyDelta(CampaignContext campaignContext, CombatContext combatContext, GamestateDelta deltaEntry)
+        {
+            this.ApplyDelta(campaignContext, combatContext, deltaEntry.DeltaEntries);
+        }
+
+        public void ApplyDelta(CampaignContext campaignContext, CombatContext combatContext, List<DeltaEntry> deltaEntry)
+        {
+            foreach (DeltaEntry entry in deltaEntry)
+            {
+                this.ApplyDelta(campaignContext, combatContext, deltaEntry);
+            }
+        }
+
         public void ApplyDelta(CampaignContext campaignContext, CombatContext combatContext, DeltaEntry deltaEntry)
         {
             if (deltaEntry.IntensityKindType == TokenEvaluatorBuilder.IntensityKind.None)

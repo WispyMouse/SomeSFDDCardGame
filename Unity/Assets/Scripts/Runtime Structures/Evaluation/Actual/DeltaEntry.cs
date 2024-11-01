@@ -39,6 +39,8 @@ namespace SFDDCards.Evaluation.Actual
         /// </summary>
         public ICombatantTarget OriginalTarget;
 
+        public string EncounterDialogueDestination = string.Empty;
+
         public DeltaEntry(CampaignContext fromCampaign, IEffectOwner owner, Combatant user, ICombatantTarget target)
         {
             this.FromCampaign = fromCampaign;
