@@ -47,9 +47,12 @@ namespace SFDDCards
             this.IsShopEncounter = basedOn.IsShopEncounter;
             this.Arguments = basedOn.Arguments;
 
-            foreach (EncounterScriptImport import in basedOn.EncounterScripts)
+            if (basedOn.EncounterScripts != null)
             {
-                this.EncounterScripts.Add(import.Id, import);
+                foreach (EncounterScriptImport import in basedOn.EncounterScripts)
+                {
+                    this.EncounterScripts.Add(import.Id, import);
+                }
             }
 
             if (!string.IsNullOrEmpty(basedOn.StandardRewardId) && RewardDatabase.TryGetReward(basedOn.StandardRewardId, out RewardImport model))

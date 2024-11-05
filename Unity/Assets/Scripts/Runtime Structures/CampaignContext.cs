@@ -26,7 +26,8 @@ namespace SFDDCards
         public enum NonCombatEncounterStatus
         {
             NotInNonCombatEncounter = 0,
-            AllowedToLeave = 1
+            AllowedToLeave = 1,
+            NotAllowedToLeave = 2
         }
 
         public readonly Deck CampaignDeck;
@@ -80,6 +81,12 @@ namespace SFDDCards
             {
                 this.LeaveCurrentCombat();
                 this.SetCampaignState(GameplayCampaignState.NonCombatEncounter, NonCombatEncounterStatus.AllowedToLeave);
+                return;
+            }
+            else if (basedOn.BasedOn.EncounterScripts != null && basedOn.BasedOn.EncounterScripts.Count > 0)
+            {
+                this.LeaveCurrentCombat();
+                this.SetCampaignState(GameplayCampaignState.NonCombatEncounter, NonCombatEncounterStatus.NotAllowedToLeave);
                 return;
             }
 
