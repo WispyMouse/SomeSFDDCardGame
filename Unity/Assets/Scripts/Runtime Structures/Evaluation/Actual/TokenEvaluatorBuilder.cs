@@ -59,6 +59,7 @@ namespace SFDDCards.Evaluation.Actual
         public CardsEvaluatableValue RelevantCardsEvaluatable;
 
         public IRealizedOperationScriptingToken RealizedOperationScriptingToken = null;
+        public string Destination = null;
 
         protected TokenEvaluatorBuilder(ConceptualTokenEvaluatorBuilder concept, CampaignContext campaignContext, IEffectOwner owner, Combatant user, ICombatantTarget originalTarget, TokenEvaluatorBuilder previousBuilder = null)
         {
@@ -68,6 +69,7 @@ namespace SFDDCards.Evaluation.Actual
             this.Owner = owner;
             this.User = user;
             this.OriginalTarget = originalTarget;
+            this.Destination = concept.Destination;
 
             if (concept.Target != null)
             {
@@ -145,6 +147,14 @@ namespace SFDDCards.Evaluation.Actual
                 delta.DeltaEntries.Add(new DeltaEntry(this)
                 {
                     ActionsToExecute = this.ActionsToExecute
+                });
+            }
+
+            if (!string.IsNullOrEmpty(this.Destination))
+            {
+                delta.DeltaEntries.Add(new DeltaEntry(this)
+                {
+                    EncounterDialogueDestination = this.Destination
                 });
             }
 

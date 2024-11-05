@@ -23,7 +23,7 @@ namespace SFDDCards
         {
             foreach (DeltaEntry entry in deltaEntry)
             {
-                this.ApplyDelta(campaignContext, combatContext, deltaEntry);
+                this.ApplyDelta(campaignContext, combatContext, entry);
             }
         }
 

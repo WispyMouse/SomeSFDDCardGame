@@ -31,16 +31,16 @@
 					]
 				},
 				{
-					"RequirementScript": "COUNTCURRENCY_CURRENCYGOLD >= 25",
+					"RequirementScript": "COUNTCURRENCY_CURRENCY_GOLD >= 25",
 					"Dialogue": "Let's go gambling!",
 					"PossibleOutcomes": [
 						{
-							"Criteria": "0~100<50",
-							"Effect": "[GOTO LOSE]"
+							"Criteria": "0~100 < 50",
+							"Effect": "[GOTO:LOSE]"
 						},
 						{
 							"Criteria": "",
-							"Effect": "[GOTO WIN]"
+							"Effect": "[GOTO:WIN]"
 						}
 					]
 				}

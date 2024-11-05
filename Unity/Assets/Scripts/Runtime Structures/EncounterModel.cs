@@ -85,7 +85,7 @@ namespace SFDDCards
 
         public string BuildEncounterDialogue(string index, CampaignContext campaignContext)
         {
-            if (!this.EncounterScripts.TryGetValue(index, out EncounterScriptImport script))
+            if (!this.EncounterScripts.TryGetValue(index.ToLower(), out EncounterScriptImport script))
             {
                 return String.Empty;
             }
@@ -107,7 +107,7 @@ namespace SFDDCards
 
         public List<EncounterOptionImport> GetOptions(string index, CampaignContext campaignContext)
         {
-            if (!this.EncounterScripts.TryGetValue(index, out EncounterScriptImport script))
+            if (!this.EncounterScripts.TryGetValue(index.ToLower(), out EncounterScriptImport script))
             {
                 return null;
             }

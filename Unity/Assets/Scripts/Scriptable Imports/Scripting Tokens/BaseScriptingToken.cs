@@ -22,7 +22,9 @@ namespace SFDDCards.ScriptingTokens
         {
             match = null;
 
-            if (!tokenString.StartsWith(ScriptingTokenStarter + this.ScriptingTokenIdentifier, System.StringComparison.InvariantCultureIgnoreCase))
+            // If this is presented as just a string, it should always try to match
+            // but if this has a [ starting, it should always continue into the expected token
+            if (tokenString.StartsWith(ScriptingTokenStarter) && !tokenString.StartsWith(ScriptingTokenStarter + this.ScriptingTokenIdentifier, System.StringComparison.InvariantCultureIgnoreCase))
             {
                 // Doesn't start with the indicator, can't be this token.
                 return false;
@@ -46,13 +48,22 @@ namespace SFDDCards.ScriptingTokens
         public static bool TryDeriveArgumentsFromScriptingToken(string tokenString, out List<string> results)
         {
             // If the token string doesn't contain any of the : separators, then there are no arguments
-            if (!tokenString.Contains(ArgumentSeparatorFromIdentifier))
+            if (tokenString.StartsWith(ScriptingTokenStarter) && !tokenString.Contains(ArgumentSeparatorFromIdentifier))
             {
                 results = new List<string>();
                 return true;
             }
 
-            Match nonIdentifierItems = Regex.Match(tokenString, @"^\[.*?\:(.*?)\]");
+            Match nonIdentifierItems;
+            if (tokenString.StartsWith(ScriptingTokenStarter))
+            {
+                nonIdentifierItems = Regex.Match(tokenString, @"^\[.*?\:(.*?)\]");
+            }
+            else
+            {
+                nonIdentifierItems = Regex.Match(tokenString, "(.*)");
+            }
+
             if (!nonIdentifierItems.Success)
             {
                 results = new List<string>();

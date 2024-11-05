@@ -40,6 +40,8 @@ namespace SFDDCards.Evaluation.Conceptual
         public CardsEvaluatableValue RelevantCards = null;
         public PlayerChoice ChoiceToMake = null;
 
+        public string Destination;
+
         public ConceptualTokenEvaluatorBuilder(ConceptualTokenEvaluatorBuilder previousBuilder = null)
         {
             this.PreviousBuilder = previousBuilder;
@@ -152,6 +154,17 @@ namespace SFDDCards.Evaluation.Conceptual
                 });
             }
 
+            if (!string.IsNullOrEmpty(this.Destination))
+            {
+                delta.DeltaEntries.Add(new ConceptualDeltaEntry(this, this.OriginalTarget, this.PreviousBuilder?.Target)
+                {
+                    MadeFromBuilder = this,
+                    IntensityKindType = IntensityKind.None,
+                    NumberOfCardsRelationType = NumberOfCardsRelation.None,
+                    Destination = this.Destination
+                });
+            }
+
             return delta;
         }
 
@@ -164,7 +177,8 @@ namespace SFDDCards.Evaluation.Conceptual
                     || (this.RealizedOperationScriptingToken != null)
                     || (this.ChoiceToMake != null)
                     || (this.ActionsToExecute.Count > 0)
-                    || (this.ElementResourceChanges.Count > 0);
+                    || (this.ElementResourceChanges.Count > 0)
+                    || (!string.IsNullOrEmpty(this.Destination));
             }
         }
     }

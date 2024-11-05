@@ -32,6 +32,8 @@ namespace SFDDCards.Evaluation.Conceptual
         public StatusEffect StatusEffect;
         public CurrencyImport Currency;
 
+        public string Destination;
+
         public ConceptualDeltaEntry(ConceptualTokenEvaluatorBuilder builder, CombatantTargetEvaluatableValue originalConceptualTarget, CombatantTargetEvaluatableValue previousConceptualTarget)
         {
             this.MadeFromBuilder = builder;

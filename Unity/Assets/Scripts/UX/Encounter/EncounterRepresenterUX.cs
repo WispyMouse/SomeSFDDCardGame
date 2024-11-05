@@ -81,9 +81,9 @@ namespace SFDDCards.UX
             // It could be the first value, especially if it has no requirements
             for (int ii = 0; ii < option.PossibleOutcomes.Count; ii++)
             {
-                if (this.CentralGameStateControllerInstance.CurrentCampaignContext.RequirementsAreMet(option.RequirementScript))
+                if (this.CentralGameStateControllerInstance.CurrentCampaignContext.RequirementsAreMet(option.PossibleOutcomes[ii].Criteria))
                 {
-                    outcome = option.PossibleOutcomes[0];
+                    outcome = option.PossibleOutcomes[ii];
                     break;
                 }
             }
