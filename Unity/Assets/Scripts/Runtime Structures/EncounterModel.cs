@@ -83,7 +83,7 @@ namespace SFDDCards
             return this.EncounterTags.Overlaps(tags);
         }
 
-        public string BuildEncounterDialogue(string index)
+        public string BuildEncounterDialogue(string index, CampaignContext campaignContext)
         {
             if (!this.EncounterScripts.TryGetValue(index, out EncounterScriptImport script))
             {
@@ -94,8 +94,7 @@ namespace SFDDCards
 
             foreach (EncounterDialogueSegmentImport dialogueSegment in script.DialogueParts)
             {
-                // TODO: Do we meet the requirement for this dialogue segment?
-                if (false)
+                if (!campaignContext.RequirementsAreMet(dialogueSegment.RequirementScript))
                 {
                     continue;
                 }
@@ -106,7 +105,7 @@ namespace SFDDCards
             return dialogue.ToString();
         }
 
-        public List<EncounterOptionImport> GetOptions(string index)
+        public List<EncounterOptionImport> GetOptions(string index, CampaignContext campaignContext)
         {
             if (!this.EncounterScripts.TryGetValue(index, out EncounterScriptImport script))
             {
@@ -117,8 +116,7 @@ namespace SFDDCards
 
             foreach (EncounterOptionImport option in script.Options)
             {
-                // TODO: Do we meet the requirement for this option?
-                if (false)
+                if (!campaignContext.RequirementsAreMet(option.RequirementScript))
                 {
                     continue;
                 }

@@ -42,20 +42,23 @@ namespace SFDDCards.UX
         {
             this.currentEncounterIndex = index;
 
-            // TODO: Process this dialogue
-            this.DescriptionLabel.text = this.representingModel.BasedOn.BuildEncounterDialogue(index);
+            string unprocessedDialogue = this.representingModel.BasedOn.BuildEncounterDialogue(index, this.CentralGameStateControllerInstance.CurrentCampaignContext);
+            this.DescriptionLabel.text = EffectDescriberDatabase.ReplaceTokensInString(unprocessedDialogue, this.CentralGameStateControllerInstance.CurrentCampaignContext);
 
             for (int ii = this.ButtonHolder.childCount - 1; ii >= 0; ii--)
             {
                 Destroy(this.ButtonHolder.GetChild(ii).gameObject);
             }
 
-            List<EncounterOptionImport> options = this.representingModel.BasedOn.GetOptions(index);
+            List<EncounterOptionImport> options = this.representingModel.BasedOn.GetOptions(index, this.CentralGameStateControllerInstance.CurrentCampaignContext);
             foreach (EncounterOptionImport option in options)
             {
                 EncounterDialogueButtonUX button = Instantiate(this.DialogueButtonPF, this.ButtonHolder);
                 EncounterOptionImport hungOption = option;
-                button.SetEncounterDialogue(hungOption.Dialogue, () => this.ChooseOption(hungOption));
+
+                string unprocessedDialogueOption = option.Dialogue;
+
+                button.SetEncounterDialogue(EffectDescriberDatabase.ReplaceTokensInString(unprocessedDialogueOption, this.CentralGameStateControllerInstance.CurrentCampaignContext), () => this.ChooseOption(hungOption));
             }
         }
 

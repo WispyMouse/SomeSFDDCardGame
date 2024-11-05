@@ -247,6 +247,55 @@ namespace SFDDCards
         {
             return $"{argumentOne} will apply to {argumentTwo} before Health.";
         }
+
+        public static string ReplaceTokensInString(string tokenString, CampaignContext campaignContext)
+        {
+            string resultingString = tokenString;
+
+            bool hitRegex = false;
+            do
+            {
+                Match nextMatch = Regex.Match(resultingString, @"\$CURRENCYNAMEANDICON_([\w_]*)");
+                hitRegex = nextMatch.Success;
+                if (!hitRegex)
+                {
+                    break;
+                }
+
+                if (CurrencyDatabase.TryGetModel(nextMatch.Groups[1].Value, out CurrencyImport foundCurrency))
+                {
+                    resultingString = resultingString.Replace(nextMatch.Value, foundCurrency.GetNameAndMaybeIcon());
+                }
+                else
+                {
+                    resultingString = resultingString.Replace(nextMatch.Value, $"UNKNOWN CURRENCY ERROR {nextMatch.Groups[1].Value}");
+                }
+            } while (hitRegex);
+
+            MatchCollection remainingStringMatch = Regex.Matches(resultingString, @"([\w_]*)+");
+            foreach (Match curMatch in remainingStringMatch)
+            {
+                if (BaseScriptingToken.TryGetIntegerEvaluatableFromString(curMatch.Groups[1].Value, out IEvaluatableValue<int> output, true))
+                {
+                    if (!output.TryEvaluateValue(campaignContext, null, out int evaluatedValue))
+                    {
+                        GlobalUpdateUX.LogTextEvent.Invoke($"Failed to evaluate a token.", GlobalUpdateUX.LogType.RuntimeError);
+                        continue;
+                    }
+
+                    string replacementString = evaluatedValue.ToString();
+
+                    if (curMatch.Groups.Count >= 3)
+                    {
+                        replacementString += curMatch.Groups[2].Value;
+                    }
+
+                    resultingString = resultingString.Replace(curMatch.Value, evaluatedValue.ToString());
+                }
+            }
+
+            return resultingString;
+        }
         #endregion
 
         #region Describing Damage

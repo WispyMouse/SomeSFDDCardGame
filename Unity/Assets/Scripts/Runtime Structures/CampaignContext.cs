@@ -476,5 +476,16 @@ namespace SFDDCards
 
             return false;
         }
+
+        public bool RequirementsAreMet(string requirementScript)
+        {
+            if (string.IsNullOrEmpty(requirementScript))
+            {
+                return true;
+            }
+
+            // TODO Process
+            return true;
+        }
     }
 }

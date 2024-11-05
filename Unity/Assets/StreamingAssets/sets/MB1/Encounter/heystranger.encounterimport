@@ -15,7 +15,7 @@
 					"Dialogue": "HEY, stranger! Wanna take a risk and see if it pays out? (25 $CURRENCYNAMEANDICON_CURRENCY_GOLD)"
 				},
 				{
-					"RequirementScript": "COUNTCURRENCY_CURRENCY_GOLD<25",
+					"RequirementScript": "COUNTCURRENCY_CURRENCY_GOLD < 25",
 					"Dialogue": "Wait a sec! You don't have the grit for this game. Get outta here."
 				}
 			],
