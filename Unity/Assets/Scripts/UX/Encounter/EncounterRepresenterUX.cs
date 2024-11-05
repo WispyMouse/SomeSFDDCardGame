@@ -64,9 +64,29 @@ namespace SFDDCards.UX
 
         public void ChooseOption(EncounterOptionImport option)
         {
-            // TODO: Determine which outcome to use
-            // currently using 0 always
+            if (option.PossibleOutcomes == null || option.PossibleOutcomes.Count == 0)
+            {
+                // If there are no possible outcomes, treat it as though it was a leave
+                GlobalSequenceEventHolder.PushSequenceToTop(new GameplaySequenceEvent(
+                () =>
+                {
+                    this.GameplayUXControllerInstance.EncounterDialogueComplete(this.representingModel);
+                }));
+                return;
+            }
+
             EncounterOptionOutcomeImport outcome = option.PossibleOutcomes[0];
+
+            // Find the first requirement with matching criteria
+            // It could be the first value, especially if it has no requirements
+            for (int ii = 0; ii < option.PossibleOutcomes.Count; ii++)
+            {
+                if (this.CentralGameStateControllerInstance.CurrentCampaignContext.RequirementsAreMet(option.RequirementScript))
+                {
+                    outcome = option.PossibleOutcomes[0];
+                    break;
+                }
+            }
 
             GamestateDelta delta = ScriptTokenEvaluator.GetDeltaFromTokens(outcome.Effect,
                 this.CentralGameStateControllerInstance.CurrentCampaignContext,
@@ -86,13 +106,18 @@ namespace SFDDCards.UX
 
                     if (string.IsNullOrEmpty(destination))
                     {
-                        this.GameplayUXControllerInstance.EncounterDialogueComplete();
+                        this.GameplayUXControllerInstance.EncounterDialogueComplete(representingModel);
                     }
                     else
                     {
                         this.SetEncounterIndex(destination);
                     }
                 }));
+        }
+
+        public void Close()
+        {
+            this.gameObject.SetActive(false);
         }
     }
 }

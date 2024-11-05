@@ -135,6 +135,7 @@ namespace SFDDCards.UX
             {
                 this.GoNextRoomButton.SetActive(false);
                 this.EndTurnButton.SetActive(false);
+                this.EncounterRepresenterUXInstance.Close();
                 MouseHoverShowerPanel.CurrentContext = null;
                 return;
             }
@@ -186,13 +187,20 @@ namespace SFDDCards.UX
                 {
                     if (this.CurrentCampaignContext.CurrentEncounter.BasedOn.EncounterScripts != null && this.CurrentCampaignContext.CurrentEncounter.BasedOn.EncounterScripts.Count > 0)
                     {
+                        this.ShopPanelUXInstance.gameObject.SetActive(false);
                         this.EncounterRepresenterUXInstance.RepresentEncounter(this.CurrentCampaignContext.CurrentEncounter);
                     }
                     else if (this.CurrentCampaignContext.CurrentEncounter.BasedOn.IsShopEncounter)
                     {
+                        this.EncounterRepresenterUXInstance.Close();
                         this.ShowShopPanel(this.CurrentCampaignContext.CurrentEncounter.GetShop(this.CurrentCampaignContext).ToArray());
                     }
                 }
+            }
+            else
+            {
+                this.ShopPanelUXInstance.gameObject.SetActive(false);
+                this.EncounterRepresenterUXInstance.Close();
             }
             
             if (newCampaignState == CampaignContext.GameplayCampaignState.InCombat)
@@ -806,9 +814,13 @@ namespace SFDDCards.UX
             }
         }
 
-        public void EncounterDialogueComplete()
+        public void EncounterDialogueComplete(EvaluatedEncounter completed)
         {
-
+            if (completed == this.CentralGameStateControllerInstance.CurrentCampaignContext.CurrentEncounter)
+            {
+                this.EncounterRepresenterUXInstance.Close();
+                this.ProceedToNextRoom();
+            }
         }
     }
 }

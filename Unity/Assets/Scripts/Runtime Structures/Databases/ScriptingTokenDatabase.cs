@@ -33,6 +33,7 @@ namespace SFDDCards.ScriptingTokens
             new GenerateCardScriptingToken(),
             new CopyAndAddToCampaignDeckScriptingToken(),
             new ShuffleScriptingToken(),
+            new LeaveScriptingToken(),
 
             // Targeting Token
             new SetTargetScriptingToken(),

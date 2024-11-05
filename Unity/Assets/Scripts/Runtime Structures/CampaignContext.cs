@@ -63,7 +63,7 @@ namespace SFDDCards
             this.CampaignDeck.AddCardToDeck(toAdd);
         }
 
-        public void LeaveCurrentCombat()
+        public void LeaveCurrentEncounter()
         {
             if (this.CurrentCombatContext != null && this.CurrentCombatContext.BasedOnEncounter != null)
             {
@@ -71,21 +71,23 @@ namespace SFDDCards
             }
 
             this.CurrentCombatContext = null;
+            this.CurrentEncounter = null;
+
+            GlobalUpdateUX.UpdateUXEvent.Invoke(this);
         }
 
         public void StartNextRoomFromEncounter(EvaluatedEncounter basedOn)
         {
+            this.LeaveCurrentEncounter();
             this.CurrentEncounter = basedOn;
 
             if (basedOn.BasedOn.IsShopEncounter)
             {
-                this.LeaveCurrentCombat();
                 this.SetCampaignState(GameplayCampaignState.NonCombatEncounter, NonCombatEncounterStatus.AllowedToLeave);
                 return;
             }
             else if (basedOn.BasedOn.EncounterScripts != null && basedOn.BasedOn.EncounterScripts.Count > 0)
             {
-                this.LeaveCurrentCombat();
                 this.SetCampaignState(GameplayCampaignState.NonCombatEncounter, NonCombatEncounterStatus.NotAllowedToLeave);
                 return;
             }
@@ -106,7 +108,7 @@ namespace SFDDCards
 
             if (toState == GameplayCampaignState.ClearedRoom && this.CurrentEncounter != null && this.CurrentCombatContext.Enemies.Count == 0)
             {
-                this.LeaveCurrentCombat();
+                this.LeaveCurrentEncounter();
             }
 
             if (toState == GameplayCampaignState.MakingRouteChoice)
@@ -484,7 +486,12 @@ namespace SFDDCards
                 return true;
             }
 
-            // TODO Process
+            RequiresComparisonScriptingToken requiresComparisonBaseToken = new RequiresComparisonScriptingToken();
+            if (requiresComparisonBaseToken.GetTokenIfMatch(requirementScript, out IScriptingToken match) && match is RequiresComparisonScriptingToken requiresComparison)
+            {
+                return requiresComparison.MeetsRequirement(null, this);
+            }
+
             return true;
         }
     }
