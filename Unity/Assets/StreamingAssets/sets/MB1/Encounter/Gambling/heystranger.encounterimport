@@ -36,11 +36,11 @@
 					"PossibleOutcomes": [
 						{
 							"Criteria": "0~100 < 50",
-							"Effect": "[GOTO:LOSE]"
+							"Effect": "[MODCURRENCY: -25 CURRENCY_GOLD][GOTO:LOSE]"
 						},
 						{
 							"Criteria": "",
-							"Effect": "[GOTO:WIN]"
+							"Effect": "[MODCURRENCY: 25 CURRENCY_GOLD][GOTO:WIN]"
 						}
 					]
 				}
@@ -61,7 +61,7 @@
 					"PossibleOutcomes": [
 						{
 							"Criteria": "",
-							"Effect": "[MODCURRENCY: -25 CURRENCY_GOLD][LEAVE]"
+							"Effect": "[LEAVE]"
 						}
 					]
 				}
@@ -82,7 +82,7 @@
 					"PossibleOutcomes": [
 						{
 							"Criteria": "",
-							"Effect": "[MODCURRENCY: 25 CURRENCY_GOLD][LEAVE]"
+							"Effect": "[LEAVE]"
 						}
 					]
 				}

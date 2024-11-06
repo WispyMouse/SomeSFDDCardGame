@@ -1,0 +1,22 @@
+{
+	"Id": "mb1_card_uncommon_slapemsilly",
+	"Name": "Slap Em Silly",
+	"EffectScript": "[SETTARGET: FOE][DAMAGE: 1][DAMAGE: 1][DAMAGE: 1][DAMAGE: 1][DAMAGE: 1][DAMAGE: 1][DAMAGE: 1][DAMAGE: 1][DAMAGE: 1][DAMAGE: 1][DAMAGE: 1][DAMAGE: 1][DAMAGE: 1][DAMAGE: 1]",
+	"Tags":
+	[
+		"mb1",
+		"force","bio",
+		"uncommon"
+	],
+	"ElementGain":
+	[
+		{	
+			"Element": "force",
+			"Gain": 2
+		},
+		{
+			"Element": "bio",
+			"Gain": 1
+		}
+	]
+}

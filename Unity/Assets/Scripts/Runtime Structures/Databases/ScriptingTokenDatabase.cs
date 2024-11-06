@@ -31,7 +31,6 @@ namespace SFDDCards.ScriptingTokens
             new IfTargetScriptingToken(),
             new MoveCardToZoneScriptingToken(),
             new GenerateCardScriptingToken(),
-            new CopyAndAddToCampaignDeckScriptingToken(),
             new ShuffleScriptingToken(),
             new LeaveScriptingToken(),
             new GotoScriptingToken(),
@@ -41,6 +40,10 @@ namespace SFDDCards.ScriptingTokens
             new ChooseCardScriptingToken(),
             new CardTargetScriptingToken(),
             new ChooseRandomlyScriptingToken(),
+
+            // Card and Artifact Manipulation Tokens
+            new AddScriptingToken(),
+            new RemoveScriptingToken(),
 
             // Element Token
             new GainElementScriptingToken(),

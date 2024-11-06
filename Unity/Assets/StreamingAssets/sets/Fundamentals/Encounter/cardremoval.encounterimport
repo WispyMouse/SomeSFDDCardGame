@@ -1,0 +1,73 @@
+{
+	"Id": "cardremoval",
+	"Name": "Card Removal",
+	"Description": "Remove a couple cards from your deck, eh?",
+	"Tags":
+	[
+		"cardremoval"
+	],
+	"EncounterScripts": [
+		{
+			"Id": "intro",
+			"DialogueParts": [
+				{
+					"RequirementScript": "",
+					"Dialogue": "Hey you! Want to get rid of some cards from your deck? This is the encounter for that!"
+				}
+			],
+			"Options": [
+				{
+					"RequirementScript": "",
+					"Dialogue": "Remove One Card",
+					"PossibleOutcomes": [
+						{
+							"Criteria": "",
+							"Effect": "[CARDTARGET: DECK][CHOOSECARDS: 1][REMOVE][GOTO:DONE]"
+						}
+					]
+				},
+				{
+					"RequirementScript": "",
+					"Dialogue": "Remove Two Cards",
+					"PossibleOutcomes": [
+						{
+							"Criteria": "",
+							"Effect": "[CARDTARGET: DECK][CHOOSECARDS: 2][REMOVE][GOTO:DONE]"
+						}
+					]
+				},
+				{
+					"RequirementScript": "",
+					"Dialogue": "Leave",
+					"PossibleOutcomes": [
+						{
+							"Criteria": "",
+							"Effect": "[LEAVE]"
+						}
+					]
+				}
+			]
+		},
+		{
+			"Id": "done",
+			"DialogueParts": [
+				{
+					"RequirementScript": "",
+					"Dialogue": "Hope it helps!"
+				}
+			],
+			"Options": [
+				{
+					"RequirementScript": "",
+					"Dialogue": "Leave",
+					"PossibleOutcomes": [
+						{
+							"Criteria": "",
+							"Effect": "[LEAVE]"
+						}
+					]
+				}
+			]
+		}
+	]
+}

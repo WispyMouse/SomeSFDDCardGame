@@ -30,7 +30,7 @@ namespace SFDDCards.UX
 
         public void Awake()
         {
-            this.Annihilate();
+            this.Annihilate(false);
         }
 
         public void SetLabelText(string newText)

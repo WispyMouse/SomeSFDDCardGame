@@ -18,6 +18,9 @@ namespace SFDDCards.UX
         private GameplayUXController GameplayUXControllerInstance;
 
         [SerializeReference]
+        private GameObject UXParent;
+
+        [SerializeReference]
         private TMPro.TMP_Text NameLabel;
         [SerializeReference]
         private TMPro.TMP_Text DescriptionLabel;
@@ -35,7 +38,7 @@ namespace SFDDCards.UX
             this.NameLabel.text = toRepresent.BasedOn.Name;
 
             this.SetEncounterIndex("intro");
-            this.gameObject.SetActive(true);
+            this.UXParent.SetActive(true);
         }
 
         public void SetEncounterIndex(string index)
@@ -45,10 +48,7 @@ namespace SFDDCards.UX
             string unprocessedDialogue = this.representingModel.BasedOn.BuildEncounterDialogue(index, this.CentralGameStateControllerInstance.CurrentCampaignContext);
             this.DescriptionLabel.text = EffectDescriberDatabase.ReplaceTokensInString(unprocessedDialogue, this.CentralGameStateControllerInstance.CurrentCampaignContext);
 
-            for (int ii = this.ButtonHolder.childCount - 1; ii >= 0; ii--)
-            {
-                Destroy(this.ButtonHolder.GetChild(ii).gameObject);
-            }
+            this.DestroyButtonHolderButtons();
 
             List<EncounterOptionImport> options = this.representingModel.BasedOn.GetOptions(index, this.CentralGameStateControllerInstance.CurrentCampaignContext);
             foreach (EncounterOptionImport option in options)
@@ -59,6 +59,14 @@ namespace SFDDCards.UX
                 string unprocessedDialogueOption = option.Dialogue;
 
                 button.SetEncounterDialogue(EffectDescriberDatabase.ReplaceTokensInString(unprocessedDialogueOption, this.CentralGameStateControllerInstance.CurrentCampaignContext), () => this.ChooseOption(hungOption));
+            }
+        }
+
+        private void DestroyButtonHolderButtons()
+        {
+            for (int ii = this.ButtonHolder.childCount - 1; ii >= 0; ii--)
+            {
+                Destroy(this.ButtonHolder.GetChild(ii).gameObject);
             }
         }
 
@@ -96,20 +104,26 @@ namespace SFDDCards.UX
 
             string destination = delta.GetEncounterDestination();
 
-            GlobalSequenceEventHolder.PushSequenceToTop(new GameplaySequenceEvent(
+            // Push resolving this event, and then afterwards, continuing the dialogue
+            this.UXParent.SetActive(false);
+            GlobalSequenceEventHolder.PushSequencesToTop(
+                this.CentralGameStateControllerInstance.CurrentCampaignContext,
+                new GameplaySequenceEvent(
                 () =>
                 {
-                    this.CentralGameStateControllerInstance.CurrentCampaignContext.CampaignPlayer.ApplyDelta(
-                           this.CentralGameStateControllerInstance.CurrentCampaignContext,
-                           null,
-                           delta.DeltaEntries);
-
+                    GlobalUpdateUX.LogTextEvent.Invoke(EffectDescriberDatabase.DescribeResolvedEffect(delta), GlobalUpdateUX.LogType.GameEvent);
+                    delta.ApplyDelta(this.CentralGameStateControllerInstance.CurrentCampaignContext);
+                }),
+                new GameplaySequenceEvent(
+                () =>
+                {
                     if (string.IsNullOrEmpty(destination))
                     {
                         this.GameplayUXControllerInstance.EncounterDialogueComplete(representingModel);
                     }
                     else
                     {
+                        this.UXParent.SetActive(true);
                         this.SetEncounterIndex(destination);
                     }
                 }));

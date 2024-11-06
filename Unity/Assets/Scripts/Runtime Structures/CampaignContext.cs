@@ -61,6 +61,20 @@ namespace SFDDCards
         public void AddCardToDeck(Card toAdd)
         {
             this.CampaignDeck.AddCardToDeck(toAdd);
+
+            GlobalUpdateUX.UpdateUXEvent?.Invoke(this);
+        }
+
+        public void RemoveCardFromDeck(Card toRemove)
+        {
+            this.CampaignDeck.RemoveCardFromDeck(toRemove);
+
+            if (this.CurrentCombatContext != null)
+            {
+                this.CurrentCombatContext.PlayerCombatDeck.RemoveCardFromAllZones(toRemove);
+            }
+
+            GlobalUpdateUX.UpdateUXEvent?.Invoke(this);
         }
 
         public void LeaveCurrentEncounter()

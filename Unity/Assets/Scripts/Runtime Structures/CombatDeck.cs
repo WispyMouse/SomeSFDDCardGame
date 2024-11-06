@@ -128,5 +128,13 @@ namespace SFDDCards
 
             this.MoveCardToZone(card, toMoveTo);
         }
+
+        public void RemoveCardFromAllZones(Card toRemove)
+        {
+            this.CardsCurrentlyInDeck.Remove(toRemove);
+            this.CardsCurrentlyInExile.Remove(toRemove);
+            this.CardsCurrentlyInHand.Remove(toRemove);
+            this.CardsCurrentlyInDiscard.Remove(toRemove);
+        }
     }
 }

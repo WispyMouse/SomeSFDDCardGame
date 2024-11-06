@@ -59,9 +59,8 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
         {
             if (campaignContext?.CurrentCombatContext?.PlayerCombatDeck?.CardsCurrentlyInDeck == null)
             {
-                GlobalUpdateUX.LogTextEvent.Invoke($"Attempted to evaluate deck cards, but there isn't an appropriate combat context.", GlobalUpdateUX.LogType.RuntimeError);
-                evaluatedValue = null;
-                return false;
+                evaluatedValue = new List<Card>(campaignContext.CampaignDeck.AllCardsInDeck);
+                return true;
             }
 
             evaluatedValue = new List<Card>(campaignContext.CurrentCombatContext.PlayerCombatDeck.CardsCurrentlyInDeck);

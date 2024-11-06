@@ -146,7 +146,7 @@ namespace SFDDCards.Tests.EditMode
             {
                 Id = nameof(generatingCard),
                 Name = nameof(generatingCard),
-                EffectScript = $"[GENERATECARD: {cardToGenerate.Id} 5][COPYANDADDTOCAMPAIGNDECK]"
+                EffectScript = $"[GENERATECARD: {cardToGenerate.Id} 5][ADD]"
             };
 
             Card derivedCard = new Card(generatingCard);

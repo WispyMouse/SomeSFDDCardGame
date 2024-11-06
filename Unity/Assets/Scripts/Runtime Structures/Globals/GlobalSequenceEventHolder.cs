@@ -30,7 +30,7 @@ namespace SFDDCards
 
         public static void ApplyNextSequenceWithAnimationHandler(ICombatTurnController controller)
         {
-            if (StackedSequenceEvents.Count == 0)
+            if (StackedSequenceEvents.Count == 0 || GlobalUpdateUX.PendingPlayerChoice)
             {
                 return;
             }

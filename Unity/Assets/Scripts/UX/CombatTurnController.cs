@@ -86,7 +86,7 @@ namespace SFDDCards.UX
 
                 GlobalSequenceEventHolder.ApplyNextSequenceWithAnimationHandler(this);
             }
-            while (GlobalSequenceEventHolder.StackedSequenceEvents.Count > 0);
+            while (GlobalSequenceEventHolder.StackedSequenceEvents.Count > 0 && !GlobalUpdateUX.PendingPlayerChoice);
         }
 
         public void HandleSequenceEventWithAnimation(GameplaySequenceEvent sequenceEvent)

@@ -27,6 +27,11 @@ namespace SFDDCards
         {
             this.ForCampaign = forCampaign;
         }
+
+        public void RemoveCardFromDeck(Card toRemove)
+        {
+            this.AllCardsInDeck.Remove(toRemove);
+        }
     }
 
     public static class ListOfCardExtentions

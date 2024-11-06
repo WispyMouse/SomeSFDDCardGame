@@ -1,0 +1,63 @@
+{
+	"Id": "cryptictransformationmachine",
+	"Name": "Cryptic Machine",
+	"Description": "A malfunctioning computer terminal, repeating a cryptic message.",
+	"Tags":
+	[
+		"gambling"
+	],
+	"EncounterScripts": [
+		{
+			"Id": "intro",
+			"DialogueParts": [
+				{
+					"RequirementScript": "",
+					"Dialogue": "You come upon a malfunctioning computer terminal. It repeats a cryptic message, over and over, about \"insufficient material for conversion.\" A chute is open on the side of the machine."
+				}
+			],
+			"Options": [
+				{
+					"RequirementScript": "",
+					"Dialogue": "Insert a card (receive a random card of same or +1 rarity)",
+					"PossibleOutcomes": [
+						{
+							"Criteria": "",
+							"Effect": "[CARDTARGET: DECK][CHOOSECARDS: 1][REMOVE][GENERATECARD: $UPGRADERARITY_SELECTED][ADD][GOTO:DONE]"
+						}
+					]
+				},
+				{
+					"RequirementScript": "",
+					"Dialogue": "Leave",
+					"PossibleOutcomes": [
+						{
+							"Criteria": "",
+							"Effect": "[LEAVE]"
+						}
+					]
+				}
+			]
+		},
+		{
+			"Id": "done",
+			"DialogueParts": [
+				{
+					"RequirementScript": "",
+					"Dialogue": "The machine seems content."
+				}
+			],
+			"Options": [
+				{
+					"RequirementScript": "",
+					"Dialogue": "Leave",
+					"PossibleOutcomes": [
+						{
+							"Criteria": "",
+							"Effect": "[LEAVE]"
+						}
+					]
+				}
+			]
+		}
+	]
+}

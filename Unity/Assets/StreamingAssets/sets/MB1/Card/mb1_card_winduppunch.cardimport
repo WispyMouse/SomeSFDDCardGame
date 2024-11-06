@@ -1,0 +1,22 @@
+{
+	"Id": "mb1_card_common_winduppunch",
+	"Name": "Wind Up Punch",
+	"EffectScript": "[GENERATECARD: mb1_card_generated_letemhaveit][MOVECARDTOZONE: DECK]",
+	"Tags":
+	[
+		"mb1",
+		"force","bio",
+		"common"
+	],
+	"ElementGain":
+	[
+		{	
+			"Element": "force",
+			"Gain": 2
+		},
+		{
+			"Element": "bio",
+			"Gain": 1
+		}
+	]
+}
