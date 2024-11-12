@@ -55,8 +55,9 @@ namespace SFDDCards.Tests.EditMode
         }
 
         /// <summary>
-        /// There is no currency with this name. It should not throw an exception,
-        /// and instead return "0".
+        /// There is no currency with this name.
+        /// This should fail to evaluate the currency count token.
+        /// There should be no exception, but ignore any logs.
         /// </summary>
         [Test]
         public void CountCurrency_ZeroCurrency()
@@ -78,9 +79,10 @@ namespace SFDDCards.Tests.EditMode
             combatContext.EndCurrentTurnAndChangeTurn(CombatContext.TurnStatus.PlayerTurn);
             GlobalSequenceEventHolder.SynchronouslyResolveAllEvents(campaignContext);
 
+            UnityEngine.TestTools.LogAssert.ignoreFailingMessages = true;
             GamestateDelta delta = ScriptTokenEvaluator.CalculateRealizedDeltaEvaluation(testGainCard, campaignContext, combatContext.CombatPlayer, combatContext.Enemies[0]);
             Assert.GreaterOrEqual(delta.DeltaEntries.Count, 1, $"There should be enough delta entries to find the specified delta index. Not enough entries returned on evaluation.");
-            Assert.IsTrue(delta.DeltaEntries[0].ConceptualIntensity.TryEvaluateValue(campaignContext, delta.DeltaEntries[0].MadeFromBuilder, out int evaluatedIntensity), "Should be able to evaluate intensity.");
+            Assert.IsFalse(delta.DeltaEntries[0].ConceptualIntensity.TryEvaluateValue(campaignContext, delta.DeltaEntries[0].MadeFromBuilder, out int evaluatedIntensity), "Should evaluate currency, because that currency does not exist.");
             Assert.AreEqual(0, evaluatedIntensity, $"There is no currency with that name. This should not throw an exception, and should return 0.");
         }
 

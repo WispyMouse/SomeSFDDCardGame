@@ -15,6 +15,20 @@ namespace SFDDCards.ScriptingTokens.EvaluatableValues
 
         public bool TryEvaluateValue(CampaignContext campaignContext, TokenEvaluatorBuilder currentBuilder, out int evaluatedValue)
         {
+            if (string.IsNullOrEmpty(this.CurrencyToCount))
+            {
+                GlobalUpdateUX.LogTextEvent.Invoke($"Told to count currency, but not provided an id.", GlobalUpdateUX.LogType.RuntimeError);
+                evaluatedValue = 0;
+                return false;
+            }
+
+            if (!CurrencyDatabase.TryGetModel(this.CurrencyToCount, out CurrencyImport foundModel))
+            {
+                GlobalUpdateUX.LogTextEvent.Invoke($"Failed to find currency model named '{this.CurrencyToCount}'.", GlobalUpdateUX.LogType.RuntimeError);
+                evaluatedValue = 0;
+                return false;
+            }
+
             evaluatedValue = campaignContext.GetCurrencyCount(CurrencyDatabase.GetModel(this.CurrencyToCount));
             return true;
         }
