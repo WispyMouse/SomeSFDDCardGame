@@ -10,6 +10,7 @@ namespace SFDDCards.ScriptingTokens
     public abstract class BaseScriptingToken : IScriptingToken
     {
         const string ScriptingTokenStarter = "[";
+        const string ScriptingTokenEnder = "]";
         const string ArgumentSeparatorFromIdentifier = ":";
 
         public bool SkipDescribingMe { get; protected set; } = false;
@@ -22,14 +23,38 @@ namespace SFDDCards.ScriptingTokens
         {
             match = null;
 
-            // If this is presented as just a string, it should always try to match
-            // but if this has a [ starting, it should always continue into the expected token
-            if (tokenString.StartsWith(ScriptingTokenStarter) && !tokenString.StartsWith(ScriptingTokenStarter + this.ScriptingTokenIdentifier, System.StringComparison.InvariantCultureIgnoreCase))
+            // Compare the token string by extracting the [ and ] so we can evaluate it without those
+            string withoutStarters = tokenString.ToLower();
+            if (withoutStarters.StartsWith(ScriptingTokenStarter) && withoutStarters.EndsWith(ScriptingTokenEnder))
             {
-                // Doesn't start with the indicator, can't be this token.
-                return false;
+                withoutStarters = withoutStarters.Substring(ScriptingTokenStarter.Length, withoutStarters.Length - ScriptingTokenStarter.Length - ScriptingTokenEnder.Length);
             }
 
+            if (withoutStarters == this.ScriptingTokenIdentifier.ToLower())
+            {
+                // Is this just exactly our identifier, with nothing else?
+                // If so, enter this if statement so that it can be parsed later down
+            }
+            else if (!withoutStarters.Contains(ArgumentSeparatorFromIdentifier))
+            {
+                // Does this contain the argument separator? If not, we've already disqualified this
+                return false;
+            }
+            else
+            {
+                // Split before the separator and compare
+                string beforeSeparator = withoutStarters.Substring(0, withoutStarters.IndexOf(ArgumentSeparatorFromIdentifier));
+
+                // Now is it a match? If not, exit
+                if (beforeSeparator != this.ScriptingTokenIdentifier.ToLower())
+                {
+                    return false;
+                }
+            }
+
+            // Now that we've made it here, we must have matched the symbol at least
+            // So now try to derive arguments and process if those are a hit
+            
             if (!TryDeriveArgumentsFromScriptingToken(tokenString, out List<string> resultingArguments))
             {
                 // If there was an error in parsing the tokenString, then it can't be this token
