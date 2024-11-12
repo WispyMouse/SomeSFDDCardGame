@@ -1,0 +1,16 @@
+{
+    "name": "Tokenization.Processing",
+    "rootNamespace": "",
+    "references": [
+        "GUID:1ba9ced06be1c2c4ebb5e89532ed9b33"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": true
+}

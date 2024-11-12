@@ -15,5 +15,6 @@ namespace SpaceDeck.Tokenization.Minimum
     /// </summary>
     public abstract class ScriptingCommand
     {
+        public abstract LowercaseString Identifier { get; }
     }
 }
