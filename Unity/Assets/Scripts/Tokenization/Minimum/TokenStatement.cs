@@ -10,10 +10,13 @@ namespace SpaceDeck.Tokenization.Minimum
     /// and optionally any <see cref="Arguments"/>, this TokenStatement can be
     /// used to create one or more ParsedTokens.
     /// </summary>
-    public struct TokenStatement
+    public class TokenStatement
     {
-        public LowercaseString ScriptingCommandIdentifier;
-        public List<LowercaseString> Arguments;
+        public readonly LowercaseString ScriptingCommandIdentifier;
+        public readonly List<LowercaseString> Arguments;
+
+        public TokenTextScope ParentScope;
+        public TokenStatement NextStatement;
 
         public TokenStatement(LowercaseString scriptingCommandIdentifier, List<LowercaseString> arguments = null)
         {

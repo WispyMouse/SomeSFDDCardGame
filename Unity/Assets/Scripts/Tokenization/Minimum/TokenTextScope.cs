@@ -9,17 +9,18 @@ namespace SpaceDeck.Tokenization.Minimum
     /// A scope is an associated group of <see cref="TokenStatement"/>s.
     /// A chain of scopes is <see cref="TokenText"/>.
     /// </summary>
-    public struct TokenTextScope
+    public class TokenTextScope
     {
-        public List<TokenStatement> Statements;
-        public TokenTextScope? PreviousScope;
-        public TokenTextScope? NextScope;
+        /// <summary>
+        /// An ordered list of statements within this scope.
+        /// </summary>
+        public readonly List<TokenStatement> Statements;
 
-        public TokenTextScope(List<TokenStatement> statements, TokenTextScope? previousScope = null, TokenTextScope? nextScope = null)
+        public TokenStatement NextStatementAfterScope;
+
+        public TokenTextScope(List<TokenStatement> statements)
         {
             this.Statements = statements;
-            this.PreviousScope = previousScope;
-            this.NextScope = nextScope;
         }
     }
 }

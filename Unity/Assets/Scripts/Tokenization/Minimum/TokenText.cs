@@ -17,7 +17,7 @@ namespace SpaceDeck.Tokenization.Minimum
     /// </summary>
     public struct TokenText
     {
-        public List<TokenTextScope> Scopes;
+        public readonly List<TokenTextScope> Scopes;
 
         public TokenText(List<TokenTextScope> scopes)
         {

@@ -22,5 +22,22 @@ namespace SpaceDeck.Tokenization.Minimum
         {
             return this.Value;
         }
+
+        public static implicit operator LowercaseString(string text)
+        {
+            return new LowercaseString(text);
+        }
+
+        public static List<LowercaseString> FromArray(string[] text)
+        {
+            List<LowercaseString> strings = new List<LowercaseString>();
+
+            foreach (string textItem in text)
+            {
+                strings.Add(new LowercaseString(textItem));
+            }
+
+            return strings;
+        }
     }
 }
