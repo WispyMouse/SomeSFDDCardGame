@@ -26,6 +26,12 @@ namespace SpaceDeck.Tests.EditMode.Tokenization
             public override LowercaseString Identifier => IdentifierString;
         }
 
+        private class TwoArgumentScriptingCommand : ScriptingCommand
+        {
+            public static readonly LowercaseString IdentifierString = new LowercaseString("TWOARGUMENTS");
+            public override LowercaseString Identifier => IdentifierString;
+        }
+
         [TearDown]
         public void TearDown()
         {
@@ -60,6 +66,26 @@ namespace SpaceDeck.Tests.EditMode.Tokenization
             Assert.True(ParsedTokenMaker.TryGetParsedTokensFromTokenText(helloWorldTokenText, out ParsedTokenSet parsedSet), "Should be able to parse tokens from token text.");
             Assert.AreEqual(1, parsedSet.Tokens.Count, "There should be one token in the parse results, because only one token is supplied.");
             Assert.True(parsedSet.Tokens[0].CommandToExecute is HelloWorldScriptingCommand, "The token that was created should be the testing Hello World token.");
+        }
+
+        /// <summary>
+        /// This test adds a Scripting Command with two arguments.
+        /// Then it is tokenized and parsed.
+        /// </summary>
+        [Test]
+        public void ScriptingCommand_TwoArgument_ParsedSetAsExpected()
+        {
+            ScriptingCommandReference.RegisterScriptingCommand(new TwoArgumentScriptingCommand());
+
+            string twoArgumentTokenTextString = $"[{TwoArgumentScriptingCommand.IdentifierString}:FOO 123]";
+            Assert.True(TokenTextMaker.TryGetTokenTextFromString(twoArgumentTokenTextString, out TokenText twoArgumentTokenText), "Should be able to parse Token Text String into Token Text.");
+            Assert.True(ParsedTokenMaker.TryGetParsedTokensFromTokenText(twoArgumentTokenText, out ParsedTokenSet parsedSet), "Should be able to parse tokens from token text.");
+            Assert.AreEqual(1, parsedSet.Tokens.Count, "There should be one token in the parse results, because only one token is supplied.");
+            Assert.True(parsedSet.Tokens[0].CommandToExecute is TwoArgumentScriptingCommand, "The token that was created should be the testing Two Argument token.");
+            Assert.True(parsedSet.Tokens[0].Arguments != null, "Should have arguments array, as two were supplied.");
+            Assert.True(parsedSet.Tokens[0].Arguments.Count == 2, "Should have two arguments.");
+            Assert.AreEqual("FOO", parsedSet.Tokens[0].Arguments[0], "Argument should be as expected in the correct order.");
+            Assert.AreEqual("123", parsedSet.Tokens[0].Arguments[1], "Argument should be as expected in the correct order.");
         }
     }
 }
