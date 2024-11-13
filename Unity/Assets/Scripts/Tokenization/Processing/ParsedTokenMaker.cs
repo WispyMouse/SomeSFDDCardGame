@@ -13,19 +13,22 @@ namespace SpaceDeck.Tokenization.Processing
         {
             List<ParsedToken> tokens = new List<ParsedToken>();
 
-            foreach (TokenStatement statement in baseText.Statements)
+            foreach (TokenTextScope scope in baseText.Scopes)
             {
-                if (!ScriptingCommandReference.TryGetScriptingCommandByIdentifier(statement.ScriptingCommandIdentifier, out ScriptingCommand command))
+                foreach (TokenStatement statement in scope.Statements)
                 {
-                    // TODO: This means something has been input incorrectly
-                    // What's the best way to gracefully inform the user?
-                    // Probably hooking up the logs soon
-                    parsedSet = default(ParsedTokenSet);
-                    return false;
-                }
+                    if (!ScriptingCommandReference.TryGetScriptingCommandByIdentifier(statement.ScriptingCommandIdentifier, out ScriptingCommand command))
+                    {
+                        // TODO: This means something has been input incorrectly
+                        // What's the best way to gracefully inform the user?
+                        // Probably hooking up the logs soon
+                        parsedSet = default(ParsedTokenSet);
+                        return false;
+                    }
 
-                ParsedToken token = new ParsedToken(command, statement.Arguments);
-                tokens.Add(token);
+                    ParsedToken token = new ParsedToken(command, statement.Arguments);
+                    tokens.Add(token);
+                }
             }
 
             parsedSet = new ParsedTokenSet(tokens);

@@ -7,12 +7,21 @@ namespace SpaceDeck.Tokenization.Minimum
     /// Describes a sanitized string representing Token Text.
     /// 
     /// Token Text is the designer's input to the Tokenization and Execution system.
-    /// It contains a set of <see cref="TokenStatement"/>s. Through the combination of a set of
-    /// Statements, and matching to <see cref="ScriptingCommand"/>, <see cref="ParsedToken"/>s can
-    /// be made.
+    /// It contains a set of <see cref="TokenTextScope"/>s in order, with each of those
+    /// containing <see cref="TokenText"/>s that have <see cref="TokenStatement"/>s.
+    /// 
+    /// Each TokenStatement can have its <see cref="TokenStatement.ScriptingCommandIdentifier"/>
+    /// matched to a <see cref="ScriptingCommand"/>, and then <see cref="TokenStatement.Arguments"/>
+    /// can be provided to form a <see cref="ParsedToken"/>. An entire TokenText parsed
+    /// becomes a <see cref="ParsedTokenSet"/>.
     /// </summary>
     public struct TokenText
     {
-        public List<TokenStatement> Statements;
+        public List<TokenTextScope> Scopes;
+
+        public TokenText(List<TokenTextScope> scopes)
+        {
+            this.Scopes = scopes;
+        }
     }
 }
