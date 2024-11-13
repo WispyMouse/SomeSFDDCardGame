@@ -122,5 +122,42 @@ namespace SpaceDeck.Tests.EditMode.Tokenization
             Assert.AreEqual("9.9", parsedSet.Tokens[4].Arguments[0], "Argument should be as expected in the correct order.");
             Assert.AreEqual("EEEEE", parsedSet.Tokens[4].Arguments[1], "Argument should be as expected in the correct order.");
         }
+
+        /// <summary>
+        /// This test creates a simple Token Text with a scope.
+        /// The first Token Statement should know the next Token Statement,
+        /// as well as knowing the Token Statement after the current Scope.
+        /// </summary>
+        [Test]
+        public void TokenStatement_KnowsScopeAndNext()
+        {
+            ScriptingCommandReference.RegisterScriptingCommand(new HelloWorldScriptingCommand());
+
+            string scopedTokenTextString = "[HELLOWORLD]{[HELLOWORLD][HELLOWORLD][HELLOWORLD]}[HELLOWORLD]";
+            Assert.True(TokenTextMaker.TryGetTokenTextFromString(scopedTokenTextString, out TokenText mixedArgumentTokenText), "Should be able to parse Token Text String into Token Text.");
+
+            Assert.AreEqual(2, mixedArgumentTokenText.Scopes.Count, "There should be two scopes from this Token Text String. The outer default Scope, and the inner one defined.");
+            Assert.AreEqual(2, mixedArgumentTokenText.Scopes[0].Statements.Count, "The outer scope should have two statements.");
+            Assert.AreEqual(3, mixedArgumentTokenText.Scopes[1].Statements.Count, "The inner scope should have three statements.");
+
+            TokenTextScope outerScope = mixedArgumentTokenText.Scopes[0];
+            TokenTextScope innerScope = mixedArgumentTokenText.Scopes[1];
+
+            TokenStatement firstOuterStatement = outerScope.Statements[0];
+            TokenStatement firstInnerStatement = mixedArgumentTokenText.Scopes[1].Statements[0];
+            TokenStatement secondInnerStatement = mixedArgumentTokenText.Scopes[1].Statements[1];
+            TokenStatement lastStatement = mixedArgumentTokenText.Scopes[0].Statements[1];
+
+            Assert.AreEqual(outerScope, firstOuterStatement.ParentScope, "The first outer scope statement should know it belongs to the outer scope.");
+            Assert.AreEqual(outerScope, lastStatement.ParentScope, "The later outer scope statement should know it belongs to the outer scope.");
+            Assert.AreEqual(innerScope, firstInnerStatement.ParentScope, "The first inner scope statement should know it belongs to the inner scope.");
+            Assert.AreEqual(innerScope, secondInnerStatement.ParentScope, "The second inner scope statement should know it belongs to the inner scope.");
+
+            Assert.AreEqual(firstInnerStatement, firstOuterStatement.NextStatement, "The first statement should know the next statement is the first inner statement.");
+            Assert.AreEqual(innerScope.NextStatementAfterScope, lastStatement, "The outer scope should know the next statement after it is the last statement.");
+
+            Assert.Null(lastStatement.NextStatement, "There should be no statement after the last one, so it shouldn't have one linked.");
+            Assert.Null(outerScope.NextStatementAfterScope, "There should be no statement after the outer scope, so it shouldn't have one linked.");
+        }
     }
 }

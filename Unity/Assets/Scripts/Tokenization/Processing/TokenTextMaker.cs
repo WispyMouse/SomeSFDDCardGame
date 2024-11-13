@@ -66,7 +66,17 @@ namespace SpaceDeck.Tokenization.Processing
                     }
 
                     previousScopeThatHasJustEnded = currentScope;
-                    currentScope = scopeStack.Pop();
+                    scopeStack.Pop();
+
+                    if (scopeStack.Count == 0)
+                    {
+                        // There's no scope on the stack, so we can't pop the current scope
+                        // TODO Log why this failed
+                        createdTokenText = default(TokenText);
+                        return false;
+                    }
+
+                    currentScope = scopeStack.Peek();
                 }
                 // No, so try to match a TokenStatement
                 else
