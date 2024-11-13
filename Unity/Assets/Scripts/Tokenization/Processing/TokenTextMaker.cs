@@ -104,7 +104,7 @@ namespace SpaceDeck.Tokenization.Processing
 
                     previousStatement = statement;
 
-                    tokenTextPointer += statementRegexMatch.Groups[0].Value.Length;
+                    tokenTextPointer += statementRegexMatch.Groups[0].Value.Length - 1;
                 }
 
                 tokenTextPointer++;
