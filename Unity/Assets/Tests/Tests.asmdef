@@ -6,7 +6,9 @@
         "UnityEditor.TestRunner",
         "Scripts",
         "ImportModels",
-        "UX"
+        "UX",
+        "Tokenization.Minimum",
+        "Tokenization.Processing"
     ],
     "includePlatforms": [
         "Editor"

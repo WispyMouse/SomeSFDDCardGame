@@ -17,5 +17,10 @@ namespace SpaceDeck.Tokenization.Minimum
         {
             this.Value = value.ToLower();
         }
+
+        public override string ToString()
+        {
+            return this.Value;
+        }
     }
 }

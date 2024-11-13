@@ -55,5 +55,15 @@ namespace SpaceDeck.Tokenization.Processing
 
             return false;
         }
+
+        /// <summary>
+        /// Clears all ScriptingCommands that are saved in <see cref="s_IdentifierToScriptingCommand"/>.
+        /// ScriptingCommands will need to be imported again before they can be fetched.
+        /// This will not necessarily unload all ScriptingCommands from memory.
+        /// </summary>
+        public static void Clear()
+        {
+            s_IdentifierToScriptingCommand.Clear();
+        }
     }
 }
